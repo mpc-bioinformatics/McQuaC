@@ -1,0 +1,31 @@
+# This file specifies additional enzymes considered for MS-GF+
+#
+# To be loaded, this file must reside in a directory named params below the working directory
+# For example, create file C:\Work\params\enzymes.txt when the working directory is C:\Work
+# Or, on Linux, create file /home/user/work/params/enzymes.txt when the working directory is /home/user/work/
+#
+# Format: ShortName,CleaveAt,Terminus,Description
+# - ShortName: A unique short name of the enzyme (e.g. Tryp). No space is allowed.
+# - CleaveAt: The residues cleaved by the enzyme (e.g. KR). Put "null" in case of no specificity.
+# - Terminus: Whether the enzyme cleaves C-terminal (C) or N-terminal (N)
+# - Description: Description of the enzyme
+#
+# The following enzymes are pre-configured, numbered 1 through 9 when using the -e argument at the command line
+# Tryp,KR,C,Trypsin                         # 1
+# Chymotrypsin,FYWL,C,Chymotrypsin          # 2
+# LysC,K,C,Lys-C                            # 3
+# LysN,K,N,Lys-N                            # 4
+# GluC,E,C,Glu-C                            # 5: glutamyl endopeptidase
+# ArgC,R,C,Arg-C                            # 6
+# AspN,D,N,Asp-N                            # 7
+# aLP,null,C,alphaLP                        # 8
+# NoCleavage,null,C,no cleavage             # 9: Endogenous peptides
+#
+# If you want to redefine a pre-configured enzyme (e.g. change CleaveAt of Asp-N to "DE"), specify the enzyme again.
+# Specify one enzyme per line.
+# New enzymes will continue the numbering at 10
+#
+# Examples:
+# CNBr,M,C,CNBr
+# AspN,DE,N,Asp-N
+# GluC,DE,C,Glu-C

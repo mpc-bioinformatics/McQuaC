@@ -2,14 +2,14 @@
 nextflow.enable.dsl=2
 
 // Required Parameters
-params.mgf_folder = "$PWD/MGFs"  // Input-Directory of MGFs, which should be used for identification
-params.fasta_file = "proteins.fasta"  // Database (FASTA-file) used for identification with (prefixed with "DECOY_") or WITHOUT DECOYS!
+params.mgf_folder = "$PWD/MGFs" // Input-Directory of MGFs, which should be used for identification
+params.fasta_file = "proteins.fasta" // Database (FASTA-file) used for identification with decoys (prefixed with "DECOY_") or without decoys!
 params.tda = 1 // 0 --> No Target-Decoy appraoch | 1 --> Target-Decoy appraoch (comet automatically prefixes decoys with "DECOY_" )
-params.search_parameter_file = "$PWD/example_configurations/comet_config.txt"  //Search Parameters for Comet
+params.search_parameter_file = "$PWD/example_configurations/comet_config.txt" //Search Parameters for Comet
 
 
 // Results output dir
-params.outdir = "$PWD/results"  // Output-Directory of the FASTA-results
+params.outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
 
 // Optional, but should be set!
 params.num_parallel_searches = Runtime.runtime.availableProcessors()

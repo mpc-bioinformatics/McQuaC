@@ -1,0 +1,580 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>MS-GF+</title>
+    <link type="text/css" rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <h1 class="pagetitle">MS-GF+</h1>
+
+    <p>
+        <a href="index.html">MS-GF+ Documentation home</a>
+    </p>
+
+    <h1>MS-GF+</h1>
+
+    <p>
+        <a href="Changelog.html" title="MS-GF+ ChangeLog">ChangeLog</a>
+    </p>
+
+    <div class="codePanel">
+      <pre class="code">Usage: java -Xmx3500M -jar MSGFPlus.jar
+
+<span class="code-keyword">-s SpectrumFile</span> (*.mzML, *.mzXML, *.mgf, *.ms2, *.pkl or *_dta.txt)
+   Spectra should be centroided (see below for MSConvert example). Profile spectra will be ignored.
+
+<span class="code-keyword">-d DatabaseFile</span> (*.fasta or *.fa or *.faa)
+
+<span class="code-keyword">[-conf ConfigurationFile]</span> (Configuration file path)
+   Example parameter file is at https://github.com/MSGFPlus/msgfplus/blob/master/docs/examples/MSGFPlus_Params.txt
+   Additional parameter files can be found at https://github.com/MSGFPlus/msgfplus/tree/master/docs/ParameterFiles
+
+<span class="code-keyword">[-decoy DecoyPrefix]</span> (Prefix for decoy protein names; <span class="code-object">Default: XXX</span>)
+
+<span class="code-keyword">[-o OutputFile (*.mzid)]</span> (<span class="code-object">Default: [SpectrumFileName].mzid</span>)
+
+<span class="code-keyword">[-t PrecursorMassTolerance]</span> (e.g. 2.5Da, 20ppm or 0.5Da,2.5Da; <span class="code-object">Default: 20ppm</span>)
+   Use a comma to define asymmetric values. 
+   E.g. <span class="code-quote">"-t 0.5Da,2.5Da"</span> will set 0.5Da to the left (ObservedPepMass &lt; TheoreticalPepMass) 
+                              and 2.5Da to the right (ObservedPepMass &gt; TheoreticalPepMass)
+
+<span class="code-keyword">[-ti IsotopeErrorRange]</span> (Range of allowed isotope peak errors; <span class="code-object">Default: 0,1</span>)
+   Takes into account the error introduced by choosing a non-monoisotopic peak for fragmentation.
+   The combination of -t and -ti determines the precursor mass tolerance.
+   E.g. <span class="code-quote">"-t 20ppm -ti -1,2"</span> tests abs(ObservedPepMass - TheoreticalPepMass - n * 1.00335Da) &lt; 20ppm for n = -1, 0, 1, 2.
+
+<span class="code-keyword">[-thread NumThreads]</span> (Number of concurrent threads to be executed; <span class="code-object">Default: Number of available cores</span>)
+
+<span class="code-keyword">[-tasks NumTasks]</span> (Override the number of tasks to use on the threads; <span class="code-object">Default: (internally calculated based on inputs)</span>)
+   More tasks than threads will reduce the memory requirements of the search, but will be slower (how much depends on the inputs).
+   1 &lt;= tasks &lt;= numThreads: will create one task per thread, which is the original behavior.
+   tasks = 0: use default calculation - minimum of: (threads*3) and (numSpectra/250).
+   tasks &lt; 0: multiply number of threads by abs(tasks) to determine number of tasks (i.e., -2 means "2 * numThreads" tasks).
+   One task per thread will use the most memory, but will usually finish the fastest.
+   2-3 tasks per thread will use comparably less memory, but may cause the search to take 1.5 to 2 times as long.
+
+<span class="code-keyword">[-verbose 0/1]</span> (<span class="code-object">0: Report total progress only (Default)</span>, 1: Report total and per-thread progress/status)
+
+<span class="code-keyword">[-tda 0/1]</span> (<span class="code-object">0: Don't search decoy database (Default)</span>, 1: Search decoy database)
+
+<span class="code-keyword">[-m FragmentMethodID]</span> (<span class="code-object">0: As written in the spectrum or CID if no info (Default)</span>, 1: CID, 2: ETD, 3: HCD, 4: UVPD)
+
+<span class="code-keyword">[-inst InstrumentID]</span> (<span class="code-object">0: Low-res LCQ/LTQ (Default)</span>, 1: Orbitrap/FTICR/Lumos, 2: TOF, 3: Q-Exactive)
+
+<span class="code-keyword">[-e EnzymeID]</span> (0: Unspecific cleavage, <span class="code-object">1: Trypsin (Default)</span>, 2: Chymotrypsin, 3: Lys-C, 4: Lys-N, 5: glutamyl endopeptidase, 6: Arg-C, 7: Asp-N, 8: alphaLP, 9: no cleavage)
+
+<span class="code-keyword">[-protocol ProtocolID]</span> (<span class="code-object">0: Automatic (Default)</span>, 1: Phosphorylation, 2: iTRAQ, 3: iTRAQPhospho, 4: TMT, 5: Standard)
+
+<span class="code-keyword">[-ntt 0/1/2]</span> (Number of Tolerable Termini; <span class="code-object">Default: 2</span>)
+   E.g. For trypsin, 0: non-tryptic, 1: semi-tryptic, 2: fully-tryptic peptides only.
+
+<span class="code-keyword">[-mod ModificationFileName]</span> (Modification file; <span class="code-object">Default: standard amino acids with fixed C+57; only if -mod is not specified</span>)
+
+<span class="code-keyword">[-minLength MinPepLength]</span> (Minimum peptide length to consider; <span class="code-object">Default: 6</span>)
+
+<span class="code-keyword">[-maxLength MaxPepLength]</span> (Maximum peptide length to consider; <span class="code-object">Default: 40</span>)
+
+<span class="code-keyword">[-minCharge MinCharge]</span> (Minimum precursor charge to consider if charges are not specified in the spectrum file; <span class="code-object">Default: 2</span>)
+
+<span class="code-keyword">[-maxCharge MaxCharge]</span> (Maximum precursor charge to consider if charges are not specified in the spectrum file; <span class="code-object">Default: 3</span>)
+
+<span class="code-keyword">[-n NumMatchesPerSpec]</span> (Number of matches per spectrum to be reported; <span class="code-object">Default: 1</span>)
+
+<span class="code-keyword">[-addFeatures 0/1]</span> (<span class="code-object">0: Output basic scores only (Default)</span>, 1: Output additional features)
+
+<span class="code-keyword">[-ccm ChargeCarrierMass]</span> (Mass of charge carrier; <span class="code-object">Default: mass of proton (1.00727649)</span>)
+
+<span class="code-keyword">[-ignoreMetCleavage 0/1]</span> (N-terminal methionine cleavage behavior; <span class="code-object">Default: 0</span>)
+
+<span class="code-keyword">[-maxMissedCleavages Count]</span> (Exclude peptides with more than this number of missed cleavages from the search; <span class="code-object">Default: -1 (no limit)</span>)
+
+<span class="code-keyword">[-numMods Count]</span> (Maximum number of dynamic (variable) modifications per peptide; <span class="code-object">Default: 3</span>)
+      </pre>
+    </div>
+
+    <h4>Examples:</h4>
+
+    <p>Example command (using a parameter file):</p>
+    <p class="note"><code>java -Xmx3500M -jar MSGFPlus.jar -s Dataset.mzML -d ProteinList.fasta -conf MSGFPlus_PartTryp_MetOx_20ppmParTol.txt</code></p>
+
+    <p>Example command (high-precision spectra, using arguments):</p>
+    <p class="note"><code>java -Xmx3500M -jar MSGFPlus.jar -s Dataset.mzML -d IPI_human_3.79.fasta -inst 1 -t 20ppm -ti -1,2 -ntt 2 -tda 1 -o PSMs.mzid</code></p>
+
+    <p>Example command (low-precision spectra):</p>
+    <p class="note"><code>java -Xmx3500M -jar MSGFPlus.jar -s Dataset.mzML -d IPI_human_3.79.fasta -inst 0 -t 0.5Da,2.5Da    -ntt 2 -tda 1 -o PSMs.mzid</code></p>
+
+    <h3>Parameters:</h3>
+    <ul>
+      <li style="margin-bottom: 10px;">
+        <b>-s SpectrumFile</b> (.mzML*, *.mzXML, *.mgf, *.ms2, *.pkl or *_dta.txt) - Required
+        <ul>
+          <li>Spectrum file name. Currently, MS-GF+ supports the following file formats: mzML, mzXML, mzML, mgf, ms2, pkl and _dta.txt.</li>
+          <li style="color:#990000;">
+             We recommend to use mzML, whenever possible.
+          </li>
+          <li>
+             For Thermo .raw files, obtain a centroided .mzML using MSConvert, which is part of <a href="http://proteowizard.sourceforge.net/">ProteoWizard</a>.
+          </li>
+        </ul>
+        <p class="note"><code>MSConvert.exe --mzML --32 --filter "peakPicking true 1-" DatasetName.raw</code></p>
+      </li>
+
+      <li style="margin-bottom: 10px;">
+        <b>-d DatabaseFile</b> (*.fasta or *.fa or *.faa) - Required
+        <ul>
+          <li>Path to the protein database file. If the database file does not have auxiliary index files (*.canno, *.cnlcp, *.csarr, and *.cseq), MS-GF+ will create them.</li>
+          <li>When "-tda 1" option is used, the database specified here must contain only target protein sequences.</li>
+        </ul>
+        <p class="note">If multiple MS-GF+ processes access the same database file, it is strongly recommended to index the database prior to the database search by <a href="BuildSA.html">running BuildSA</a>.</p>
+      </li>
+
+      <li style="margin-bottom: 10px;">
+        <b>-conf ConfigurationFile</b>
+        <ul>
+          <li>Path to the configuration file (aka parameter file) that defines settings for MS-GF+</li>
+          <li>Options specified at the command line will override settings in the config file</li>
+          <li>Example parameter file: <a href="https://github.com/MSGFPlus/msgfplus/blob/master/docs/examples/MSGFPlus_Params.txt">MSGFPlus_Params.txt</a></li>
+          <li>See also these additional <a href="https://github.com/MSGFPlus/msgfplus/tree/master/docs/ParameterFiles">example parameter files</a></li>
+        </ul>
+      </li>
+      <li>
+        <b>-decoy DecoyPrefix</b>
+        <ul>
+          <li>Text to prepend to protein names when including decoy (reverse sequence) proteins in the .revCat.fasta file and related index files</li>
+          <li>Defaults to XXX (though an underscore is also added, giving names like <span class="code-keyword"><code>XXX_Contaminant_TRYP_BOVIN</code></span>)</li>
+          <li>Use <span class="code-keyword"><code>-decoy REV</code></span> to get names like <span class="code-keyword"><code>REV_Contaminant_TRYP_BOVIN</code></span></li>
+        </ul>
+      </li>
+
+    </ul>
+
+    <ul>
+      <li style="margin-bottom: 10px;">
+        <b>-o OutputFile</b> (*.mzid)
+        <ul>
+          <li>Filename where the output (mzIdentML 1.1 format) will be written.</li>
+          <li>File extension must be "mzid" (case sensitive).</li>
+          <li>By default, the output file name will be "[SpectrumFileName].mzid".</li>
+          <li>E.g. for the input spectrum file "test.mzML", the output will be written to "test.mzid" if this parameter is not specified.</li>
+        </ul>
+      </li>
+
+      <li style="margin-bottom: 10px;">
+        <b>-t PrecursorMassTolerance</b> (Default: 20ppm)
+        <ul>
+          <li>Precursor mass tolerance in Da. or ppm. There must be no space between the number and the unit. E.g. <code>2.5Da</code> or <code>20ppm</code></li>
+          <li>To set asymmetric tolerances, use a comma to separate left (observed mass &lt; theoretical mass) and <br>right (observed mass &gt; theoretical mass) tolerances.<br>E.g. <code>0.5Da,2.5Da</code></li>
+          <li>It is recommended to use a tight tolerance rather than a loose tolerance (e.g. for Orbitrap data, 10ppm or 20ppm usually identifies more spectra than 50ppm).</li>
+        </ul>
+      </li>
+
+      <li style="margin-bottom: 10px;">
+        <b>-ti IsotopeErrorRange</b> (Default: 0,1)
+        <ul>
+          <li>Takes into account of the error introduced by choosing non-monoisotopic peak for fragmentation.</li>
+          <li>If the precursor mass tolerance is equal to or larger than 0.5Da or 500ppm, this parameter will be ignored.</li>
+          <li>The combination of -t and -ti determines the precursor mass tolerance.</li>
+          <li>E.g. <span class="code-keyword"><code>-t 20ppm -ti -1,2</code></span> tests abs(ObservedPepMass - TheoreticalPepMass - n * 1.00335Da) &lt; 20ppm for n = -1, 0, 1, 2</li>
+        </ul>
+      </li>
+
+      <li style="margin-bottom: 10px;">
+        <b>-thread NumOfThreads</b> (Default: Number of available cores)
+        <ul>
+          <li>Number of concurrent threads to be executed together.</li>
+          <li>Default value is the number of available logical cores (e.g. 8 for quad-core processor with hyper-threading support).</li>
+        </ul>
+      </li>
+
+      <li style="margin-bottom: 10px;">
+        <b>-tasks NumTasks</b> (Default: internally calculated based on inputs)
+        <ul>
+          <li>Use this to manually set the number of tasks to create for the search.</li>
+          <li>More tasks than threads will reduce the memory requirements of the search, but will be slower (how much depends on the inputs).</li>
+          <li>If the spectrum file is particularly large, a larger number of tasks will decrease the possibility of out of memory errors.</li>
+          <li>If the fasta file being searched is larger than 10MB, more tasks will cause a noticeably longer search time.</li>
+          <li>1 &lt;= tasks &lt;= numThreads: will create one task per thread, which is the original behavior.</li>
+          <li>tasks = 0: use default calculation - minimum of :(threads*3), and (numSpectra/250).</li>
+          <li>tasks &lt; 0: multiply number of threads by abs(tasks) to determine number of tasks (i.e., -2 =&gt; "2 * numThreads" tasks).</li>
+          <li>One task per thread will use the most memory, but will usually finish the fastest.</li>
+          <li>2-3 tasks per thread will use comparably less memory, but may cause the search to take 1.5 to 2 times as long with a 23MB fasta file.</li>
+        </ul>
+      </li>
+
+      <li style="margin-bottom: 10px;">
+        <b>-verbose 0/1</b> (Default: 0)
+        <ul>
+          <li>Changes the verbosity of the output</li>
+          <li>If 0, only the overall progress is reported, creating the minimal useful output to console.</li>
+          <li>If 1, you see all of the output of 0, but with additional console output from each thread and task.</li>
+          <li>1 will produce console output that matches the console output of older versions.</li>
+        </ul>
+      </li>
+      <li>
+        <b>-tda 0/1</b> (Default: 0)
+        <ul>
+          <li>Indicates whether to search normal (forward only) protein sequences, 
+              or a decoy file where the reversed protein sequences are appended to the normal protein sequences
+            <ul>
+             <li>0: Search the protein sequences as listed in the FASTA file (the target database)</li>
+             <li>1: Search a target-decoy database, allowing for the computation of QValues (FDR)</li>
+            </ul>
+          </li>
+          <li>QValue is defined as the minimum false discovery rate (FDR) at which the test may be called significant (ReversePeptideCount / ForwardPeptideCount)
+            <ul>
+              <li>QValue(t) = (Number of DecoyPSMs with score equal or above t) &divide; (Number of TargetPSMs with score equal or above t)</li>
+              <li>PSM: Peptide-Spectrum Match</li>
+              <li>-log(SpecProb) is used as the score to compute QValue.</li>
+            </ul>
+        </ul>
+      </li>
+      <p class="note">
+        If <span class="code-keyword"><code>-tda 1</code></span> is specified, MS-GF+ automatically creates a combined target/reversed database file (DBFileName.revConcat.fasta).<br>
+        Thus, when specifying "-d" parameter, DatabaseFile must contain only target proteins.
+      </p>
+    </ul>
+
+    <ul>
+      <li style="margin-bottom: 10px;">
+        <b>-m FragmentationMethodID</b> (Default: 0)
+        <ul>
+          <li>Fragmentation method identifier (used to determine the scoring model).
+             <ul>
+              <li>0: As written in the spectrum or CID if no info (default)</li>
+              <li>1: CID</li>
+              <li>2: ETD</li>
+              <li>3: HCD</li>
+              <li>4: UVPD</li>
+             </ul>
+          </li>
+          <li>If the identifier is 0 and fragmentation method is written in the spectrum file (e.g. mzML files), MS-GF+ will recognize the fragmentation method and use a relevant scoring model.</li>
+          <li>If the identifier is 0 and there is no fragmentation method information in the spectrum (e.g. mgf files), CID model will be used by default.</li>
+          <li>If the identifier is non-zero and the spectrum has fragmentation method information, only the spectra that match with the identifier will be processed.</li>
+          <li>If the identifier is non-zero and the spectrum has no fragmentation method information, MS-GF+ will process all spectra assuming the specified fragmentation method.</li>
+          <li>If the identifier is 4, MS/MS spectra from the same precursor ion (e.g. CID/ETD pairs, CID/HCD/ETD triplets) will be merged and the &quot;merged&quot; spectrum will be used for searching instead of individual spectra. See Kim et al., MCP 2010 for details.</li>
+        </ul>
+      </li>
+
+      <li style="margin-bottom: 10px;">
+        <b>-inst InstrumentID</b>
+        <ul>
+          <li>Identifier of the instrument used to generate MS/MS spectra (this parameter defines the the scoring model).
+             <ul>
+              <li>0: Low-res LCQ/LTQ (Default for CID and ETD)</li>
+              <li>1: Orbitrap/FTICR/Lumos (Default for HCD)</li>
+              <li>2: TOF</li>
+              <li>3: Q-Exactive</li>
+             </ul>
+          </li>
+          <li>For "hybrid" spectra with high-precision MS1 and low-precision MS2, use 0.</li>
+          <li>For usual low-precision instruments (e.g. Thermo LTQ), use 0.</li>
+          <li>If MS/MS fragment ion peaks are of high-precision (e.g. tolerance = 10ppm), use 2.</li>
+          <li>For TOF instruments, use 2.</li>
+          <li>For Q-Exactive HCD spectra, use 3.</li>
+          <li>For other HCD spectra, use 1.</li>
+        </ul>
+      </li>
+
+      <li style="margin-bottom: 10px;">
+        <b>-e EnzymeID</b> (Default: 1)
+        <ul>
+          <li>Enzyme identifier.
+            <ul>
+              <li>0: unspecific cleavage (cleave after any residue)</li>
+              <li>1: Trypsin (default)</li>
+              <li>2: Chymotrypsin</li>
+              <li>3: Lys-C</li>
+              <li>4: Lys-N</li>
+              <li>5: glutamyl endopeptidase (Glu-C)</li>
+              <li>6: Arg-C</li>
+              <li>7: Asp-N</li>
+              <li>8: alphaLP</li>
+              <li>9: no cleavage</li>
+             </ul>
+          </li>
+          <li>Use 9 for peptidomics studies</li>
+          <li>Create file params\enzymes.txt (or params/enzymes.txt on Linux) below the working directory to define custom enzymes or override the cleavage residues for built-in enzymes</li>
+          <li>For more info, see <a href="examples/enzymes.txt">enzymes.txt</a></li>
+        </ul>
+      </li>
+
+      <li style="margin-bottom: 10px;">
+        <b>-p ProtocolID</b> (Default: 0)
+        <ul>
+          <li>Protocol identifier. Protocols are used to enable scoring parameters for enriched and/or labeled samples.
+		    <ul>
+              <li>0: Automatic (Default)
+                <ul>
+                  <li>This will set the protocol based on the names of the modifications in Mods.txt</li>
+                  <li>It looks for names (case insensitive) that start with "itraq", "phospho", and "tmt"</li>
+                </ul>
+              </li>
+              <li>1: Phosphorylation: for phosphopeptide enriched samples</li>
+              <li>2: iTRAQ: for iTRAQ-labeled samples</li>
+              <li>3: iTRAQPhospho: for phosphopeptide enriched and iTRAQ-labeled samples</li>
+              <li>4: TMT: for TMT-labeled samples</li>
+              <li>5: Standard: for samples not in the above categories (no protocol)</li>
+		    </ul>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <b>-ntt 0/1/2</b> (Default: 2)
+        <ul>
+          <li>Number of tolerable termini (aka tryptic termini)
+          <li>This parameter is used to apply the enzyme cleavage specificity rule when searching the database.</li>
+          <li>Specifies the minimum number of termini matching the enzyme specificity rule.
+            <ul>
+              <li>For example, for trypsin, K.ACDEFGHR.C (NTT=2), G.ACDEFGHR.C (NTT=1), K.ACDEFGHI.C (NTT=1) and G.ACDEFGHR.C (NTT=0).</li>
+              <li><span class="code-keyword"><code>-ntt 2</code></span> will search for fully tryptic peptides only.</li>
+            </ul>
+          </li>
+          <li>By default, <span class="code-keyword"><code>-ntt 2</code></span> is used.</li>
+          <li>Using <span class="code-keyword"><code>-ntt 1</code></span> or <span class="code-keyword"><code>-ntt 0</code></span> can make the search significantly slower.</li>
+        </ul>
+    </li>
+    </ul>
+
+    <ul>
+      <li style="margin-bottom: 10px;">
+        <b>-mod ModificationFile</b> (Default: standard amino acids with fixed C+57, though only if <span class="code-keyword"><code>-mod</code></span> is not specified)
+        <ul>
+          <li>Modification file name. ModificationFile contains the modifications to be considered in the search.</li>
+          <li>If <span class="code-keyword"><code>-mod</code></span> is not specified, standard amino acids with fixed Carbamidomethylation C will be used.</li>
+          <li>
+            See an <a href="examples/Mods.txt">example MS-GF+ modification file</a>.</li>
+        </ul>
+      </li>
+
+      <li style="margin-bottom: 10px;">
+        <b>-minLength MinPepLength</b> (Default: 6)
+        <ul>
+          <li>Minimum length of the peptide to be considered.</li>
+        </ul>
+      </li>
+
+      <li style="margin-bottom: 10px;">
+        <b>-maxLength MaxPepLength</b> (Default: 40)
+        <ul>
+          <li>Maximum length of the peptide to be considered.</li>
+        </ul>
+      </li>
+
+      <li style="margin-bottom: 10px;">
+        <b>-minCharge MinPrecursorCharge</b> (Default: 2)
+        <ul>
+          <li>Minimum precursor charge to consider. This parameter is used only for spectra with no charge.</li>
+        </ul>
+      </li>
+
+      <li style="margin-bottom: 10px;">
+        <b>-maxCharge MinPrecursorCharge</b> (Default: 3)
+        <ul>
+          <li>Maximum precursor charge to consider. This parameter is used only for spectra with no charge.</li>
+        </ul>
+      </li>
+
+      <li style="margin-bottom: 10px;">
+        <b>-n NumMatchesPerSpec</b> (Default: 1)
+        <ul>
+          <li>Number of peptide matches per spectrum to report.</li>
+          <li>Expected false discovery rates (EFDRs) will be reported only when this value is 1.</li>
+        </ul>
+      </li>
+      
+      <li style="margin-bottom: 10px;">
+        <b>-addFeatures 0/1</b> (Default: 0)
+        <ul>
+          <li>If 0, only basic scores are reported.</li>
+          <li>If 1, the following features are reported
+            <ul>
+              <li>MS2IonCurrent: Summed intensity of all product ions</li>
+              <li>ExplainedIonCurrentRatio: Summed intensity of all matched product ions (e.g. b, b-H2O, y, etc.) divided by MS2IonCurrent</li>
+              <li>NTermIonCurrentRatio: Summed intensity of all matched prefix ions (e.g. b, b-H2O, etc.) divided by MS2IonCurrent</li>
+              <li>CTermIonCurrentRatio: Summed intensity of all matched suffix ions (e.g. y, y-H2O, etc.) divided by MS2IonCurrent</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      
+      <li style="margin-bottom: 10px;">
+        <b>-ccm ChargeCarrierMass</b> (Default: 1.00727649)
+        <ul>
+          <li>Override the default charge carrier mass</li>
+        </ul>
+      </li>
+      
+      <li style="margin-bottom: 10px;">
+        <b>-ignoreMetCleavage 0/1</b> (Default: 0)
+        <ul>
+          <li>0: consider cleavage of methionine from the protein's N-terminus, even when NTT=2</li>
+          <li>1: disable N-terminal methionine cleavage</li>
+        </ul>
+      </li>
+      
+      <li style="margin-bottom: 10px;">
+        <b>-maxMissedCleavages Count</b> (Default: -1, meaning no limit)
+        <ul>
+          <li>Exclude peptides with more than this number of missed cleavages</li>
+        </ul>
+      </li>
+      
+      <li style="margin-bottom: 10px;">
+        <b>-numMods Count</b> (Default: 3)
+        <ul>
+          <li>Maximum number of dynamic (variable) modifications per peptide</li>
+          <li>If this value is large and multiple dynamic modifications are defined, the search will be slow (depending on FASTA file size)</li>
+        </ul>
+      </li>
+
+    </ul>
+
+    <h3>MS-GF+ output</h3>
+    <p>MS-GF+ outputs results as an mzIdentML (version 1.1) file. See <a href="http://www.psidev.info/mzidentml/">http://www.psidev.info/mzidentml/</a> for details on the mzIdentML format. For every PSM, MS-GF+ reports the following scores:</p>
+
+    <ul>
+      <li style="margin-bottom: 5px;">
+        <b>MS-GF:RawScore</b>: MS-GF+ raw score of the peptide-spectrum match
+      </li>
+
+      <li style="margin-bottom: 5px;">
+        <b>MS-GF:DeNovoScore</b><b>:</b> the score of the optimal scoring peptide for the spectrum (not necessary in the database)&nbsp;(MS-GF:RawScore &lt;= MS-GF:DeNovoScore)
+      </li>
+
+      <li style="margin-bottom: 5px;">
+        <b>MS-GF:SpecEValue</b>: spectral E-value (spectrum level E-value) of the peptide-spectrum match - the lower the better
+      </li>
+
+      <li style="margin-bottom: 5px;">
+        <b>MS-GF:EValue</b>: database level E-value (expected number of peptides in a random database having equal or better scores than the PSM score) - the lower the better
+      </li>
+
+      <li style="margin-bottom: 5px;">
+        <b>MS-GF:QValue</b>
+        <ul>
+          <li>PSM-level Q-value estimated using the target-decoy approach.</li>
+          <li>MS-GF:QValue is computed solely based on MS-GF:SpecEValue.</li>
+        </ul>
+      </li>
+
+      <li style="margin-bottom: 5px;">
+        <b>MS-GF:PepQValue</b>
+        <ul>
+          <li>Peptide-level Q-value estimated using the target-decoy approach.</li>
+          <li>Reported only if "-tda 1" is specified.</li>
+          <li>If multiple spectra are matched to the same peptide, only the best scoring PSM (lowest SpecProb) is retained.<br>
+              After that, MS-GF:PepQValue is calculated as #DecoyPSMs&gt;s / #TargetPSMs&gt;s among the retained PSMs. <br>
+              This approximates the Q-value of the set of unique peptides. </li>
+          <li>In the MS-GF+ output, the same PepQValue value is given to all PSMs sharing the peptide.
+            <ul>
+              <li>Thus, even a low-quality PSM may get a low PepQValue (if it has a high-quality "sibling" PSM sharing the peptide).</li>
+              <li>Note that this should not be used to count the number of identified PSMs.</li>
+            </ul>
+        </ul>
+      </li>
+    </ul>
+
+    <h3>MS-GF+ output example</h3>
+
+    <p>Shown below is a sample of the MS-GF+ output in table form, as extracted from a simple MzIdentML file: <a href="examples/test.mzid">test.mzid</a></p>
+
+    <p>There are two options for converting an MS-GF+ output file (<b>.mzid</b>) into a tab-separated file (<b>.tsv</b>).</p>
+
+    <ol>
+    <li>The MzIDToTsv utility built into MSGFPlus.jar (see the <a href="MzidToTsv.html">MzIDToTsv</a> page)
+        <ul>
+        <li>Easy to access (though syntax is a bit tricky)</li>
+        <li>Can be slow for large .mzid files</li>
+        </ul>
+    </li>
+    <li>The Mzid-To-Tsv-Converter standalone application, <a href="https://github.com/PNNL-Comp-Mass-Spec/Mzid-To-Tsv-Converter/releases">available on GitHub</a>
+        <ul>
+        <li>Fast conversion</li>
+        <li>Handles large .mzid files</li>
+        <li>Runs natively on Windows, but requires mono to use on Linux</li>
+        </ul>
+    </li>
+    </ol>
+
+    <div class="codePanel">
+    <table style="font-family:courier">
+        <tr>
+          <th>&#35;SpecFile</th>
+          <th>SpecID</th>
+          <th>ScanNum</th>
+          <th>FragMethod</th>
+          <th>Precursor</th>
+          <th>IsotopeError</th>
+          <th>PrecursorError(ppm)</th>
+          <th>Charge</th>
+          <th>Peptide</th>
+          <th>Protein</th>
+          <th>DeNovoScore</th>
+          <th>MSGFScore</th>
+          <th>SpecEValue</th>
+          <th>EValue</th>
+          <th>QValue</th>
+          <th>PepQValue</th>
+        </tr>
+        <tr>
+          <td>test.mgf</td>
+          <td>index=0</td>
+          <td>26559</td>
+          <td>CID</td>
+          <td>1285.3457</td>
+          <td>1</td>
+          <td>-5.049801</td>
+          <td>3</td>
+          <td>K.IGAYLFVDMAHVAGLIAAGVYPNPVPHAHVVTSTTHK.T</td>
+          <td>test</td>
+          <td>299</td>
+          <td>244</td>
+          <td>1.4807088E-31</td>
+          <td>3.2871733E-29</td>
+          <td>0.0</td>
+          <td>0.0</td>
+        </tr>
+        <tr>
+          <td>test.mgf</td>
+          <td>index=0</td>
+          <td>26559</td>
+          <td>CID</td>
+          <td>1285.3457</td>
+          <td>1</td>
+          <td>-5.049801</td>
+          <td>3</td>
+          <td>K.IGAYLFVDMAHVAGLIAAGVYPNPVPHAHVVTSTTHK.T</td>
+          <td>test_isoform</td>
+          <td>299</td>
+          <td>244</td>
+          <td>1.4807088E-31</td>
+          <td>3.2871733E-29</td>
+          <td>0.0</td>
+          <td>0.0</td>
+        </tr>
+        <tr>
+          <td>test.mgf</td>
+          <td>index=1</td>
+          <td>-1</td>
+          <td>CID</td>
+          <td>870.11743</td>
+          <td>0</td>
+          <td>0.14029178</td>
+          <td>3</td>
+          <td>K.NLANPTSVILASIQM+15.995LEYLGMADK.A</td>
+          <td>test2</td>
+          <td>156</td>
+          <td>136</td>
+          <td>2.2559852E-22</td>
+          <td>4.4217308E-20</td>
+          <td>0.0</td>
+          <td>0.0</td>
+        </tr>
+    </table>
+    </div>
+
+    (Text file of this table: <a href="examples/test_Unrolled.tsv">test_Unrolled.tsv</a>)
+
+  </body>
+</html>

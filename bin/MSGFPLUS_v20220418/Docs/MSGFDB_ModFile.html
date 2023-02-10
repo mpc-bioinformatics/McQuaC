@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>MS-GFDB Modification File Example</title>
+    <link type="text/css" rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <h1 class="pagetitle">MS-GFDB Modification File Example</h1>
+
+    <p class="note">
+    This mod file was used by MS-GFDB, an old application that is no longer under development.<br>
+    It was supserseded by <a href="MSGFPlus.html">MS-GF+</a>, which supports a
+    <a href="examples/Mods.txt">modification file</a> with additional features</li>
+    </p>
+
+    <ul>
+        <li>
+            <a href="index.html">MS-GF+ Documentation home</a>
+        </li>
+        <li>
+            <a href="MS-GFDB.html">MS-GFDB help page</a>
+        </li>
+    </ul>
+
+  <div class="codePanel">
+      <pre class="code"># This file is used to specify modifications
+# Use # for comments, either at the start of a line or in the middle of line
+
+# Max Number of Dynamic (Variable) Modifications per peptide (default 3).
+# If this value is large, the search takes long.
+<span class="code-keyword">NumMods=3</span>
+
+# To input a modification, use the following command:
+# Mass or CompositionStr, Residues, ModType, Position, Name (all the five fields are required).
+# <span class="code-keyword">CompositionStr</span> (C[Num]H[Num]N[Num]O[Num]S[Num]P[Num])
+# 	- C (Carbon), H (Hydrogen), N (Nitrogen), O (Oxygen), S (Sulfer) and P (Phosphorus) are allowed.
+# 	- Atom can be omitted. The sequence of atoms must be followed.
+# 	- Negative numbers are allowed.
+# 	- E.g. C2H2O1 (valid), H2C1O1 (invalid)
+# <span class="code-keyword">Mass</span> can be used instead of CompositionStr. It is important to specify accurate monoisotopic masses (integer masses are insufficient).
+# 	- E.g. 15.994915
+# <span class="code-keyword">Residues</span>: affected amino acids (must be upper letters)
+# 	- Must be upper letters or *
+# 	- Use * if this modification is applicable to any residue.
+# 	- * should not be "anywhere" modification (e.g. "15.994915, *, opt, any, Oxidation" is not allowed.)
+# 	- E.g. NQ, *
+# <span class="code-keyword">ModType</span>: "fix" for fixed modifications, "opt" for variable modifications (case insensitive)
+# <span class="code-keyword">Position</span>: position in the peptide where the modification can be attached.
+# 	- One of the following five values should be used:
+# 	- any (anywhere), N-term (peptide N-term), C-term (peptide C-term), Prot-N-term (protein N-term), Prot-C-term (protein C-term)
+# 	- Case insensitive
+# 	- "-" can be omitted
+# 	- E.g. any, Any, Prot-n-Term, ProtNTerm are all valid
+# <span class="code-keyword">Name</span>: name of the modification (Unimod PSI-MS name)
+# 	- E.g. Oxidation
+
+# Static (fixed) modifications:
+<span class="code-keyword">C2H3N1O1,C,fix,any,Carbamidomethylation</span>     # Fixed Carbamidomethyl C
+
+# Variable Modifications (default: none)
+<span class="code-keyword">O1,M,opt,any,Oxidation</span>                      # Oxidation M
+
+# Additional Modification Examples
+# C2H3N1O1,C,fix,any,Carbamidomethyl        # Fixed Carbamidomethyl C (alkylation)
+# O1,M,opt,any,Oxidation                    # Oxidation M
+# 15.994915,M,opt,any,Oxidation             # Oxidation M (mass is used instead of CompositionStr)
+# H-1N-1O1,NQ,opt,any,Deamidated            # Negative numbers are allowed.
+# CH2,K,opt,any,Methyl                      # Methylation K
+# C2H2O1,K,opt,any,Acetyl                   # Acetylation K
+# HO3P,STY,opt,any,Phospho                  # Phosphorylation STY
+# C2H3NO,*,opt,N-term,Carbamidomethyl       # Variable Carbamidomethyl N-term
+# H-2O-1,E,opt,N-term,Glu->pyro-Glu         # Pyro-glu from E
+# H-3N-1,Q,opt,N-term,Gln->pyro-Glu         # Pyro-glu from Q
+# C2H2O,*,opt,Prot-N-term,Acetyl            # Acetylation Protein N-term
+      </pre>
+    </div>
+
+  </body>
+</html>
