@@ -7,11 +7,8 @@ params.fasta_file = "proteins.fasta" // Database (FASTA-file) used for identific
 params.tda = 1 // 0 --> No Target-Decoy appraoch | 1 --> Target-Decoy appraoch (we hardcoded the prefix "DECOY_" )
 params.search_parameter_file = "$PWD/example_configurations/msgfplus_config.txt" //Search Parameters for MSGFPlus
 
-
-// Results output dir
+// Optional Parameters
 params.outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
-
-// Optional, but should be set!
 params.num_parallel_searches = Runtime.runtime.availableProcessors()
 
 // Parameters for the JVM
@@ -19,7 +16,7 @@ params.jvm_params = "Xmx3500M"
 
 workflow {
     // Get all mgf files which should be identified
-    mgfs = Channel.fromPath(params.mzml_folder + "/*.mgf")
+    mgfs = Channel.fromPath(params.mgf_folder + "/*.mgf")
 
     // Get FASTA-file
     fasta_file = Channel.fromPath(params.fasta_file)
@@ -38,8 +35,6 @@ workflow {
         
     // Start search
     msgfplus_search_mgf(combined_channel)
-
-
 }
 
 process msgfplus_buildsa {
@@ -70,7 +65,6 @@ process msgfplus_search_mgf {
 
     output: 
     file "${mgf_file.baseName}.mzid"
-
 
     """
     touch -m ${input_fasta.baseName}*

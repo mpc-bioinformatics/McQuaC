@@ -7,15 +7,12 @@ params.fasta_file = "proteins.fasta" // Database (FASTA-file) used for identific
 params.tda = 1 // 0 --> No Target-Decoy appraoch | 1 --> Target-Decoy appraoch (comet automatically prefixes decoys with "DECOY_" )
 params.search_parameter_file = "$PWD/example_configurations/comet_config.txt" //Search Parameters for Comet
 
-
-// Results output dir
+// Optional Parameters
 params.outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
-
-// Optional, but should be set!
 params.num_parallel_searches = Runtime.runtime.availableProcessors()
 
 workflow {
-    // Get all mzML files which should be identified
+    // Get all MGF files which should be identified
     mgfs = Channel.fromPath(params.mgf_folder + "/*.mgf")
 
     // Get FASTA-file
@@ -24,14 +21,13 @@ workflow {
     // Get Modification Parameters file
     modifications_file = Channel.fromPath(params.search_parameter_file)
 
-    // Combined channel replicated the indexed fasta for each MZML to be reused
+    // Combined channel replicated the indexed fasta for each MGF to be reused
     combined_channel = fasta_file
         .combine(modifications_file)
         .combine(mgfs)
         
     // Start search
     comet_search_mgf(combined_channel)
-
 }
 
 

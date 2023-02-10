@@ -3,8 +3,9 @@ nextflow.enable.dsl=2
 
 // Required Parameters
 params.thermo_raws = "$PWD/raws"  // Databasefile in SP-EMBL
-params.outdir = "$PWD/results"  // Output-Directory of the MGFs. Here it is <Input_file>.mgf
 
+// Optional Parameters
+params.outdir = "$PWD/results"  // Output-Directory of the MGFs. Here it is <Input_file>.mgf
 params.additional_params = ""
 params.num_procs_conversion = Runtime.runtime.availableProcessors()  // Number of process used to convert (CAUTION: This can be very resource intensive!)
 
