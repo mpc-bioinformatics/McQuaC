@@ -3,11 +3,13 @@
 
 Please use camel case for process names and snake case for variable names. Go all caps on global, non-dynamic variables. 
 Have fun!
+
+Example run for PIA: nextflow run pia.nf --idents /home/maike/Programmierprojekte/QC-Nextflow/pia-tutorial/data/identifications/ --outdir /home/maike/Programmierprojekte/QC-Nextflow/result/
 */
 
 PROJECT_DIR = workflow.projectDir
 NFX_WORK = PROJECT_DIR + "work/"
-
+println(PROJECT_DIR)
 params.help = false
 
 if(params.help) {
@@ -17,22 +19,63 @@ if(params.help) {
 	System.exit(0)
 	} else {
 		dir= workflow.projectDir.getParent() + "/results/"
-		path= params.input + "**/*.fna"
-		db = params.db
+		
 
 
-process loadDB {
+workflow {
+	converter()
+	comet(converter.out)
+    pia(comet.out)
+}
+//add parameters to workflow : include {sayHello} from './some/module' addParams(foo: 'Ciao')
+include {convert_raw_via_thermorawfileparser} from PROJECT_DIR + '/convert_to_mgf_thermorawfileparser.nf'
+
+workflow converter{
+    // Convert the file to MGF
+	// Needs to have mono installed on linux system (mono-complete)
+	// required parameters: params.thermo_raws
+    rawfiles = Channel.fromPath(params.thermo_raws + "/*.raw")
+	main:
+    	convert_raw_via_thermorawfileparser(rawfiles)
+	emit:
+		convert_raw_via_thermorawfileparser.out
 }
 
-process identification {
+params.search_parameter_file = "$PWD/example_configurations/comet_config.txt" //Search Parameters for Comet
+include {comet_search_mgf} from PROJECT_DIR + "/identification_via_comet.nf"
+workflow comet{
+    // Get all MGF files which should be identified
+ //   mgfs = Channel.fromPath(converter.out)
+
+    // Get FASTA-file
+    fasta_file = Channel.fromPath(params.fasta_file)
+
+    // Get Modification Parameters file
+    modifications_file = Channel.fromPath(params.search_parameter_file)
+
+
+	take: data
+	main: 
+    // Start search
+		combined_channel = fasta_file
+        	.combine(modifications_file)
+        	.combine(data)
+		combined_channel.view()
+    	comet_search_mgf(combined_channel)
+	emit:
+		comet_search_mgf.out
 }
 
-process inference {
-}
 
-process featureFinder {
-}
+include {pia_compilation; pia_analysis} from PROJECT_DIR + '/pia.nf'
 
-process visualization {
+workflow pia{
+    // Run PIA protein inference
+	//params.idents = "/home/maike/Programmierprojekte/QC-Nextflow/pia-tutorial/data/identifications/"
+   // rawfiles = Channel.fromPath(params.idents + "/*.idXML")
+	take: data
+	main:
+    	pia_compilation(data)
+    	pia_analysis(pia_compilation.out)
 }
 }
