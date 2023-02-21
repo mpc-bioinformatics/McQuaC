@@ -9,7 +9,7 @@ params.search_parameter_file = "$PWD/example_configurations/comet_config.txt" //
 
 // Optional Parameters
 params.outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
-params.num_parallel_searches = Runtime.runtime.availableProcessors()
+params.num_parallel_searches = 1 //Runtime.runtime.availableProcessors()
 
 workflow {
     // Get all MGF files which should be identified
@@ -40,8 +40,6 @@ process comet_search_mgf {
 
     output: 
     file "${mgf_file.baseName}.mzid"
-    file "${mgf_file.baseName}.txt"
-    file "${mgf_file.baseName}.pin"
 
     """
     sed 's/^decoy_search.*/decoy_search = ${params.tda} /' ${mod_file} > ${mod_file.baseName}_new.txt
