@@ -8,7 +8,7 @@ params.outdir = "$PWD/results"  // Output-Directory of the PIA results. 3 files 
 params.additional_params = ""
 params.num_procs_conversion = Runtime.runtime.availableProcessors()  // Number of process used to convert (CAUTION: This can be very resource intensive!)
 
-workflow {
+workflow pia{
     // Run PIA protein inference
     rawfiles = Channel.fromPath(params.idents + "/*.idXML")
     pia_compilation(rawfiles)
