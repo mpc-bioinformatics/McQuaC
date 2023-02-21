@@ -3,7 +3,7 @@ nextflow.enable.dsl=2
 
 // Required Parameters
 params.idents = "$PWD/identifications"  // Peptide Identifications by search machine
-params.outdir = "$PWD/results"  // Output-Directory of the PIA results. Here it is piaExport.mzTab
+params.outdir = "$PWD/results"  // Output-Directory of the PIA results. 3 files are expected.
 
 params.additional_params = ""
 params.num_procs_conversion = Runtime.runtime.availableProcessors()  // Number of process used to convert (CAUTION: This can be very resource intensive!)
@@ -16,6 +16,7 @@ workflow {
 }
 
 process pia_compilation {
+    // Compiling files into a PIA intermediate file
     maxForks params.num_procs_conversion
     stageInMode "copy"
 
@@ -34,6 +35,9 @@ process pia_compilation {
 }
 
 process pia_analysis {
+    // Running an analysis with a parameter file
+    // The command line allows you to execute an analysis via prior defined analysis in JSON format. 
+    // Additionally to the json file, the prior compiled intermediate file must be given.
     publishDir "${params.outdir}/", mode:'copy'
 
     input:
