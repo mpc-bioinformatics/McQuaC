@@ -42,14 +42,14 @@ List of plots (regular QC):
 - Figure 1: Barplot for total number of MS1 and MS2 spectra (absolute numbers)
 - Figure 2: Barplot for number of PSMs, peptides, proteins and identified features (absolute numbers)
 - Figure 3: TIC Overlay as Lineplot
-- Figure 4: Barplot TIC quantiles
-- Figure 5: Barplot MS1 TIC quantiles
-- Figure 6: Barplot MS2 TIC quantiles
+- Figure 4: Barplot TIC quartiles
+- Figure 5: Barplot MS1 TIC quartiles
+- Figure 6: Barplot MS2 TIC quartiles
 - Figure 7: Barplot of precursor charge states (relative)
 - Figure 8: Barplot of PSM charge states (of identified spectra) (relative)
 - Figure 9: Barplot of missed cleavages of PSMs (relative)
-- Figure 10: PCA on all data (+ table and plot for Loadings (to assess importance of variables for the PCA))
-- Figure 11: PCA on raw data (+ table and plot for Loadings (to assess importance of variables for the PCA))
+- Figure 10: PCA on all data (a) (+ table and plot for Loadings (b) (to assess importance of variables for the PCA))
+- Figure 11: PCA on raw data (a) (+ table and plot for Loadings (b) (to assess importance of variables for the PCA))
 
 
 List of plots (ISA QC):
