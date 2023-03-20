@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 // Required Parameters
 params.thermo_raws = "$PWD/raws"  // Databasefile in SP-EMBL
 params.identification_files = "$PWD/idents" // Identification-Files in mzTAB-Format already FDR-filtered (e.g. by PIA)
-params.spike_ins = "$PWD/parameter_files/spike_ins.csv" // The Spike-Ins we also added in the Identification
+params.spike_ins = "$PWD/example_configurations/spike_ins.csv" // The Spike-Ins we also added in the Identification
 
 // Optional Parameters
 params.outdir = "$PWD/results"  // Output-Directory of the XICs (and corrected retention-time XICs with the help of the identification) as a csv-file. Here it is <Input-Raw-File>_spikeins.csv
