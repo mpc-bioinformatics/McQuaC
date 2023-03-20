@@ -2,7 +2,7 @@
 nextflow.enable.dsl=2
 
 // Required Parameters
-params.thermo_raws = "$PWD/raws"  // Databasefile in SP-EMBL
+params.thermo_raws = "$PWD/raws"  // Folder of Thermo-RAW-files
 
 // Optional Parameters
 params.outdir = "$PWD/results"  // Output-Directory of the MGFs. Here it is <Input_file>.mgf
