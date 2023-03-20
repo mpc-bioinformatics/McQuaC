@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     headers_included = []
     final_table = dict()
-    headers = [
+    headers = [ # Example header for MPCSPIKE1 (old-isa) (Replace XXX with peptide)
         "run_file" ,
         "FIXED_MPCSPIKE1_PEP_XXX_RT_XXX",
         "IDENT_MPCSPIKE1_COUNT",
