@@ -58,3 +58,13 @@ List of plots (ISA QC):
 - Figure 1: Barplot with number of proteins, protein groups and unfiltered protein groups (absolute numbers)
 - Figure 2: Barplot with number of peptides (absolute numbers)
 - Figure 3: Barplot with number of PSMs (absolute numbers)
+
+## Docker Image
+
+A docker image containing all needed dependencies is provided in `docker`.
+
+To build this image (with docker-buildx) execute the following in the root directory of this repository:
+
+> docker build -t nextqcflow:latest . -f docker/Dockerfile
+
+An interactive shell can be started with: `docker run -it nextqcflow:latest` and all workflows can be executed via `nextflow` if necessary

@@ -20,8 +20,8 @@ rm -rf openms.deb data.tar.gz
 
 
 # Install environment
-rm Pipfile
-pipenv --rm
+rm -rf Pipfile
+pipenv --rm | true
 pipenv install --python 3.9
 pipenv run pip install pyopenms==2.7.0
 pipenv run pip install pandas
