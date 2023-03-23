@@ -61,7 +61,7 @@ process msgfplus_search_mgf {
     publishDir "${params.outdir}/mzid", mode:'copy'
 
     input:
-    tuple file(input_fasta), file(mod_file), file(mmgf_file), file(remainder)
+    tuple file(input_fasta), file(mod_file), file(mgf_file), file(remainder)
 
     output: 
     file "${mgf_file.baseName}.mzid"
@@ -71,9 +71,10 @@ process msgfplus_search_mgf {
 
     run_msgfplus.sh ${params.jvm_params} -d ${input_fasta} -s ${mgf_file} -tda ${params.tda} -decoy DECOY_ -conf ${mod_file} -o ${mgf_file.baseName}.mzid
 
-    # Since we copy the input files, and MS-GF+ does not like symlinks, we later remove them manually to save memory
-    rm ${input_fasta.baseName}*
-    rm ${mgf_file}
-    rm ${mod_file}
     """  
 }
+
+//    # Since we copy the input files, and MS-GF+ does not like symlinks, we later remove them manually to save memory
+//    rm ${input_fasta.baseName}*
+//    rm ${mgf_file}
+//    rm ${mod_file}

@@ -47,6 +47,6 @@ process comet_search_mgf {
     sed -i 's/^decoy_prefix.*/decoy_prefix = DECOY_/' ${mod_file.baseName}_new.txt
 
 
-    comet.linux_v2022.01.2.exe -P${mod_file.baseName}_new.txt -D${input_fasta} ${mgf_file}
+    comet.linux_v2023.01.1.exe -P${mod_file.baseName}_new.txt -D${input_fasta} ${mgf_file}
     """  
 }

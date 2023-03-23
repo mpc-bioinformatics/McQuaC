@@ -21,11 +21,14 @@ if(params.help) {
 		dir= workflow.projectDir.getParent() + "/results/"
 		
 
+//rawfiles_pia = Channel.fromPath(PROJECT_DIR  + "/results/mzid/*.mzid")
 
 workflow {
 	converter()
-	comet(converter.out)
-    pia(comet.out)
+	//comet(converter.out)
+	msgfplus(converter.out)
+	//msgfplus.out.view()
+    pia(msgfplus.out)
 }
 //add parameters to workflow : include {sayHello} from './some/module' addParams(foo: 'Ciao')
 include {convert_raw_via_thermorawfileparser} from PROJECT_DIR + '/convert_to_mgf_thermorawfileparser.nf'
@@ -66,16 +69,47 @@ workflow comet{
 		comet_search_mgf.out
 }
 
+include {msgfplus_buildsa; msgfplus_search_mgf} from PROJECT_DIR + "/identification_via_msgfplus.nf"
+workflow msgfplus{
+    // Get all MGF files which should be identified
+ //   mgfs = Channel.fromPath(converter.out)
+
+    // Get FASTA-file
+    fasta_file = Channel.fromPath(params.fasta_file)
+
+    // Get Modification Parameters file
+    modifications_file = Channel.fromPath(params.search_parameter_file)
+
+	take: data
+
+	main: 
+    // Build indexed fasta for MSGFPLUS
+    	msgfplus_buildsa(fasta_file)
+    // Combined channel replicated the indexed fasta for each MGF to be reused
+    	combined_channel = fasta_file
+        	.combine(modifications_file)
+        	.combine(data)
+        	.combine(msgfplus_buildsa.out.toList())
+	// Start search
+    	msgfplus_search_mgf(combined_channel)
+		msgfplus_search_mgf.out.view()
+
+	emit:
+		msgfplus_search_mgf.out
+}
+
 
 include {pia_compilation; pia_analysis} from PROJECT_DIR + '/pia.nf'
 
 workflow pia{
     // Run PIA protein inference
 	//params.idents = "/home/maike/Programmierprojekte/QC-Nextflow/pia-tutorial/data/identifications/"
-   // rawfiles = Channel.fromPath(params.idents + "/*.idXML")
+    
 	take: data
 	main:
     	pia_compilation(data)
     	pia_analysis(pia_compilation.out)
+	emit: 
+		pia_analysis.out
 }
 }

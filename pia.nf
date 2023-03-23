@@ -19,7 +19,7 @@ process pia_compilation {
     // Compiling files into a PIA intermediate file
     maxForks params.num_procs_conversion
     stageInMode "copy"
-
+    
     publishDir "${params.outdir}/", mode:'copy'
 
     input:
@@ -30,6 +30,7 @@ process pia_compilation {
 
     """
     echo "Starting Compilation"
+    echo "${idXML}"
     java -jar "${baseDir}/bin/pia-1.4.7/pia-1.4.7.jar" --compile -o "${idXML.baseName}-pia-compilation.xml"  ${idXML}
     """
 }
@@ -45,8 +46,8 @@ process pia_analysis {
 
     output:
     file "${compilation.simpleName}-piaExport-PSM.mzTab"
-    file "${compilation.simpleName}-piaExport-peptides.csv"
-    file "${compilation.simpleName}-piaExport--proteins.mzid"
+    // file "${compilation.simpleName}-piaExport-peptides.csv"
+    // file "${compilation.simpleName}-piaExport--proteins.mzid"
 
 
     script:
