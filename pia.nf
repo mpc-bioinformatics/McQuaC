@@ -1,19 +1,33 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-// Required Parameters
+// Parameters required for standalone execution
 params.idents = "$PWD/identifications"  // Peptide Identifications by search machine
-params.outdir = "$PWD/results"  // Output-Directory of the PIA results. 3 files are expected.
 
+// Optional Parameters TODO
+params.outdir = "$PWD/results"  // Output-Directory of the PIA results. 3 files are expected.
 params.additional_params = ""
 params.num_procs_conversion = Runtime.runtime.availableProcessors()  // Number of process used to convert (CAUTION: This can be very resource intensive!)
 
-workflow pia{
+workflow{
     // Run PIA protein inference
-    rawfiles = Channel.fromPath(params.idents + "/*.idXML")
-    pia_compilation(rawfiles)
-    pia_analysis(pia_compilation.out)
+    idents = Channel.fromPath(params.idents + "/*.idXML")
+
+    execute_pia(idents)
 }
+
+workflow execute_pia{
+    take:
+        idents
+    main:
+        // Run PIA protein inference
+        rawfiles = Channel.fromPath(params.idents + "/*.idXML")
+        pia_compilation(idents)
+        pia_analysis(pia_compilation.out)
+    emit: 
+        pia_analysis.out
+}
+
 
 process pia_compilation {
     // Compiling files into a PIA intermediate file
@@ -26,12 +40,12 @@ process pia_compilation {
     file idXML
 
     output:
-    file "${idXML.baseName}-pia-compilation.xml"
+    file "${idXML.baseName}_____pia-compilation.xml"
 
     """
     echo "Starting Compilation"
     echo "${idXML}"
-    java -jar "${baseDir}/bin/pia-1.4.7/pia-1.4.7.jar" --compile -o "${idXML.baseName}-pia-compilation.xml"  ${idXML}
+    java -jar "${baseDir}/bin/pia-1.4.7/pia-1.4.7.jar" --compile -o "${idXML.baseName}_____pia-compilation.xml"  ${idXML}
     """
 }
 
@@ -52,6 +66,7 @@ process pia_analysis {
 
     script:
     """
+    TODO REMOVE HARD_CODED parameters-file and make it available from outside the script!
     cat ${baseDir}/bin/pia-1.4.7/pia-analysis.json \
         | sed -e 's;"psmExportFile": "/tmp/piaExport-PSMs.mzTab";"psmExportFile": "${compilation.simpleName}-piaExport-PSM.mzTab";g' \
         | sed -e 's;"peptideExportFile": "/tmp/piaExport-peptides.csv";"peptideExportFile": "${compilation.simpleName}-piaExport-peptides.csv";g' \

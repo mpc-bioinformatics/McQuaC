@@ -1,10 +1,9 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-// Required Parameters
+// Parameters required for standalone execution
 params.thermo_raws = "$PWD/raws"  // Folder of Thermo-RAW-files
 params.ident_files = "$PWD/raws"  // Folder of mzTab Identification files (already FDR-filtered). Names should be identical to raw files for matching
-
 
 // Optional Parameters
 // Parameters for Feature Detection
@@ -18,29 +17,40 @@ params.outdir = "$PWD/results"  // Output-Directory of the mzMLs. Here it is <In
 
 params.num_procs_conversion = Runtime.runtime.availableProcessors()  // Number of process used to convert (CAUTION: This can be very resource intensive!)
 
+
 workflow {
-    // Get files from Folder
-    rawfiles = Channel.fromPath(params.thermo_raws + "/*.raw")
-    mztabfiles = Channel.fromPath(params.ident_files + "/*.mzTab")
-    
-    // Match files according to their baseName
-    create_baseName_for_raws(rawfiles)
-    create_baseName_for_idents(mztabfiles)
-    raw_and_id = create_baseName_for_raws.out.join(
-        create_baseName_for_idents.out,
-        by: 1
-    )
-    // Convert the file to mzML, where MS1 (peak picked) (for feature finding)
-    convert_raw_via_thermorawfileparser(raw_and_id)
+    rawfiles = Channel.fromPath(params.spk_thermo_raws + "/*.raw")
+    mztabfiles = Channel.fromPath(params.spk_identification_files + "/*.mzTab")
+    retrieve_spikeins(rawfiles, mztabfiles)
+}
 
-    // Get features with OpenMS' feature finder
-    run_feature_finder(convert_raw_via_thermorawfileparser.out)
+workflow get_features {
+    take:
+        rawfiles
+        mztabfiles
+    main:
+        mztabs_tuple = mztabfiles.map {
+            file -> tuple(file, file.baseName.split("_____")[0])
+        }
+        // Match files according to their baseName
+        create_baseName_for_raws(rawfiles)
+        raw_and_id = create_baseName_for_raws.out.join(
+            mztabs_tuple,
+            by: 1
+        )
+        // Convert the file to mzML, where MS1 (peak picked) (for feature finding)
+        convert_raw_via_thermorawfileparser(raw_and_id)
 
-    // Map Identification with Features (using mzTab and featureXML)
-    map_features_with_idents(run_feature_finder.out)
+        // Get features with OpenMS' feature finder
+        run_feature_finder(convert_raw_via_thermorawfileparser.out)
 
-    // Retrieve the actual data and report a csv file
-    get_statistics_from_featurexml(map_features_with_idents.out)
+        // Map Identification with Features (using mzTab and featureXML)
+        map_features_with_idents(run_feature_finder.out)
+
+        // Retrieve the actual data and report a csv file
+        get_statistics_from_featurexml(map_features_with_idents.out)
+    emit:
+        get_statistics_from_featurexml.out
 }
 
 // Stubs for an easy conversion of a channel into a tuple
@@ -50,17 +60,6 @@ process create_baseName_for_raws {
 
     output:
     tuple file(raw), val("$raw.baseName")
-
-    """
-    """
-}
-
-process create_baseName_for_idents {
-    input:
-    file mztab
-
-    output:
-    tuple file(mztab), val("$mztab.baseName")
 
     """
     """

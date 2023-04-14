@@ -1,25 +1,36 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-// Required Parameters
-params.thermo_raws = "$PWD/raws"  // Folder of Thermo-RAW-files
+// Parameters required for standalone execution
+params.ctm_input_thermo_raws = "$PWD/raws"  // Folder of Thermo-RAW-files
 
 // Optional Parameters
-params.outdir = "$PWD/results"  // Output-Directory of the MGFs. Here it is <Input_file>.mgf
-params.additional_params = ""
-params.num_procs_conversion = Runtime.runtime.availableProcessors()  // Number of process used to convert (CAUTION: This can be very resource intensive!)
+params.ctm_outdir = "$PWD/results"  // Output-Directory of the MGFs. Here it is <Input_file>.mgf
+params.ctm_additional_params = ""  // Addtional parameters for the TRFP
+params.ctm_num_procs_conversion = Runtime.runtime.availableProcessors()  // Number of process used to convert (CAUTION: This can be very resource intensive!)
 
+// Standalone Workflow
 workflow {
-    // Convert the file to MGF
     rawfiles = Channel.fromPath(params.thermo_raws + "/*.raw")
-    convert_raw_via_thermorawfileparser(rawfiles)
+    convert_to_mgf(rawfiles)
+}
+
+
+workflow convert_to_mgf {
+    take:
+        raw_files // a list of raw_files
+    main:
+        // Convert the file to MGF
+        convert_raw_via_thermorawfileparser(raw_files)
+    emit:
+        convert_raw_via_thermorawfileparser.out
 }
 
 process convert_raw_via_thermorawfileparser {
-    maxForks params.num_procs_conversion
+    maxForks params.ctm_num_procs_conversion
     stageInMode "copy"
 
-    publishDir "${params.outdir}/", mode:'copy'
+    publishDir "${params.ctm_outdir}/", mode:'copy'
 
     input:
     file raw
@@ -28,7 +39,7 @@ process convert_raw_via_thermorawfileparser {
     file "${raw.baseName}.mgf"
 
     """
-    run_thermorawfileparser.sh ${params.additional_params} --format=0 --output_file=${raw.baseName}.mgf --input=${raw} 
+    run_thermorawfileparser.sh ${params.ctm_additional_params} --format=0 --output_file=${raw.baseName}.mgf --input=${raw} 
     rm ${raw}
     """
 }
