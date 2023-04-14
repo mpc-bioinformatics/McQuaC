@@ -2,25 +2,25 @@
 nextflow.enable.dsl=2
 
 // Parameters required for standalone execution
-params.thermo_raws = "$PWD/raws"  // Folder of Thermo-RAW-files
-params.ident_files = "$PWD/raws"  // Folder of mzTab Identification files (already FDR-filtered). Names should be identical to raw files for matching
+params.gf_thermo_raws = "$PWD/raws"  // Folder of Thermo-RAW-files
+params.gf_ident_files = "$PWD/raws"  // Folder of mzTab Identification files (already FDR-filtered). Names should be identical to raw files for matching
 
 // Optional Parameters
 // Parameters for Feature Detection
 // params.resulolution_featurefinder = "-algortihm:mass_trace:mz_tolerance 0.02 -algorithm:isotopic_pattern:mz_tolerance 0.04"  // Parameters for Low Resolution Machines (Q-TOF)
-params.resolution_featurefinder = "-algorithm:mass_trace:mz_tolerance 0.004 -algorithm:isotopic_pattern:mz_tolerance 0.005"   // Parameters for High Resolution Machines (LTQ-OrbiTrap)
-params.considered_charges_low = "1"  // Charges for the feature finder to use to extract features. In QC this was set to 2:5
-params.considered_charges_high = "5"  // Charges for the feature finder to use to extract features. In QC this was set to 2:5
+params.gf_resolution_featurefinder = "-algorithm:mass_trace:mz_tolerance 0.004 -algorithm:isotopic_pattern:mz_tolerance 0.005"   // Parameters for High Resolution Machines (LTQ-OrbiTrap)
+params.gf_considered_charges_low = "1"  // Charges for the feature finder to use to extract features. In QC this was set to 2:5
+params.gf_considered_charges_high = "5"  // Charges for the feature finder to use to extract features. In QC this was set to 2:5
 
 // Output Directory
-params.outdir = "$PWD/results"  // Output-Directory of the mzMLs. Here it is <Input_file>.mzML
+params.gf_outdir = "$PWD/results"  // Output-Directory of the mzMLs. Here it is <Input_file>.mzML
 
-params.num_procs_conversion = Runtime.runtime.availableProcessors()  // Number of process used to convert (CAUTION: This can be very resource intensive!)
+params.gf_num_procs_conversion = Runtime.runtime.availableProcessors()  // Number of process used to convert (CAUTION: This can be very resource intensive!)
 
 
 workflow {
-    rawfiles = Channel.fromPath(params.spk_thermo_raws + "/*.raw")
-    mztabfiles = Channel.fromPath(params.spk_identification_files + "/*.mzTab")
+    rawfiles = Channel.fromPath(params.gf_thermo_raws + "/*.raw")
+    mztabfiles = Channel.fromPath(params.gf_ident_files + "/*.mzTab")
     retrieve_spikeins(rawfiles, mztabfiles)
 }
 
@@ -66,7 +66,7 @@ process create_baseName_for_raws {
 }
 
 process convert_raw_via_thermorawfileparser {
-    maxForks params.num_procs_conversion
+    maxForks params.gf_num_procs_conversion
     stageInMode "copy"
 
     input:
@@ -92,7 +92,7 @@ process run_feature_finder {
     tuple file("${mzml.baseName}.featureXML"), file(ident)
 
     """
-    run_featurefindercentroided.sh -in ${mzml} -out ${mzml.baseName}.featureXML -algorithm:isotopic_pattern:charge_low ${params.considered_charges_low} -algorithm:isotopic_pattern:charge_high ${params.considered_charges_high} ${params.resolution_featurefinder}
+    run_featurefindercentroided.sh -in ${mzml} -out ${mzml.baseName}.featureXML -algorithm:isotopic_pattern:charge_low ${params.gf_considered_charges_low} -algorithm:isotopic_pattern:charge_high ${params.gf_considered_charges_high} ${params.gf_resolution_featurefinder}
     # run_featurefindermultiplex.sh -in ${mzml} -out ${mzml.baseName}.featureXML
     # We do not use multiplex, it seems to be broken, mem usage way over 40 GB per RAW file failing by "std::bad_alloc"
     rm ${mzml}
@@ -119,7 +119,7 @@ process map_features_with_idents {
 process get_statistics_from_featurexml {
     stageInMode "copy"
 
-    publishDir "${params.outdir}/", mode:'copy'
+    publishDir "${params.gf_outdir}/", mode:'copy'
 
     input:
     tuple file(featurexml), val(file_base_name)
@@ -128,6 +128,6 @@ process get_statistics_from_featurexml {
     tuple file(featurexml), file("${file_base_name}_features.csv")
 
     """
-    extract_from_featurexml.py -featurexml ${featurexml} -out_csv ${file_base_name}_features.csv -report_up_to_charge ${params.considered_charges_high}
+    extract_from_featurexml.py -featurexml ${featurexml} -out_csv ${file_base_name}_features.csv -report_up_to_charge ${params.gf_considered_charges_high}
     """
 }
