@@ -1,0 +1,75 @@
+Table,,Column,Data type,unit,comment,created where?,used in raw data PCA?,used in all data PCA?
+qc_data,,RT_duration,float,seconds,Scan start time of the last measured spectrum,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,total_num_ms1,int,,Number of measured MS1 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,ms1_tic_array,array,,RAW-Array of the TICs of MS1 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,,
+qc_data,,ms1_rt_array,array,seconds,RAW-Array of the retention times of MS1 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,,
+qc_data,,total_nr_ms2,int,,Number of measured MS2 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,ms2_tic_array,array,,RAW-Array of the TICs of MS2 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,,
+qc_data,,ms2_rt_array,array,seconds,RAW-Array of the retention times of MS2 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,,
+qc_data,,RT_TIC_Q_000_025,float,,"The time interval when the first 25 % (and corresponsing the others) of TIC accumulates, divided by the RT_duration (taken from paper Bittremieux et al. 2016)",get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,RT_TIC_Q_025_050,float,,as above,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,RT_TIC_Q_050_075,float,,as above,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,RT_TIC_Q_075_100,float,,as above,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,RT_MS1_Q_000_025,float,,"The time interval when the first 25 % (and corresponsing the others) of the total number of MS1 spectra are measured, divided by the RT_duration  (taken from paper Bittremieux et al. 2016)",get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,RT_MS1_Q_025_050,float,,as above,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,RT_MS1_Q_050_075,float,,as above,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,RT_MS1_Q_075_100,float,,as above,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,RT_MS2_Q_000_025,float,,"The time interval when the first 25 % (and corresponsing the others) of the total number of MS2 spectra are measured, divided by the RT_duration  (taken from paper Bittremieux et al. 2016)",get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,RT_MS2_Q_025_050,float,,as above,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,RT_MS2_Q_050_075,float,,as above,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,RT_MS2_Q_075_100,float,,as above,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS1-TIC-Change-Q2,float,,"log2(50%-quantile / 25%-quantile of the TIC-change ) (measure for ESI-Stability, for details see paper Bittremieux et al. 2016)",get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS1-TIC-Change-Q3,float,,"log2(75%-quantile / 50%-quantile of the TIC-change ) (measure for ESI-Stability, for details see paper Bittremieux et al. 2016)",get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS1-TIC-Change-Q4,float,,"log2(100%-quantile / 75%- quantile of the TIC-change ) (measure for ESI-Stability, for details see paper Bittremieux et al. 2016)",get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS1-TIC-Q2,float,,"log2(50%-quantile / 25%-quantile of the actual TIC ) (measure for ESI-Stability, for details see paper Bittremieux et al. 2016)",get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS1-TIC-Q3,float,,"log2(75%-quantile / 50%-quantile of the actual TIC ) (measure for ESI-Stability, for details see paper Bittremieux et al. 2016)",get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS1-TIC-Q4,float,,"log2(100%-quantile / 75%-quantile of the actual TIC ) (measure for ESI-Stability, for details see paper Bittremieux et al. 2016)",get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS1_Freq_Max,float,Hz,Highest frequency of MS1 spectra in Hertz (iow: the highest number of measured MS1 spectra in a 1 minute window divided by 60),get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS1-Density-Q1,int,,25% Quantile of the peak counts per spectrum over all MS1 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS1-Density-Q2,int,,50% Quantile of the peak counts per spectrum over all MS1 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS1-Density-Q3,int,,75% Quantile of the peak counts per spectrum over all MS1 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2_Freq_Max,float,Hz,Highest frequency of MS1 spectra in Herz (iow: the highest number of measured MS2 spectra in 1 minute windows divided by 60),get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2-Density-Q1,int,,25% Quantile of the peak counts per spectrum over all MS2 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2-Density-Q2,int,,50% Quantile of the peak counts per spectrum over all MS2 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2-Density-Q3,int,,75% Quantile of the peak counts per spectrum over all MS2 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2_PrecZ1,int,,Number of MS2 precursors with charge 1,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2_PrecZ2,int,,Number of MS2 precursors with charge 2,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2_PrecZ3,int,,Number of MS2 precursors with charge 3,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2_PrecZ4,int,,Number of MS2 precursors with charge 4,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2_PrecZ5,int,,Number of MS2 precursors with charge 5,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2-PrecZ_more,int,,Number of MS2 precursors with charge 6 and more,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,accumulated-MS1_TIC,float,,The overall sum over all Peaks across all MS1 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,accumulated-MS2_TIC,float,,The overall sum over all Peaks across all MS2 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,filename,char,,The filename of the RAW-file (QEXIYYYYYY.raw),,,
+qc_data,TODO,file_and_analysis_timestamp,,,Filename appended with YYYY_MM_DD_HH_MM,,,
+qc_data_only_for_isa,TODO,file_and_analysis_timestamp,,,Filename appended with YYYY_MM_DD_HH_MM,,,
+qc_data_only_for_isa,,Total_Ion_Current_Max,int,,The maximum  of all TICs across all MS1 and MS2 Spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,,
+qc_data_only_for_isa,,Base_Peak_Intensity_Max,int,,The maximum base peak (highest peak in spectrum) across all MS1 and MS2 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,,
+qc_data_only_for_isa,,Total_Ion_Current_Max_Up_To_105,int,,The maximum of all TICs across all MS1 and MS2 spectra up to 105 minutes,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,,
+qc_data_only_for_isa,,Base_Peak_Up_Zo_105,int,,The maximum base peak (highest peak in spectrum) across all MS1 and MS2 spectra up to 105 minutes,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,,
+qc_data_only_for_isa,,FIXED_MPCSPIKEX_Pep_XXX_RT_XXX,,,Sum of all peaks measured inside the expected spike-in window (10 ppm m/z-tolerance and +/- 3 min retention time window),retrieve_spike_ins_thermorawfileparser.nf -> trfp_json_to_table.py,,
+qc_data_only_for_isa,,IDENT_MPCSPIKEX_Count,,,Number of identified spectra with the expected peptide-sequence,retrieve_spike_ins_thermorawfileparser.nf -> trfp_json_to_table.py,,
+qc_data_only_for_isa,,IDENT_MPCSPIKEX_DELTA_RT,,,"If identified, the difference  between the identified and expected retention time (of the last identified PSM?)",retrieve_spike_ins_thermorawfileparser.nf -> trfp_json_to_table.py,,
+qc_data_only_for_isa,,IDENT_MPCSPIKEX_PEP_XXX_RT_DELTA,,,"As above (sum of all peaks), only for the identified PSM",retrieve_spike_ins_thermorawfileparser.nf -> trfp_json_to_table.py,,
+qc_data,TODO,nrProteins,,,,,,
+qc_data,TODO,nrProteingroups_unfiltered,,,,,,
+qc_data,TODO,psmZ1-5,,,,,,X
+qc_data,TODO,psm_missed 0-3,,,,,,
+qc_data,TODO,number-filtered-psms,,,PSMS filtered by an FDR-Score of 0.01,,,
+qc_data,,psm-data (blob),BLOB,,PIA-output,pia.nf,,
+qc_data,TODO,number-filtered-peptides,,,Peptides filtered by an FDR-Score of 0.01,,,
+qc_data,,peptide-data (blob),BLOB,,PIA-output,pia.nf,,
+qc_data,TODO,number-filtered-protein-groups,,,Protein-Groups filtered by an FDR-Score of 0.01,,,
+qc_data,,protein-data (blob),BLOB,,PIA-output,pia.nf,,
+qc_data,,timestamp,,,"Unix Timestamp, when this raw-file was measured",get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,,
+qc_data,,total_num_features,int,,Total number of features found in raw file,get_features_in_raws.nf -> extract_from_featurexml.py,,
+qc_data,,total_num_ident_features,int,,"Total number of features, which have at least 1 identification mapped to them",get_features_in_raws.nf -> extract_from_featurexml.py,,X
+qc_data,,num_feature_charge_1,,,Total number of features with charge 1,get_features_in_raws.nf -> extract_from_featurexml.py,,X
+qc_data,,num_feature_charge_2,,,Total number of features with charge 2,get_features_in_raws.nf -> extract_from_featurexml.py,,X
+qc_data,,num_feature_charge_3,,,Total number of features with charge 3,get_features_in_raws.nf -> extract_from_featurexml.py,,X
+qc_data,,num_feature_charge_4,,,Total number of features with charge 4,get_features_in_raws.nf -> extract_from_featurexml.py,,X
+qc_data,,num_feature_charge_5,,,Total number of features with charge 5,get_features_in_raws.nf -> extract_from_featurexml.py,,X
+qc_data,,feature-data (blob),BLOB,,FeatureXML directly from OpenMS with annotated identification data,get_features_in_raws.nf -> extract_from_featurexml.py,,
+qc_data,TODO,fasta_file_name,,,"Fasta-Plain-Filename(, concatenated by comma, if more)",,,
+qc_data,TODO,search_parameter_file,,,The Comet-Search-Parameter-File,,,
+qc_data,TODO,captured_machine,,,"The Machine which was used to measure the sample (FLI,QEXI,Other)",,,
