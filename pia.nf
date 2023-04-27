@@ -24,8 +24,9 @@ workflow execute_pia{
         rawfiles = Channel.fromPath(params.idents + "/*.idXML")
         pia_compilation(idents)
         pia_analysis(pia_compilation.out)
+        pia_extraction(pia_analysis.out)
     emit: 
-        pia_analysis.out
+        pia_extraction.out
 }
 
 
@@ -40,7 +41,7 @@ process pia_compilation {
     file idXML
 
     output:
-    file "${idXML.baseName}_____pia-compilation.xml"
+    tuple file("${idXML.baseName}_____pia-compilation.xml"), val("${idXML.baseName}")
 
     """
     echo "Starting Compilation"
@@ -56,12 +57,10 @@ process pia_analysis {
     publishDir "${params.outdir}/", mode:'copy'
 
     input:
-    file compilation
+    tuple file(compilation), val(basename)
 
     output:
-    file "${compilation.simpleName}-piaExport-PSM.mzTab"
-    // file "${compilation.simpleName}-piaExport-peptides.csv"
-    // file "${compilation.simpleName}-piaExport--proteins.mzid"
+    tuple file("${compilation.simpleName}-piaExport-PSM.mzTab"), file("${compilation.simpleName}-piaExport-peptides.csv"),file("${compilation.simpleName}-piaExport--proteins.mzid"), val($basename)
 
 
     script:
@@ -74,5 +73,21 @@ process pia_analysis {
  
     java -jar "${baseDir}/bin/pia-1.4.7/pia-1.4.7.jar" parameters.json ${compilation}
     """
+
+prozess pia_extraction {
+
+    input:
+    tuple file(psms), file(peptides), file(proteins), val(basename)
+
+    output:
+    file "${basename}_____pia_extraction.csv"
+
+    script:
+    """
+    extract_from_pia_output.py --pia_PSMs $psms --pia_peptides $peptides --pia_proteins $proteins --output $basename_____pia_extraction.csv
+    """
+
+}
+
 }
 
