@@ -25,3 +25,8 @@ pipenv --rm | true
 pipenv install --python 3.9
 pipenv run pip install pyopenms==2.7.0
 pipenv run pip install pandas
+pipenv run pip install sqlalchemy
+pipenv run pip install plotly
+pipenv run pip install scikit-learn
+pipenv run pip install numpy
+
