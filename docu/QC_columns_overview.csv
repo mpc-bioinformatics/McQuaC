@@ -32,12 +32,12 @@ qc_data,,MS2_Freq_Max,float,Hz,Highest frequency of MS1 spectra in Herz (iow: th
 qc_data,,MS2-Density-Q1,int,,25% Quantile of the peak counts per spectrum over all MS2 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
 qc_data,,MS2-Density-Q2,int,,50% Quantile of the peak counts per spectrum over all MS2 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
 qc_data,,MS2-Density-Q3,int,,75% Quantile of the peak counts per spectrum over all MS2 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
-qc_data,,MS2_PrecZ1,int,,Number of MS2 precursors with charge 1,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
-qc_data,,MS2_PrecZ2,int,,Number of MS2 precursors with charge 2,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
-qc_data,,MS2_PrecZ3,int,,Number of MS2 precursors with charge 3,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
-qc_data,,MS2_PrecZ4,int,,Number of MS2 precursors with charge 4,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
-qc_data,,MS2_PrecZ5,int,,Number of MS2 precursors with charge 5,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
-qc_data,,MS2-PrecZ_more,int,,Number of MS2 precursors with charge 6 and more,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2_PrecZ1,int,,Relative  number of MS2 precursors with charge 1,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2_PrecZ2,int,,Relative  number of MS2 precursors with charge 2,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2_PrecZ3,int,,Relative  number of MS2 precursors with charge 3,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2_PrecZ4,int,,Relative  number of MS2 precursors with charge 4,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2_PrecZ5,int,,Relative  number of MS2 precursors with charge 5,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
+qc_data,,MS2-PrecZ_more,int,,Relative number of MS2 precursors with charge 6 and more,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
 qc_data,,accumulated-MS1_TIC,float,,The overall sum over all Peaks across all MS1 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
 qc_data,,accumulated-MS2_TIC,float,,The overall sum over all Peaks across all MS2 spectra,get_mzml_chromatogram_and_more.nf -> extract_data_from_mzml.py,X,X
 qc_data,,filename,char,,The filename of the RAW-file (QEXIYYYYYY.raw),,,
