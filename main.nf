@@ -65,9 +65,21 @@ workflow {
 	// Run Feature Finding and Statistics
 	get_features(rawfiles, execute_pia.out)
 
-	// Save to database
+	// Concatenate to large csv
+	combine_output_to_table()
 	// TODO currently not implemented
 
+}
+
+process combine_output_to_table {
+	publishDir "${params.gf_outdir}/", mode:'copy'
+
+    output:
+    file("quality_control.csv")
+
+    """
+	touch quality_control.csv
+    """
 }
 
 
