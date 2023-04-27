@@ -70,8 +70,8 @@ workflow {
 	// Concatenate to large csv
 	combined_csvs = get_various_mzml_infos.out[1].collect().concat(
 		retrieve_spikeins.out.collect(),
-		get_features.out.collect().map { it[1] }
-		// execute_pia.out[TODO]
+		get_features.out.collect().map { it[1] },
+		execute_pia.out.collect()
 	).collect().view()
 	combine_output_to_table(combined_csvs)
 	
