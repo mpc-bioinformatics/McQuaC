@@ -87,9 +87,9 @@ if __name__ == "__main__":
         elif spectrum.getMSLevel() == 2:
             ms2_rt.append(spectrum.getRT())
             ms2_tic.append(sum(spectrum.get_peaks()[1]))
-    data_dict["ms1_tic_array"] = ms1_rt
+    data_dict["ms1_tic_array"] = ms1_tic
     data_dict["ms1_rt_array"]  = ms1_rt
-    data_dict["ms2_tic_array"] = ms2_rt
+    data_dict["ms2_tic_array"] = ms2_tic
     data_dict["ms2_rt_array"]  = ms2_rt
 
 
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     rt_ms1_q100 = (max(ms1_rt) - rt_ms1_q75_temp) / rt_duration
 
     data_dict["RT_MS1_Q_000-025"] = rt_ms1_q025
-    data_dict["RT_MS1_Q_025_050"] = rt_ms1_q050
+    data_dict["RT_MS1_Q_025-050"] = rt_ms1_q050
     data_dict["RT_MS1_Q_050-075"] = rt_ms1_q075
     data_dict["RT_MS1_Q_075-100"] = rt_ms1_q100
     ###
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     rt_ms2_q100 = (max(ms2_rt) - rt_ms2_q75_temp) / rt_duration
 
     data_dict["RT_MS2_Q_000-025"] = rt_ms2_q025
-    data_dict["RT_MS2_Q_025_050"] = rt_ms2_q050
+    data_dict["RT_MS2_Q_025-050"] = rt_ms2_q050
     data_dict["RT_MS2_Q_050-075"] = rt_ms2_q075
     data_dict["RT_MS2_Q_075-100"] = rt_ms2_q100
     ###
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     rt_ms1_ms2_part_100 = (ms1_ms2_rt[-1] - ms1_ms2_rt[np.where(mask_075 == False)[0][0]]) / rt_duration # Get RT-Difference from first and last entry in 75% - 100%
     
     data_dict["RT_TIC_Q_000-025"] = rt_ms1_ms2_part_025
-    data_dict["RT_TIC_Q_025_050"] = rt_ms1_ms2_part_050
+    data_dict["RT_TIC_Q_025-050"] = rt_ms1_ms2_part_050
     data_dict["RT_TIC_Q_050-075"] = rt_ms1_ms2_part_075
     data_dict["RT_TIC_Q_075-100"] = rt_ms1_ms2_part_100
     ###

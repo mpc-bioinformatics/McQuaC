@@ -97,9 +97,9 @@ process get_statistics {
     tuple val(associations), file(trfp_spike_ins_json)
 
     output:
-    file("${trfp_spike_ins_json.baseName}_spikeins.csv")
+    file("${trfp_spike_ins_json.baseName}_____spikeins.csv")
 
     """
-    trfp_json_to_table.py -itrfp_json $trfp_spike_ins_json -iassociations $associations -ocsv ${trfp_spike_ins_json.baseName}_spikeins.csv
+    trfp_json_to_table.py -itrfp_json $trfp_spike_ins_json -iassociations $associations -ocsv ${trfp_spike_ins_json.baseName}_____spikeins.csv
     """
 }
