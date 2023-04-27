@@ -73,8 +73,8 @@ process pia_analysis {
  
     java -jar "${baseDir}/bin/pia-1.4.7/pia-1.4.7.jar" parameters.json ${compilation}
     """
-
-prozess pia_extraction {
+}
+process pia_extraction {
 
     input:
     tuple file(psms), file(peptides), file(proteins), val(basename)
@@ -89,5 +89,5 @@ prozess pia_extraction {
 
 }
 
-}
+
 
