@@ -26,6 +26,7 @@ workflow execute_pia{
         pia_analysis(pia_compilation.out)
         pia_extraction(pia_analysis.out)
     emit: 
+        pia_analysis.out
         pia_extraction.out
 }
 
@@ -60,7 +61,7 @@ process pia_analysis {
     tuple file(compilation), val(basename)
 
     output:
-    tuple file("${compilation.simpleName}-piaExport-PSM.mzTab"), file("${compilation.simpleName}-piaExport-peptides.csv"),file("${compilation.simpleName}-piaExport--proteins.mzid"), val($basename)
+    tuple file("${compilation.simpleName}-piaExport-PSM.mzTab"), file("${compilation.simpleName}-piaExport-peptides.csv"), file("${compilation.simpleName}-piaExport--proteins.mzid"), val(basename)
 
 
     script:
@@ -84,7 +85,9 @@ process pia_extraction {
 
     script:
     """
-    extract_from_pia_output.py --pia_PSMs $psms --pia_peptides $peptides --pia_proteins $proteins --output $basename_____pia_extraction.csv
+    #extract_from_pia_output.py --pia_PSMs $psms --pia_peptides $peptides --pia_proteins $proteins --output ${basename}_____pia_extraction.csv
+    # DEBUGGING
+    echo "test_col1,test_col2\nvalue1,value2\n" > ${basename}_____pia_extraction.csv
     """
 
 }

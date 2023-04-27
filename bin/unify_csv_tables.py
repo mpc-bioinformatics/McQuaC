@@ -19,11 +19,6 @@ def argparse_setup():
 if __name__ == "__main__":
     args = argparse_setup()
 
-    args.input_csvs = "/home/luxii/git/Next-QC-Flow/results_OLD/QEXI38563std_with_idents_funny_outpautpasudifaj.csv,/home/luxii/git/Next-QC-Flow/results_OLD/QEXI38536std_mzml_info.csv,/home/luxii/git/Next-QC-Flow/results_OLD/QEXI38536std_features.csv,/home/luxii/git/Next-QC-Flow/results_OLD/QEXI38536std_spikeins.csv,/home/luxii/git/Next-QC-Flow/results_OLD/QEXI38563std_with_idents_funny_outpautpasudifaj.csv,/home/luxii/git/Next-QC-Flow/results_OLD/QEXI38560std_features.csv,/home/luxii/git/Next-QC-Flow/results_OLD/QEXI38560std_mzml_info.csv,/home/luxii/git/Next-QC-Flow/results_OLD/QEXI38560std_spikeins.csv,/home/luxii/git/Next-QC-Flow/results_OLD/QEXI38563std_features.csv,/home/luxii/git/Next-QC-Flow/results_OLD/QEXI38563std_mzml_info.csv,/home/luxii/git/Next-QC-Flow/results_OLD/QEXI38563std_spikeins.csv"
-    args.out_csv = "test_output.csv" 
-
-
-
     # Get timestamp of the actual identification
     ts = time.time()
     

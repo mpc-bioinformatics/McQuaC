@@ -61,17 +61,17 @@ workflow {
 
 	// Specific to ISA: Do XIC-Extraction if specified
 	if (params.is_isa) {
-		retrieve_spikeins(rawfiles, execute_pia.out)
+		retrieve_spikeins(rawfiles, execute_pia.out[0].map { it[0] })
 	}
 
 	// Run Feature Finding and Statistics
-	get_features(rawfiles, execute_pia.out)
+	get_features(rawfiles, execute_pia.out[0].map { it[0] })
 
 	// Concatenate to large csv
 	combined_csvs = get_various_mzml_infos.out[1].collect().concat(
 		retrieve_spikeins.out.collect(),
 		get_features.out.collect().map { it[1] },
-		execute_pia.out.collect()
+		execute_pia.out[1].collect()
 	).collect().view()
 	combine_output_to_table(combined_csvs)
 	

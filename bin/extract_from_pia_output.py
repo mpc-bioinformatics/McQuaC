@@ -16,7 +16,7 @@ def argparse_setup():
     parser = argparse.ArgumentParser()
     parser.add_argument("--pia_peptides", help="peptides.txt from PIA output")
     parser.add_argument("--pia_proteins", help="Proteins.mzID from PIA output")
-    parser.add_argument("-pia_PSMs", help="PSM.mzTab from PIA output")
+    parser.add_argument("--pia_PSMs", help="PSM.mzTab from PIA output")
     parser.add_argument("--output", help="path where output should be saved")
 
     return parser.parse_args()
@@ -24,7 +24,7 @@ def argparse_setup():
 def run_pia_extraction():
     args = argparse_setup()
     peptide_count = count_nr_filtered_peptides(args.pia_peptides)
-    PSM_counts , charge_counts, miss_counts = read_mzTab(args.PSMs)
+    PSM_counts , charge_counts, miss_counts = read_mzTab(args.pia_PSMs)
     dics = [peptide_count, PSM_counts, charge_counts, miss_counts]
 
   # geschrieben von Dirk (er muss debuggen falls kaputt geht)

@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
 
     # Figure 4: Barplot TIC quartiles
-    df_pl4 = df[["filename", 'RT_TIC_Q_000-025', 'RT_TIC_Q_025_050', 'RT_TIC_Q_050-075', 'RT_TIC_Q_075-100']]
+    df_pl4 = df[["filename", 'RT_TIC_Q_000-025', 'RT_TIC_Q_025-050', 'RT_TIC_Q_050-075', 'RT_TIC_Q_075-100']]
     df_pl4_long = df_pl4.melt(id_vars = ["filename"])
     fig4 = px.bar(df_pl4_long, x = "filename", y = "value", color = "variable", title = "Quartiles of TIC over retention time")
     fig4.show()
@@ -118,7 +118,7 @@ if __name__ == "__main__":
 
 
     # Figure 5: Barplot MS1 TIC quartiles
-    df_pl5 = df[["filename", 'RT_MS1_Q_000-025', 'RT_MS1_Q_025_050', 'RT_MS1_Q_050-075', 'RT_MS1_Q_075-100']]
+    df_pl5 = df[["filename", 'RT_MS1_Q_000-025', 'RT_MS1_Q_025-050', 'RT_MS1_Q_050-075', 'RT_MS1_Q_075-100']]
     df_pl5_long = df_pl5.melt(id_vars = ["filename"])
     fig5 = px.bar(df_pl5_long, x="filename", y="value", color="variable", title = "Quartiles of MS1 over retention time")
     fig5.show()
@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
 
     # Figure 6: Barplot MS2 TIC quartiles
-    df_pl6 = df[["filename", 'RT_MS2_Q_000-025', 'RT_MS2_Q_025_050', 'RT_MS2_Q_050-075', 'RT_MS2_Q_075-100']]
+    df_pl6 = df[["filename", 'RT_MS2_Q_000-025', 'RT_MS2_Q_025-050', 'RT_MS2_Q_050-075', 'RT_MS2_Q_075-100']]
     df_pl6_long = df_pl6.melt(id_vars = ["filename"])
     fig6 = px.bar(df_pl6_long, x="filename", y="value", color="variable", title = "Quartiles of MS2 over retention time")
     fig6.show()
@@ -295,15 +295,15 @@ if __name__ == "__main__":
     "total_num_ms1",
     "total_num_ms2", 
     "RT_TIC_Q_000-025",
-    "RT_TIC_Q_025_050",
+    "RT_TIC_Q_025-050",
     "RT_TIC_Q_050-075",
     "RT_TIC_Q_075-100",
     "RT_MS1_Q_000-025",
-    "RT_MS1_Q_025_050",
+    "RT_MS1_Q_025-050",
     "RT_MS1_Q_050-075",
     "RT_MS1_Q_075-100",
     "RT_MS2_Q_000-025",
-    "RT_MS2_Q_025_050", 
+    "RT_MS2_Q_025-050", 
     "RT_MS2_Q_050-075",
     "RT_MS2_Q_075-100", 
     "MS1-TIC-Change-Q2",
