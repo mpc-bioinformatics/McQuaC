@@ -112,8 +112,7 @@ process visualize_results {
     file("*.json")
 
     """
-	# TODO visualize
-	touch test.json
+	QC_visualization.py -csv_file $complete_csv -output "." 
     """
 }
 
