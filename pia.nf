@@ -66,7 +66,7 @@ process pia_analysis {
 
     script:
     """
-    TODO REMOVE HARD_CODED parameters-file and make it available from outside the script!
+    #TODO REMOVE HARD_CODED parameters-file and make it available from outside the script!
     cat ${baseDir}/bin/pia-1.4.7/pia-analysis.json \
         | sed -e 's;"psmExportFile": "/tmp/piaExport-PSMs.mzTab";"psmExportFile": "${compilation.simpleName}-piaExport-PSM.mzTab";g' \
         | sed -e 's;"peptideExportFile": "/tmp/piaExport-peptides.csv";"peptideExportFile": "${compilation.simpleName}-piaExport-peptides.csv";g' \

@@ -32,6 +32,8 @@ include {get_features} from PROJECT_DIR + '/get_features_in_raws.nf'
 params.main_raw_files_folder = "" // The folder containing the raw_files
 params.main_fasta_file = "" // A SINGLE-Fasta-file of the species to be searched (should also contain the SpikeIns if needed)
 params.main_comet_params = "$PWD/example_configurations/comet_config.txt" // Main-Search-Parameters for the comet search engine
+params.main_outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
+
 
 // Here are some optional Parameters which can be set if needed
 params.is_isa = true // Parameter to check if we execute a isa specific xic extraction (NOTE: FASTA has to contain the SpikeIns too!)
@@ -66,22 +68,54 @@ workflow {
 	get_features(rawfiles, execute_pia.out)
 
 	// Concatenate to large csv
-	combine_output_to_table()
-	// TODO currently not implemented
+	combined_csvs = get_various_mzml_infos.out[1].collect().concat(
+		retrieve_spikeins.out.collect(),
+		get_features.out.collect().map { it[1] }
+		// execute_pia.out[TODO]
+	).collect().view()
+	combine_output_to_table(combined_csvs)
+	
+
+	// Visualize the results
+	visualize_results(combine_output_to_table.out)
 
 }
 
 process combine_output_to_table {
-	publishDir "${params.gf_outdir}/", mode:'copy'
+	publishDir "${params.main_outdir}/qc_results", mode:'copy'
+
+	input:
+	file(input_csv_files)
 
     output:
     file("quality_control.csv")
 
     """
-	touch quality_control.csv
+	CONCAT_CSVS=""
+    for file in $input_csv_files
+    do
+        CONCAT_CSVS+="\$file,"
+    done
+    CONCAT_CSVS=\$(echo \$CONCAT_CSVS | rev | cut -c2- | rev)
+
+	unify_csv_tables.py -out_csv quality_control.csv -input_csvs \$CONCAT_CSVS
     """
 }
 
+process visualize_results {
+	publishDir "${params.main_outdir}/qc_results", mode:'copy'
+
+	input:
+	file(complete_csv)
+
+    output:
+    file("*.json")
+
+    """
+	# TODO visualize
+	touch test.json
+    """
+}
 
 // // TODO Usefull bits: 
 // params.help = false

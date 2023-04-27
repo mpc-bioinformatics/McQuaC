@@ -19,10 +19,6 @@ def argparse_setup():
 if __name__ == "__main__":
     args = argparse_setup()
 
-    args.featurexml = "/home/luxii/git/Next-QC-Flow/results/QEXI38563std_with_idents.featureXML"
-    args.out_csv = "/home/luxii/git/Next-QC-Flow/results/QEXI38563std_with_idents_funny_outpautpasudifaj.csv" 
-
-
     # Count features
     features = pyopenms.FeatureMap()
     pyopenms.FeatureXMLFile().load(args.featurexml, features)
@@ -58,7 +54,7 @@ if __name__ == "__main__":
         header = ["total_num_features", "total_num_ident_features"] + \
             ["num_features_charge_" + str(i) for i in range(1, int(args.report_up_to_charge) + 1)] + \
             ["num_ident_features_charge_" + str(i) for i in range(1, int(args.report_up_to_charge) + 1)] + \
-            ["feature_data.featureXML"]
+            ["feature_data.featureXML.zip"]
 
         row = [str(total_num_features), str(total_num_ident_features)] + \
             [str(num_features_charge[i]) for i in range(1, int(args.report_up_to_charge) + 1)] + \
