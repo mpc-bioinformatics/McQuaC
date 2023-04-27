@@ -20,7 +20,7 @@ from sklearn.decomposition import PCA
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-raw_files", help="List of raw files to plot from database (comma-separated).")
+    parser.add_argument("-csv_file", help="CSV file with QC data.")
     parser.add_argument("-output", help="Output folder for the plots as json files.")
     return parser.parse_args()
 
@@ -31,85 +31,51 @@ if __name__ == "__main__":
     # parameters
 
     ### use some ISA runs for testing
-    raw_files = args.raw_files.split(",")
-    #raw_files = ["FLI18416std", "FLI18414std", "EXII01692std", "QEXI39066std"]
+    csv_file = args.csv_file.split(",")
+    #csv_file = "temp/example_nf_out.csv"
 
     ### folder to save the plots as json files
     output_path = args.output    # "graphics/"
     #output_path = "graphics/"
 
-
     ##########
+    ISA_df = pd.read_csv(csv_file)
 
-    engine = create_engine("mysql+mariadbconnector://mpcqc:quality@mpc-qc/mpcqc")
+  
 
-    file_df: Optional[pd.DataFrame] = None
-    with engine.connect() as conn:
-        statement = text("SELECT * FROM files WHERE filename IN :raw_files")
-        statement = statement.bindparams(
-            bindparam("raw_files", tuple(raw_files), expanding=True)
-        )
-        query = conn.execute(statement)
-        file_df = pd.DataFrame(query.fetchall(), columns=query.keys())
-
-    ids = file_df["id"]
-
-    ISA_df: Optional[pd.DataFrame] = None
-    with engine.connect() as conn:
-        statement = text("SELECT * FROM isa_data WHERE fileId IN :ids")
-        statement = statement.bindparams(
-            bindparam("ids", tuple(ids), expanding=True)
-        )
-        print(statement.compile(compile_kwargs={"literal_binds": True}))
-        query = conn.execute(statement)
-        ISA_df = pd.DataFrame(query.fetchall(), columns=query.keys())
-        
-    #print(ISA_df)
-
-    # %%
     # Figure 1: Number of proteins, protein groups and unfiltered protein groups
+    #### TODO: has to be tested, when PIA output is finished!
+    df_pl1 = ISA_df[["filename", "nrProteins", "number-filtered-protein-groups", "nrProteingroups_unfiltered"]]
+    df_pl1_long = df_pl1.melt(id_vars = ["filename"])
+    # TODO: evtl. Spalten umbenennen damit es schoener aussieht?
 
-    df_pl1 = ISA_df[["fileId", "run_name", "nrProteins", "nrProteingroups", "nrProteingroups_unfiltered"]]
-    df_pl1_long = df_pl1.melt(id_vars = ["fileId", "run_name"])
-    #print(df_pl1_long)
-    #df_pl1_long = df_pl1_long.reset_index(level=["level"])
-
-    fig1 = px.bar(df_pl1_long, x="run_name", y="value", color="variable", barmode = "group", 
+    fig1 = px.bar(df_pl1_long, x="filename", y="value", color="variable", barmode = "group", 
                 title = "Number of proteins, protein groups and unfiltered protein groups")
     fig1.update_yaxes(exponentformat="none") 
-    #fig1.show()
 
     with open(output_path +"/isafig1_barplot_proteins_proteingroups.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig1))
 
-    # %%
+
     # Figure 2: Number of peptides
+    #### TODO: has to be tested, when PIA output is finished!
+    df_pl2 = ISA_df[["filename", "number-filtered-peptides"]]
 
-    df_pl2 = ISA_df[["fileId", "run_name", "nrPeptides"]]
-    #df_pl1_long = df_pl1.melt(id_vars = ["fileId", "run_name"])
-    #print(df_pl1_long)
-    #df_pl1_long = df_pl1_long.reset_index(level=["level"])
-
-    fig2 = px.bar(df_pl2, x="run_name", y="nrPeptides", #color="variable", barmode = "group", 
+    fig2 = px.bar(df_pl2, x="filename", y="number-filtered-peptides", #color="variable", barmode = "group", 
                 title = "Number of peptides")
     fig2.update_yaxes(exponentformat="none") 
-    #fig2.show()
 
     with open(output_path +"/isafig2_barplot_peptides.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig2))
 
-    # %%
+    
     # Figure 3: Number of PSMs
+    #### TODO: has to be tested, when PIA output is finished!
+    df_pl3 = ISA_df[["filename", "number-filtered-psms"]]
 
-    df_pl3 = ISA_df[["fileId", "run_name", "nrPSMs"]]
-    #df_pl1_long = df_pl1.melt(id_vars = ["fileId", "run_name"])
-    #print(df_pl1_long)
-    #df_pl1_long = df_pl1_long.reset_index(level=["level"])
-
-    fig3 = px.bar(df_pl3, x="run_name", y="nrPSMs", #color="variable", barmode = "group", 
+    fig3 = px.bar(df_pl3, x="filename", y="number-filtered-psms", #color="variable", barmode = "group", 
                 title = "Number of PSMs")
     fig3.update_yaxes(exponentformat="none") 
-    #fig3.show()
 
     with open(output_path +"/isafig3_barplot_PSMs.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig3))
