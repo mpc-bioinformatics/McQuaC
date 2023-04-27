@@ -52,7 +52,6 @@ qc_data_only_for_isa,,IDENT_MPCSPIKEX_Count,,,Number of identified spectra with 
 qc_data_only_for_isa,,IDENT_MPCSPIKEX_DELTA_RT,,,"If identified, the difference  between the identified and expected retention time (of the last identified PSM?)",retrieve_spike_ins_thermorawfileparser.nf -> trfp_json_to_table.py,,
 qc_data_only_for_isa,,IDENT_MPCSPIKEX_PEP_XXX_RT_DELTA,,,"As above (sum of all peaks), only for the identified PSM",retrieve_spike_ins_thermorawfileparser.nf -> trfp_json_to_table.py,,
 qc_data,TODO,nrProteins,,,,,,
-qc_data,TODO,nrProteingroups,,,,,,
 qc_data,TODO,nrProteingroups_unfiltered,,,,,,
 qc_data,TODO,psmZ1-5,,,,,,X
 qc_data,TODO,psm_missed 0-3,,,,,,
