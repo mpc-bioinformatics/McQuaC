@@ -57,9 +57,9 @@ process retrieve_data_from_mzml {
     file(mzml)
 
     output:
-    file("${mzml.baseName}_mzml_info.csv")
+    file("${mzml.baseName}_____mzml_info.csv")
 
     """
-    extract_data_from_mzml.py -mzml ${mzml} -out_csv ${mzml.baseName}_mzml_info.csv
+    extract_data_from_mzml.py -mzml ${mzml} -out_csv ${mzml.baseName}_____mzml_info.csv
     """
 }

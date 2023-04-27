@@ -125,9 +125,9 @@ process get_statistics_from_featurexml {
     tuple file(featurexml), val(file_base_name)
 
     output:
-    tuple file(featurexml), file("${file_base_name}_features.csv")
+    tuple file(featurexml), file("${file_base_name}_____features.csv")
 
     """
-    extract_from_featurexml.py -featurexml ${featurexml} -out_csv ${file_base_name}_features.csv -report_up_to_charge ${params.gf_considered_charges_high}
+    extract_from_featurexml.py -featurexml ${featurexml} -out_csv ${file_base_name}_____features.csv -report_up_to_charge ${params.gf_considered_charges_high}
     """
 }

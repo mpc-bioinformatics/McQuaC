@@ -87,9 +87,9 @@ if __name__ == "__main__":
         elif spectrum.getMSLevel() == 2:
             ms2_rt.append(spectrum.getRT())
             ms2_tic.append(sum(spectrum.get_peaks()[1]))
-    data_dict["ms1_tic_array"] = ms1_rt
+    data_dict["ms1_tic_array"] = ms1_tic
     data_dict["ms1_rt_array"]  = ms1_rt
-    data_dict["ms2_tic_array"] = ms2_rt
+    data_dict["ms2_tic_array"] = ms2_tic
     data_dict["ms2_rt_array"]  = ms2_rt
 
 

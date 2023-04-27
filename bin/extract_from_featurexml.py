@@ -1,7 +1,10 @@
 #!/bin/env python
 
 import sys
+import os
 import argparse
+import base64
+import zipfile
 import pyopenms
 from collections import defaultdict
 
@@ -15,6 +18,10 @@ def argparse_setup():
 
 if __name__ == "__main__":
     args = argparse_setup()
+
+    args.featurexml = "/home/luxii/git/Next-QC-Flow/results/QEXI38563std_with_idents.featureXML"
+    args.out_csv = "/home/luxii/git/Next-QC-Flow/results/QEXI38563std_with_idents_funny_outpautpasudifaj.csv" 
+
 
     # Count features
     features = pyopenms.FeatureMap()
@@ -41,17 +48,22 @@ if __name__ == "__main__":
             total_num_ident_features += 1
             num_ident_features_charge[charge] += 1
 
+    zipfile.ZipFile("featurexml.zip", mode="w", compresslevel=9).write(args.featurexml, compress_type=zipfile.ZIP_DEFLATED, compresslevel=9, arcname=args.featurexml.split(os.sep)[-1])
+    with open("featurexml.zip", "rb") as fb:
+        feature_str_bs64 = base64.b64encode(fb.read())
 
     with open(args.out_csv, "w") as csv_out:
 
         # First create header:
         header = ["total_num_features", "total_num_ident_features"] + \
-            ["num_features_charge_" + str(i) for i in range(0, int(args.report_up_to_charge) + 1)] + \
-            ["num_ident_features_charge_" + str(i) for i in range(0, int(args.report_up_to_charge) + 1)]
+            ["num_features_charge_" + str(i) for i in range(1, int(args.report_up_to_charge) + 1)] + \
+            ["num_ident_features_charge_" + str(i) for i in range(1, int(args.report_up_to_charge) + 1)] + \
+            ["feature_data.featureXML"]
 
         row = [str(total_num_features), str(total_num_ident_features)] + \
-            [str(num_features_charge[i]) for i in range(0, int(args.report_up_to_charge) + 1)] + \
-            [str(num_ident_features_charge[i]) for i in range(0, int(args.report_up_to_charge) + 1)]
+            [str(num_features_charge[i]) for i in range(1, int(args.report_up_to_charge) + 1)] + \
+            [str(num_ident_features_charge[i]) for i in range(1, int(args.report_up_to_charge) + 1)] + \
+            [feature_str_bs64.decode()]
 
         csv_out.write(
             ",".join(header) + "\n"
