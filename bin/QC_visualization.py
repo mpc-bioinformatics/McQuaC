@@ -25,6 +25,7 @@ def argparse_setup():
     parser.add_argument("-csv_file", help="CSV file with QC data.")
     parser.add_argument("-group", help="List of the experimental group (comma-separated).", default=None)
     parser.add_argument("-output", help="Output folder for the plots as json files.", default = "graphics")
+    parser.add_argument("-tic_overlay_offset", help = "Offset for TIC overlay plots", default = 0.5)
     return parser.parse_args()
 
 
@@ -91,6 +92,8 @@ if __name__ == "__main__":
 
 
     ## Figure 3: TIC Overlay as Lineplot
+    offset_ratio = float(args.tic_overlay_offset)
+
     MS1_TICs = df[["ms1_tic_array", "ms1_rt_array"]]
     tic_df = []
     for index in df.index:
@@ -99,10 +102,25 @@ if __name__ == "__main__":
             filename=[df["filename"].iloc[index]]*len(ast.literal_eval(df["ms1_tic_array"].iloc[index])))
         tic = pd.DataFrame(tic)
         tic_df.append(tic)
-    tic_df = pd.concat(tic_df)
+    tic_df2 = pd.concat(tic_df)
+    print(tic_df2)
+
+    #TIC_list2 = pd.concat(TIC_list)
+    offset = max(tic_df2["TIC"])
+    #print(offset)
+
+    offset_tmp = 0
+    tic_df3 = []
+    for tmp in tic_df:
+        tmp["TIC"] = tmp["TIC"] + offset_tmp
+        tic_df3.append(tmp)
+        offset_tmp = offset_tmp + offset_ratio*offset
+    tic_df = pd.concat(tic_df3)
 
     fig3 = px.line(tic_df, x="RT", y="TIC", color = "filename", title = "TIC overlay")
+    fig3.update_traces(line=dict(width=0.5))
     fig3.update_yaxes(exponentformat="E") 
+    fig3.update_layout(width = int(1000), height = int(1000))
     fig3.show()
     with open(output_path +"/fig3_TIC_overlay.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig3))
