@@ -33,6 +33,10 @@ if __name__ == "__main__":
     args = argparse_setup()
     data_dict = dict()
 
+
+    args.mzml = "test.mzML"
+    args.out_csv = "dasistdiebestedebugdatei.csv"
+
     # Load MZML
     exp = pyopenms.MSExperiment()
     pyopenms.MzMLFile().load(args.mzml, exp)
@@ -80,17 +84,63 @@ if __name__ == "__main__":
     ms1_rt = []  # This is the MS1-TIC-BLOB
     ms2_tic = [] # This is the MS2-TIC-BLOB
     ms2_rt = []  # This is the MS2-TIC-BLOB
+    ms2_mz = []  # This is the MS2-MZ-BLOB (needed or the Ion-Map)
     for spectrum in exp.getSpectra():
         if spectrum.getMSLevel() == 1:
             ms1_rt.append(spectrum.getRT())
             ms1_tic.append(sum(spectrum.get_peaks()[1]))
+            precs = spectrum.getPrecursors()
         elif spectrum.getMSLevel() == 2:
             ms2_rt.append(spectrum.getRT())
             ms2_tic.append(sum(spectrum.get_peaks()[1]))
+            precs = spectrum.getPrecursors()
+            if len(precs) != 1:
+                raise Exception("Unexpected number of precursors in a MS2-Spectrum")
+            else:
+                ms2_mz.append(precs[0].getMZ())
     data_dict["ms1_tic_array"] = ms1_tic
     data_dict["ms1_rt_array"]  = ms1_rt
     data_dict["ms2_tic_array"] = ms2_tic
     data_dict["ms2_rt_array"]  = ms2_rt
+    data_dict["ms2_mz_array"]  = ms2_mz
+
+
+    ### get Chromatogram information:
+    # from lxml import etree
+    # import zlib
+    # import base64
+
+    # tree = etree.parse(args.mzml)
+    # [run] = [x for x in tree.getroot().getchildren() if "run" in x.tag]
+    # [chromlist] = [x for x in run.getchildren() if "chromatogramList" in x.tag]
+    
+    # for chrom in chromlist.getchildren():
+    #     if "Pump_Preasure" in chrom.attrib["id"]:
+
+    #         [bindata] = [x for x in chrom.getchildren() if "binaryDataArrayList" in x.tag]
+
+
+    #         for axis in bindata.getchildren():
+                
+    #             is_time_array = False
+    #             for c in axis.getchildren():
+    #                 if "cvParam" in c.tag:
+    #                     c.attrib["name"] == "time array"
+    #                     is_time_array = True
+    #                     break
+
+    #             for c in axis.getchildren():
+    #                 if "binary" in c.tag:
+    #                     decompressed_data = a = zlib.decompress(base64.b64decode(c.text)) # THis is a byte array DL TODO contionue
+
+    #         break
+
+
+
+
+    # pyteomics.mzml
+
+
 
 
     ### Calculate the diffenrece in RT between 25%, 50%, 75% and 100% of data (relative) (RT-MS1_Q1-4)
@@ -276,6 +326,10 @@ if __name__ == "__main__":
 
     data_dict["Base_Peak_Intensity_Max_Up_To_105"] = base_peak_intensity_max_up_to_105m
     data_dict["Total_Ion_Current_Max_Up_To_105"] = total_ion_curretn_max_up_to_105m
+
+    print("GETcrhon")
+
+
 
     # Write Output
     with open(args.out_csv, "w") as csv_out:
