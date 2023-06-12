@@ -11,6 +11,13 @@ import argparse
 import zipfile
 import base64
 import os
+from lxml import etree as ET
+from pathlib import Path
+
+PROTEIN_AMBIGUITY_ELEM: bytes = b'<ProteinAmbiguityGroup'
+PROTEIN_HYPOTHESIS_ELEM: bytes = b'<ProteinDetectionHypothesis'
+PASS_THRESHOLD_ATTR: bytes = b'passThreshold="'
+ID_ATTR: bytes = b'id="'
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
@@ -130,5 +137,60 @@ def read_mzTab(file):
 
         return PSM_count, charge_counts, miss_counts
 
+def parse_protein_mzid(xmlfile: Path):
+    # with xmlfile.open("r", encoding="utf-8") as f:
+    #     tree = ET.parse(f)
+    # #for element in tree.iter():
+    # #    print(element)
+  
+    # # get root element
+    # root = tree.getroot()
+    # nsmap = {k:v for k,v in root.nsmap.items() if k}
+    # print(root.nsmap)
+    # print(nsmap)
+    # print(root.xpath(".//ProteinAmbiguityGroup", namespaces=nsmap))
 
-run_pia_extraction()
+    # for pag in root.findall('ProteinAmbiguityGroup', nsmap):
+    #     print(pag)
+    #     break
+
+    with xmlfile.open("rb") as f:
+        xmlb = f.read()
+        num_groups = xmlb.count(PROTEIN_AMBIGUITY_ELEM)
+        prots = set()
+        next_hypo_offset = 0
+        while True:
+            # geschrieben von Dirk (er muss debuggen falls kaputt geht)
+            # find protein hypo
+            start = xmlb.find(PROTEIN_HYPOTHESIS_ELEM, next_hypo_offset)
+            if start < 0:
+                break
+            end = xmlb.find(b">", start)
+            if end < 0:
+                raise IndexError("WTF ")
+            next_hypo_offset = end
+            hypo = xmlb[start:end]
+            # find id attr
+            id_start = hypo.find(ID_ATTR)
+            id_end = hypo.find(b'"', id_start + len(ID_ATTR))  # start after `id="`
+            id = hypo[id_start:id_end]
+            if b"DECOY" in id:
+                continue
+            # find threshold pass
+            pass_start = hypo.find(PASS_THRESHOLD_ATTR)
+            pass_end = hypo.find(b'"', pass_start + len(PASS_THRESHOLD_ATTR))  # start after `passThreshold="`
+            pass_threshold = hypo[pass_start + len(PASS_THRESHOLD_ATTR):pass_end] == b'true'
+            if not pass_threshold:
+                continue
+            prots.add(id.split(b"_")[1])
+
+        print(num_groups)
+        print(len(prots))
+
+
+
+        
+
+
+
+parse_protein_mzid(Path("/home/weberma/coding/piia/QEXI38536std_____pia-compilation-piaExport--proteins.mzid"))
