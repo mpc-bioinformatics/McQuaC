@@ -21,16 +21,16 @@ workflow get_custom_headers {
     take:
         raw_files // a list of raw_files
     main:
-        // Convert the file to MGF
+        // Extract Information directly from the RAW-file using fisher-py
         retrieve_custom_headers_thermo(raw_files)
     emit:
         retrieve_custom_headers_thermo.out
 }
 
 process retrieve_custom_headers_thermo {
-    maxForks 2
+    maxForks 1
+    stageInMode "copy"
     publishDir "${params.ccff_outdir}/", mode:'copy'
-    debug true
 
     input:
     file raw
@@ -40,5 +40,6 @@ process retrieve_custom_headers_thermo {
 
     """
     thermo_extract_cutsom_headers.py -raw ${raw} ${params.ccff_header_in_raws} ${params.ccff_header_in_raws_names} -out_csv ${raw.baseName}_____customs.csv 
+    rm ${raw}
     """
 }

@@ -53,8 +53,6 @@ if __name__ == "__main__":
     args = argparse_setup()
     data_dict = defaultdict(lambda: list())
 
-    args.raw = "/home/luxii/Downloads/fsatas/EX03046std.raw"
-
     raw_file = RawFileReaderAdapter.file_factory(args.raw)
     raw_file.select_instrument(Device.MS, 1)  # Selecting the MS
     all_headers =  raw_file.get_trailer_extra_header_information()
