@@ -33,10 +33,6 @@ if __name__ == "__main__":
     args = argparse_setup()
     data_dict = dict()
 
-
-    args.mzml = "test.mzML"
-    args.out_csv = "dasistdiebestedebugdatei.csv"
-
     # Load MZML
     exp = pyopenms.MSExperiment()
     pyopenms.MzMLFile().load(args.mzml, exp)
@@ -65,7 +61,7 @@ if __name__ == "__main__":
             num_ms2_prec_charges[spectrum.getPrecursors()[0].getCharge()] += 1
 
     data_dict["total_num_ms1"] = num_ms1_spectra
-    data_dict["total_num_ms2"] = num_ms2_spectra
+    data_dict["total_num_ms2"] = num_ms2_spectra#
     for i in range(1, 6):
         data_dict["MS2_PrecZ" + str(i)] = num_ms2_prec_charges[i] / num_ms2_spectra
     
@@ -103,45 +99,6 @@ if __name__ == "__main__":
     data_dict["ms2_tic_array"] = ms2_tic
     data_dict["ms2_rt_array"]  = ms2_rt
     data_dict["ms2_mz_array"]  = ms2_mz
-
-
-    ### get Chromatogram information:
-    # from lxml import etree
-    # import zlib
-    # import base64
-
-    # tree = etree.parse(args.mzml)
-    # [run] = [x for x in tree.getroot().getchildren() if "run" in x.tag]
-    # [chromlist] = [x for x in run.getchildren() if "chromatogramList" in x.tag]
-    
-    # for chrom in chromlist.getchildren():
-    #     if "Pump_Preasure" in chrom.attrib["id"]:
-
-    #         [bindata] = [x for x in chrom.getchildren() if "binaryDataArrayList" in x.tag]
-
-
-    #         for axis in bindata.getchildren():
-                
-    #             is_time_array = False
-    #             for c in axis.getchildren():
-    #                 if "cvParam" in c.tag:
-    #                     c.attrib["name"] == "time array"
-    #                     is_time_array = True
-    #                     break
-
-    #             for c in axis.getchildren():
-    #                 if "binary" in c.tag:
-    #                     decompressed_data = a = zlib.decompress(base64.b64decode(c.text)) # THis is a byte array DL TODO contionue
-
-    #         break
-
-
-
-
-    # pyteomics.mzml
-
-
-
 
     ### Calculate the diffenrece in RT between 25%, 50%, 75% and 100% of data (relative) (RT-MS1_Q1-4)
     # Normalize data between 0 and 1
@@ -307,7 +264,8 @@ if __name__ == "__main__":
     ms1_ms2_tic = []
     for spectrum in exp.getSpectra():
         ms1_ms2_rt.append(spectrum.getRT())
-        ms1_ms2_basepeaks.append(max(spectrum.get_peaks()[1]))
+        peaks = spectrum.get_peaks()[1]
+        ms1_ms2_basepeaks.append(sum(peaks) if len(peaks) != 0 else 0)
         ms1_ms2_tic.append(sum(spectrum.get_peaks()[1]))
 
     base_peak_intensity_max = max(ms1_ms2_basepeaks)
@@ -326,8 +284,6 @@ if __name__ == "__main__":
 
     data_dict["Base_Peak_Intensity_Max_Up_To_105"] = base_peak_intensity_max_up_to_105m
     data_dict["Total_Ion_Current_Max_Up_To_105"] = total_ion_curretn_max_up_to_105m
-
-    print("GETcrhon")
 
 
 

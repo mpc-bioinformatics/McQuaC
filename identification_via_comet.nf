@@ -64,7 +64,8 @@ process convert_raw_via_thermorawfileparser {
 
 
 process comet_search {
-    maxForks params.ic_num_parallel_searches
+    // maxForks params.ic_num_parallel_searches
+    maxForks 1 // TODO REMOVE ME | Limit for Laptops
     publishDir "${params.ic_outdir}/idents", mode:'copy'
     stageInMode "copy"
 
@@ -80,11 +81,12 @@ process comet_search {
     sed -i 's/^decoy_prefix.*/decoy_prefix = DECOY_/' ${mod_file.baseName}_new.txt
     sed -i 's/^database_name.*/database_name = ${input_fasta}/' ${mod_file.baseName}_new.txt
     sed -i 's/^output_pepxmlfile.*/output_pepxmlfile = 1/' ${mod_file.baseName}_new.txt
+    sed -i 's/^output_txtfile.*/output_txtfile = 1/' ${mod_file.baseName}_new.txt
 
     # We run the Comet Adapter since PIA does not work with comet output and need to mimic everything to satisfy OpenMS
     run_decoydatabase.sh -in ${input_fasta} -out ${input_fasta.baseName}_rev.fasta -decoy_string "DECOY_" -method "reverse"
     run_cometadapter.sh -PeptideIndexing:unmatched_action warn  -in ${mzml} -out ${mzml.baseName}.idXML -database ${input_fasta.baseName}_rev.fasta -comet_executable ${workflow.projectDir}/bin/comet.linux_v2022.01.0.exe -default_params_file ${mod_file.baseName}_new.txt
 
-    # comet.linux_v2023.01.2.exe -P${mod_file.baseName}_new.txt -D${input_fasta} ${mzml}
+    comet.linux_v2022.01.2.exe -P${mod_file.baseName}_new.txt -D${input_fasta} ${mzml}
     """  
 }

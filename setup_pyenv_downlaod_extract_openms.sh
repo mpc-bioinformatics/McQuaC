@@ -29,4 +29,5 @@ pipenv run pip install sqlalchemy
 pipenv run pip install plotly
 pipenv run pip install scikit-learn
 pipenv run pip install numpy
+pipenv run pip install fisher-py==1.0.21
 

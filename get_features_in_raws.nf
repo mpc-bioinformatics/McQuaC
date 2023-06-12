@@ -9,7 +9,7 @@ params.gf_ident_files = "$PWD/raws"  // Folder of mzTab Identification files (al
 // Parameters for Feature Detection
 // params.resulolution_featurefinder = "-algortihm:mass_trace:mz_tolerance 0.02 -algorithm:isotopic_pattern:mz_tolerance 0.04"  // Parameters for Low Resolution Machines (Q-TOF)
 params.gf_resolution_featurefinder = "-algorithm:mass_trace:mz_tolerance 0.004 -algorithm:isotopic_pattern:mz_tolerance 0.005"   // Parameters for High Resolution Machines (LTQ-OrbiTrap)
-params.gf_considered_charges_low = "1"  // Charges for the feature finder to use to extract features. In QC this was set to 2:5
+params.gf_considered_charges_low = "2"  // Charges for the feature finder to use to extract features. In QC this was set to 2:5
 params.gf_considered_charges_high = "5"  // Charges for the feature finder to use to extract features. In QC this was set to 2:5
 
 // Output Directory
