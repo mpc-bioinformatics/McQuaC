@@ -184,8 +184,8 @@ def parse_protein_mzid(xmlfile: Path):
                 continue
             prots.add(id.split(b"_")[1])
 
-        print(num_groups)
-        print(len(prots))
+        print("amount of proteins: ", len(prots))
+        print("amount of protein groups :", num_groups)
 
 
 
@@ -193,4 +193,4 @@ def parse_protein_mzid(xmlfile: Path):
 
 
 
-parse_protein_mzid(Path("/home/weberma/coding/piia/QEXI38536std_____pia-compilation-piaExport--proteins.mzid"))
+parse_protein_mzid(Path("/home/maike/Programmierprojekte/QC-Nextflow/result/2c-QExHF04048-pia-compilation-piaExport--proteins.mzid"))
