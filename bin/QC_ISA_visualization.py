@@ -81,3 +81,7 @@ if __name__ == "__main__":
         json_file.write(plotly.io.to_json(fig3))
 
 
+    # Figure 4: 
+    ## TODO: add ion map plot
+
+

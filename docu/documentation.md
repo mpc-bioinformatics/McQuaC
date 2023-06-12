@@ -109,6 +109,7 @@ List of plots (regular QC):
 - Figure 9: Barplot of missed cleavages of PSMs (relative)
 - Figure 10: PCA on all data (a) (+ table and plot for Loadings (b) (to assess importance of variables for the PCA))
 - Figure 11: PCA on raw data (a) (+ table and plot for Loadings (b) (to assess importance of variables for the PCA))
+- Figure 12: For each raw files, an ion map (2D density plot with x = RT, y = MZ)
 
 In the QC_columns_overview.csv table it is indicated which columns are used inside the two PCA plots.
 
