@@ -72,7 +72,7 @@ process pia_analysis {
         | sed -e 's;"peptideExportFile": "/tmp/piaExport-peptides.csv";"peptideExportFile": "${compilation.simpleName}-piaExport-peptides.csv";g' \
         | sed -e 's;"proteinExportFile": "/tmp/piaExport-proteins.mzid";"proteinExportFile": "${compilation.simpleName}-piaExport--proteins.mzid";g' > parameters.json
  
-    java -jar "${baseDir}/bin/pia-1.4.7/pia-1.4.7.jar" parameters.json ${compilation}
+    java -Xmx8g -jar "${baseDir}/bin/pia-1.4.7/pia-1.4.7.jar" parameters.json ${compilation}
     """
 }
 process pia_extraction {

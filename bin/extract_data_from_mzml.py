@@ -61,7 +61,7 @@ if __name__ == "__main__":
             num_ms2_prec_charges[spectrum.getPrecursors()[0].getCharge()] += 1
 
     data_dict["total_num_ms1"] = num_ms1_spectra
-    data_dict["total_num_ms2"] = num_ms2_spectra#
+    data_dict["total_num_ms2"] = num_ms2_spectra
     for i in range(1, 6):
         data_dict["MS2_PrecZ" + str(i)] = num_ms2_prec_charges[i] / num_ms2_spectra
     

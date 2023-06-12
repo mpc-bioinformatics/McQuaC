@@ -25,6 +25,7 @@ include {ident_via_comet} from PROJECT_DIR + '/identification_via_comet.nf'
 include {execute_pia} from PROJECT_DIR + '/pia.nf' // TODO expose pia-parameters.json file here!
 include {retrieve_spikeins} from PROJECT_DIR + '/retrieve_spike_ins_thermorawfileparser.nf' // We could also consider to expose params.spk_spike_ins, however it is always fixed for our ISA-stadard!
 include {get_features} from PROJECT_DIR + '/get_features_in_raws.nf'
+include {get_custom_headers} from PROJECT_DIR + '/get_custom_columns_from_file_directly.nf'
 // Each script has its own UNIQUE-param-attribute and can be fine-tuned from this main.nf-script.
 // The requiered params are also exposed in this script and are listed below:
 
@@ -67,11 +68,16 @@ workflow {
 	// Run Feature Finding and Statistics
 	get_features(rawfiles, execute_pia.out[0].map { it[0] })
 
+	// Get Thermospecific information from raw
+	get_custom_headers(raw_files)
+
+
 	// Concatenate to large csv
 	combined_csvs = get_various_mzml_infos.out[1].collect().concat(
 		retrieve_spikeins.out.collect(),
 		get_features.out.collect().map { it[1] },
-		execute_pia.out[1].collect()
+		execute_pia.out[1].collect(),
+		get_custom_headers.out.collect()
 	).collect().view()
 	combine_output_to_table(combined_csvs)
 	
