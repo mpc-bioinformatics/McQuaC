@@ -28,7 +28,6 @@ workflow get_custom_headers {
 }
 
 process retrieve_custom_headers_thermo {
-    maxForks 1
     stageInMode "copy"
     publishDir "${params.ccff_outdir}/", mode:'copy'
 

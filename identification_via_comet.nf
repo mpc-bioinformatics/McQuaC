@@ -65,7 +65,6 @@ process convert_raw_via_thermorawfileparser {
 
 process comet_search {
     // maxForks params.ic_num_parallel_searches
-    maxForks 1 // TODO REMOVE ME | Limit for Laptops
     publishDir "${params.ic_outdir}/idents", mode:'copy'
     stageInMode "copy"
 

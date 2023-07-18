@@ -69,7 +69,7 @@ workflow {
 	get_features(rawfiles, execute_pia.out[0].map { it[0] })
 
 	// Get Thermospecific information from raw
-	get_custom_headers(raw_files)
+	get_custom_headers(rawfiles)
 
 
 	// Concatenate to large csv

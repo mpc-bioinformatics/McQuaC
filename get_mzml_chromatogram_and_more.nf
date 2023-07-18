@@ -48,7 +48,6 @@ process convert_raw_via_thermorawfileparser {
 }
 
 process retrieve_data_from_mzml {
-    maxForks 1  // TODO Please remove limit, my laptop is not that powerful! 
     stageInMode "copy"
 
     publishDir "${params.gmc_outdir}/", mode:'copy'
