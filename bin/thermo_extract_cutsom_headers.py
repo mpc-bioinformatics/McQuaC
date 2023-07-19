@@ -9,6 +9,9 @@ from collections import defaultdict
 import datetime
 import time
 import csv
+import zlib
+import pickle
+import base64
 
 from fisher_py import RawFile
 
@@ -36,16 +39,16 @@ def argparse_setup():
         "LM m/z-Correction",
     ])
     parser.add_argument("-headers_to_parse_column_name", "-cn", help="The Headers column name which was parsed (in same order). Can be applied multiple times", action="append", default=[
-        "Ion_Injection_Time",
-        "Number_of_Lock_Masses",
-        "Lock_Mass_1",
-        "Lock_Mass_2",
-        "Lock_Mass_3",
-        "LM_Search_Window",
-        "LM_Search_Window",
-        "Number_of_LM_Found",
-        "Last_Locking",
-        "LM_m_z_Correction",
+        "Ion_Injection_Time_pickle_zlib",
+        "Number_of_Lock_Masses_pickle_zlib",
+        "Lock_Mass_1_pickle_zlib",
+        "Lock_Mass_2_pickle_zlib",
+        "Lock_Mass_3_pickle_zlib",
+        "LM_Search_Window_pickle_zlib",
+        "LM_Search_Window_pickle_zlib",
+        "Number_of_LM_Found_pickle_zlib",
+        "Last_Locking_pickle_zlib",
+        "LM_m_z_Correction_pickle_zlib",
     ])
     return parser.parse_args()
 
@@ -114,6 +117,10 @@ if __name__ == "__main__":
         # This is currently the case for PROETD and OEI. These are not captured, hence None
         data_dict["pump_preasure_bar_x_axis"] = None
         data_dict["pump_preasure_bar_y_axis"] = None
+
+    # zlib and pickle all the data
+    for k, v in data_dict.items():
+        data_dict[k] = base64.b64encode(zlib.compress(pickle.dumps(v), level=9))
 
     # Write Output
     with open(args.out_csv, "w") as csv_out:

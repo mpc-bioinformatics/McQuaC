@@ -62,8 +62,9 @@ if __name__ == "__main__":
 
     data_dict["total_num_ms1"] = num_ms1_spectra
     data_dict["total_num_ms2"] = num_ms2_spectra
+    data_dict["MS2_PrecZ_Unknown"] = 0 if 0 not in num_ms2_prec_charges else num_ms2_prec_charges[0] / num_ms2_spectra
     for i in range(1, 6):
-        data_dict["MS2_PrecZ" + str(i)] = num_ms2_prec_charges[i] / num_ms2_spectra
+        data_dict["MS2_PrecZ_" + str(i)] = num_ms2_prec_charges[i] / num_ms2_spectra
     
     data_dict["MS2_PrecZ_more"] = 0
     for key in num_ms2_prec_charges.keys():
@@ -107,10 +108,10 @@ if __name__ == "__main__":
     rt_ms1_q75_temp = np.quantile(ms1_rt, 0.75)
 
 
-    rt_ms1_q025 = (rt_ms1_q25_temp - min(ms1_rt))  / rt_duration
+    rt_ms1_q025 = (rt_ms1_q25_temp - 0)  / rt_duration
     rt_ms1_q050 = (rt_ms1_q50_temp - rt_ms1_q25_temp) / rt_duration
     rt_ms1_q075 = (rt_ms1_q75_temp - rt_ms1_q50_temp) / rt_duration
-    rt_ms1_q100 = (max(ms1_rt) - rt_ms1_q75_temp) / rt_duration
+    rt_ms1_q100 = (rt_duration - rt_ms1_q75_temp) / rt_duration
 
     data_dict["RT_MS1_Q_000-025"] = rt_ms1_q025
     data_dict["RT_MS1_Q_025-050"] = rt_ms1_q050
@@ -124,10 +125,10 @@ if __name__ == "__main__":
     rt_ms2_q75_temp = np.quantile(ms2_rt, 0.75)
 
 
-    rt_ms2_q025 = (rt_ms2_q25_temp - min(ms2_rt))  / rt_duration
+    rt_ms2_q025 = (rt_ms2_q25_temp - 0)  / rt_duration
     rt_ms2_q050 = (rt_ms2_q50_temp - rt_ms2_q25_temp) / rt_duration
     rt_ms2_q075 = (rt_ms2_q75_temp - rt_ms2_q50_temp) / rt_duration
-    rt_ms2_q100 = (max(ms2_rt) - rt_ms2_q75_temp) / rt_duration
+    rt_ms2_q100 = (rt_duration - rt_ms2_q75_temp) / rt_duration
 
     data_dict["RT_MS2_Q_000-025"] = rt_ms2_q025
     data_dict["RT_MS2_Q_025-050"] = rt_ms2_q050
