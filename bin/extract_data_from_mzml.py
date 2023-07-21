@@ -40,7 +40,10 @@ if __name__ == "__main__":
     # Get Date and Time of Measurement (timestamp)
     hh_mm_ss_str = exp.getDateTime().getTime()
     yy_mm_dd_str = exp.getDateTime().getDate() # could also be yy_mm_dd
-    data_dict["timestamp"] = time.mktime(datetime.datetime.strptime(yy_mm_dd_str + "|" + hh_mm_ss_str , "%Y-%m-%d|%H:%M:%S").timetuple())
+    try:
+        data_dict["timestamp"] = time.mktime(datetime.datetime.strptime(yy_mm_dd_str + "|" + hh_mm_ss_str , "%Y-%m-%d|%H:%M:%S").timetuple())
+    except:
+        data_dict["timestamp"] = None
 
     # Get accumulated TICs for ms1 and ms2 (accumulated-MS1_TIC)
     accum_tic_ms1 = get_accumulated_TIC(exp, 1)
