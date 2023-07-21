@@ -69,9 +69,9 @@ process pia_analysis {
     #TODO REMOVE HARD_CODED parameters-file and make it available from outside the script!
     cat ${baseDir}/bin/pia-1.4.7/pia-analysis.json \
         | sed -e 's;"psmExportFile": "/tmp/piaExport-PSMs.mzTab";"psmExportFile": "${compilation.simpleName}-piaExport-PSM.mzTab";g' \
-        | sed -e 's;"peptideExportFile": "/tmp/piaExport-peptides.csv";"peptideExportFile": "${compilation.simpleName}-piaExport-peptides.csv";g' \
-        | sed -e 's;"proteinExportFile": "/tmp/piaExport-proteins.mzid";"proteinExportFile": "${compilation.simpleName}-piaExport--proteins.mzid";g' \
-        | sed -e 's;"protein_q_value_filter <= 0.01;"protein_q_value_filter <= 1.0": "${compilation.simpleName}-piaExport--proteins.mzid";g' > parameters.json
+        | sed -e 's;"peptideExportFile": "/tmp/piaExport-peptides.mzTab";"peptideExportFile": "${compilation.simpleName}-piaExport-peptides.csv";g' \
+        | sed -e 's;"proteinExportFile": "/tmp/piaExport-proteins.mzTab";"proteinExportFile": "${compilation.simpleName}-piaExport--proteins.mzTab";g' \
+        | # sed -e 's;"protein_q_value_filter <= 0.01;"protein_q_value_filter <= 1.0": "${compilation.simpleName}-piaExport--proteins.mzTab";g' > parameters.json
 
 
  
