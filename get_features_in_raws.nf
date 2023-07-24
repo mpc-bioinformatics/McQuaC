@@ -82,7 +82,6 @@ process convert_raw_via_thermorawfileparser {
 }
 
 process run_feature_finder {
-    maxForks 3  // TODO Please remove limit, my laptop is not that powerful! 
     stageInMode "copy"
 
     input:

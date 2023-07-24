@@ -83,7 +83,7 @@ workflow {
 	
 
 	// Visualize the results
-	visualize_results(combine_output_to_table.out)
+	//visualize_results(combine_output_to_table.out)
 
 }
 

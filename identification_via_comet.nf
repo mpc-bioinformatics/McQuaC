@@ -9,7 +9,7 @@ params.ic_search_parameter_file = "$PWD/example_configurations/comet_config.txt"
 // Optional Parameters
 params.ic_tda = 1 // 0 --> No Target-Decoy appraoch | 1 --> Target-Decoy appraoch (comet automatically prefixes decoys with "DECOY_" )
 params.ic_outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
-params.ic_num_parallel_searches = 1 //Runtime.runtime.availableProcessors()
+params.ic_num_parallel_threads_per_search = 1
 
 
 workflow {
@@ -64,7 +64,7 @@ process convert_raw_via_thermorawfileparser {
 
 
 process comet_search {
-    // maxForks params.ic_num_parallel_searches
+    cpus params.ic_num_parallel_threads_per_search
     publishDir "${params.ic_outdir}/idents", mode:'copy'
     stageInMode "copy"
 
@@ -81,6 +81,8 @@ process comet_search {
     sed -i 's/^database_name.*/database_name = ${input_fasta}/' ${mod_file.baseName}_new.txt
     sed -i 's/^output_pepxmlfile.*/output_pepxmlfile = 1/' ${mod_file.baseName}_new.txt
     sed -i 's/^output_txtfile.*/output_txtfile = 1/' ${mod_file.baseName}_new.txt
+    sed -i 's/^num_threads.*/num_threads = ${params.ic_num_parallel_threads_per_search} /' ${mod_file.baseName}_new.txt
+
 
     # We run the Comet Adapter since PIA does not work with comet output and need to mimic everything to satisfy OpenMS
     #run_decoydatabase.sh -in ${input_fasta} -out ${input_fasta.baseName}_rev.fasta -decoy_string "DECOY_" -method "reverse"

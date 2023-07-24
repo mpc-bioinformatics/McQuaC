@@ -55,7 +55,7 @@ if __name__ == "__main__":
             # If not already included add all information including headers
             final_table[
                 "FIXED_" + ass[0] + "_PEP_" + ass[1] + "_MZ_" + ass[2] + "_RT_" + ass[3]
-            ] = sum(xic["Intensities"])
+            ] = sum(xic["Intensities"] if xic["Intensities"] else [])
 
             final_table[
                 "IDENT_" + ass[0] + "_COUNT"
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
                     final_table[
                         "IDENT_" + ass[0] + "_PEP_" + ass_ass[1] + "_MZ_" + ass_ass[2] + "_RT_DELTA"
-                    ] = sum(xic["Intensities"])
+                    ] = sum(xic["Intensities"] if xic["Intensities"] else [])
                     break
 
 
