@@ -91,8 +91,10 @@ process run_feature_finder {
     tuple file("${mzml.baseName}.featureXML"), file(ident)
 
     """
-    run_featurefindercentroided.sh -in ${mzml} -out ${mzml.baseName}.featureXML -algorithm:isotopic_pattern:charge_low ${params.gf_considered_charges_low} -algorithm:isotopic_pattern:charge_high ${params.gf_considered_charges_high} ${params.gf_resolution_featurefinder}
-    # run_featurefindermultiplex.sh -in ${mzml} -out ${mzml.baseName}.featureXML
+    # run_featurefindercentroided.sh -in ${mzml} -out ${mzml.baseName}.featureXML -algorithm:isotopic_pattern:charge_low ${params.gf_considered_charges_low} -algorithm:isotopic_pattern:charge_high ${params.gf_considered_charges_high} ${params.gf_resolution_featurefinder}
+    run_featurefindermultiplex.sh -in ${mzml} -out ${mzml.baseName}.featureXML \
+        -algorithm:labels "" \
+        -algorithm:charge "1:5"
     # We do not use multiplex, it seems to be broken, mem usage way over 40 GB per RAW file failing by "std::bad_alloc"
     rm ${mzml}
     """

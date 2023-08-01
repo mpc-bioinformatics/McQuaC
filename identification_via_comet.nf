@@ -9,7 +9,7 @@ params.ic_search_parameter_file = "$PWD/example_configurations/comet_config.txt"
 // Optional Parameters
 params.ic_tda = 1 // 0 --> No Target-Decoy appraoch | 1 --> Target-Decoy appraoch (comet automatically prefixes decoys with "DECOY_" )
 params.ic_outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
-params.ic_num_parallel_threads_per_search = 1
+params.ic_num_parallel_threads_per_search = 4
 
 
 workflow {
