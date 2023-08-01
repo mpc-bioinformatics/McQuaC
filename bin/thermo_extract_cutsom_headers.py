@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
     # zlib and pickle all the data
     for k, v in data_dict.items():
-        data_dict[k] = base64.b64encode(zlib.compress(pickle.dumps(v), level=9))
+        data_dict[k] = base64.b64encode(zlib.compress(pickle.dumps(v), level=9)).decode("utf-8")
 
     # Write Output
     with open(args.out_csv, "w") as csv_out:
