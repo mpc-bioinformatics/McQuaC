@@ -10,41 +10,19 @@ params.gmc_num_procs_conversion = Runtime.runtime.availableProcessors()  // Numb
 
 // Standalone Workflow
 workflow {
-    rawfiles = Channel.fromPath(params.gmc_thermo_raws + "/*.raw")
-    get_various_mzml_infos(raw_files)
+    mzmlfiles = Channel.fromPath(params.gmc_thermo_raws + "/*.mzML")
+    get_various_mzml_infos(mzmlfiles)
 }
 
 
 workflow get_various_mzml_infos {
     take:
-        raw_files
+        mzmlfiles  // mzML where MS1 is peak picked
     main:
-        // Convert the file to mzML, where MS1 (peak picked) (for feature finding)
-        convert_raw_via_thermorawfileparser(raw_files)
-
         // Retrieve the information from mzml (using pyopenms in a python script)
-        retrieve_data_from_mzml(convert_raw_via_thermorawfileparser.out)
-    emit: 
-        convert_raw_via_thermorawfileparser.out
+        retrieve_data_from_mzml(mzmlfiles)
+    emit:
         retrieve_data_from_mzml.out
-}
-
-process convert_raw_via_thermorawfileparser {
-    maxForks params.gmc_num_procs_conversion
-    stageInMode "copy"
-
-    publishDir "${params.gmc_outdir}/", mode:'copy'
-
-    input:
-    file(raw)
-
-    output:
-    file("${raw.baseName}.mzML")
-
-    """
-    run_thermorawfileparser.sh --format=1 --output_file=${raw.baseName}.mzML --input=${raw} 
-    rm ${raw}
-    """
 }
 
 process retrieve_data_from_mzml {

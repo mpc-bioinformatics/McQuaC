@@ -9,12 +9,12 @@ params.ic_search_parameter_file = "$PWD/example_configurations/comet_config.txt"
 // Optional Parameters
 params.ic_tda = 1 // 0 --> No Target-Decoy appraoch | 1 --> Target-Decoy appraoch (comet automatically prefixes decoys with "DECOY_" )
 params.ic_outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
-params.ic_num_parallel_threads_per_search = 1
+params.ic_num_parallel_threads_per_search = 4
 
 
 workflow {
     // Get all MGF files which should be identified
-    raws = Channel.fromPath(params.ic_raw_folder + "/*.raw")
+    mgfs = Channel.fromPath(params.ic_raw_folder + "/*.mgf")
 
     // Get FASTA-file
     fasta_file = Channel.fromPath(params.ic_fasta_file)
@@ -22,46 +22,26 @@ workflow {
     // Get Modification Parameters file
     modifications_file = Channel.fromPath(params.ic_search_parameter_file)
 
-    ident_via_comet(mgfs, fasta_file, modification_file)
+    ident_via_comet(mgfs, fasta_file, modifications_file)
 }
 
 workflow ident_via_comet {
     take:
-        raws
+        mgfs
         fasta_file
         modification_file
 
     main:
-        // Convert to needed indexedmzmls
-        convert_raw_via_thermorawfileparser(raws)
         // Combined channel replicated the indexed fasta for each MGF to be reused
         combined_channel = fasta_file
             .combine(modification_file)
-            .combine(convert_raw_via_thermorawfileparser.out)
+            .combine(mgfs)
         
         // Start search
         comet_search(combined_channel)
     emit:
         comet_search.out
 }
-
-
-process convert_raw_via_thermorawfileparser {
-    stageInMode "copy"
-
-    input:
-    file raw
-
-    output:
-    file "${raw.baseName}.mzML"
-
-    """
-    run_thermorawfileparser.sh --format=2 --output_file=${raw.baseName}.mzML --input=${raw} 
-    rm ${raw}
-    """
-}
-
-
 
 process comet_search {
     cpus params.ic_num_parallel_threads_per_search

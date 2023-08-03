@@ -39,6 +39,5 @@ process retrieve_custom_headers_thermo {
 
     """
     thermo_extract_cutsom_headers.py -raw ${raw} ${params.ccff_header_in_raws} ${params.ccff_header_in_raws_names} -out_csv ${raw.baseName}_____customs.csv 
-    rm ${raw}
     """
 }

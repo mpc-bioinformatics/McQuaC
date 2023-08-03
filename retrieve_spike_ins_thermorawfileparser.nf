@@ -23,12 +23,15 @@ workflow retrieve_spikeins {
         mztabfiles
     main:
         spikeins = Channel.from(file(params.spk_spike_ins))
+        
         // Match files according to their baseName
-        create_baseName_for_raws(rawfiles)
+        rawfiles_tuple = rawfiles.map {
+            file -> tuple(file.baseName, file)
+        }
         mztabs_tuple = mztabfiles.map {
             file -> tuple(file.baseName.split("_____")[0], file)
         }
-        raw_and_id = create_baseName_for_raws.out.join(
+        raw_and_id = rawfiles_tuple.join(
             mztabs_tuple,
             by: 0
         )
@@ -44,19 +47,6 @@ workflow retrieve_spikeins {
     emit:
         get_statistics.out
 }
-
-// Stubs for an easy conversion of a channel into a tuple
-process create_baseName_for_raws {
-    input:
-    file raw
-
-    output:
-    tuple val("$raw.baseName"), file(raw)
-
-    """
-    """
-}
-
 
 // Uses the Identification file and Spike Ins and maps according to the accession identified spike ins. We also generate here the query for TRFP 
 process generate_json_and_association {
@@ -85,7 +75,6 @@ process retrieve_via_thermorawfileparser {
 
     """
     run_thermorawfileparser.sh xic -i $raw -j $trfp_input 
-    rm ${raw}
     """
 }
 
