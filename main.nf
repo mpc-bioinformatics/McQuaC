@@ -19,7 +19,7 @@ nextflow run \
 // Include all the needed workflows from the sub-workflows
 // Extend this to also extend the QC-Workflow 
 PROJECT_DIR = workflow.projectDir
-include {convert_to_mgf} from PROJECT_DIR + '/convert_to_mgf_thermorawfileparser.nf'
+include {convert_to_mgf_mzml} from PROJECT_DIR + '/convert_to_mgf_mzml_thermorawfileparser.nf'
 include {get_various_mzml_infos} from PROJECT_DIR + '/get_mzml_chromatogram_and_more.nf'
 include {ident_via_comet} from PROJECT_DIR + '/identification_via_comet.nf'
 include {execute_pia} from PROJECT_DIR + '/pia.nf' // TODO expose pia-parameters.json file here!
@@ -43,15 +43,18 @@ params.is_isa = true // Parameter to check if we execute a isa specific xic extr
 workflow {
 	// Retrieve RAW-Files
     rawfiles = Channel.fromPath(params.main_raw_files_folder + "/*.raw")
+
+	// Convert to needed formats:
+	convert_to_mgf_mzml(rawfiles) // 0 --> .mgf | 1 --> .mzML (peak-picked)
 	
 	// Retreive MZML Statistics
-	get_various_mzml_infos(rawfiles)
+	get_various_mzml_infos(convert_to_mgf_mzml.out[1])
 
 	/* Identify with multiple search engines */
 	fasta_file = Channel.fromPath(params.main_fasta_file)
 	// Comet
 	comet_params = Channel.fromPath(params.main_comet_params)
-	ident_via_comet(rawfiles, fasta_file, comet_params)
+	ident_via_comet(convert_to_mgf_mzml.out[0], fasta_file, comet_params)
 	// MS-GF+
 	// convert_to_mgf(rawfiles) //MS-GF+ Workflow requires MGFs
 	// TODO ||| HERE goes the code!
@@ -73,9 +76,9 @@ workflow {
 
 
 	// Concatenate to large csv
-	combined_csvs = get_various_mzml_infos.out[1].collect().concat(
+	combined_csvs = get_various_mzml_infos.out.collect().concat(
 		retrieve_spikeins.out.collect(),
-		get_features.out.collect().map { it[1] },
+		get_features.out.collect(),
 		execute_pia.out[1].collect(),
 		get_custom_headers.out.collect()
 	).collect().view()

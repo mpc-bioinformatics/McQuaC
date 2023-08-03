@@ -21,30 +21,30 @@ params.gf_num_procs_conversion = Runtime.runtime.availableProcessors()  // Numbe
 
 
 workflow {
-    rawfiles = Channel.fromPath(params.gf_thermo_raws + "/*.raw")
+    mzmls = Channel.fromPath(params.gf_thermo_raws + "/*.mzML")
     mztabfiles = Channel.fromPath(params.gf_ident_files + "/*.mzTab")
-    retrieve_spikeins(rawfiles, mztabfiles)
+    retrieve_spikeins(mzmls, mztabfiles)
 }
 
 workflow get_features {
     take:
-        rawfiles
+        mzmls  // MS1 should be peak picked for feature-finding
         mztabfiles
     main:
+        // Match files according to their baseName
         mztabs_tuple = mztabfiles.map {
             file -> tuple(file, file.baseName.split("_____")[0])
         }
-        // Match files according to their baseName
-        create_baseName_for_raws(rawfiles)
-        raw_and_id = create_baseName_for_raws.out.join(
+        mzmls_tuple = mzmls.map {
+            file -> tuple(file, file.baseName)
+        }
+        mzml_and_id = mzmls_tuple.join(
             mztabs_tuple,
             by: 1
         )
-        // Convert the file to mzML, where MS1 (peak picked) (for feature finding)
-        convert_raw_via_thermorawfileparser(raw_and_id)
 
-        // Get features with OpenMS' feature finder
-        run_feature_finder(convert_raw_via_thermorawfileparser.out)
+        // Get features with OpenMS' or Dinosaur feature finder
+        run_feature_finder(mzml_and_id)
 
         // Map Identification with Features (using mzTab and featureXML)
         map_features_with_idents(run_feature_finder.out)
@@ -53,34 +53,6 @@ workflow get_features {
         get_statistics_from_featurexml(map_features_with_idents.out)
     emit:
         get_statistics_from_featurexml.out
-}
-
-// Stubs for an easy conversion of a channel into a tuple
-process create_baseName_for_raws {
-    input:
-    file raw
-
-    output:
-    tuple file(raw), val("$raw.baseName")
-
-    """
-    """
-}
-
-process convert_raw_via_thermorawfileparser {
-    maxForks params.gf_num_procs_conversion
-    stageInMode "copy"
-
-    input:
-    tuple val(file_base_name), file(raw), file(ident)
-
-    output:
-    tuple file("${raw.baseName}.mzML"), file(ident)
-
-    """
-    run_thermorawfileparser.sh --format=1 --output_file=${raw.baseName}.mzML --input=${raw} 
-    rm ${raw}
-    """
 }
 
 process run_feature_finder {
@@ -106,11 +78,8 @@ process run_feature_finder {
         ${params.additional_dinosaur_settings} --mzML ${mzml}
 
     run_fileconverter.sh -in ${mzml.baseName}.msInspect.tsv -out ${mzml.baseName}.featureXML
-    
-    rm ${mzml}
     """
 }
-
 
 process map_features_with_idents {
     stageInMode "copy"
@@ -123,10 +92,8 @@ process map_features_with_idents {
     """
     convert_mztab_to_idxml.py -mztab ${ident} -out_idxml ${ident.baseName}.idXML
     run_idmapper.sh -id ${ident.baseName}.idXML -in ${featurexml} -out ${featurexml.baseName}_with_idents.featureXML
-    rm ${featurexml}
     """
 }
-
 
 process get_statistics_from_featurexml {
     stageInMode "copy"

@@ -23,7 +23,8 @@ workflow convert_to_mgf {
         // Convert the file to MGF
         convert_raw_via_thermorawfileparser(raw_files)
     emit:
-        convert_raw_via_thermorawfileparser.out
+        convert_raw_via_thermorawfileparser.out[0]
+        convert_raw_via_thermorawfileparser.out[1]
 }
 
 process convert_raw_via_thermorawfileparser {
@@ -37,9 +38,10 @@ process convert_raw_via_thermorawfileparser {
 
     output:
     file "${raw.baseName}.mgf"
+    file "${raw.baseName}.mzML"
 
     """
     run_thermorawfileparser.sh ${params.ctm_additional_params} --format=0 --output_file=${raw.baseName}.mgf --input=${raw} 
-    rm ${raw}
+    run_thermorawfileparser.sh ${params.ctm_additional_params} --format=1 --output_file=${raw.baseName}.mzML --input=${raw} 
     """
 }
