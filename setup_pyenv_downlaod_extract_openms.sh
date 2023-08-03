@@ -18,6 +18,14 @@ mkdir -p ./bin/openms
 tar -xf data.tar.gz -C ./bin/openms
 rm -rf openms.deb data.tar.gz
 
+# Download Pia:
+rm -rf bin/pia/
+wget -O pia.zip https://github.com/mpc-bioinformatics/pia/releases/download/1.4.7/pia-1.4.7.zip
+mkdir -p ./bin/pia
+unzip -d ./bin/pia pia.zip
+rm -rf pia.zip
+
+
 # Download Dinosaur
 wget  -O bin/Dinosaur.jar https://github.com/fickludd/dinosaur/releases/download/1.2.0/Dinosaur-1.2.0.free.jar
 

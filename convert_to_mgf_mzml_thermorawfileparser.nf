@@ -16,7 +16,7 @@ workflow {
 }
 
 
-workflow convert_to_mgf {
+workflow convert_to_mgf_mzml {
     take:
         raw_files // a list of raw_files
     main:
