@@ -58,7 +58,6 @@ workflow get_features {
 }
 
 process run_feature_finder {
-    debug true
     stageInMode "copy"
 
     input:
