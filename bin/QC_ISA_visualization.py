@@ -83,5 +83,8 @@ if __name__ == "__main__":
 
     # Figure 4: 
     ## TODO: add ion map plot
+    ### Time vs. Lockmass deviation
+    ### pressure (over time)
+    ### ion injection time (over retention time)
 
 
