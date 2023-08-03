@@ -69,7 +69,7 @@ workflow {
 	}
 
 	// Run Feature Finding and Statistics
-	get_features(rawfiles, execute_pia.out[0].map { it[0] })
+	get_features(convert_to_mgf_mzml.out[1], execute_pia.out[0].map { it[0] })
 
 	// Get Thermospecific information from raw
 	get_custom_headers(rawfiles)
