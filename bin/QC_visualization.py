@@ -29,7 +29,7 @@ def argparse_setup():
     parser.add_argument("-output", help="Output folder for the plots as json files.", default = "graphics")
     parser.add_argument("-tic_overlay_offset", help = "Offset for TIC overlay plots", default = 0)
     parser.add_argument("-fig_show", help = "Show figures, e.g. for debugging?", default = False, action = "store_true")
-    parser.add_argument("-isa", help = "Is this ISA QC?", default = True, action = "store_true")
+    parser.add_argument("-isa", help = "Is this ISA QC?", default = False, action = "store_true")
     return parser.parse_args()
 
 
