@@ -23,7 +23,7 @@ params.gf_num_procs_conversion = Runtime.runtime.availableProcessors()  // Numbe
 workflow {
     mzmls = Channel.fromPath(params.gf_thermo_raws + "/*.mzML")
     mztabfiles = Channel.fromPath(params.gf_ident_files + "/*.mzTab")
-    retrieve_spikeins(mzmls, mztabfiles)
+    get_features(mzmls, mztabfiles)
 }
 
 workflow get_features {
@@ -41,7 +41,9 @@ workflow get_features {
         mzml_and_id = mzmls_tuple.join(
             mztabs_tuple,
             by: 1
-        )
+        ).map {
+            it -> tuple(it[1], it[2])
+        }
 
         // Get features with OpenMS' or Dinosaur feature finder
         run_feature_finder(mzml_and_id)
@@ -56,6 +58,7 @@ workflow get_features {
 }
 
 process run_feature_finder {
+    debug true
     stageInMode "copy"
 
     input:
