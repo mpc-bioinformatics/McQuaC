@@ -107,9 +107,12 @@ List of plots (regular QC):
 - Figure 7: Barplot of precursor charge states (relative)
 - Figure 8: Barplot of PSM charge states (of identified spectra) (relative)
 - Figure 9: Barplot of missed cleavages of PSMs (relative)
-- Figure 10: PCA on all data (a) (+ table and plot for Loadings (b) (to assess importance of variables for the PCA))
-- Figure 11: PCA on raw data (a) (+ table and plot for Loadings (b) (to assess importance of variables for the PCA))
+- Figure 10: PCA on all data (a) (+ plot for Loadings (b) (to assess importance of variables for the PCA))
+- Figure 11: PCA on raw data (a) (+ plot for Loadings (b) (to assess importance of variables for the PCA))
 - Figure 12: For each raw files, an ion map (2D density plot with x = RT, y = MZ)
+- Figure 13: Time vs. pump pressure (Lineplot)
+- Figure 14: Time vs. ion injection time (Lineplot)
+- Figure 15: Time vs. Lock mass correction (ppm) (Lineplot)
 
 In the QC_columns_overview.csv table it is indicated which columns are used inside the two PCA plots.
 

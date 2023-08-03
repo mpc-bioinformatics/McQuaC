@@ -11,6 +11,9 @@ import argparse
 #import zipfile
 import ast
 import os
+import base64
+import pickle
+import zlib
 
 # 3rd party imports
 import pandas as pd
@@ -58,6 +61,9 @@ if __name__ == "__main__":
     fig_show = args.fig_show
     isa = args.isa
 
+
+
+####################################################################################################
     # read csv file
     df = pd.read_csv(csv_file)
     nr_rawfiles = len(df)
@@ -70,17 +76,27 @@ if __name__ == "__main__":
         return dataframe
     df = add_filename_column(df, "filename")
 
+####################################################################################################
+    # short function to extract infos from compressed columns
+    def unbase64_uncomp_unpickle(x: bytes) -> list:
+        unb64 = base64.b64decode(x)
+        uncomp = zlib.decompress(unb64)
+        return pickle.loads(uncomp)
+
+
+
 
 ### im KNIME ISA gab es 3 plots: 
-# Tabelle mit den nr Peptides, nrMS1, TIC, basekpeak, spikeins
-# Proteins: proteins, groups filtered und unfiltered
-# Peptides
-# PSMs
+
+
 
 
 
     if isa:
+        ### TODO: test when PIA output is integrated
+        ### TODO: Tabelle mit den nr Peptides, nrMS1, TIC, basekpeak, spikeins ....
 
+        '''
         #   Figure 1: Number of proteins, protein groups and unfiltered protein groups
         #### TODO: has to be tested, when PIA output is finished!
         df_pl1_isa = df[["filename", "nrProteins", "number-filtered-protein-groups", "nrProteingroups_unfiltered"]]
@@ -118,12 +134,13 @@ if __name__ == "__main__":
 
         with open(output_path +"/isafig3_barplot_PSMs.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig3_isa))
-
+        '''
+            
     else:  # normal QC
 
-### TODO: beim normalen QC gibts auch ne Tabelle mit den wichtigsten Werten
+        ### TODO: beim normalen QC gibts auch ne Tabelle mit den wichtigsten Werten
 
-####################################################################################################
+    ################################################################################################
         # Figure 1: Barplot for total number of MS1 and MS2 spectra
         df_pl1 = df[["filename", "total_num_ms1", "total_num_ms2"]]
         df_pl1_long = df_pl1.melt(id_vars = ["filename"])
@@ -136,7 +153,7 @@ if __name__ == "__main__":
         with open(output_path +"/fig1_barplot_MS1_MS2.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig1))
 
-    ####################################################################################################
+    ################################################################################################
         # Figure 2: Barplot for number of PSMs, peptides, proteins and identified features
         ### TODO: nr of PSMs, peptides and protein groups are missing (from PIA)
         '''
@@ -193,13 +210,13 @@ if __name__ == "__main__":
         fig3 = px.line(tic_df, x="RT", y="TIC", color = "filename", title = "TIC overlay")
         fig3.update_traces(line=dict(width=0.5))
         fig3.update_yaxes(exponentformat="E") 
-        fig3.update_layout(width = int(1000), height = int(1000))
+        #fig3.update_layout(width = int(1000), height = int(1000))
         if fig_show:
             fig3.show()
         with open(output_path +"/fig3_TIC_overlay.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig3))
 
-    ####################################################################################################
+    #################################################################################################
         # Figure 4: Barplot TIC quartiles
         df_pl4 = df[["filename", 'RT_TIC_Q_000-025', 'RT_TIC_Q_025-050', 'RT_TIC_Q_050-075', 'RT_TIC_Q_075-100']]
         df_pl4_long = df_pl4.melt(id_vars = ["filename"])
@@ -210,7 +227,7 @@ if __name__ == "__main__":
         with open(output_path +"/fig4_barplot_TIC_quartiles.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig4))
 
-    ####################################################################################################
+    ################################################################################################
         # Figure 5: Barplot MS1 TIC quartiles
         df_pl5 = df[["filename", 'RT_MS1_Q_000-025', 'RT_MS1_Q_025-050', 'RT_MS1_Q_050-075', 'RT_MS1_Q_075-100']]
         df_pl5_long = df_pl5.melt(id_vars = ["filename"])
@@ -221,7 +238,7 @@ if __name__ == "__main__":
         with open(output_path +"/fig5_barplot_MS1_TIC_quartiles.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig5))
 
-    ####################################################################################################
+    ################################################################################################
         # Figure 6: Barplot MS2 TIC quartiles
         df_pl6 = df[["filename", 'RT_MS2_Q_000-025', 'RT_MS2_Q_025-050', 'RT_MS2_Q_050-075', 'RT_MS2_Q_075-100']]
         df_pl6_long = df_pl6.melt(id_vars = ["filename"])
@@ -232,9 +249,9 @@ if __name__ == "__main__":
         with open(output_path +"/fig6_barplot_MS2_TIC_quartiles.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig6))
 
-    ####################################################################################################
+    ################################################################################################
         # Figure 7: Precursor charge states
-        df_pl7 = df[["filename", 'MS2_PrecZ_1', 'MS2_PrecZ_2', 'MS2_PrecZ_3', 'MS2_PrecZ_4', 'MS2_PrecZ_5', 'MS2_PrecZ_more']]
+        df_pl7 = df[["filename", 'MS2_PrecZ_1', 'MS2_PrecZ_2', 'MS2_PrecZ_3', 'MS2_PrecZ_4', 'MS2_PrecZ_5', 'MS2_PrecZ_more', 'MS2_PrecZ_Unknown']]
         df_pl7_long = df_pl7.melt(id_vars = ["filename"])
         fig7 = px.bar(df_pl7_long, x="filename", y="value", color="variable", title = "Charge states of precursors")
         fig7.update_xaxes(tickangle=-90)
@@ -243,7 +260,7 @@ if __name__ == "__main__":
         with open(output_path +"/fig7_barplot_precursor_chargestate.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig7))
 
-    ####################################################################################################
+    ################################################################################################
         # Figure 8: PSM charge states (of identified spectra)
         #### TODO: muss getestet werden, wenn PIA Teil fertig ist!
         #df_pl8 = df[["filename", 'psmZ1', 'psmZ2', 'psmZ3', 'psmZ4', 'psmZ5']]
@@ -255,7 +272,7 @@ if __name__ == "__main__":
         #with open(output_path +"/fig8_barplot_PSM_chargestate.json", "w") as json_file:
         #    json_file.write(plotly.io.to_json(fig8))
 
-    ####################################################################################################
+    ################################################################################################
         # Figure 9: Missed cleavages of PSMs
         ### TODO: muss getestet werden, wenn PIA Teil fertig ist
         #df_pl9 = df[["filename", 'psm-missed-0', 'psm-missed-1', 'psm-missed-2', 'psm-missed-3', 'psm-missed-more']]
@@ -268,7 +285,7 @@ if __name__ == "__main__":
         #    json_file.write(plotly.io.to_json(fig9))
 
 
-    ####################################################################################################
+    #################################################################################################
         #### Preparations for PCA
         # If no groups are given, the points in the PCA are coloured by the timestamp.
         # The oldest raw file is coloured blue, the newest red.
@@ -294,10 +311,6 @@ if __name__ == "__main__":
         # Fig 10 PCA on all data
         #### TODO: Testen, wenn PIA Teil fertig ist
         #### TODO: Fall mit nur einem Sample einbauen
-
-            # Fig 10 PCA on all data
-            #### TODO: Testen, wenn PIA Teil fertig ist
-            #### TODO: Fall mit nur einem Sample einbauen
 
         if nr_rawfiles > 1:
             feature_list = ["RT_duration", 
@@ -400,7 +413,7 @@ if __name__ == "__main__":
             loadings = pd.DataFrame(pca.components_.T, columns=['PC1', 'PC2'], index=feature_list)
             loadings["length"] = np.sqrt(loadings["PC1"]**2+ loadings["PC2"]**2)
             loadings["variable"] = loadings.index
-            fig10_loadings = px.scatter(loadings, x = "PC1", y = "PC2", title = "PCA loadings (raw data)", 
+            fig10_loadings = px.scatter(loadings, x = "PC1", y = "PC2", title = "PCA loadings (all data)", 
                 hover_name="variable", hover_data=["PC1", "PC2"],)
         else:
             fig10 = go.Figure()
@@ -419,15 +432,15 @@ if __name__ == "__main__":
             fig10_loadings = fig10
         if fig_show:
             fig10.show()
-        with open(output_path +"/fig11a_PCA_raw.json", "w") as json_file:
+        with open(output_path +"/fig11a_PCA_rall.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig10)) 
         if fig_show: 
             fig10_loadings.show()
-        with open(output_path +"/fig11b_Loadings_raw.json", "w") as json_file:
+        with open(output_path +"/fig11b_Loadings_all.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig10_loadings))
     
 
-    ####################################################################################################
+    ################################################################################################
         # Fig 11 PCA on raw data (only plotted if we have more than one raw file)
 
         
@@ -547,8 +560,8 @@ if __name__ == "__main__":
             json_file.write(plotly.io.to_json(fig11_loadings))
             
 
-    ####################################################################################################
-        ### Fig 12: ion map
+    #################################################################################################
+        ### Fig 12: Ion Maps (one for each raw file)
         ionmap_df = []
         for index in df.index:
             tmp = dict(RT = ast.literal_eval(df["ms2_rt_array"].iloc[index]),
@@ -559,6 +572,7 @@ if __name__ == "__main__":
             ionmap_df.append(tmp)
         ionmap_df2 = pd.concat(ionmap_df)
 
+        # create folder to store ion maps
         if not os.path.exists(output_path + "/fig12_ionmaps"):
             os.makedirs(output_path + "/fig12_ionmaps")
 
@@ -575,7 +589,151 @@ if __name__ == "__main__":
             fig12_tmp.show()
 
 
+    ################################################################################################
+        ### Figure 13: Pump Pressure
 
-### retention Time vs. Lockmass deviation
-### pressure (x vs y)
-### ion injection time (over retention time)
+        ### extract data from compressed columns and put them into long format
+        x = []
+        y = []
+        fn = []
+        for index in df.index:
+            x_locally = unbase64_uncomp_unpickle(df["pump_preasure_bar_x_axis"].iloc[index])
+            y_locally = unbase64_uncomp_unpickle(df["pump_preasure_bar_y_axis"].iloc[index])
+            if x_locally is None:
+                #print(f"x is None at {index} => {df['filename'].iloc[index]}")
+                continue
+            if y_locally is None:
+                #print(f"y is None at {index} => {df['filename'].iloc[index]}")
+                continue
+            if len(x_locally) != len(y_locally):
+                raise ValueError("x and y does not have same length")
+
+
+            # With more than 10000 datapoints plotting the data
+            # leads to unnecessary delay. Interpolating 10000 datapoints is usually enough.
+            if len(x_locally) > 10000:
+                samples = int(len(x_locally) / 10000)
+                # Explictly adding the last datapoint to make sure we cover rounding errors when calculating `sample`
+                x_locally = [x_locally[i] for i in range(0, len(x_locally), samples)] + x_locally[-1:]
+                y_locally = [y_locally[i] for i in range(0, len(y_locally), samples)] + y_locally[-1:]
+            x += x_locally
+            y += y_locally
+            fn += [df["filename"].iloc[index]] * len(x_locally)
+
+        pp_df2 = pd.DataFrame({
+            "filename": fn,
+            "x": x,
+            "y": y
+        })
+
+        if not pp_df2.empty:
+            fig13 = px.line(pp_df2, x="x", y="y", color = "filename", title = "Pump Pressure")
+            fig13.update_traces(line=dict(width=0.5))
+            fig13.update_yaxes(exponentformat="E") 
+            fig13.update_layout(width = int(1000), height = int(1000), 
+                                xaxis_title = "Time (min)", 
+                                yaxis_title = "Pump pressure")
+            if fig_show:
+                fig13.show()
+            with open(output_path +"/fig13_Pump_pressure.json", "w") as json_file:
+                json_file.write(plotly.io.to_json(fig13))
+                    
+
+    ################################################################################################
+        # Figure 14: Ion Injection time
+
+        ### extract data from compressed columns and put them into long format
+        x = []
+        y = []
+        fn = []
+        for index in df.index:
+
+            y_locally = unbase64_uncomp_unpickle(df["Ion_Injection_Time_pickle_zlib"].iloc[index])
+
+            # calculate x values (time) based on RT_duration
+            time_res = df['RT_duration'].iloc[index] /len(y_locally)
+            x_locally = [i * time_res for i in range(0, len(y_locally))] 
+            
+            y_locally = [float(y) for y in y_locally if y is not None]
+            x_locally = [x for x, y in zip(x_locally, y_locally) if y is not None]
+            
+            # With more than 10000 datapoints plotting the data
+            # leads to unnecessary delay. Interpolating 10000 datapoins is usually enough.
+            if len(x_locally) > 10000:
+                samples = int(len(x_locally) / 10000)
+                # Explictly adding the last datapoint to make sure we cover rounding errors when calculating `sample`
+                x_locally = [x_locally[i] for i in range(0, len(x_locally), samples)] + x_locally[-1:]
+                y_locally = [y_locally[i] for i in range(0, len(y_locally), samples)] + y_locally[-1:]
+
+            x += x_locally
+            y += y_locally
+            fn += [df["filename"].iloc[index]] * len(x_locally)
+
+
+        ionInjTime_df = pd.DataFrame({
+            "filename": fn,
+            "x": x,
+            "y": y
+        })
+
+        if not ionInjTime_df.empty:
+            fig14 = px.line(ionInjTime_df, x="x", y="y", color = "filename", title = "Ion Injection Time")
+            fig14.update_traces(line=dict(width=0.5))
+            fig14.update_yaxes(exponentformat="E") 
+            fig14.update_layout(width = int(1000), height = int(1000), 
+                                xaxis_title = "Time (min)", 
+                                yaxis_title = "Ion Injection Time (ms)")
+            if fig_show:
+                fig14.show()
+            with open(output_path +"/fig14_Ion_Injection_Time.json", "w") as json_file:
+                json_file.write(plotly.io.to_json(fig14))
+
+
+    ################################################################################################
+        # Figure 15: Lock Mass Correction
+
+
+        ### extract data from compressed columns and put them into long format
+        x = []
+        y = []
+        fn = []
+        for index in df.index:
+            y_locally = unbase64_uncomp_unpickle(df["LM_m_z_Correction_pickle_zlib"].iloc[index])
+
+            # calculate x values (time) based on RT_duration
+            time_res = df['RT_duration'].iloc[index] /len(y_locally)
+            x_locally = [i * time_res for i in range(0, len(y_locally))] # int(df['RT_duration'].iloc[index])
+
+            y_locally = [float(y) for y in y_locally if y is not None]
+            x_locally = [x for x, y in zip(x_locally, y_locally) if y is not None]
+
+            # With more than 10000 datapoints plotting the data
+            # leads to unnecessary delay. Interpolating 10000 datapoins is usually enough.
+            if len(x_locally) > 10000:
+                samples = int(len(x_locally) / 10000)
+                # Explictly adding the last datapoint to make sure we cover rounding errors when calculating `sample`
+                x_locally = [x_locally[i] for i in range(0, len(x_locally), samples)] + x_locally[-1:]
+                y_locally = [y_locally[i] for i in range(0, len(y_locally), samples)] + y_locally[-1:]
+
+            x += x_locally
+            y += y_locally
+            fn += [df["filename"].iloc[index]] * len(x_locally)
+
+        LMCorr_df = pd.DataFrame({
+            "filename": fn,
+            "x": x,
+            "y": y
+        })
+
+        if not LMCorr_df.empty:
+            fig15 = px.line(LMCorr_df, x="x", y="y", color = "filename", title = "Lock Mass Correction")
+            fig15.update_traces(line=dict(width=0.5))
+            fig15.update_yaxes(exponentformat="E") 
+            fig15.update_layout(width = int(1000), height = int(1000),
+                                xaxis_title = "Time (min)", 
+                                yaxis_title = "LM m/z-Correction (ppm)")
+            if fig_show:
+                fig15.show()
+            with open(output_path +"/fig15_Lock_Mass_Correction.json", "w") as json_file:
+                json_file.write(plotly.io.to_json(fig15))
+
