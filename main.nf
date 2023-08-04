@@ -78,7 +78,7 @@ workflow {
 	// Concatenate to large csv
 	combined_csvs = get_various_mzml_infos.out.collect().concat(
 		retrieve_spikeins.out.collect(),
-		get_features.out.collect(),
+		get_features.out.map { it[1] }.collect(),
 		execute_pia.out[1].collect(),
 		get_custom_headers.out.collect()
 	).collect().view()
