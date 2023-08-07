@@ -30,14 +30,11 @@ rm -rf pia.zip
 wget  -O bin/Dinosaur.jar https://github.com/fickludd/dinosaur/releases/download/1.2.0/Dinosaur-1.2.0.free.jar
 
 # Install environment
-rm -rf Pipfile
-pipenv --rm | true
-pipenv install --python 3.9
-pipenv run pip install pyopenms==2.7.0
-pipenv run pip install pandas
-pipenv run pip install sqlalchemy
-pipenv run pip install plotly
-pipenv run pip install scikit-learn
-pipenv run pip install numpy
-pipenv run pip install fisher-py==1.0.21
+python -m pip install pyopenms
+python -m pip install pandas
+python -m pip install sqlalchemy
+python -m pip install plotly
+python -m pip install scikit-learn
+python -m pip install numpy
+python -m pip install fisher-py==1.0.21
 
