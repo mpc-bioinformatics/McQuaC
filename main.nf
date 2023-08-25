@@ -11,7 +11,7 @@ The <TODO_VIS>.nf-Script then can be used to genereate various plots from the ex
 Example call:
 nextflow run \
 	-resume main.nf \
-	--main_raw_files_folder <Path_to_folder_of_raws>/raws \
+	--main_raw_spectra_folder <Path_to_folder_of_raws>/raws \
 	--main_fasta_file <Path_to_FASTA_file>.fasta 
 
 */
@@ -30,19 +30,19 @@ include {get_custom_headers} from PROJECT_DIR + '/get_custom_columns_from_file_d
 // The requiered params are also exposed in this script and are listed below:
 
 // Parameters required for the standalone execution of this main-nextflow script
-params.main_raw_files_folder = "" // The folder containing the raw_files
+params.main_raw_spectra_folder = "" // The folder containing the raw spectra
 params.main_fasta_file = "" // A SINGLE-Fasta-file of the species to be searched (should also contain the SpikeIns if needed)
 params.main_comet_params = "$PWD/example_configurations/comet_config.txt" // Main-Search-Parameters for the comet search engine
 params.main_outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
 
 
 // Here are some optional Parameters which can be set if needed
-params.is_isa = true // Parameter to check if we execute a isa specific xic extraction (NOTE: FASTA has to contain the SpikeIns too!)
+params.main_is_isa = true // Parameter to check if we execute a isa specific xic extraction (NOTE: FASTA has to contain the SpikeIns too!)
 
 // MAIN WORKFLOW
 workflow {
 	// Retrieve RAW-Files
-    rawfiles = Channel.fromPath(params.main_raw_files_folder + "/*.raw")
+    rawfiles = Channel.fromPath(params.main_raw_spectra_folder + "/*.raw")
 
 	// Convert to needed formats:
 	convert_to_mgf_mzml(rawfiles) // 0 --> .mgf | 1 --> .mzML (peak-picked)
@@ -64,7 +64,7 @@ workflow {
 	execute_pia(ident_via_comet.out)
 
 	// Specific to ISA: Do XIC-Extraction if specified
-	if (params.is_isa) {
+	if (params.main_is_isa) {
 		retrieve_spikeins(rawfiles, execute_pia.out[0].map { it[0] })
 	}
 

@@ -2,16 +2,15 @@
 nextflow.enable.dsl=2
 
 // Parameters required for standalone execution
-params.idents = "$PWD/identifications"  // Peptide Identifications by search machine
+params.pia_idents = "$PWD/identifications"  // Peptide Identifications by search machine, which is working with PIA
 
 // Optional Parameters TODO
-params.outdir = "$PWD/results"  // Output-Directory of the PIA results. 3 files are expected.
-params.additional_params = ""
-params.num_procs_conversion = Runtime.runtime.availableProcessors()  // Number of process used to convert (CAUTION: This can be very resource intensive!)
+params.pia_outdir = "$PWD/results"  // Output-Directory of the PIA results.
+params.pia_parameters_file = ""  // Parameters file to configure PIA (e.g. FDR-Calculation)
 
 workflow{
     // Run PIA protein inference
-    idents = Channel.fromPath(params.idents + "/*.idXML")
+    idents = Channel.fromPath(params.pia_idents + "/*.idXML")
 
     execute_pia(idents)
 }
@@ -21,7 +20,7 @@ workflow execute_pia{
         idents
     main:
         // Run PIA protein inference
-        rawfiles = Channel.fromPath(params.idents + "/*.idXML")
+        rawfiles = Channel.fromPath(params.pia_idents + "/*.idXML")
         pia_compilation(idents)
         pia_analysis(pia_compilation.out)
         pia_extraction(pia_analysis.out)
@@ -36,7 +35,7 @@ process pia_compilation {
     maxForks params.num_procs_conversion
     stageInMode "copy"
     
-    publishDir "${params.outdir}/", mode:'copy'
+    publishDir "${params.pia_outdir}/", mode:'copy'
 
     input:
     file idXML
@@ -55,7 +54,7 @@ process pia_analysis {
     // Running an analysis with a parameter file
     // The command line allows you to execute an analysis via prior defined analysis in JSON format. 
     // Additionally to the json file, the prior compiled intermediate file must be given.
-    publishDir "${params.outdir}/", mode:'copy'
+    publishDir "${params.pia_outdir}/", mode:'copy'
 
     input:
     tuple file(compilation), val(basename)
