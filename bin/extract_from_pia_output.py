@@ -28,9 +28,10 @@ def argparse_setup():
 
 def run_pia_extraction():
     args = argparse_setup()
+    number_proteins, number_ungrouped_proteins = count_nr_Proteins(args.pia_proteins)
     peptide_count = count_nr_filtered_peptides(args.pia_peptides)
     PSM_counts , charge_counts, miss_counts = read_mzTab(args.pia_PSMs)
-    dics = [peptide_count, PSM_counts, charge_counts, miss_counts]
+    dics = [number_proteins, number_ungrouped_proteins, peptide_count, PSM_counts, charge_counts, miss_counts]
 
     # geschrieben von Dirk (er muss debuggen falls kaputt geht)
     data = {
@@ -55,7 +56,7 @@ def run_pia_extraction():
     with open("pia_extractions.zip", "rb") as pia_b:
         pia_str_bs64 = base64.b64encode(pia_b.read())
         df["pia_output.zip"] = pia_str_bs64
-        df.to_csv(args.output)
+        df.to_csv(args.output, index=False)
 
 
 def count_nr_filtered_peptides(file) -> int:
@@ -71,11 +72,9 @@ def count_nr_filtered_peptides(file) -> int:
     return peptide_count
 
 
-def count_nr_Proteins():
-    protein_file = "/Users/julian/uniNoBackup/nextflow-qc/pia-nextflow/results/QEXHF19807std_____pia-compilation-piaExport-proteins.mzTab"
-
+def count_nr_Proteins(file):
     # read in proteins
-    with open(protein_file) as f:
+    with open(file) as f:
         text = "\n".join([line for line in f if line.startswith("PRH") or line.startswith("PRT")])
 
     protein_df = pd.read_csv(io.StringIO(text), sep="\t")
