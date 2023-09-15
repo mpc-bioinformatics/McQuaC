@@ -22,7 +22,7 @@ PROJECT_DIR = workflow.projectDir
 include {convert_to_mgf_mzml} from PROJECT_DIR + '/convert_to_mgf_mzml_thermorawfileparser.nf'
 include {get_various_mzml_infos} from PROJECT_DIR + '/get_mzml_chromatogram_and_more.nf'
 include {ident_via_comet} from PROJECT_DIR + '/identification_via_comet.nf'
-include {execute_pia} from PROJECT_DIR + '/pia.nf' // TODO expose pia-parameters.json file here!
+include {execute_pia} from PROJECT_DIR + '/pia.nf'
 include {retrieve_spikeins} from PROJECT_DIR + '/retrieve_spike_ins_thermorawfileparser.nf' // We could also consider to expose params.spk_spike_ins, however it is always fixed for our ISA-stadard!
 include {get_features} from PROJECT_DIR + '/get_features_in_raws.nf'
 include {get_custom_headers} from PROJECT_DIR + '/get_custom_columns_from_file_directly.nf'

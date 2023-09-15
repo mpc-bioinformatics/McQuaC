@@ -1,8 +1,6 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-// this version of the workflow calls PIA as it is distributed by Bioconda.
-
 // Parameters required for standalone execution
 params.pia_idents = "$PWD/identifications"  // Peptide Identifications by search machine, which is working with PIA
 
@@ -10,7 +8,9 @@ params.pia_idents = "$PWD/identifications"  // Peptide Identifications by search
 params.pia_outdir = "$PWD/results"  // Output-Directory of the PIA results.
 params.pia_parameters_file = ""  // Parameters file to configure PIA (e.g. FDR-Calculation)
 
-params.pia_memory = "8g"        // memory in Java format, passed like "-Xmx[PIA_MEMORY]"
+params.pia_memory = "8g"  // memory in Java format, passed like "-Xmx[PIA_MEMORY]"
+params.pia_executable = "${baseDir}/bin/pia/pia-1.4.8.jar"  // Executable to the pia jar
+params.pia_analysis_file = "${baseDir}/example_configurations/pia-analysis.json"
 
 workflow {
     // Run PIA protein inference
@@ -49,7 +49,7 @@ process pia_compilation {
     """
     echo "Starting Compilation"
     echo "${idXML}"
-    pia -Xmx${params.pia_memory} --compile -o "${idXML.baseName}_____pia-compilation.xml" "${idXML}"
+    java -Xmx${params.pia_memory} -jar "${params.pia_executable}" --compile -o "${idXML.baseName}_____pia-compilation.xml" "${idXML}"
     """
 }
 
@@ -70,14 +70,13 @@ process pia_analysis {
 
     script:
     """
-    #TODO REMOVE HARD_CODED parameters-file and make it available from outside the script!
     # TODO: adjust decoy regex in the params file!!
-    cat ${baseDir}/example_configurations/pia-analysis.json \
+    cat ${params.pia_analysis_file} \
         | sed -e 's;"psmExportFile": "/tmp/piaExport-PSMs.mzTab";"psmExportFile": "${compilation.simpleName}-piaExport-PSM.mzTab";g' \
         | sed -e 's;"peptideExportFile": "/tmp/piaExport-peptides.csv";"peptideExportFile": "${compilation.simpleName}-piaExport-peptides.csv";g' \
         | sed -e 's;"proteinExportFile": "/tmp/piaExport-proteins.mzTab";"proteinExportFile": "${compilation.simpleName}-piaExport-proteins.mzTab";g' > parameters.json
  
-    pia -Xmx${params.pia_memory} parameters.json ${compilation}
+    java -Xmx${params.pia_memory} -jar "${params.pia_executable}" parameters.json ${compilation}
     """
 }
 
@@ -97,6 +96,4 @@ process pia_extraction {
     """
     python ${baseDir}/bin/extract_from_pia_output.py --pia_PSMs $psms --pia_peptides $peptides --pia_proteins $proteins --output ${basename}_____pia_extraction.csv
     """
-    //# DEBUGGING
-    //#echo "test_col1,test_col2\nvalue1,value2\n" > ${basename}_____pia_extraction.csv
 }

@@ -20,7 +20,7 @@ rm -rf openms.deb data.tar.gz
 
 # Download Pia:
 rm -rf bin/pia/
-wget -O pia.zip https://github.com/mpc-bioinformatics/pia/releases/download/1.4.7/pia-1.4.7.zip
+wget -O pia.zip https://github.com/medbioinf/pia/releases/download/1.4.8/pia-1.4.8.zip
 mkdir -p ./bin/pia
 unzip -d ./bin/pia pia.zip
 rm -rf pia.zip
