@@ -11,8 +11,8 @@ params.ctm_num_procs_conversion = Runtime.runtime.availableProcessors()  // Numb
 
 // Standalone Workflow
 workflow {
-    rawfiles = Channel.fromPath(params.thermo_raws + "/*.raw")
-    convert_to_mgf(rawfiles)
+    rawfiles = Channel.fromPath(params.ctm_input_thermo_raws + "/*.raw")
+    convert_to_mgf_mzml(rawfiles)
 }
 
 
