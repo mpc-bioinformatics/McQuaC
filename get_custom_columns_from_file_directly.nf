@@ -38,6 +38,13 @@ process retrieve_custom_headers_thermo {
     file "${raw.baseName}_____customs.csv"
 
     """
-    thermo_extract_cutsom_headers.py -raw ${raw} ${params.ccff_header_in_raws} ${params.ccff_header_in_raws_names} -out_csv ${raw.baseName}_____customs.csv 
+    # Pythonnet sometimes fails to exit and throws a mono error
+    thermo_extract_cutsom_headers.py -raw ${raw} ${params.ccff_header_in_raws} ${params.ccff_header_in_raws_names} -out_csv ${raw.baseName}_____customs.csv || true
+
+    # Fail Check if no content was written
+    if ! [ -s "${raw.baseName}_____customs.csv" ];then
+        rm ${raw.baseName}_____customs.csv
+    fi
+
     """
 }

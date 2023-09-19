@@ -66,32 +66,25 @@ if __name__ == "__main__":
 
         print("Field {},\t\tLabel: {}".format(idx, h.label))
         for hp, cn in zip(args.headers_to_parse, args.headers_to_parse_column_name):
-
             if h.label.startswith(hp):
                 # Retrievable in this RAW-file
-                statistics_to_retrieve.append(
-                    (idx, hp, cn)
-                )
-            else: 
-                # Not  retrievable, we set all values to none
-                statistics_to_retrieve.append(
-                    (-1, hp, cn)
-                )
+                statistics_to_retrieve.append((idx, hp, cn))
+
 
     # Retrieve all the information 
     first_scan_number = raw_file.run_header_ex.first_spectrum
     last_scan_number = raw_file.run_header_ex.last_spectrum
     for scan in range(first_scan_number, last_scan_number + 1):
         scan_values = raw_file.get_trailer_extra_information(scan).values
+        scan_statistics = raw_file.get_scan_stats_for_scan_number(scan)
+        start_time_of_scan = scan_statistics.start_time
+        data_dict["Scan_StartTime_zlib"].append(start_time_of_scan)
+        scan_filter = raw_file.get_filter_for_scan_number(scan)
+        data_dict["Scan_msLevel_zlib"].append(scan_filter.ms_order.value)
 
+        # Get Info of filtered statistics we want to track
         for idx, hp, cn in statistics_to_retrieve:
-            
-            if idx == -1:
-                # Cannot be retrieved
-                data_dict[cn].append(None)
-            else:
-                # Can be retrievved
-                data_dict[cn].append(scan_values[idx])
+            data_dict[cn].append(scan_values[idx])
 
 
     # Get all the information from the instruments (in FreeStyle under Devices)
@@ -117,6 +110,9 @@ if __name__ == "__main__":
         # This is currently the case for PROETD and OEI. These are not captured, hence None
         data_dict["pump_preasure_bar_x_axis"] = None
         data_dict["pump_preasure_bar_y_axis"] = None
+
+    # Close raw-file
+    raw_file.dispose()  
 
     # zlib and pickle all the data
     for k, v in data_dict.items():
