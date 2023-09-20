@@ -119,22 +119,23 @@ def read_mzTab(file):
     psm_df = psm_df.loc[psm_df[psm_score_header] <= 0.01]
 
     PSM_count = {}
-    PSM_count["number_filtered_pms"] = psm_df.shape[0]
+    PSM_count["number_filtered_psms"] = psm_df.shape[0]
     
-    charge_counts_above5 = psm_df[psm_df['charge'] > 5]['PSM_ID'].count()
-    charge_counts_1      = psm_df[psm_df['charge'] == 1]['PSM_ID'].count()
-    charge_counts_2      = psm_df[psm_df['charge'] == 2]['PSM_ID'].count()
-    charge_counts_3      = psm_df[psm_df['charge'] == 3]['PSM_ID'].count()
-    charge_counts_4      = psm_df[psm_df['charge'] == 4]['PSM_ID'].count()
-    charge_counts_5      = psm_df[psm_df['charge'] == 5]['PSM_ID'].count()
-    charge_counts = {"Z1": charge_counts_1, "Z2": charge_counts_2, "Z3": charge_counts_3, "Z4": charge_counts_4, "Z5": charge_counts_5, "Z_more": charge_counts_above5}
+    nr_psms = psm_df.shape[0] if psm_df.shape[0] != 0 else 1
+    charge_counts_above5 = psm_df[psm_df['charge'] > 5]['PSM_ID'].count() / nr_psms
+    charge_counts_1      = psm_df[psm_df['charge'] == 1]['PSM_ID'].count() / nr_psms
+    charge_counts_2      = psm_df[psm_df['charge'] == 2]['PSM_ID'].count() / nr_psms
+    charge_counts_3      = psm_df[psm_df['charge'] == 3]['PSM_ID'].count() / nr_psms
+    charge_counts_4      = psm_df[psm_df['charge'] == 4]['PSM_ID'].count() / nr_psms
+    charge_counts_5      = psm_df[psm_df['charge'] == 5]['PSM_ID'].count() / nr_psms
+    charge_counts = {"psm_charge1": charge_counts_1, "psm_charge2": charge_counts_2, "psm_charge3": charge_counts_3, "psm_charge4": charge_counts_4, "psm_charge5": charge_counts_5, "psm_charge_more": charge_counts_above5}
 
-    miss_count_0    = psm_df[psm_df['opt_global_missed_cleavages'] == 0]['PSM_ID'].count()
-    miss_count_1    = psm_df[psm_df['opt_global_missed_cleavages'] == 1]['PSM_ID'].count()
-    miss_count_2    = psm_df[psm_df['opt_global_missed_cleavages'] == 2]['PSM_ID'].count()
-    miss_count_3    = psm_df[psm_df['opt_global_missed_cleavages'] == 3]['PSM_ID'].count()
-    miss_count_more = psm_df[psm_df['opt_global_missed_cleavages'] > 3]['PSM_ID'].count()
-    miss_counts = {"missed_0": miss_count_0, "missed_1": miss_count_1, "missed_2": miss_count_2, "missed_3": miss_count_3, "missed_more": miss_count_more}
+    miss_count_0    = psm_df[psm_df['opt_global_missed_cleavages'] == 0]['PSM_ID'].count() /nr_psms
+    miss_count_1    = psm_df[psm_df['opt_global_missed_cleavages'] == 1]['PSM_ID'].count() /nr_psms
+    miss_count_2    = psm_df[psm_df['opt_global_missed_cleavages'] == 2]['PSM_ID'].count() /nr_psms
+    miss_count_3    = psm_df[psm_df['opt_global_missed_cleavages'] == 3]['PSM_ID'].count() /nr_psms
+    miss_count_more = psm_df[psm_df['opt_global_missed_cleavages'] > 3]['PSM_ID'].count() /nr_psms
+    miss_counts = {"psm_missed_0": miss_count_0, "psm_missed_1": miss_count_1, "psm_missed_2": miss_count_2, "psm_missed_3": miss_count_3, "psm_missed_more": miss_count_more}
 
     return PSM_count, charge_counts, miss_counts
 
