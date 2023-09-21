@@ -36,7 +36,7 @@ def argparse_setup():
         "LM Search Window",
         "Number of LM Found",
         "Last Locking",
-        "LM m/z-Correction",
+        "LM m/z-Correction,LM Correction",
     ])
     parser.add_argument("-headers_to_parse_column_name", "-cn", help="The Headers column name which was parsed (in same order). Can be applied multiple times", action="append", default=[
         "Ion_Injection_Time_pickle_zlib",
@@ -66,9 +66,11 @@ if __name__ == "__main__":
 
         print("Field {},\t\tLabel: {}".format(idx, h.label))
         for hp, cn in zip(args.headers_to_parse, args.headers_to_parse_column_name):
-            if h.label.startswith(hp):
-                # Retrievable in this RAW-file
-                statistics_to_retrieve.append((idx, hp, cn))
+            for hp_part in hp.split(","):
+                if h.label.startswith(hp_part):
+                    # Retrievable in this RAW-file
+                    statistics_to_retrieve.append((idx, hp, cn))
+                    break
 
 
     # Retrieve all the information 
