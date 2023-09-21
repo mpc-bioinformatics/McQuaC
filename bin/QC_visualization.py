@@ -14,6 +14,7 @@ import os
 import base64
 import pickle
 import zlib
+import datetime
 
 # 3rd party imports
 import pandas as pd
@@ -64,7 +65,7 @@ if __name__ == "__main__":
     fig_show = args.fig_show
     isa = args.isa
 
-
+    #csv_file = "temp/quality_control_20230920.csv"
 
 ####################################################################################################
     # read csv file
@@ -87,61 +88,175 @@ if __name__ == "__main__":
         return pickle.loads(uncomp)
 
 
-
-
-### im KNIME ISA gab es 3 plots: 
-
-
-
-
-
     if isa:
-        ### TODO: test when PIA output is integrated
-        ### TODO: Tabelle mit den nr Peptides, nrMS1, TIC, basekpeak, spikeins ....
+       ############################################################################################
+        # Table 0: table with overviw over QC measures. 
+        feature_list = ["filename",
+                        "timestamp",
+                        "number_ungrouped_proteins",
+                        "number_proteins", 
+                        "number_filtered_peptides", 
+                        "number_filtered_pms", # TODO: typo
+                        "total_num_ms1", 
+                        "total_num_ms2",                      
+                        "Total_Ion_Current_Max",
+                        "Base_Peak_Intensity_Max",
+                        "Total_Ion_Current_Max_Up_To_105",
+                        "FIXED_MPCSPIKE1_PEP_old-isa01_MZ_457.2834_RT_2439",
+                        "FIXED_MPCSPIKE2_PEP_old-isa02_MZ_895.9493_RT_4212",
+                        "FIXED_MPCSPIKE3_PEP_old-isa03_MZ_966.088_RT_5925",
+                        "FIXED_MPCSPIKE4_PEP_GEPAAAAAPEAGASPVEK_MZ_815.9118_RT_1890",
+                        "FIXED_MPCSPIKE5_PEP_NLVVGDETTSSLR_MZ_700.8664_RT_2611",
+                        "FIXED_MPCSPIKE6_PEP_LQPGDIGIYR_MZ_571.3156_RT_3067",
+                        "FIXED_MPCSPIKE7_PEP_VVVLPSGALQISR_MZ_674.913_RT_3995",
+                        "FIXED_MPCSPIKE8_PEP_YPGAYYIFQIK_MZ_685.8654_RT_4595",
+                        "FIXED_MPCSPIKE9_PEP_NIPTVNENLENYYLEVNQLEK_MZ_848.7618_RT_5490",
+                        "IDENT_MPCSPIKE1_COUNT",
+                        "IDENT_MPCSPIKE1_DELTA_RT",
+                        "IDENT_MPCSPIKE1_PEP_old-isa01_MZ_457.2834_RT_DELTA",
+                        "IDENT_MPCSPIKE2_COUNT",
+                        "IDENT_MPCSPIKE2_DELTA_RT",
+                        "IDENT_MPCSPIKE2_PEP_old-isa02_MZ_895.9493_RT_DELTA",
+                        "IDENT_MPCSPIKE3_COUNT",
+                        "IDENT_MPCSPIKE3_DELTA_RT",
+                        "IDENT_MPCSPIKE3_PEP_old-isa03_MZ_966.088_RT_DELTA",
+                        "IDENT_MPCSPIKE4_COUNT",
+                        "IDENT_MPCSPIKE4_DELTA_RT",
+                        "IDENT_MPCSPIKE4_PEP_GEPAAAAAPEAGASPVEK_MZ_815.9118_RT_DELTA",
+                        "IDENT_MPCSPIKE5_COUNT",
+                        "IDENT_MPCSPIKE5_DELTA_RT",
+                        "IDENT_MPCSPIKE5_PEP_NLVVGDETTSSLR_MZ_700.8664_RT_DELTA",
+                        "IDENT_MPCSPIKE6_COUNT",
+                        "IDENT_MPCSPIKE6_DELTA_RT",
+                        "IDENT_MPCSPIKE6_PEP_LQPGDIGIYR_MZ_571.3156_RT_DELTA",
+                        "IDENT_MPCSPIKE7_COUNT",
+                        "IDENT_MPCSPIKE7_DELTA_RT",
+                        "IDENT_MPCSPIKE7_PEP_VVVLPSGALQISR_MZ_674.913_RT_DELTA",
+                        "IDENT_MPCSPIKE8_COUNT",
+                        "IDENT_MPCSPIKE8_DELTA_RT",
+                        "IDENT_MPCSPIKE8_PEP_YPGAYYIFQIK_MZ_685.8654_RT_DELTA",
+                        "IDENT_MPCSPIKE9_COUNT",
+                        "IDENT_MPCSPIKE9_DELTA_RT",
+                        "IDENT_MPCSPIKE9_PEP_NIPTVNENLENYYLEVNQLEK_MZ_848.7618_RT_DELTA"
+                    ]
 
-        '''
-        #   Figure 1: Number of proteins, protein groups and unfiltered protein groups
-        #### TODO: has to be tested, when PIA output is finished!
-        df_pl1_isa = df[["filename", "nrProteins", "number-filtered-protein-groups", "nrProteingroups_unfiltered"]]
+        x = [datetime.datetime.utcfromtimestamp(x) for x in df["timestamp"]] # convert timestamp to datetime
+        df_isatable0 = df[feature_list]
+        df_isatable0 = df_isatable0.loc[:,:].copy()
+        df_isatable0.loc[:,"timestamp"] = x
+        df_isatable0.to_csv(output_path + "/isatable0_summary.csv")
+
+        
+        #   Figure 1: Number of protein groups and accessions
+        df_pl1_isa = df[["filename", "number_proteins", "number_ungrouped_proteins"]]
         df_pl1_long = df_pl1_isa.melt(id_vars = ["filename"])
 
         fig1_isa = px.bar(df_pl1_long, x="filename", y="value", color="variable", barmode = "group", 
-                    title = "Number of proteins, protein groups and unfiltered protein groups")
+                    title = "Number of protein groups and accessions")
         fig1_isa.update_yaxes(exponentformat="none") 
         if fig_show: 
             fig1_isa.show()
 
-        with open(output_path +"/isafig1_barplot_proteins_proteingroups.json", "w") as json_file:
+        with open(output_path +"/isafig1_barplot_proteingroups.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig1_isa))
+        pyo.plot(fig1_isa, filename = output_path +"/isafig1_barplot_proteingroups.html")
 
 
         # Figure 2: Number of peptides
-        #### TODO: has to be tested, when PIA output is finished!
-        df_pl2_isa = df[["filename", "number-filtered-peptides"]]
+        df_pl2_isa = df[["filename", "number_filtered_peptides"]]
 
-        fig2_isa = px.bar(df_pl2_isa, x="filename", y="number-filtered-peptides", #color="variable", barmode = "group", 
+        fig2_isa = px.bar(df_pl2_isa, x="filename", y="number_filtered_peptides",
                     title = "Number of peptides")
         fig2_isa.update_yaxes(exponentformat="none") 
 
         with open(output_path +"/isafig2_barplot_peptides.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig2_isa))
+        pyo.plot(fig2_isa, filename = output_path +"/isafig2_barplot_peptides.html")
 
         
         # Figure 3: Number of PSMs
         #### TODO: has to be tested, when PIA output is finished!
-        df_pl3_isa = df[["filename", "number-filtered-psms"]]
+        df_pl3_isa = df[["filename", "number_filtered_pms"]] # TODO: typo in psms
 
-        fig3_isa = px.bar(df_pl3_isa, x="filename", y="number-filtered-psms", #color="variable", barmode = "group", 
+        fig3_isa = px.bar(df_pl3_isa, x="filename", y="number_filtered_pms", 
                     title = "Number of PSMs")
         fig3_isa.update_yaxes(exponentformat="none") 
 
         with open(output_path +"/isafig3_barplot_PSMs.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig3_isa))
-        '''
+        pyo.plot(fig3_isa, filename = output_path +"/isafig3_barplot_PSMs.html")
+        
             
     else:  # normal QC
 
-        ### TODO: beim normalen QC gibts auch ne Tabelle mit den wichtigsten Werten
+        ############################################################################################
+        # Table 0: table with overviw over QC measures. 
+        feature_list = ["filename",
+                        "timestamp",
+                        "total_num_ms1",
+                        "total_num_ms2",
+                        "number_filtered_pms", # TODO: typo
+                        "number_filtered_peptides", 
+                        "number_proteins", 
+                        "total_num_ident_features",
+                        "total_num_features",
+                        "RT_duration", 
+                        "RT_TIC_Q_000-025",
+                        "RT_TIC_Q_025-050",
+                        "RT_TIC_Q_050-075",
+                        "RT_TIC_Q_075-100",
+                        "RT_MS1_Q_000-025",
+                        "RT_MS1_Q_025-050",
+                        "RT_MS1_Q_050-075",
+                        "RT_MS1_Q_075-100",
+                        "RT_MS2_Q_000-025",
+                        "RT_MS2_Q_025-050", 
+                        "RT_MS2_Q_050-075",
+                        "RT_MS2_Q_075-100", 
+                        "MS1-TIC-Change-Q2",
+                        "MS1-TIC-Change-Q3", 
+                        "MS1-TIC-Change-Q4",
+                        "MS1-TIC-Q2",
+                        "MS1-TIC-Q3",
+                        "MS1-TIC-Q4", 
+                        "MS1_Freq_Max",
+                        "MS1_Density_Q1",
+                        "MS1_Density_Q2", 
+                        "MS1_Density_Q3",
+                        "MS2_Freq_Max",
+                        "MS2_Density_Q1",
+                        "MS2_Density_Q2", 
+                        "MS2_Density_Q3",
+                        "MS2_PrecZ_1", 
+                        "MS2_PrecZ_2", 
+                        "MS2_PrecZ_3",
+                        "MS2_PrecZ_4",
+                        "MS2_PrecZ_5",
+                        "MS2_PrecZ_more", 
+                        "accumulated-MS1_TIC", 
+                        "accumulated-MS2_TIC",
+                        "num_features_charge_1",
+                        "num_features_charge_2",
+                        "num_features_charge_3",
+                        "num_features_charge_4",
+                        "num_features_charge_5", 
+                        "Z1",  # TODO: changed column name
+                        "Z2", 
+                        "Z3", 
+                        "Z4", 
+                        "Z5", 
+                        "missed_0",
+                        "missed_1",
+                        "missed_2",
+                        "missed_3",
+                        "missed_more"
+                    ]
+        
+        x = [datetime.datetime.utcfromtimestamp(x) for x in df["timestamp"]] # convert timestamp to datetime
+        df_table0 = df_table0.loc[:,:].copy()
+        df_table0.loc[:,"timestamp"] = x
+        df_table0.to_csv(output_path + "/table0_summary.csv")
+
 
     ################################################################################################
         # Figure 1: Barplot for total number of MS1 and MS2 spectra
@@ -606,9 +721,9 @@ if __name__ == "__main__":
         if fig_show:
             fig13_tmp.show()
 
-'''
+
     ################################################################################################
-        ### Figure 13: Pump Pressure
+        ### Figure 14: Pump Pressure
 
         ### extract data from compressed columns and put them into long format
         x = []
@@ -645,49 +760,43 @@ if __name__ == "__main__":
         })
 
         if not pp_df2.empty:
-            fig13 = px.line(pp_df2, x="x", y="y", color = "filename", title = "Pump Pressure")
-            fig13.update_traces(line=dict(width=0.5))
-            fig13.update_yaxes(exponentformat="E") 
-            fig13.update_layout(width = int(1000), height = int(1000), 
+            fig14 = px.line(pp_df2, x="x", y="y", color = "filename", title = "Pump Pressure")
+            fig14.update_traces(line=dict(width=0.5))
+            fig14.update_yaxes(exponentformat="E") 
+            fig14.update_layout(width = int(1000), height = int(1000), 
                                 xaxis_title = "Time (min)", 
                                 yaxis_title = "Pump pressure")
             if fig_show:
-                fig13.show()
-            with open(output_path +"/fig13_Pump_pressure.json", "w") as json_file:
-                json_file.write(plotly.io.to_json(fig13))
+                fig14.show()
+            with open(output_path +"/fig14_Pump_pressure.json", "w") as json_file:
+                json_file.write(plotly.io.to_json(fig14))
+            pyo.plot(fig14, filename = output_path +"/fig14_Pump_pressure.html")
                     
 
     ################################################################################################
-        # Figure 14: Ion Injection time
+        # Figure 15: Ion Injection time
 
         ### extract data from compressed columns and put them into long format
-        x = []
-        y = []
-        fn = []
+        x = [] # x-axis Scan_StartTime_zlib
+        y = [] # y-axis Ion_Injection_Time_pickle_zlib
+        fn = [] # filename
+        
         for index in df.index:
 
             y_locally = unbase64_uncomp_unpickle(df["Ion_Injection_Time_pickle_zlib"].iloc[index])
-
-            # calculate x values (time) based on RT_duration
-            time_res = df['RT_duration'].iloc[index] /len(y_locally)
-            x_locally = [i * time_res for i in range(0, len(y_locally))] 
-            
-            y_locally = [float(y) for y in y_locally if y is not None]
-            x_locally = [x for x, y in zip(x_locally, y_locally) if y is not None]
-            
-            # With more than 10000 datapoints plotting the data
-            # leads to unnecessary delay. Interpolating 10000 datapoins is usually enough.
-            if len(x_locally) > 10000:
-                samples = int(len(x_locally) / 10000)
-                # Explictly adding the last datapoint to make sure we cover rounding errors when calculating `sample`
-                x_locally = [x_locally[i] for i in range(0, len(x_locally), samples)] + x_locally[-1:]
-                y_locally = [y_locally[i] for i in range(0, len(y_locally), samples)] + y_locally[-1:]
-
+            y_locally = [y_locally[i] for i in range(0, len(y_locally), 2)]  ### TODO: Nur zum Testen weil komischweise doppelte Werte vorhanden
+            x_locally = unbase64_uncomp_unpickle(df["Scan_StartTime_zlib"].iloc[index])
+            mslevel = unbase64_uncomp_unpickle(df["Scan_msLevel_zlib"].iloc[index])
+              
+            # keep only values for MS1 spectra
+            x_locally = [x for x,y in zip(x_locally, mslevel) if y == 1]
+            y_locally = [float(x) for x,y in zip(y_locally, mslevel) if y == 1]
+  
             x += x_locally
             y += y_locally
             fn += [df["filename"].iloc[index]] * len(x_locally)
-
-
+            
+            
         ionInjTime_df = pd.DataFrame({
             "filename": fn,
             "x": x,
@@ -695,64 +804,68 @@ if __name__ == "__main__":
         })
 
         if not ionInjTime_df.empty:
-            fig14 = px.line(ionInjTime_df, x="x", y="y", color = "filename", title = "Ion Injection Time")
-            fig14.update_traces(line=dict(width=0.5))
-            fig14.update_yaxes(exponentformat="E") 
-            fig14.update_layout(width = int(1000), height = int(1000), 
+            fig15 = px.line(ionInjTime_df, x="x", y="y", color = "filename", title = "Ion Injection Time")
+            fig15.update_traces(line=dict(width=0.5))
+            fig15.update_yaxes(exponentformat="E") 
+            fig15.update_layout(width = int(1000), height = int(1000), 
                                 xaxis_title = "Time (min)", 
                                 yaxis_title = "Ion Injection Time (ms)")
             if fig_show:
-                fig14.show()
-            with open(output_path +"/fig14_Ion_Injection_Time.json", "w") as json_file:
-                json_file.write(plotly.io.to_json(fig14))
+                fig15.show()
+            with open(output_path +"/fig15_Ion_Injection_Time.json", "w") as json_file:
+                json_file.write(plotly.io.to_json(fig15))
+            pyo.plot(fig15, filename = output_path +"/fig15_Ion_Injection_Time.html")
 
 
     ################################################################################################
-        # Figure 15: Lock Mass Correction
+        # Figure 16: Lock Mass Correction
 
+        x = [] # x-axis Scan_StartTime_zlib
+        y = [] # y-axis Ion_Injection_Time_pickle_zlib
+        fn = [] # filename
 
-        ### extract data from compressed columns and put them into long format
-        x = []
-        y = []
-        fn = []
         for index in df.index:
+
+            if pd.isnull(df["LM_m_z_Correction_pickle_zlib"].iloc[index]):
+                continue
+
             y_locally = unbase64_uncomp_unpickle(df["LM_m_z_Correction_pickle_zlib"].iloc[index])
-
-            # calculate x values (time) based on RT_duration
-            time_res = df['RT_duration'].iloc[index] /len(y_locally)
-            x_locally = [i * time_res for i in range(0, len(y_locally))] # int(df['RT_duration'].iloc[index])
-
-            y_locally = [float(y) for y in y_locally if y is not None]
-            x_locally = [x for x, y in zip(x_locally, y_locally) if y is not None]
-
+            x_locally = unbase64_uncomp_unpickle(df["Scan_StartTime_zlib"].iloc[index])
+            y_locally = [y_locally[i] for i in range(0, len(y_locally), 2)]  ### TODO: Nur zum Testen weil komischweise doppelte Werte vorhanden
+            
             # With more than 10000 datapoints plotting the data
-            # leads to unnecessary delay. Interpolating 10000 datapoins is usually enough.
+            # leads to unnecessary delay. Interpolating 10000 datapoints is usually enough.
             if len(x_locally) > 10000:
                 samples = int(len(x_locally) / 10000)
                 # Explictly adding the last datapoint to make sure we cover rounding errors when calculating `sample`
                 x_locally = [x_locally[i] for i in range(0, len(x_locally), samples)] + x_locally[-1:]
                 y_locally = [y_locally[i] for i in range(0, len(y_locally), samples)] + y_locally[-1:]
-
+            
+            
+            y_locally = [float(x) for x in y_locally]
             x += x_locally
             y += y_locally
             fn += [df["filename"].iloc[index]] * len(x_locally)
-
+            
         LMCorr_df = pd.DataFrame({
-            "filename": fn,
-            "x": x,
-            "y": y
+        "filename": fn,
+        "x": x,
+        "y": y
         })
 
         if not LMCorr_df.empty:
-            fig15 = px.line(LMCorr_df, x="x", y="y", color = "filename", title = "Lock Mass Correction")
-            fig15.update_traces(line=dict(width=0.5))
-            fig15.update_yaxes(exponentformat="E") 
-            fig15.update_layout(width = int(1000), height = int(1000),
+            fig16 = px.line(LMCorr_df, x="x", y="y", color = "filename", title = "Lock Mass Correction")
+            fig16.update_traces(line=dict(width=0.5))
+            fig16.update_yaxes(exponentformat="E") 
+            fig16.update_layout(width = int(1000), height = int(1000),
                                 xaxis_title = "Time (min)", 
                                 yaxis_title = "LM m/z-Correction (ppm)")
             if fig_show:
-                fig15.show()
-            with open(output_path +"/fig15_Lock_Mass_Correction.json", "w") as json_file:
-                json_file.write(plotly.io.to_json(fig15))
+                fig16.show()
+            with open(output_path +"/fig16_Lock_Mass_Correction.json", "w") as json_file:
+                json_file.write(plotly.io.to_json(fig16))
+            pyo.plot(fig16, filename = output_path +"/fig16_Lock_Mass_Correction.html")
+            
+            
+            
 
-'''
