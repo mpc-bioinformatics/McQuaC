@@ -65,10 +65,10 @@ process comet_search {
 
 
     # We run the Comet Adapter since PIA does not work with comet output and need to mimic everything to satisfy OpenMS
-    #run_decoydatabase.sh -in ${input_fasta} -out ${input_fasta.baseName}_rev.fasta -decoy_string "DECOY_" -method "reverse"
-    #run_cometadapter.sh -PeptideIndexing:unmatched_action warn  -in ${mzml} -out ${mzml.baseName}.idXML -database ${input_fasta.baseName}_rev.fasta -comet_executable ${workflow.projectDir}/bin/comet.linux_v2022.01.0.exe -default_params_file ${mod_file.baseName}_new.txt
+    #\$(get_cur_bin_dir.sh)/openms/usr/bin/DecoyDatabase -in ${input_fasta} -out ${input_fasta.baseName}_rev.fasta -decoy_string "DECOY_" -method "reverse"
+    #\$(get_cur_bin_dir.sh)/openms/usr/bin/CometAdapter -PeptideIndexing:unmatched_action warn  -in ${mzml} -out ${mzml.baseName}.idXML -database ${input_fasta.baseName}_rev.fasta -comet_executable ${workflow.projectDir}/bin/comet.linux_v2022.01.0.exe -default_params_file ${mod_file.baseName}_new.txt
 
     comet.linux_v2022.01.2.exe -P${mod_file.baseName}_new.txt -D${input_fasta} ${mzml}
-    run_idfileconverter.sh -in ${mzml.baseName}.pep.xml -out ${mzml.baseName}.idXML 
+    \$(get_cur_bin_dir.sh)/openms/usr/bin/IDFileConverter -in ${mzml.baseName}.pep.xml -out ${mzml.baseName}.idXML 
     """  
 }

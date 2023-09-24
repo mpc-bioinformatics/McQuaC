@@ -253,7 +253,7 @@ if __name__ == "__main__":
                     ]
         
         x = [datetime.datetime.utcfromtimestamp(x) for x in df["timestamp"]] # convert timestamp to datetime
-        df_table0 = df_table0.loc[:,:].copy()
+        df_table0 = df.loc[:,:].copy()
         df_table0.loc[:,"timestamp"] = x
         df_table0.to_csv(output_path + "/table0_summary.csv")
 
@@ -276,7 +276,7 @@ if __name__ == "__main__":
 
     ################################################################################################
         # Figure 2: Barplot for number of PSMs, peptides, proteins
-        df_pl2 = df[["filename", "number_filtered_pms", "number_filtered_peptides", "number_proteins", "number_ungrouped_proteins"]]  # TODO: typo in "pms" -> "psms"
+        df_pl2 = df[["filename", "number_filtered_psms", "number_filtered_peptides", "number_proteins", "number_ungrouped_proteins"]]
         df_pl2_long = df_pl2.melt(id_vars = ["filename"])
         fig2 = px.bar(df_pl2_long, x="filename", y="value", color="variable", barmode = "group", 
                     title = "Number of filtered PSMs, filtered peptides, filtered protein groups and accessions")
@@ -390,9 +390,8 @@ if __name__ == "__main__":
 
     ################################################################################################
         # Figure 9: PSM charge states (of identified spectra)
-        #### TODO: evtl Spaltennamen mit "psm" ergänzen!
         #### TODO: relative statt absolute Zahlen!
-        df_pl9 = df[["filename", 'Z1', 'Z2', 'Z3', 'Z4', 'Z5']]
+        df_pl9 = df[["filename", 'psm_charge1', 'psm_charge2', 'psm_charge3', 'psm_charge4', 'psm_charge5', 'psm_charge_more']]
         df_pl9_long = df_pl9.melt(id_vars = ["filename"])
         fig9 = px.bar(df_pl9_long, x="filename", y="value", color="variable", title = "Charge states of PSMs")
         fig9.update_xaxes(tickangle=-90)
@@ -404,9 +403,8 @@ if __name__ == "__main__":
 
     ################################################################################################
         # Figure 10: Missed cleavages of PSMs
-        ### TODO: evtl Spaltennamen mit "psm" ergänzen!
         ### TODO: relative statt absolute Zahlen!
-        df_pl10 = df[["filename", 'missed_0', 'missed_1', 'missed_2', 'missed_3', 'missed_more']]
+        df_pl10 = df[["filename", 'psm_missed_0', 'psm_missed_1', 'psm_missed_2', 'psm_missed_3', 'psm_missed_more']]
         df_pl10_long = df_pl10.melt(id_vars = ["filename"])
         fig10 = px.bar(df_pl10_long, x="filename", y="value", color="variable", title = "Number of missed cleavages for PSMs")
         fig10.update_xaxes(tickangle=-90)
@@ -485,11 +483,12 @@ if __name__ == "__main__":
             "num_features_charge_3",
             "num_features_charge_4",
             "num_features_charge_5", 
-            "Z1",
-            "Z2", 
-            "Z3", 
-            "Z4", 
-            "Z5"
+            "psm_charge1",
+            "psm_charge2", 
+            "psm_charge3", 
+            "psm_charge4", 
+            "psm_charge5",
+            "psm_charge_more"
             ]
 
             df_pl11 = df[feature_list]
@@ -730,8 +729,14 @@ if __name__ == "__main__":
         y = []
         fn = []
         for index in df.index:
-            x_locally = unbase64_uncomp_unpickle(df["pump_preasure_bar_x_axis"].iloc[index])
-            y_locally = unbase64_uncomp_unpickle(df["pump_preasure_bar_y_axis"].iloc[index])
+            if pd.isnull(df["THERMO_pump_preasure_bar_x_axis"].iloc[index]):
+                # Skip, there is no Pump pressure available
+                continue
+            x_locally = unbase64_uncomp_unpickle(df["THERMO_pump_preasure_bar_x_axis"].iloc[index])
+            y_locally = unbase64_uncomp_unpickle(df["THERMO_pump_preasure_bar_y_axis"].iloc[index])
+
+            # TODO Add Bruker pump pressure!
+
             if x_locally is None:
                 #print(f"x is None at {index} => {df['filename'].iloc[index]}")
                 continue
@@ -783,10 +788,14 @@ if __name__ == "__main__":
         
         for index in df.index:
 
-            y_locally = unbase64_uncomp_unpickle(df["Ion_Injection_Time_pickle_zlib"].iloc[index])
+            if pd.isnull(df["THERMO_Ion_Injection_Time_pickle_zlib"].iloc[index]):
+                # Skip, there is no Ion Injection Time available
+                continue
+
+            y_locally = unbase64_uncomp_unpickle(df["THERMO_Ion_Injection_Time_pickle_zlib"].iloc[index])
             y_locally = [y_locally[i] for i in range(0, len(y_locally), 2)]  ### TODO: Nur zum Testen weil komischweise doppelte Werte vorhanden
-            x_locally = unbase64_uncomp_unpickle(df["Scan_StartTime_zlib"].iloc[index])
-            mslevel = unbase64_uncomp_unpickle(df["Scan_msLevel_zlib"].iloc[index])
+            x_locally = unbase64_uncomp_unpickle(df["THERMO_Scan_StartTime_zlib"].iloc[index])
+            mslevel = unbase64_uncomp_unpickle(df["THERMO_Scan_msLevel_zlib"].iloc[index])
               
             # keep only values for MS1 spectra
             x_locally = [x for x,y in zip(x_locally, mslevel) if y == 1]
@@ -826,11 +835,11 @@ if __name__ == "__main__":
 
         for index in df.index:
 
-            if pd.isnull(df["LM_m_z_Correction_pickle_zlib"].iloc[index]):
+            if pd.isnull(df["THERMO_LM_m_z_Correction_pickle_zlib"].iloc[index]):
                 continue
 
-            y_locally = unbase64_uncomp_unpickle(df["LM_m_z_Correction_pickle_zlib"].iloc[index])
-            x_locally = unbase64_uncomp_unpickle(df["Scan_StartTime_zlib"].iloc[index])
+            y_locally = unbase64_uncomp_unpickle(df["THERMO_LM_m_z_Correction_pickle_zlib"].iloc[index])
+            x_locally = unbase64_uncomp_unpickle(df["THERMO_Scan_StartTime_zlib"].iloc[index])
             y_locally = [y_locally[i] for i in range(0, len(y_locally), 2)]  ### TODO: Nur zum Testen weil komischweise doppelte Werte vorhanden
             
             # With more than 10000 datapoints plotting the data

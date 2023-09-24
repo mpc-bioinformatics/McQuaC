@@ -19,11 +19,11 @@ nextflow run \
 // Include all the needed workflows from the sub-workflows
 // Extend this to also extend the QC-Workflow 
 PROJECT_DIR = workflow.projectDir
-include {convert_to_mgf_mzml} from PROJECT_DIR + '/convert_to_mgf_mzml_thermorawfileparser.nf'
+include {convert_to_mgf_mzml} from PROJECT_DIR + '/convert_to_mgf_mzml.nf'
 include {get_various_mzml_infos} from PROJECT_DIR + '/get_mzml_chromatogram_and_more.nf'
 include {ident_via_comet} from PROJECT_DIR + '/identification_via_comet.nf'
 include {execute_pia} from PROJECT_DIR + '/pia.nf'
-include {retrieve_spikeins} from PROJECT_DIR + '/retrieve_spike_ins_thermorawfileparser.nf' // We could also consider to expose params.spk_spike_ins, however it is always fixed for our ISA-stadard!
+include {retrieve_spikeins} from PROJECT_DIR + '/retrieve_spike_ins.nf' // We could also consider to expose params.spk_spike_ins, however it is always fixed for our ISA-stadard!
 include {get_features} from PROJECT_DIR + '/get_features_in_raws.nf'
 include {get_custom_headers} from PROJECT_DIR + '/get_custom_columns_from_file_directly.nf'
 // Each script has its own UNIQUE-param-attribute and can be fine-tuned from this main.nf-script.
@@ -41,11 +41,11 @@ params.main_is_isa = true // Parameter to check if we execute a isa specific xic
 
 // MAIN WORKFLOW
 workflow {
-	// Retrieve RAW-Files
-    rawfiles = Channel.fromPath(params.main_raw_spectra_folder + "/*.raw")
+	// Retrieve RAW-Spectra
+    rawspectra = Channel.fromPath(params.main_raw_spectra_folder + "/*.{raw,d}", type: "any")
 
 	// Convert to needed formats:
-	convert_to_mgf_mzml(rawfiles) // 0 --> .mgf | 1 --> .mzML (peak-picked)
+	convert_to_mgf_mzml(rawspectra) // 0 --> .mgf | 1 --> .mzML (peak-picked)
 	
 	// Retreive MZML Statistics
 	get_various_mzml_infos(convert_to_mgf_mzml.out[1])
@@ -56,7 +56,7 @@ workflow {
 	comet_params = Channel.fromPath(params.main_comet_params)
 	ident_via_comet(convert_to_mgf_mzml.out[0], fasta_file, comet_params)
 	// MS-GF+
-	// convert_to_mgf(rawfiles) //MS-GF+ Workflow requires MGFs
+	// convert_to_mgf(rawspectra) //MS-GF+ Workflow requires MGFs
 	// TODO ||| HERE goes the code!
 	/* END Identify with multiple search engines */
 
@@ -65,14 +65,14 @@ workflow {
 
 	// Specific to ISA: Do XIC-Extraction if specified
 	if (params.main_is_isa) {
-		retrieve_spikeins(rawfiles, execute_pia.out[0].map { it[0] })
+		retrieve_spikeins(rawspectra, execute_pia.out[0].map { it[0] })
 	}
 
 	// Run Feature Finding and Statistics
 	get_features(convert_to_mgf_mzml.out[1], execute_pia.out[0].map { it[0] })
 
 	// Get Thermospecific information from raw
-	get_custom_headers(rawfiles)
+	get_custom_headers(rawspectra)
 
 
 	// Concatenate to large csv
@@ -86,7 +86,7 @@ workflow {
 	
 
 	// Visualize the results
-	//visualize_results(combine_output_to_table.out)
+	visualize_results(combine_output_to_table.out)
 
 }
 
@@ -119,6 +119,8 @@ process visualize_results {
 
     output:
     file("*.json")
+	file("*.html")
+	path("fig13_ionmaps")
 
     """
 	QC_visualization.py -csv_file $complete_csv -output "." 

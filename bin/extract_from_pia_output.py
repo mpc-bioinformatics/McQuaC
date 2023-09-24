@@ -112,7 +112,10 @@ def read_mzTab(file):
     psm_df = psm_df.loc[:,["PSM_ID", "sequence", "accession", "unique", "retention_time", "charge", "opt_global_missed_cleavages", "modifications", "retention_time", "exp_mass_to_charge", "calc_mass_to_charge", "spectra_ref", psm_score_header]]
 
     # group the accessions
-    psm_df['accession'] = psm_df.groupby(by=['PSM_ID'])['accession'].transform(lambda x: ",".join(x))
+    gbseries = psm_df.groupby(by=['PSM_ID'])['accession']
+    psm_df['accession'] = psm_df["PSM_ID"].map(gbseries.apply(",".join))
+    # This uses something incompatible in numpy in some specific versions (e.g. 1.23.5):
+    # psm_df['accession'] = psm_df.groupby(by=['PSM_ID'])['accession'].transform(lambda x: ",".join(x))
     psm_df = psm_df.drop_duplicates()
 
     # filter FDR <= 0.01    # TODO: parameterize?

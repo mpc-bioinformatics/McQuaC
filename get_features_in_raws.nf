@@ -9,7 +9,7 @@ params.gf_ident_files = "$PWD/raws"  // Folder of mzTab Identification files (al
 // Parameters for Feature Detection
 // params.resulolution_featurefinder = "-algortihm:mass_trace:mz_tolerance 0.02 -algorithm:isotopic_pattern:mz_tolerance 0.04"  // Parameters for Low Resolution Machines (Q-TOF)
 params.gf_resolution_featurefinder = "-algorithm:mass_trace:mz_tolerance 0.004 -algorithm:isotopic_pattern:mz_tolerance 0.005"   // Parameters for High Resolution Machines (LTQ-OrbiTrap)
-params.gf_considered_charges_low = "1"  // Charges for the feature finder to use to extract features. In QC this was set to 2:5
+params.gf_considered_charges_low = "3"  // Charges for the feature finder to use to extract features. In QC this was set to 2:5
 params.gf_considered_charges_high = "6"  // Charges for the feature finder to use to extract features. In QC this was set to 2:5
 params.additional_dinosaur_settings = "" // Additional Parameters which can be set for Dinosaur
 
@@ -68,22 +68,22 @@ process run_feature_finder {
 
     """
     # Centroided FF
-    run_featurefindercentroided.sh -in ${mzml} -out ${mzml.baseName}.featureXML -algorithm:isotopic_pattern:charge_low ${params.gf_considered_charges_low} -algorithm:isotopic_pattern:charge_high ${params.gf_considered_charges_high} ${params.gf_resolution_featurefinder}
+    \$(get_cur_bin_dir.sh)/openms/usr/bin/FeatureFinderCentroided -in ${mzml} -out ${mzml.baseName}.featureXML -algorithm:isotopic_pattern:charge_low ${params.gf_considered_charges_low} -algorithm:isotopic_pattern:charge_high ${params.gf_considered_charges_high} ${params.gf_resolution_featurefinder}
     touch ${mzml.baseName}.hills.csv
     
     # Multiplex FF
-    # run_featurefindermultiplex.sh -in ${mzml} -out ${mzml.baseName}.featureXML \
+    # \$(get_cur_bin_dir.sh)/openms/usr/bin/FeatureFinderMultiplex -in ${mzml} -out ${mzml.baseName}.featureXML \
     #     -algorithm:labels "" \
     #     -algorithm:charge "1:5"
     # touch ${mzml.baseName}.hills.csv
     # We do not use multiplex, it seems to be broken, mem usage way over 40 GB per RAW file failing by "std::bad_alloc"
     
     # Dinosaur FF
-    # run_dinosaur.sh \
+    # java -jar \$(get_cur_bin_dir.sh)/Dinosaur.jar \
     #    --writeHills \
     #    --writeMsInspect \
     #    ${params.additional_dinosaur_settings} --mzML ${mzml}
-    # run_fileconverter.sh -in ${mzml.baseName}.msInspect.tsv -out ${mzml.baseName}.featureXML
+    # \$(get_cur_bin_dir.sh)/openms/usr/bin/FileConverter -in ${mzml.baseName}.msInspect.tsv -out ${mzml.baseName}.featureXML
     """
 }
 
@@ -97,7 +97,7 @@ process map_features_with_idents {
     tuple file("${featurexml.baseName}_with_idents.featureXML"), file(hills), val("${featurexml.baseName}")
     """
     convert_mztab_to_idxml.py -mztab ${ident} -out_idxml ${ident.baseName}.idXML
-    run_idmapper.sh -id ${ident.baseName}.idXML -in ${featurexml} -out ${featurexml.baseName}_with_idents.featureXML
+    \$(get_cur_bin_dir.sh)/openms/usr/bin/IDMapper -id ${ident.baseName}.idXML -in ${featurexml} -out ${featurexml.baseName}_with_idents.featureXML
     """
 }
 

@@ -2,7 +2,7 @@
 nextflow.enable.dsl=2
 
 // Parameters required for standalone execution
-params.spk_thermo_raws = "$PWD/raws"  // Databasefile in SP-EMBL
+params.spk_raw_spectra = "$PWD/raws"  // Databasefile in SP-EMBL
 params.spk_identification_files = "$PWD/idents" // Identification-Files in mzTAB-Format already FDR-filtered (e.g. by PIA)
 
 // Optional Parameters
@@ -12,7 +12,7 @@ params.spk_num_procs_extraction = Runtime.runtime.availableProcessors()  // Numb
 
 
 workflow {
-    rawfiles = Channel.fromPath(params.spk_thermo_raws + "/*.raw")
+    rawfiles = Channel.fromPath(params.spk_raw_spectra + "/*.{raw,d}", type: "any")
     ident_files = Channel.fromPath(params.spk_identification_files + "/*.mzTab")
     retrieve_spikeins(rawfiles, ident_files)
 }
@@ -41,8 +41,8 @@ workflow retrieve_spikeins {
 
         // Finally, we generate the input json, retrieve it via trfp and parse back this results into a csv-format
         generate_json_and_association(raw_id_spikes)
-        retrieve_via_thermorawfileparser(generate_json_and_association.out)
-        get_statistics(retrieve_via_thermorawfileparser.out)
+        retrieve_xics_from_raw_spectra(generate_json_and_association.out)
+        get_statistics(retrieve_xics_from_raw_spectra.out)
 
     emit:
         get_statistics.out
@@ -62,7 +62,7 @@ process generate_json_and_association {
 }
 
 // Actual retrieval of the XICs using TRFP (Wrapper)
-process retrieve_via_thermorawfileparser {
+process retrieve_xics_from_raw_spectra {
     maxForks params.spk_num_procs_extraction
     stageInMode "copy"
 
@@ -74,7 +74,13 @@ process retrieve_via_thermorawfileparser {
 
 
     """
-    run_thermorawfileparser.sh xic -i $raw -j $trfp_input 
+    if [[ "${raw}" == *.raw ]]; then
+        mono \$(get_cur_bin_dir.sh)/ThermoRawFileParser_v1.4.0/ThermoRawFileParser.exe xic -i $raw -j $trfp_input 
+    fi
+
+    if [[ "${raw}" == *.d ]]; then
+        extract_xic_bruker.py -d_folder ${raw} -in_json ${trfp_input} -out_json ${raw.baseName}.json
+    fi 
     """
 }
 

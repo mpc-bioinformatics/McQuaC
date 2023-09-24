@@ -39,16 +39,16 @@ def argparse_setup():
         "LM m/z-Correction,LM Correction",
     ])
     parser.add_argument("-headers_to_parse_column_name", "-cn", help="The Headers column name which was parsed (in same order). Can be applied multiple times", action="append", default=[
-        "Ion_Injection_Time_pickle_zlib",
-        "Number_of_Lock_Masses_pickle_zlib",
-        "Lock_Mass_1_pickle_zlib",
-        "Lock_Mass_2_pickle_zlib",
-        "Lock_Mass_3_pickle_zlib",
-        "LM_Search_Window_pickle_zlib",
-        "LM_Search_Window_pickle_zlib",
-        "Number_of_LM_Found_pickle_zlib",
-        "Last_Locking_pickle_zlib",
-        "LM_m_z_Correction_pickle_zlib",
+        "THERMO_Ion_Injection_Time_pickle_zlib",
+        "THERMO_Number_of_Lock_Masses_pickle_zlib",
+        "THERMO_Lock_Mass_1_pickle_zlib",
+        "THERMO_Lock_Mass_2_pickle_zlib",
+        "THERMO_Lock_Mass_3_pickle_zlib",
+        "THERMO_LM_Search_Window_pickle_zlib",
+        "THERMO_LM_Search_Window_pickle_zlib",
+        "THERMO_Number_of_LM_Found_pickle_zlib",
+        "THERMO_Last_Locking_pickle_zlib",
+        "THERMO_LM_m_z_Correction_pickle_zlib",
     ])
     return parser.parse_args()
 
@@ -80,9 +80,9 @@ if __name__ == "__main__":
         scan_values = raw_file.get_trailer_extra_information(scan).values
         scan_statistics = raw_file.get_scan_stats_for_scan_number(scan)
         start_time_of_scan = scan_statistics.start_time
-        data_dict["Scan_StartTime_zlib"].append(start_time_of_scan)
+        data_dict["THERMO_Scan_StartTime_zlib"].append(start_time_of_scan)
         scan_filter = raw_file.get_filter_for_scan_number(scan)
-        data_dict["Scan_msLevel_zlib"].append(scan_filter.ms_order.value)
+        data_dict["THERMO_Scan_msLevel_zlib"].append(scan_filter.ms_order.value)
 
         # Get Info of filtered statistics we want to track
         for idx, hp, cn in statistics_to_retrieve:
@@ -105,13 +105,13 @@ if __name__ == "__main__":
         if label in ("Pump_Pressure bar", "NC_Pump_Pressure bar"):
             # This works for QexHF, QeXI and FLI (NC_Pump_Pressure) and EX, EXI and EXII (Pump_Preasure)
             data = raw_file.get_chromatogram_data([settings], 1, -1)
-            data_dict["pump_preasure_bar_y_axis"] = list(data.intensities_array[0])
-            data_dict["pump_preasure_bar_x_axis"] = list(data.positions_array[0])
+            data_dict["THERMO_pump_preasure_bar_y_axis"] = list(data.intensities_array[0])
+            data_dict["THERMO_pump_preasure_bar_x_axis"] = list(data.positions_array[0])
    
     if "pump_preasure_bar_x_axis" not in data_dict:
         # This is currently the case for PROETD and OEI. These are not captured, hence None
-        data_dict["pump_preasure_bar_x_axis"] = None
-        data_dict["pump_preasure_bar_y_axis"] = None
+        data_dict["THERMO_pump_preasure_bar_x_axis"] = None
+        data_dict["THERMO_pump_preasure_bar_y_axis"] = None
 
     # Close raw-file
     raw_file.dispose()  

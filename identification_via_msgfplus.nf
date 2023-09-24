@@ -69,7 +69,7 @@ process msgfplus_search_mgf {
     """
     touch -m ${input_fasta.baseName}*
 
-    run_msgfplus.sh ${params.jvm_params} -d ${input_fasta} -s ${mgf_file} -tda ${params.tda} -decoy DECOY_ -conf ${mod_file} -o ${mgf_file.baseName}.mzid
+    java -${params.jvm_params} -jar \$(get_cur_bin_dir.sh)/MSGFPLUS_v20220418/MSGFPlus.jar -d ${input_fasta} -s ${mgf_file} -tda ${params.tda} -decoy DECOY_ -conf ${mod_file} -o ${mgf_file.baseName}.mzid
 
     """  
 }

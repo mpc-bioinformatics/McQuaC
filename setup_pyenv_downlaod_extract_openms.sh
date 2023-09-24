@@ -29,12 +29,31 @@ rm -rf pia.zip
 # Download Dinosaur
 wget  -O bin/Dinosaur.jar https://github.com/fickludd/dinosaur/releases/download/1.2.0/Dinosaur-1.2.0.free.jar
 
-# Install environment
+
+
+
+### Install tdf2mzml
+rm -rf bin/tdf2mzml
+git clone https://github.com/mafreitas/tdf2mzml bin/tdf2mzml
+OLD_PWD=$(pwd)
+cd bin/tdf2mzml
+git checkout 85c2b258ea418369ee8753294d8b57978d6ec747
+pip install -r requirements.txt
+cd $OLD_PWD
+# You can call tdf2mzml via: LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$pwd/bin/tdf2mzml python bin/tdf2mzml tdf2mzml.py 
+
+
+### Install python dependencies
+python -m pip install numpy==1.23.5
+python -m pip install fisher-py==1.0.21
 python -m pip install pyopenms
 python -m pip install pandas
 python -m pip install sqlalchemy
 python -m pip install plotly
 python -m pip install scikit-learn
-python -m pip install numpy
-python -m pip install fisher-py==1.0.21
+python -m pip install alphatims
+python -m pip install nextflow
 
+
+# Make the executables visible in nextflow
+chmod +x bin/*
