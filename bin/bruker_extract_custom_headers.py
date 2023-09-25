@@ -4,8 +4,6 @@ import sys
 import os
 import sqlite3
 import argparse
-from alphatims.bruker import TimsTOF
-import alphatims.plotting
 import zlib
 import pickle
 import base64
@@ -39,9 +37,6 @@ def argparse_setup():
 if __name__ == "__main__":
 
     args = argparse_setup()
-
-    args.d_folder = "/home/luxii/Documents/RAWs_BRUKER/TIM0000136_GA6_1_353.d"
-    
 
     con = sqlite3.connect(args.d_folder + os.sep + "analysis.tdf")
     cur = con.cursor()
