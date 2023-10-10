@@ -43,7 +43,6 @@ if __name__ == "__main__":
     args = argparse_setup()
     print(args)
 
-### TODO: plots auch als plotly-html ausgeben
 
 ####################################################################################################
     # parameters
@@ -79,6 +78,11 @@ if __name__ == "__main__":
             dataframe.insert(0, column_name, filenames)
         return dataframe
     df = add_filename_column(df, "filename")
+    
+    # sort data by name run name to have the right order for the plots
+    df = df.sort_values(by = "filename")
+    df.reset_index(drop = True, inplace = True)
+    
 
 ####################################################################################################
     # short function to extract infos from compressed columns
@@ -335,7 +339,7 @@ if __name__ == "__main__":
         #fig3.update_layout(width = int(1000), height = int(1000))
         if fig_show:
             fig4.show()
-        with open(output_path +"/fig3_TIC_overlay.json", "w") as json_file:
+        with open(output_path +"/fig4_TIC_overlay.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig4))
         pyo.plot(fig4, filename = output_path +"/fig4_TIC_overlay.html")
 
@@ -709,7 +713,7 @@ if __name__ == "__main__":
 
         for file in df["filename"]:
             ionmap_df2_tmp = ionmap_df2[ionmap_df2["filename"] == file]
-            fig13_tmp = px.density_contour(ionmap_df2_tmp, x="RT", y="MZ", title = file)
+            fig13_tmp = px.density_contour(ionmap_df2_tmp, x="RT", y="MZ", title = file, nbinsx = 50, nbinsy = 50)
             fig13_tmp.update_traces(contours_coloring="fill", contours_showlabels = True)
             #if fig_show: 
                 #fig12_tmp.show()
@@ -829,51 +833,73 @@ if __name__ == "__main__":
     ################################################################################################
         # Figure 16: Lock Mass Correction
 
-        x = [] # x-axis Scan_StartTime_zlib
-        y = [] # y-axis Ion_Injection_Time_pickle_zlib
-        fn = [] # filename
+        # Important: Older machines like PROETD or OEI do not have Lock Mass Correction, so the respective
+        # columns may not exist    
 
-        for index in df.index:
+        if "THERMO_LM_m_z_Correction_pickle_zlib" in df.columns:
 
-            if pd.isnull(df["THERMO_LM_m_z_Correction_pickle_zlib"].iloc[index]):
-                continue
+            x = [] # x-axis Scan_StartTime_zlib
+            y = [] # y-axis Ion_Injection_Time_pickle_zlib
+            fn = [] # filename
 
-            y_locally = unbase64_uncomp_unpickle(df["THERMO_LM_m_z_Correction_pickle_zlib"].iloc[index])
-            x_locally = unbase64_uncomp_unpickle(df["THERMO_Scan_StartTime_zlib"].iloc[index])
-            y_locally = [y_locally[i] for i in range(0, len(y_locally), 2)]  ### TODO: Nur zum Testen weil komischweise doppelte Werte vorhanden
-            
-            # With more than 10000 datapoints plotting the data
-            # leads to unnecessary delay. Interpolating 10000 datapoints is usually enough.
-            if len(x_locally) > 10000:
-                samples = int(len(x_locally) / 10000)
-                # Explictly adding the last datapoint to make sure we cover rounding errors when calculating `sample`
-                x_locally = [x_locally[i] for i in range(0, len(x_locally), samples)] + x_locally[-1:]
-                y_locally = [y_locally[i] for i in range(0, len(y_locally), samples)] + y_locally[-1:]
-            
-            
-            y_locally = [float(x) for x in y_locally]
-            x += x_locally
-            y += y_locally
-            fn += [df["filename"].iloc[index]] * len(x_locally)
-            
-        LMCorr_df = pd.DataFrame({
-        "filename": fn,
-        "x": x,
-        "y": y
-        })
+            for index in df.index:
 
-        if not LMCorr_df.empty:
-            fig16 = px.line(LMCorr_df, x="x", y="y", color = "filename", title = "Lock Mass Correction")
-            fig16.update_traces(line=dict(width=0.5))
-            fig16.update_yaxes(exponentformat="E") 
-            fig16.update_layout(width = int(1000), height = int(1000),
-                                xaxis_title = "Time (min)", 
-                                yaxis_title = "LM m/z-Correction (ppm)")
-            if fig_show:
-                fig16.show()
-            with open(output_path +"/fig16_Lock_Mass_Correction.json", "w") as json_file:
-                json_file.write(plotly.io.to_json(fig16))
-            pyo.plot(fig16, filename = output_path +"/fig16_Lock_Mass_Correction.html")
+                if pd.isnull(df["THERMO_LM_m_z_Correction_pickle_zlib"].iloc[index]):
+                    continue
+
+                y_locally = unbase64_uncomp_unpickle(df["THERMO_LM_m_z_Correction_pickle_zlib"].iloc[index])
+                x_locally = unbase64_uncomp_unpickle(df["THERMO_Scan_StartTime_zlib"].iloc[index])
+                y_locally = [y_locally[i] for i in range(0, len(y_locally), 2)]  ### TODO: Nur zum Testen weil komischweise doppelte Werte vorhanden
+                
+                # With more than 10000 datapoints plotting the data
+                # leads to unnecessary delay. Interpolating 10000 datapoints is usually enough.
+                if len(x_locally) > 10000:
+                    samples = int(len(x_locally) / 10000)
+                    # Explictly adding the last datapoint to make sure we cover rounding errors when calculating `sample`
+                    x_locally = [x_locally[i] for i in range(0, len(x_locally), samples)] + x_locally[-1:]
+                    y_locally = [y_locally[i] for i in range(0, len(y_locally), samples)] + y_locally[-1:]
+                
+                
+                y_locally = [float(x) for x in y_locally]
+                x += x_locally
+                y += y_locally
+                fn += [df["filename"].iloc[index]] * len(x_locally)
+                
+            LMCorr_df = pd.DataFrame({
+            "filename": fn,
+            "x": x,
+            "y": y
+            })
+
+            if not LMCorr_df.empty:
+                fig16 = px.line(LMCorr_df, x="x", y="y", color = "filename", title = "Lock Mass Correction")
+                fig16.update_traces(line=dict(width=0.5))
+                fig16.update_yaxes(exponentformat="E") 
+                fig16.update_layout(width = int(1000), height = int(1000),
+                                    xaxis_title = "Time (min)", 
+                                    yaxis_title = "LM m/z-Correction (ppm)")
+                
+        else:
+           
+            fig16 = go.Figure()
+            fig16.add_annotation(
+                x=0.5,
+                y=0.5,
+                text="No Lock Mass Correction in Data Set!",
+                showarrow=False,
+                font=dict(size=14)
+            )
+            fig16.update_layout(
+                width=600,
+                height=400,
+                title="Empty Plot"
+            )
+
+        if fig_show:
+            fig16.show()
+        with open(output_path +"/fig16_Lock_Mass_Correction.json", "w") as json_file:
+            json_file.write(plotly.io.to_json(fig16))
+        pyo.plot(fig16, filename = output_path +"/fig16_Lock_Mass_Correction.html")
             
             
             
