@@ -81,7 +81,7 @@ workflow {
 		get_features.out.map { it[1] }.collect(),
 		execute_pia.out[1].collect(),
 		get_custom_headers.out.collect()
-	).collect().view()
+	).collect()
 	combine_output_to_table(combined_csvs)
 	
 
