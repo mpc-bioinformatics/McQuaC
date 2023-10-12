@@ -23,9 +23,12 @@ import numpy as np
 import plotly
 import plotly.express as px
 import plotly.graph_objects as go
-import plotly.offline as pyo
+#import plotly.offline as pyo
+import plotly.io as pio
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+
+pio.renderers.default = "png"
 
 
 def argparse_setup():
@@ -61,7 +64,7 @@ if __name__ == "__main__":
     ### folder to save the plots as json files
     output_path = args.output    
 
-    fig_show = args.fig_show
+    fig_show = False #args.fig_show
     isa = args.isa
 
     #csv_file = "temp/quality_control_20230920.csv"
@@ -163,7 +166,8 @@ if __name__ == "__main__":
 
         with open(output_path +"/isafig1_barplot_proteingroups.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig1_isa))
-        pyo.plot(fig1_isa, filename = output_path +"/isafig1_barplot_proteingroups.html")
+        #pyo.plot(fig1_isa, filename = output_path +"/isafig1_barplot_proteingroups.html")
+        fig1_isa.write_html(file = output_path +"/isafig1_barplot_proteingroups.html", auto_open = False)
 
 
         # Figure 2: Number of peptides
@@ -175,11 +179,11 @@ if __name__ == "__main__":
 
         with open(output_path +"/isafig2_barplot_peptides.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig2_isa))
-        pyo.plot(fig2_isa, filename = output_path +"/isafig2_barplot_peptides.html")
+        #pyo.plot(fig2_isa, filename = output_path +"/isafig2_barplot_peptides.html")
+        fig2_isa.write_html(file = output_path +"/isafig2_barplot_peptides.html", auto_open = False)
 
         
         # Figure 3: Number of PSMs
-        #### TODO: has to be tested, when PIA output is finished!
         df_pl3_isa = df[["filename", "number_filtered_pms"]] # TODO: typo in psms
 
         fig3_isa = px.bar(df_pl3_isa, x="filename", y="number_filtered_pms", 
@@ -188,7 +192,8 @@ if __name__ == "__main__":
 
         with open(output_path +"/isafig3_barplot_PSMs.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig3_isa))
-        pyo.plot(fig3_isa, filename = output_path +"/isafig3_barplot_PSMs.html")
+        #pyo.plot(fig3_isa, filename = output_path +"/isafig3_barplot_PSMs.html")
+        fig3_isa.write_html(file = output_path +"/isafig3_barplot_PSMs.html", auto_open = False)
         
             
     else:  # normal QC
@@ -199,7 +204,7 @@ if __name__ == "__main__":
                         "timestamp",
                         "total_num_ms1",
                         "total_num_ms2",
-                        "number_filtered_pms", # TODO: typo
+                        "number_filtered_psms",
                         "number_filtered_peptides", 
                         "number_proteins", 
                         "total_num_ident_features",
@@ -244,23 +249,24 @@ if __name__ == "__main__":
                         "num_features_charge_3",
                         "num_features_charge_4",
                         "num_features_charge_5", 
-                        "Z1",  # TODO: changed column name
-                        "Z2", 
-                        "Z3", 
-                        "Z4", 
-                        "Z5", 
-                        "missed_0",
-                        "missed_1",
-                        "missed_2",
-                        "missed_3",
-                        "missed_more"
+                        "psm_charge1",
+                        "psm_charge2", 
+                        "psm_charge3", 
+                        "psm_charge4", 
+                        "psm_charge5",
+                        "psm_charge_more", 
+                        "psm_missed_0",
+                        "psm_missed_1",
+                        "psm_missed_2",
+                        "psm_missed_3",
+                        "psm_missed_more"
                     ]
         
         x = [datetime.datetime.utcfromtimestamp(x) for x in df["timestamp"]] # convert timestamp to datetime
-        df_table0 = df.loc[:,:].copy()
+        df_table0 = df[feature_list]
+        df_table0 = df_table0.loc[:,:].copy()
         df_table0.loc[:,"timestamp"] = x
         df_table0.to_csv(output_path + "/table0_summary.csv")
-
 
     ################################################################################################
         # Figure 1: Barplot for total number of MS1 and MS2 spectra
@@ -274,8 +280,8 @@ if __name__ == "__main__":
             fig1.show()
         with open(output_path +"/fig1_barplot_MS1_MS2.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig1))
-        pyo.plot(fig1, filename = output_path +"/fig1_barplot_MS1_MS2.html")
-        
+        #pyo.plot(fig1, filename = output_path +"/fig1_barplot_MS1_MS2.html")
+        fig1.write_html(file = output_path +"/fig1_barplot_MS1_MS2.html", auto_open = False)
 
 
     ################################################################################################
@@ -289,7 +295,8 @@ if __name__ == "__main__":
             fig2.show()
         with open(output_path +"/fig2_barplot_PSMs_peptides_proteins.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig2))
-        pyo.plot(fig2, filename = output_path +"/fig2_barplot_PSMs_peptides_proteins.html")
+        #pyo.plot(fig2, filename = output_path +"/fig2_barplot_PSMs_peptides_proteins.html")
+        fig2.write_html(file = output_path +"/fig2_barplot_PSMs_peptides_proteins.html", auto_open = False)
 
     ################################################################################################
         # Figure 3: Barplot for features and identified features
@@ -303,14 +310,14 @@ if __name__ == "__main__":
             fig3.show()
         with open(output_path +"/fig3_barplot_features.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig3))
-        pyo.plot(fig3, filename = output_path +"/fig3_barplot_features.html")
+        #pyo.plot(fig3, filename = output_path +"/fig3_barplot_features.html")
+        fig3.write_html(file = output_path +"/fig3_barplot_features.html", auto_open = False)
 
 
     ####################################################################################################
         ## Figure 4: TIC Overlay as Lineplot
         offset_ratio = float(args.tic_overlay_offset)
 
-        #MS1_TICs = df[["ms1_tic_array", "ms1_rt_array"]]
         tic_df = []
         for index in df.index:
             tic = dict(TIC=ast.literal_eval(df["ms1_tic_array"].iloc[index]),
@@ -319,11 +326,9 @@ if __name__ == "__main__":
             tic = pd.DataFrame(tic)
             tic_df.append(tic)
         tic_df2 = pd.concat(tic_df)
-        #print(tic_df2)
 
-        #TIC_list2 = pd.concat(TIC_list)
         offset = max(tic_df2["TIC"])
-        #print(offset)
+
 
         offset_tmp = 0
         tic_df3 = []
@@ -336,12 +341,12 @@ if __name__ == "__main__":
         fig4 = px.line(tic_df, x="RT", y="TIC", color = "filename", title = "TIC overlay")
         fig4.update_traces(line=dict(width=0.5))
         fig4.update_yaxes(exponentformat="E") 
-        #fig3.update_layout(width = int(1000), height = int(1000))
         if fig_show:
             fig4.show()
         with open(output_path +"/fig4_TIC_overlay.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig4))
-        pyo.plot(fig4, filename = output_path +"/fig4_TIC_overlay.html")
+        #pyo.plot(fig4, filename = output_path +"/fig4_TIC_overlay.html")
+        fig4.write_html(file = output_path +"/fig4_TIC_overlay.html", auto_open = False)
 
    
     #################################################################################################
@@ -354,7 +359,8 @@ if __name__ == "__main__":
             fig5.show()
         with open(output_path +"/fig5_barplot_TIC_quartiles.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig5))
-        pyo.plot(fig5, filename = output_path +"/fig5_barplot_TIC_quartiles.html")
+        #pyo.plot(fig5, filename = output_path +"/fig5_barplot_TIC_quartiles.html")
+        fig5.write_html(file = output_path +"/fig5_barplot_TIC_quartiles.html", auto_open = False)
 
     ################################################################################################
         # Figure 6: Barplot MS1 TIC quartiles
@@ -366,7 +372,8 @@ if __name__ == "__main__":
             fig6.show()
         with open(output_path +"/fig6_barplot_MS1_TIC_quartiles.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig6))
-        pyo.plot(fig6, filename = output_path +"/fig6_barplot_MS1_TIC_quartiles.html")   
+        #pyo.plot(fig6, filename = output_path +"/fig6_barplot_MS1_TIC_quartiles.html")   
+        fig6.write_html(file = output_path +"/fig6_barplot_MS1_TIC_quartiles.html", auto_open = False)
 
     ################################################################################################
         # Figure 7: Barplot MS2 TIC quartiles
@@ -378,7 +385,8 @@ if __name__ == "__main__":
             fig7.show()
         with open(output_path +"/fig7_barplot_MS2_TIC_quartiles.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig7))
-        pyo.plot(fig7, filename = output_path +"/fig7_barplot_MS2_TIC_quartiles.html")
+        #pyo.plot(fig7, filename = output_path +"/fig7_barplot_MS2_TIC_quartiles.html")
+        fig7.write_html(file = output_path +"/fig7_barplot_MS2_TIC_quartiles.html", auto_open = False)
 
     ################################################################################################
         # Figure 8: Precursor charge states
@@ -390,7 +398,8 @@ if __name__ == "__main__":
             fig8.show()
         with open(output_path +"/fig8_barplot_precursor_chargestate.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig8))
-        pyo.plot(fig8, filename = output_path +"/fig8_barplot__precursor_chargestate.html")
+        #pyo.plot(fig8, filename = output_path +"/fig8_barplot__precursor_chargestate.html")
+        fig8.write_html(file = output_path +"/fig8_barplot__precursor_chargestate.html", auto_open = False)
 
     ################################################################################################
         # Figure 9: PSM charge states (of identified spectra)
@@ -403,7 +412,8 @@ if __name__ == "__main__":
             fig9.show()
         with open(output_path +"/fig9_barplot_PSM_chargestate.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig9))
-        pyo.plot(fig9, filename = output_path +"/fig9_barplot_PSM_chargestate.html")
+        #pyo.plot(fig9, filename = output_path +"/fig9_barplot_PSM_chargestate.html")
+        fig9.write_html(file = output_path +"/fig9_barplot_PSM_chargestate.html", auto_open = False)
 
     ################################################################################################
         # Figure 10: Missed cleavages of PSMs
@@ -416,7 +426,8 @@ if __name__ == "__main__":
             fig10.show()
         with open(output_path +"/fig10_barplot_PSM_missedcleavages.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig10))
-        pyo.plot(fig10, filename = output_path +"/fig10_barplot_PSM_missedcleavages.html")
+        #pyo.plot(fig10, filename = output_path +"/fig10_barplot_PSM_missedcleavages.html")
+        fig10.write_html(file = output_path +"/fig10_barplot_PSM_missedcleavages.html", auto_open = False)
 
 
     #################################################################################################
@@ -428,8 +439,6 @@ if __name__ == "__main__":
         timestamps = df[["timestamp"]].values.flatten().tolist()
         mintime = min(timestamps)
         maxtime = max(timestamps)
-        #print(mintime)
-        #print(maxtime)
 
         ## Calculate scaling of timestamps to colour the points in the PCA plot (percentage between min and max time):
         t_scaled = []
@@ -566,12 +575,14 @@ if __name__ == "__main__":
             fig11.show()
         with open(output_path +"/fig11a_PCA_all.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig11))
-        pyo.plot(fig11, filename = output_path +"/fig11a_PCA_all.html")
+        #pyo.plot(fig11, filename = output_path +"/fig11a_PCA_all.html")
+        fig11.write_html(file = output_path +"/fig11a_PCA_all.html", auto_open = False)
         if fig_show: 
             fig11_loadings.show()
         with open(output_path +"/fig11b_Loadings_all.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig11_loadings))
-        pyo.plot(fig11_loadings, filename = output_path +"/fig11b_Loadings_all.html")
+        #pyo.plot(fig11_loadings, filename = output_path +"/fig11b_Loadings_all.html")
+        fig11_loadings.write_html(file = output_path +"/fig11b_Loadings_all.html", auto_open = False)
 
     ################################################################################################
         # Fig 12 PCA on raw data (only plotted if we have more than one raw file)
@@ -687,12 +698,14 @@ if __name__ == "__main__":
             fig12.show()
         with open(output_path +"/fig12a_PCA_raw.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig12)) 
-        pyo.plot(fig12, filename = output_path +"/fig12_PCA_raw.html")
+        #pyo.plot(fig12, filename = output_path +"/fig12_PCA_raw.html")
+        fig12.write_html(file = output_path +"/fig12_PCA_raw.html", auto_open = False)
         if fig_show: 
             fig12_loadings.show()
         with open(output_path +"/fig12b_Loadings_raw.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig12_loadings))
-        pyo.plot(fig12_loadings, filename = output_path +"/fig12b_Loadings_raw.html")
+        #pyo.plot(fig12_loadings, filename = output_path +"/fig12b_Loadings_raw.html")
+        fig12_loadings.write_html(file = output_path +"/fig12b_Loadings_raw.html", auto_open = False)
             
 
     #################################################################################################
@@ -719,7 +732,8 @@ if __name__ == "__main__":
                 #fig12_tmp.show()
             with open(output_path +"/fig13_ionmaps/fig13_ionmap_" + file + ".json", "w") as json_file:
                 json_file.write(plotly.io.to_json(fig13_tmp))
-            pyo.plot(fig13_tmp, filename = output_path +"/fig13_ionmaps/fig13_ionmap_" + file + ".html")
+            #pyo.plot(fig13_tmp, filename = output_path +"/fig13_ionmaps/fig13_ionmap_" + file + ".html")
+            fig13_tmp.write_html(file = output_path +"/fig13_ionmaps/fig13_ionmap_" + file + ".html", auto_open = False)
 
         if fig_show:
             fig13_tmp.show()
@@ -728,6 +742,8 @@ if __name__ == "__main__":
     ################################################################################################
         ### Figure 14: Pump Pressure
 
+        ### TODO: generate empty plot if this column is missing
+        ### TODO: why is this plot also misisng for EXII???
         ### extract data from compressed columns and put them into long format
         x = []
         y = []
@@ -779,7 +795,8 @@ if __name__ == "__main__":
                 fig14.show()
             with open(output_path +"/fig14_Pump_pressure.json", "w") as json_file:
                 json_file.write(plotly.io.to_json(fig14))
-            pyo.plot(fig14, filename = output_path +"/fig14_Pump_pressure.html")
+            #pyo.plot(fig14, filename = output_path +"/fig14_Pump_pressure.html")
+            fig14.write_html(file = output_path +"/fig14_Pump_pressure.html", auto_open = False)
                     
 
     ################################################################################################
@@ -827,7 +844,8 @@ if __name__ == "__main__":
                 fig15.show()
             with open(output_path +"/fig15_Ion_Injection_Time.json", "w") as json_file:
                 json_file.write(plotly.io.to_json(fig15))
-            pyo.plot(fig15, filename = output_path +"/fig15_Ion_Injection_Time.html")
+            #pyo.plot(fig15, filename = output_path +"/fig15_Ion_Injection_Time.html")
+            fig15.write_html(file = output_path +"/fig15_Ion_Injection_Time.html", auto_open = False)
 
 
     ################################################################################################
@@ -899,7 +917,8 @@ if __name__ == "__main__":
             fig16.show()
         with open(output_path +"/fig16_Lock_Mass_Correction.json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig16))
-        pyo.plot(fig16, filename = output_path +"/fig16_Lock_Mass_Correction.html")
+        #pyo.plot(fig16, filename = output_path +"/fig16_Lock_Mass_Correction.html")
+        fig16.write_html(file = output_path +"/fig16_Lock_Mass_Correction.html", auto_open = False)
             
             
             

@@ -15,8 +15,11 @@ import numpy as np
 from sqlalchemy import create_engine, text, bindparam
 import plotly
 import plotly.express as px
+import plotly.io as pio
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+
+pio.renderers.default = "png"
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
