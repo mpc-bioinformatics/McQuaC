@@ -120,6 +120,7 @@ process visualize_results {
     output:
     file("*.json")
 	file("*.html")
+	file("*.csv")
 	path("fig13_ionmaps")
 
     """
