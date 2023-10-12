@@ -64,7 +64,7 @@ if __name__ == "__main__":
     ### folder to save the plots as json files
     output_path = args.output    
 
-    fig_show = False #args.fig_show
+    fig_show = args.fig_show
     isa = args.isa
 
     #csv_file = "temp/quality_control_20230920.csv"
