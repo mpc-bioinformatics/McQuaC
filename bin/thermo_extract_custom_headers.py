@@ -108,7 +108,7 @@ if __name__ == "__main__":
             data_dict["THERMO_pump_preasure_bar_y_axis"] = list(data.intensities_array[0])
             data_dict["THERMO_pump_preasure_bar_x_axis"] = list(data.positions_array[0])
    
-    if "pump_preasure_bar_x_axis" not in data_dict:
+    if "THERMO_pump_preasure_bar_x_axis" not in data_dict:
         # This is currently the case for PROETD and OEI. These are not captured, hence None
         data_dict["THERMO_pump_preasure_bar_x_axis"] = None
         data_dict["THERMO_pump_preasure_bar_y_axis"] = None
