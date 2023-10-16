@@ -742,48 +742,54 @@ if __name__ == "__main__":
     ################################################################################################
         ### Figure 14: Pump Pressure
 
-        ### TODO: generate empty plot if this column is missing
-        ### TODO: why is this plot also misisng for EXII???
-        ### extract data from compressed columns and put them into long format
-        x = []
-        y = []
-        fn = []
-        for index in df.index:
-            if pd.isnull(df["THERMO_pump_preasure_bar_x_axis"].iloc[index]):
-                # Skip, there is no Pump pressure available
-                continue
-            x_locally = unbase64_uncomp_unpickle(df["THERMO_pump_preasure_bar_x_axis"].iloc[index])
-            y_locally = unbase64_uncomp_unpickle(df["THERMO_pump_preasure_bar_y_axis"].iloc[index])
 
-            # TODO Add Bruker pump pressure!
+        if "THERMO_pump_preasure_bar_x_axis" in df.columns:
 
-            if x_locally is None:
-                #print(f"x is None at {index} => {df['filename'].iloc[index]}")
-                continue
-            if y_locally is None:
-                #print(f"y is None at {index} => {df['filename'].iloc[index]}")
-                continue
-            if len(x_locally) != len(y_locally):
-                raise ValueError("x and y does not have same length")
+            ### TODO: generate empty plot if this column is missing
+            ### TODO: why is this plot also misisng for EXII???
+            ### extract data from compressed columns and put them into long format
+            x = []
+            y = []
+            fn = []
+            for index in df.index:
+                #if pd.isnull(df["THERMO_pump_preasure_bar_x_axis"].iloc[index]):
+                    # Skip, there is no Pump pressure available
+                #    continue
+                x_locally = unbase64_uncomp_unpickle(df["THERMO_pump_preasure_bar_x_axis"].iloc[index])
+                y_locally = unbase64_uncomp_unpickle(df["THERMO_pump_preasure_bar_y_axis"].iloc[index])
+
+                # TODO Add Bruker pump pressure!
+
+                if x_locally is None:
+                    #print(f"x is None at {index} => {df['filename'].iloc[index]}")
+                    continue
+                if y_locally is None:
+                    #print(f"y is None at {index} => {df['filename'].iloc[index]}")
+                    continue
+                if len(x_locally) != len(y_locally):
+                    raise ValueError("x and y does not have same length")
 
 
-            # With more than 10000 datapoints plotting the data
-            # leads to unnecessary delay. Interpolating 10000 datapoints is usually enough.
-            if len(x_locally) > 10000:
-                samples = int(len(x_locally) / 10000)
-                # Explictly adding the last datapoint to make sure we cover rounding errors when calculating `sample`
-                x_locally = [x_locally[i] for i in range(0, len(x_locally), samples)] + x_locally[-1:]
-                y_locally = [y_locally[i] for i in range(0, len(y_locally), samples)] + y_locally[-1:]
-            x += x_locally
-            y += y_locally
-            fn += [df["filename"].iloc[index]] * len(x_locally)
+                # With more than 10000 datapoints plotting the data
+                # leads to unnecessary delay. Interpolating 10000 datapoints is usually enough.
+                if len(x_locally) > 10000:
+                    samples = int(len(x_locally) / 10000)
+                    # Explictly adding the last datapoint to make sure we cover rounding errors when calculating `sample`
+                    x_locally = [x_locally[i] for i in range(0, len(x_locally), samples)] + x_locally[-1:]
+                    y_locally = [y_locally[i] for i in range(0, len(y_locally), samples)] + y_locally[-1:]
+                x += x_locally
+                y += y_locally
+                fn += [df["filename"].iloc[index]] * len(x_locally)
 
-        pp_df2 = pd.DataFrame({
-            "filename": fn,
-            "x": x,
-            "y": y
-        })
-
+            pp_df2 = pd.DataFrame({
+                "filename": fn,
+                "x": x,
+                "y": y
+            })
+            
+        else: 
+            pp_df2 = pd.DataFrame()
+            
         if not pp_df2.empty:
             fig14 = px.line(pp_df2, x="x", y="y", color = "filename", title = "Pump Pressure")
             fig14.update_traces(line=dict(width=0.5))
@@ -791,48 +797,72 @@ if __name__ == "__main__":
             fig14.update_layout(width = int(1000), height = int(1000), 
                                 xaxis_title = "Time (min)", 
                                 yaxis_title = "Pump pressure")
-            if fig_show:
-                fig14.show()
-            with open(output_path +"/fig14_Pump_pressure.json", "w") as json_file:
-                json_file.write(plotly.io.to_json(fig14))
-            #pyo.plot(fig14, filename = output_path +"/fig14_Pump_pressure.html")
-            fig14.write_html(file = output_path +"/fig14_Pump_pressure.html", auto_open = False)
-                    
+            
+        else:     
+            
+            fig14 = go.Figure()
+            fig14.add_annotation(
+                x=0.5,
+                y=0.5,
+                text="No Pump Pressure data available!",
+                showarrow=False,
+                font=dict(size=14)
+            )
+            fig14.update_layout(
+                width=600,
+                height=400,
+                title="Empty Plot"
+            )
+            
+            
+        if fig_show:
+            fig14.show()
+        with open(output_path +"/fig14_Pump_pressure.json", "w") as json_file:
+            json_file.write(plotly.io.to_json(fig14))
+        #pyo.plot(fig14, filename = output_path +"/fig14_Pump_pressure.html")
+        fig14.write_html(file = output_path +"/fig14_Pump_pressure.html", auto_open = False)
+                
 
     ################################################################################################
         # Figure 15: Ion Injection time
 
-        ### extract data from compressed columns and put them into long format
-        x = [] # x-axis Scan_StartTime_zlib
-        y = [] # y-axis Ion_Injection_Time_pickle_zlib
-        fn = [] # filename
-        
-        for index in df.index:
 
-            if pd.isnull(df["THERMO_Ion_Injection_Time_pickle_zlib"].iloc[index]):
-                # Skip, there is no Ion Injection Time available
-                continue
-
-            y_locally = unbase64_uncomp_unpickle(df["THERMO_Ion_Injection_Time_pickle_zlib"].iloc[index])
-            y_locally = [y_locally[i] for i in range(0, len(y_locally), 2)]  ### TODO: Nur zum Testen weil komischweise doppelte Werte vorhanden
-            x_locally = unbase64_uncomp_unpickle(df["THERMO_Scan_StartTime_zlib"].iloc[index])
-            mslevel = unbase64_uncomp_unpickle(df["THERMO_Scan_msLevel_zlib"].iloc[index])
-              
-            # keep only values for MS1 spectra
-            x_locally = [x for x,y in zip(x_locally, mslevel) if y == 1]
-            y_locally = [float(x) for x,y in zip(y_locally, mslevel) if y == 1]
-  
-            x += x_locally
-            y += y_locally
-            fn += [df["filename"].iloc[index]] * len(x_locally)
+        if "THERMO_Ion_Injection_Time_pickle_zlib" in df.columns:
+            ### extract data from compressed columns and put them into long format
+            x = [] # x-axis Scan_StartTime_zlib
+            y = [] # y-axis Ion_Injection_Time_pickle_zlib
+            fn = [] # filename
             
-            
-        ionInjTime_df = pd.DataFrame({
-            "filename": fn,
-            "x": x,
-            "y": y
-        })
+            for index in df.index:
 
+                if pd.isnull(df["THERMO_Ion_Injection_Time_pickle_zlib"].iloc[index]):
+                    # Skip, there is no Ion Injection Time available
+                    continue
+
+                y_locally = unbase64_uncomp_unpickle(df["THERMO_Ion_Injection_Time_pickle_zlib"].iloc[index])
+                y_locally = [y_locally[i] for i in range(0, len(y_locally), 2)]  ### TODO: Nur zum Testen weil komischweise doppelte Werte vorhanden
+                x_locally = unbase64_uncomp_unpickle(df["THERMO_Scan_StartTime_zlib"].iloc[index])
+                mslevel = unbase64_uncomp_unpickle(df["THERMO_Scan_msLevel_zlib"].iloc[index])
+                
+                # keep only values for MS1 spectra
+                x_locally = [x for x,y in zip(x_locally, mslevel) if y == 1]
+                y_locally = [float(x) for x,y in zip(y_locally, mslevel) if y == 1]
+    
+                x += x_locally
+                y += y_locally
+                fn += [df["filename"].iloc[index]] * len(x_locally)
+                
+                
+            ionInjTime_df = pd.DataFrame({
+                "filename": fn,
+                "x": x,
+                "y": y
+            })
+
+
+        else: 
+            ionInjTime_df = pd.DataFrame()
+            
         if not ionInjTime_df.empty:
             fig15 = px.line(ionInjTime_df, x="x", y="y", color = "filename", title = "Ion Injection Time")
             fig15.update_traces(line=dict(width=0.5))
@@ -840,12 +870,28 @@ if __name__ == "__main__":
             fig15.update_layout(width = int(1000), height = int(1000), 
                                 xaxis_title = "Time (min)", 
                                 yaxis_title = "Ion Injection Time (ms)")
-            if fig_show:
-                fig15.show()
-            with open(output_path +"/fig15_Ion_Injection_Time.json", "w") as json_file:
-                json_file.write(plotly.io.to_json(fig15))
-            #pyo.plot(fig15, filename = output_path +"/fig15_Ion_Injection_Time.html")
-            fig15.write_html(file = output_path +"/fig15_Ion_Injection_Time.html", auto_open = False)
+                
+        else: 
+            fig15 = go.Figure()
+            fig15.add_annotation(
+                x=0.5,
+                y=0.5,
+                text="No Ion Injection Time data available!",
+                showarrow=False,
+                font=dict(size=14)
+            )
+            fig15.update_layout(
+                width=600,
+                height=400,
+                title="Empty Plot"
+            )
+                
+        if fig_show:
+            fig15.show()
+        with open(output_path +"/fig15_Ion_Injection_Time.json", "w") as json_file:
+            json_file.write(plotly.io.to_json(fig15))
+        #pyo.plot(fig15, filename = output_path +"/fig15_Ion_Injection_Time.html")
+        fig15.write_html(file = output_path +"/fig15_Ion_Injection_Time.html", auto_open = False)
 
 
     ################################################################################################
@@ -889,13 +935,17 @@ if __name__ == "__main__":
             "y": y
             })
 
-            if not LMCorr_df.empty:
-                fig16 = px.line(LMCorr_df, x="x", y="y", color = "filename", title = "Lock Mass Correction")
-                fig16.update_traces(line=dict(width=0.5))
-                fig16.update_yaxes(exponentformat="E") 
-                fig16.update_layout(width = int(1000), height = int(1000),
-                                    xaxis_title = "Time (min)", 
-                                    yaxis_title = "LM m/z-Correction (ppm)")
+
+        else:
+            LMCorr_df = pd.DataFrame()
+            
+        if not LMCorr_df.empty:
+            fig16 = px.line(LMCorr_df, x="x", y="y", color = "filename", title = "Lock Mass Correction")
+            fig16.update_traces(line=dict(width=0.5))
+            fig16.update_yaxes(exponentformat="E") 
+            fig16.update_layout(width = int(1000), height = int(1000),
+                                xaxis_title = "Time (min)", 
+                                yaxis_title = "LM m/z-Correction (ppm)")
                 
         else:
            
@@ -903,7 +953,7 @@ if __name__ == "__main__":
             fig16.add_annotation(
                 x=0.5,
                 y=0.5,
-                text="No Lock Mass Correction in Data Set!",
+                text="No Lock Mass Correction data available!",
                 showarrow=False,
                 font=dict(size=14)
             )
