@@ -291,6 +291,7 @@ if __name__ == "__main__":
         fig2 = px.bar(df_pl2_long, x="filename", y="value", color="variable", barmode = "group", 
                     title = "Number of filtered PSMs, filtered peptides, filtered protein groups and accessions")
         fig2.update_yaxes(exponentformat="none") 
+        fig2.update_xaxes(tickangle=-90)
         if fig_show: 
             fig2.show()
         with open(output_path +"/fig2_barplot_PSMs_peptides_proteins.json", "w") as json_file:
