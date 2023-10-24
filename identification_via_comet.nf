@@ -40,7 +40,7 @@ workflow ident_via_comet {
         // Start search
         comet_search(combined_channel)
     emit:
-        comet_search.out
+        comet_search.out[0]
 }
 
 process comet_search {
@@ -53,6 +53,7 @@ process comet_search {
 
     output: 
     file "${mzml.baseName}.idXML"
+    file "${mzml.baseName}.txt"
 
     """
     sed 's/^decoy_search.*/decoy_search = ${params.ic_tda} /' ${mod_file} > ${mod_file.baseName}_new.txt
