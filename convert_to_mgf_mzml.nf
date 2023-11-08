@@ -37,8 +37,8 @@ process convert_spectra {
     file raw_spectra
 
     output:
-    file "${raw_spectra.baseName}.mgf"
-    file "${raw_spectra.baseName}.mzML"
+    file("${raw_spectra.baseName}.mgf")
+    file("${raw_spectra.baseName}.mzML")
 
     """
     if [[ "${raw_spectra}" == *.raw ]]; then
@@ -50,6 +50,10 @@ process convert_spectra {
         LD_LIBRARY_PATH=\$(get_cur_bin_dir.sh)/tdf2mzml python \$(get_cur_bin_dir.sh)/tdf2mzml/tdf2mzml.py -i ${raw_spectra} -o ${raw_spectra.baseName}.mzML --ms1_type centroid
         
         alphatims export mgf -o . ${raw_spectra}
+
+        # TODO We need to find a better way. MGF is optional. This is not needed for a DIA analysis
+        touch ${raw_spectra.baseName}.mgf
     fi 
     """
 }
+
