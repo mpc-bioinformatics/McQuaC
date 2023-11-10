@@ -28,7 +28,8 @@ if __name__ == "__main__":
             if line.split('\t', 1)[0] != 'PSH':
                 if 'ms_run[1]-location' in line:
                     run_name = line.split('\t')[2]
-            line = next(f_in)
+            else:
+                break
             skiplines += 1
 
     if skiplines != 0:
