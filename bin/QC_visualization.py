@@ -1,7 +1,7 @@
 #!/bin/env python
 
 # %%
-
+import re
 # std imports
 import argparse
 #from typing import Optional
@@ -33,7 +33,7 @@ pio.renderers.default = "png"
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-csv_file", help="CSV file with QC data.")
+    parser.add_argument("-csv_file", help="CSV file with QC data.", default=None)
     parser.add_argument("-group", help="List of the experimental group (comma-separated).", default=None)
     parser.add_argument("-output", help="Output folder for the plots as json files.", default = "graphics")
     parser.add_argument("-tic_overlay_offset", help = "Offset for TIC overlay plots", default = 0)
@@ -44,7 +44,6 @@ def argparse_setup():
 
 if __name__ == "__main__":
     args = argparse_setup()
-    print(args)
 
 
 ####################################################################################################
@@ -259,7 +258,13 @@ if __name__ == "__main__":
                         "psm_missed_1",
                         "psm_missed_2",
                         "psm_missed_3",
-                        "psm_missed_more"
+                        "psm_missed_more"   
+                        # TODO we should add then dynamically. Iow, we could thest if it contains binary data and if not include it into the list
+                        # TODO These below are Thermo TUNE Information which is one dimensional
+                        # "THEREMO_TUNE_ '''Ion Transfer Tube Temperature (+ or +-)'''"
+                        # "THEREMO_TUNE_ '''Ion Transfer Tube Temperature (-)'''"
+                        # "THEREMO_TUNE_ '''Vaporizer Temp. (+ or +-)'''"
+                        # "THEREMO_TUNE_ '''Vaporizer Temp. (-)'''"
                     ]
         
         x = [datetime.datetime.utcfromtimestamp(x) for x in df["timestamp"]] # convert timestamp to datetime
@@ -744,7 +749,7 @@ if __name__ == "__main__":
         ### Figure 14: Pump Pressure
 
 
-        if "THERMO_pump_preasure_bar_x_axis" in df.columns:
+        if "THERMO_pump_pressure_bar_x_axis_____pickle_zlib" in df.columns:
 
             ### TODO: generate empty plot if this column is missing
             ### TODO: why is this plot also misisng for EXII???
@@ -756,8 +761,8 @@ if __name__ == "__main__":
                 #if pd.isnull(df["THERMO_pump_preasure_bar_x_axis"].iloc[index]):
                     # Skip, there is no Pump pressure available
                 #    continue
-                x_locally = unbase64_uncomp_unpickle(df["THERMO_pump_preasure_bar_x_axis"].iloc[index])
-                y_locally = unbase64_uncomp_unpickle(df["THERMO_pump_preasure_bar_y_axis"].iloc[index])
+                x_locally = unbase64_uncomp_unpickle(df["THERMO_pump_pressure_bar_x_axis_____pickle_zlib"].iloc[index])
+                y_locally = unbase64_uncomp_unpickle(df["THERMO_pump_pressure_bar_y_axis_____pickle_zlib"].iloc[index])
 
                 # TODO Add Bruker pump pressure!
 
@@ -822,155 +827,76 @@ if __name__ == "__main__":
             json_file.write(plotly.io.to_json(fig14))
         #pyo.plot(fig14, filename = output_path +"/fig14_Pump_pressure.html")
         fig14.write_html(file = output_path +"/fig14_Pump_pressure.html", auto_open = False)
-                
 
     ################################################################################################
-        # Figure 15: Ion Injection time
+        # Figure 15_XXX: visualize all THERMO_LOG and THERMO_EXTRA (without a filter)
 
 
-        if "THERMO_Ion_Injection_Time_pickle_zlib" in df.columns:
-            ### extract data from compressed columns and put them into long format
-            x = [] # x-axis Scan_StartTime_zlib
-            y = [] # y-axis Ion_Injection_Time_pickle_zlib
-            fn = [] # filename
-            
-            for index in df.index:
+        for column_header in df.columns:
+            if column_header.startswith("THERMO_LOG_") or column_header.startswith("THERMO_EXTRA_"):
+                ### extract data from compressed columns and put them into long format
+                x = [] # x-axis Scan_StartTime_zlib
+                y = [] # y-axis THERMO HEADER
+                fn = [] # filename
 
-                if pd.isnull(df["THERMO_Ion_Injection_Time_pickle_zlib"].iloc[index]):
-                    # Skip, there is no Ion Injection Time available
-                    continue
+                for index in df.index:
+                    column_display_header = column_header
 
-                y_locally = unbase64_uncomp_unpickle(df["THERMO_Ion_Injection_Time_pickle_zlib"].iloc[index])
-                y_locally = [y_locally[i] for i in range(0, len(y_locally), 2)]  ### TODO: Nur zum Testen weil komischweise doppelte Werte vorhanden
-                x_locally = unbase64_uncomp_unpickle(df["THERMO_Scan_StartTime_zlib"].iloc[index])
-                mslevel = unbase64_uncomp_unpickle(df["THERMO_Scan_msLevel_zlib"].iloc[index])
-                
-                # keep only values for MS1 spectra
-                x_locally = [x for x,y in zip(x_locally, mslevel) if y == 1]
-                y_locally = [float(x) for x,y in zip(y_locally, mslevel) if y == 1]
-    
-                x += x_locally
-                y += y_locally
-                fn += [df["filename"].iloc[index]] * len(x_locally)
-                
-                
-            ionInjTime_df = pd.DataFrame({
-                "filename": fn,
-                "x": x,
-                "y": y
-            })
+                    if pd.isnull(df[column_header].iloc[index]):
+                        # Skip, there is no info available
+                        continue
+
+                    y_locally = unbase64_uncomp_unpickle(df[column_header].iloc[index])
+                    x_locally = unbase64_uncomp_unpickle(df["THERMO_Scan_StartTime_____pickle_zlib"].iloc[index])  # All of THERMO_EXTRA and THERMO_LOG are defined over the Retention tims / Scan StartTime
+                    
+                    # Keep only values for MS1 spectra  (e.g. for Lock Mass Correction or Ion Injection Time)
+                    if any(x in column_header for x in ["Ion Injection Time", "LM Correction", "LM m/z-Correction"]):
+                        mslevel = unbase64_uncomp_unpickle(df["THERMO_Scan_msLevel_____pickle_zlib"].iloc[index])
+                        x_locally = [x for x,y in zip(x_locally, mslevel) if y == 1]
+                        y_locally = [float(x) for x,y in zip(y_locally, mslevel) if y == 1]
+                        column_display_header = column_header.split("_____")[0] + " (MS1 Level filtered)_____" + column_header.split("_____")[1]
+
+                    x += [float(_x) for _x in x_locally]
+                    y += [float(_y) for _y in y_locally]
+                    fn += [df["filename"].iloc[index]] * len(x_locally)
 
 
-        else: 
-            ionInjTime_df = pd.DataFrame()
-            
-        if not ionInjTime_df.empty:
-            fig15 = px.line(ionInjTime_df, x="x", y="y", color = "filename", title = "Ion Injection Time")
-            fig15.update_traces(line=dict(width=0.5))
-            fig15.update_yaxes(exponentformat="E") 
-            fig15.update_layout(width = int(1000), height = int(1000), 
-                                xaxis_title = "Time (min)", 
-                                yaxis_title = "Ion Injection Time (ms)")
-                
-        else: 
-            fig15 = go.Figure()
-            fig15.add_annotation(
-                x=0.5,
-                y=0.5,
-                text="No Ion Injection Time data available!",
-                showarrow=False,
-                font=dict(size=14)
-            )
-            fig15.update_layout(
-                width=600,
-                height=400,
-                title="Empty Plot"
-            )
-                
-        if fig_show:
-            fig15.show()
-        with open(output_path +"/fig15_Ion_Injection_Time.json", "w") as json_file:
-            json_file.write(plotly.io.to_json(fig15))
-        #pyo.plot(fig15, filename = output_path +"/fig15_Ion_Injection_Time.html")
-        fig15.write_html(file = output_path +"/fig15_Ion_Injection_Time.html", auto_open = False)
+                local_df = pd.DataFrame({
+                    "filename": fn,
+                    "x": x,
+                    "y": y
+                })
+
+                column_title = column_display_header.split("_____")[0]
+                if not local_df.empty:
+                    fig15 = px.line(local_df, x="x", y="y", color = "filename", title = column_title)
+                    fig15.update_traces(line=dict(width=0.5))
+                    fig15.update_yaxes(exponentformat="E") 
+                    fig15.update_layout(width = int(1000), height = int(1000), 
+                                        xaxis_title = "Time (min)", 
+                                        yaxis_title = column_title)
+
+                else: 
+                    fig15 = go.Figure()
+                    fig15.add_annotation(
+                        x=0.5,
+                        y=0.5,
+                        text="No '{}' available!".format(column_title),
+                        showarrow=False,
+                        font=dict(size=14)
+                    )
+                    fig15.update_layout(
+                        width=600,
+                        height=400,
+                        title="Empty Plot"
+                    )
+
+                os.makedirs(output_path + os.sep + "THERMO_PLOTS_FIG15", exist_ok=True)
+                if fig_show:
+                    fig15.show()
+                with open(output_path + os.sep + "THERMO_PLOTS_FIG15" + os.sep + "{}.json".format(re.sub('\W+','', column_title)), "w") as json_file:
+                    json_file.write(plotly.io.to_json(fig15))
+                fig15.write_html(file = output_path + os.sep + "THERMO_PLOTS_FIG15" + os.sep + "{}.html".format(re.sub('\W+','', column_title)), auto_open = False)
 
 
-    ################################################################################################
-        # Figure 16: Lock Mass Correction
-
-        # Important: Older machines like PROETD or OEI do not have Lock Mass Correction, so the respective
-        # columns may not exist    
-
-        if "THERMO_LM_m_z_Correction_pickle_zlib" in df.columns:
-
-            x = [] # x-axis Scan_StartTime_zlib
-            y = [] # y-axis Ion_Injection_Time_pickle_zlib
-            fn = [] # filename
-
-            for index in df.index:
-
-                if pd.isnull(df["THERMO_LM_m_z_Correction_pickle_zlib"].iloc[index]):
-                    continue
-
-                y_locally = unbase64_uncomp_unpickle(df["THERMO_LM_m_z_Correction_pickle_zlib"].iloc[index])
-                x_locally = unbase64_uncomp_unpickle(df["THERMO_Scan_StartTime_zlib"].iloc[index])
-                y_locally = [y_locally[i] for i in range(0, len(y_locally), 2)]  ### TODO: Nur zum Testen weil komischweise doppelte Werte vorhanden
-                
-                # With more than 10000 datapoints plotting the data
-                # leads to unnecessary delay. Interpolating 10000 datapoints is usually enough.
-                if len(x_locally) > 10000:
-                    samples = int(len(x_locally) / 10000)
-                    # Explictly adding the last datapoint to make sure we cover rounding errors when calculating `sample`
-                    x_locally = [x_locally[i] for i in range(0, len(x_locally), samples)] + x_locally[-1:]
-                    y_locally = [y_locally[i] for i in range(0, len(y_locally), samples)] + y_locally[-1:]
-                
-                
-                y_locally = [float(x) for x in y_locally]
-                x += x_locally
-                y += y_locally
-                fn += [df["filename"].iloc[index]] * len(x_locally)
-                
-            LMCorr_df = pd.DataFrame({
-            "filename": fn,
-            "x": x,
-            "y": y
-            })
-
-
-        else:
-            LMCorr_df = pd.DataFrame()
-            
-        if not LMCorr_df.empty:
-            fig16 = px.line(LMCorr_df, x="x", y="y", color = "filename", title = "Lock Mass Correction")
-            fig16.update_traces(line=dict(width=0.5))
-            fig16.update_yaxes(exponentformat="E") 
-            fig16.update_layout(width = int(1000), height = int(1000),
-                                xaxis_title = "Time (min)", 
-                                yaxis_title = "LM m/z-Correction (ppm)")
-                
-        else:
-           
-            fig16 = go.Figure()
-            fig16.add_annotation(
-                x=0.5,
-                y=0.5,
-                text="No Lock Mass Correction data available!",
-                showarrow=False,
-                font=dict(size=14)
-            )
-            fig16.update_layout(
-                width=600,
-                height=400,
-                title="Empty Plot"
-            )
-
-        if fig_show:
-            fig16.show()
-        with open(output_path +"/fig16_Lock_Mass_Correction.json", "w") as json_file:
-            json_file.write(plotly.io.to_json(fig16))
-        #pyo.plot(fig16, filename = output_path +"/fig16_Lock_Mass_Correction.html")
-        fig16.write_html(file = output_path +"/fig16_Lock_Mass_Correction.html", auto_open = False)
-            
-            
-            
-
+# %%
