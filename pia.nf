@@ -77,6 +77,11 @@ process pia_analysis {
         | sed -e 's;"proteinExportFile": "/tmp/piaExport-proteins.mzTab";"proteinExportFile": "${compilation.simpleName}-piaExport-proteins.mzTab";g' > parameters.json
  
     java -Xmx${params.pia_memory} -jar "${params.pia_executable}" parameters.json ${compilation}
+
+    # Generate Output, in case of empty results.
+    touch ${compilation.simpleName}-piaExport-PSM.mzTab
+    touch ${compilation.simpleName}-piaExport-peptides.csv
+    touch ${compilation.simpleName}-piaExport-proteins.mzTab
     """
 }
 

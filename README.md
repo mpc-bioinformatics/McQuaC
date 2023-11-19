@@ -46,6 +46,10 @@ Chmod +x ./bin/*
 
 That’s it! You should now be able to execute `main.nf` and all the other workflows within.
 
+You can also start a very basic gui by executing:
+
+> streamlit run simple_main_gui.py
+
 ## Build local docker
 
 A docker image containing all needed dependencies is provided in docker. To build this image (with `docker-buildx`) execute the following in the root directory of this repository:

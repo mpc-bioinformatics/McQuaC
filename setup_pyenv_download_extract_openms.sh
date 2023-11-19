@@ -53,6 +53,7 @@ python -m pip install plotly
 python -m pip install scikit-learn
 python -m pip install alphatims
 python -m pip install nextflow
+python -m pip install streamlit==1.28.2
 
 
 # Make the executables visible in nextflow
