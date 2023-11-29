@@ -499,7 +499,7 @@ if __name__ == "__main__":
         else:
             principalDf["t_scaled"] = t_scaled
             fig11 = px.scatter(principalDf, x = "pca1", y = "pca2", color = "t_scaled",
-                        color_continuous_scale="bluered", title = "PCA on raw data",
+                        color_continuous_scale="bluered", title = "PCA on all data",
                         hover_name="raw_file", hover_data=["pca1", "pca2"],
                             labels={
                             "pca1": label_x,
