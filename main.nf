@@ -122,6 +122,7 @@ process visualize_results {
 	file("*.html")
 	file("*.csv")
 	path("fig13_ionmaps")
+	path("THERMO_PLOTS_FIG15")
 
     """
 	QC_visualization.py -csv_file $complete_csv -output "." 
