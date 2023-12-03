@@ -68,11 +68,11 @@ process run_feature_finder {
 
     """
     # Centroided FF
-    \$(get_cur_bin_dir.sh)/openms/usr/bin/FeatureFinderCentroided -in ${mzml} -out ${mzml.baseName}.featureXML -algorithm:isotopic_pattern:charge_low ${params.gf_considered_charges_low} -algorithm:isotopic_pattern:charge_high ${params.gf_considered_charges_high} ${params.gf_resolution_featurefinder}
+    FeatureFinderCentroided -in ${mzml} -out ${mzml.baseName}.featureXML -algorithm:isotopic_pattern:charge_low ${params.gf_considered_charges_low} -algorithm:isotopic_pattern:charge_high ${params.gf_considered_charges_high} ${params.gf_resolution_featurefinder}
     touch ${mzml.baseName}.hills.csv
     
     # Multiplex FF
-    # \$(get_cur_bin_dir.sh)/openms/usr/bin/FeatureFinderMultiplex -in ${mzml} -out ${mzml.baseName}.featureXML \
+    # FeatureFinderMultiplex -in ${mzml} -out ${mzml.baseName}.featureXML \
     #     -algorithm:labels "" \
     #     -algorithm:charge "1:5"
     # touch ${mzml.baseName}.hills.csv
@@ -83,7 +83,7 @@ process run_feature_finder {
     #    --writeHills \
     #    --writeMsInspect \
     #    ${params.additional_dinosaur_settings} --mzML ${mzml}
-    # \$(get_cur_bin_dir.sh)/openms/usr/bin/FileConverter -in ${mzml.baseName}.msInspect.tsv -out ${mzml.baseName}.featureXML
+    # FileConverter -in ${mzml.baseName}.msInspect.tsv -out ${mzml.baseName}.featureXML
     """
 }
 
@@ -97,7 +97,7 @@ process map_features_with_idents {
     tuple file("${featurexml.baseName}_with_idents.featureXML"), file(hills), val("${featurexml.baseName}")
     """
     convert_mztab_to_idxml.py -mztab ${ident} -out_idxml ${ident.baseName}.idXML
-    \$(get_cur_bin_dir.sh)/openms/usr/bin/IDMapper -id ${ident.baseName}.idXML -in ${featurexml} -out ${featurexml.baseName}_with_idents.featureXML
+    IDMapper -id ${ident.baseName}.idXML -in ${featurexml} -out ${featurexml.baseName}_with_idents.featureXML
     """
 }
 

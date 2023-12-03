@@ -1,0 +1,5 @@
+#!/bin/bash
+
+BRUKER_LIB_PATH=$(dirname $(python -c "import tdf2mzml; print(tdf2mzml.__file__)"))
+
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$BRUKER_LIB_PATH tdf2mzml $@

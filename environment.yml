@@ -1,0 +1,15 @@
+name: nextqcflow
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.10
+  - pip
+  - setuptools
+  - pia=1.4.8
+  - openms
+  - pyopenms  # needs to be installed by conda to link the correct binaries
+  - thermorawfileparser=1.4.0
+  - pip:
+    - -r requirements.txt

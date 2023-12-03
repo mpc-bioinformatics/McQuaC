@@ -49,7 +49,7 @@ process pia_compilation {
     """
     echo "Starting Compilation"
     echo "${idXML}"
-    java -Xmx${params.pia_memory} -jar "${params.pia_executable}" --compile -o "${idXML.baseName}_____pia-compilation.xml" "${idXML}"
+    pia -Xmx${params.pia_memory} --compile -o "${idXML.baseName}_____pia-compilation.xml" "${idXML}"
     """
 }
 
@@ -76,7 +76,7 @@ process pia_analysis {
         | sed -e 's;"peptideExportFile": "/tmp/piaExport-peptides.csv";"peptideExportFile": "${compilation.simpleName}-piaExport-peptides.csv";g' \
         | sed -e 's;"proteinExportFile": "/tmp/piaExport-proteins.mzTab";"proteinExportFile": "${compilation.simpleName}-piaExport-proteins.mzTab";g' > parameters.json
  
-    java -Xmx${params.pia_memory} -jar "${params.pia_executable}" parameters.json ${compilation}
+    pia -Xmx${params.pia_memory} parameters.json ${compilation}
 
     # Generate Output, in case of empty results.
     touch ${compilation.simpleName}-piaExport-PSM.mzTab
@@ -99,6 +99,6 @@ process pia_extraction {
 
     script:
     """
-    python ${baseDir}/bin/extract_from_pia_output.py --pia_PSMs $psms --pia_peptides $peptides --pia_proteins $proteins --output ${basename}_____pia_extraction.csv
+    extract_from_pia_output.py --pia_PSMs $psms --pia_peptides $peptides --pia_proteins $proteins --output ${basename}_____pia_extraction.csv
     """
 }

@@ -45,6 +45,7 @@ workflow {
     rawspectra = Channel.fromPath(params.main_raw_spectra_folder + "/*.{raw,d}", type: "any")
 
 	// Convert to needed formats:
+	// TODO: Split up thermo and bruker conversion so differen containers can be used
 	convert_to_mgf_mzml(rawspectra) // 0 --> .mgf | 1 --> .mzML (peak-picked)
 	
 	// Retreive MZML Statistics
@@ -72,7 +73,7 @@ workflow {
 	get_features(convert_to_mgf_mzml.out[1], execute_pia.out[0].map { it[0] })
 
 	// Get Thermospecific information from raw
-	get_custom_headers(rawspectra)
+	// get_custom_headers(rawspectra)
 
 
 	// Concatenate to large csv
@@ -80,7 +81,9 @@ workflow {
 		retrieve_spikeins.out.collect(),
 		get_features.out.map { it[1] }.collect(),
 		execute_pia.out[1].collect(),
-		get_custom_headers.out.collect()
+		// TODO: Uncomment when thermorawfileparser (TRFP) and this fisher-py are processed by different container
+		// as the mono version of TRFP is not compatible with fisher-py (got an ugly assemply error)
+		// get_custom_headers.out.collect()
 	).collect()
 	combine_output_to_table(combined_csvs)
 	

@@ -64,6 +64,16 @@ An interactive shell can be started with: `docker run -it nextqcflow:local` and 
 docker run -it nextqcflow:local nextflow main.nf <Parameters>
 ```
 
+### Container for Nextflow with `-with-docker` attribute
+Build
+```
+docker build mpc/nextqcflow-exec:latest -f docker/executor/Dockerfile .
+```
+
+```
+env NF_UID=$(id -u) NF_GID=$(id -g) nextflow run -profile docker main.nf --main_raw_spectra_folder <PATH_TO_RAWS> --main_fasta_file <PATH_TO_FASTA> --main_comet_params /Users/winkelhardtdi/Code/workflows/next-qc/example_configurations/comet_config.txt --main_outdir <PATH_TO_RESULT>
+```
+
 ## Input
 
 The `main.nf`-workflow requires 3 parameters, which need to be set:

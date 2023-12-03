@@ -75,7 +75,7 @@ process retrieve_xics_from_raw_spectra {
 
     """
     if [[ "${raw}" == *.raw ]]; then
-        mono \$(get_cur_bin_dir.sh)/ThermoRawFileParser_v1.4.0/ThermoRawFileParser.exe xic -i $raw -j $trfp_input 
+        thermorawfileparser xic -i $raw -j $trfp_input 
     fi
 
     if [[ "${raw}" == *.d ]]; then

@@ -42,12 +42,12 @@ process convert_spectra {
 
     """
     if [[ "${raw_spectra}" == *.raw ]]; then
-        mono \$(get_cur_bin_dir.sh)/ThermoRawFileParser_v1.4.0/ThermoRawFileParser.exe ${params.ctm_additional_params} --format=0 --output_file=${raw_spectra.baseName}.mgf --input=${raw_spectra} 
-        mono \$(get_cur_bin_dir.sh)/ThermoRawFileParser_v1.4.0/ThermoRawFileParser.exe ${params.ctm_additional_params} --format=1 --output_file=${raw_spectra.baseName}.mzML --input=${raw_spectra} 
+        thermorawfileparser ${params.ctm_additional_params} --format=0 --output_file=${raw_spectra.baseName}.mgf --input=${raw_spectra} 
+        thermorawfileparser ${params.ctm_additional_params} --format=1 --output_file=${raw_spectra.baseName}.mzML --input=${raw_spectra} 
     fi
 
     if [[ "${raw_spectra}" == *.d ]]; then
-        LD_LIBRARY_PATH=\$(get_cur_bin_dir.sh)/tdf2mzml python \$(get_cur_bin_dir.sh)/tdf2mzml/tdf2mzml.py -i ${raw_spectra} -o ${raw_spectra.baseName}.mzML --ms1_type centroid
+        tdf2mzml_wrapper -i ${raw_spectra} -o ${raw_spectra.baseName}.mzML --ms1_type centroid
         
         alphatims export mgf -o . ${raw_spectra}
 
