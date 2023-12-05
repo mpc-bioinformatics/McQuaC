@@ -5,6 +5,3 @@ sqlalchemy
 plotly
 scikit-learn
 alphatims
-streamlit==1.28.2
-hdf5plugin # needed for tdf2mzml
-tdf2mzml @ git+https://github.com/mafreitas/tdf2mzml@0.4
