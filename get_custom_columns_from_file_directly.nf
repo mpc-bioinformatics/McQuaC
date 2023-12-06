@@ -38,10 +38,10 @@ process retrieve_custom_headers_from_thermo_raw_files {
     publishDir "${params.ccff_outdir}/", mode:'copy'
 
     input:
-    file raw
+    path raw
 
     output:
-    file "${raw.baseName}_____customs.csv"
+    path "${raw.baseName}_____customs.csv"
 
     """
     # Pythonnet sometimes fails to exit and throws a mono error
@@ -60,10 +60,10 @@ process retrieve_custom_headers_from_bruker_raw_files {
     publishDir "${params.ccff_outdir}/", mode:'copy'
 
     input:
-    file raw
+    path raw
 
     output:
-    file "${raw.baseName}_____customs.csv"
+    path "${raw.baseName}_____customs.csv"
 
     """
     bruker_extract_custom_headers.py -d_folder ${raw} -out_csv ${raw.baseName}_____customs.csv ${params.ccff_header_in_d} ${params.ccff_header_in_d_names}

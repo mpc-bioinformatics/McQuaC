@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 // Parameters required for standalone execution
 params.ic_raw_folder = "$PWD/MZMLs" // Input-Directory of MGFs, which should be used for identification
 params.ic_fasta_file = "proteins.fasta" // Database (FASTA-file) used for identification with decoys (prefixed with "DECOY_") or without decoys!
-params.ic_search_parameter_file = "$PWD/example_configurations/comet_config.txt" //Search Parameters for Comet
+params.ic_search_parameter_file = "${baseDir}/example_configurations/comet_config.txt" //Search Parameters for Comet
 
 // Optional Parameters
 params.ic_tda = 1 // 0 --> No Target-Decoy appraoch | 1 --> Target-Decoy appraoch (comet automatically prefixes decoys with "DECOY_" )

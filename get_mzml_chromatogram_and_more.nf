@@ -31,10 +31,10 @@ process retrieve_data_from_mzml {
     publishDir "${params.gmc_outdir}/", mode:'copy'
 
     input:
-    file(mzml)
+    path(mzml)
 
     output:
-    file("${mzml.baseName}_____mzml_info.csv")
+    path("${mzml.baseName}_____mzml_info.csv")
 
     """
     extract_data_from_mzml.py -mzml ${mzml} -out_csv ${mzml.baseName}_____mzml_info.csv

@@ -6,7 +6,7 @@ params.spk_raw_spectra = "$PWD/raws"  // Databasefile in SP-EMBL
 params.spk_identification_files = "$PWD/idents" // Identification-Files in mzTAB-Format already FDR-filtered (e.g. by PIA)
 
 // Optional Parameters
-params.spk_spike_ins = "$PWD/example_configurations/spike_ins.csv" // The Spike-Ins we also added in the Identification. Defaults to MPC-SPIKEINS
+params.spk_spike_ins = "${baseDir}/example_configurations/spike_ins.csv" // The Spike-Ins we also added in the Identification. Defaults to MPC-SPIKEINS
 params.spk_outdir = "$PWD/results"  // Output-Directory of the XICs (and corrected retention-time XICs with the help of the identification) as a csv-file. Here it is <Input-Raw-File>_spikeins.csv
 params.spk_num_procs_extraction = Runtime.runtime.availableProcessors()  // Number of process used to extract (CAUTION: This can be very resource intensive!)
 
@@ -67,7 +67,7 @@ process generate_json_and_association {
     path spike_ins
 
     output:
-    tuple file(raw), file("trfp_input.json"), file("association.txt")
+    tuple path(raw), path("trfp_input.json"), path("association.txt")
 
     """
     xics_to_json.py -icsv $spike_ins -iidents $ident -ojson trfp_input.json -oassociation association.txt
@@ -81,10 +81,10 @@ process retrieve_xics_from_thermo_raw_spectra {
     maxForks params.spk_num_procs_extraction
 
     input:
-    tuple file(raw), file(trfp_input), file(associations)
+    tuple path(raw), path(trfp_input), path(associations)
 
     output:
-    tuple file(associations), file("${raw.baseName}.json")
+    tuple path(associations), path("${raw.baseName}.json")
 
     """
     thermorawfileparser xic -i $raw -j $trfp_input 
@@ -98,10 +98,10 @@ process retrieve_xics_from_bruker_raw_spectra {
     maxForks params.spk_num_procs_extraction
 
     input:
-    tuple file(raw), file(trfp_input), file(associations)
+    tuple path(raw), path(trfp_input), path(associations)
 
     output:
-    tuple file(associations), file("${raw.baseName}.json")
+    tuple path(associations), path("${raw.baseName}.json")
 
     """
     extract_xic_bruker.py -d_folder ${raw} -in_json ${trfp_input} -out_json ${raw.baseName}.json
@@ -113,10 +113,10 @@ process get_statistics {
     publishDir "${params.spk_outdir}/", mode:'copy'
 
     input:
-    tuple val(associations), file(trfp_spike_ins_json)
+    tuple val(associations), path(trfp_spike_ins_json)
 
     output:
-    file("${trfp_spike_ins_json.baseName}_____spikeins.csv")
+    path("${trfp_spike_ins_json.baseName}_____spikeins.csv")
 
     """
     trfp_json_to_table.py -itrfp_json $trfp_spike_ins_json -iassociations $associations -ocsv ${trfp_spike_ins_json.baseName}_____spikeins.csv

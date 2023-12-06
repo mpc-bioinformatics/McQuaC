@@ -67,10 +67,10 @@ process run_feature_finder {
     container 'mpc/nextqcflow-python:latest'
 
     input:
-    tuple file(mzml), file(ident)
+    tuple path(mzml), path(ident)
 
     output:
-    tuple file("${mzml.baseName}.featureXML"), file("${mzml.baseName}.hills.csv"), file(ident)
+    tuple path("${mzml.baseName}.featureXML"), path("${mzml.baseName}.hills.csv"), path(ident)
 
     """
     # Centroided FF
@@ -97,10 +97,10 @@ process map_features_with_idents {
     container 'mpc/nextqcflow-python:latest'
 
     input:
-    tuple file(featurexml), file(hills), file(ident)
+    tuple path(featurexml), path(hills), path(ident)
 
     output:
-    tuple file("${featurexml.baseName}_with_idents.featureXML"), file(hills), val("${featurexml.baseName}")
+    tuple path("${featurexml.baseName}_with_idents.featureXML"), path(hills), val("${featurexml.baseName}")
     """
     convert_mztab_to_idxml.py -mztab ${ident} -out_idxml ${ident.baseName}.idXML
     IDMapper -id ${ident.baseName}.idXML -in ${featurexml} -out ${featurexml.baseName}_with_idents.featureXML
@@ -113,10 +113,10 @@ process get_statistics_from_featurexml {
     publishDir "${params.gf_outdir}/", mode:'copy'
 
     input:
-    tuple file(featurexml), file(hills), val(file_base_name)
+    tuple path(featurexml), path(hills), val(file_base_name)
 
     output:
-    tuple file(featurexml), file("${file_base_name}_____features.csv")
+    tuple path(featurexml), path("${file_base_name}_____features.csv")
 
     """
     extract_from_featurexml.py -featurexml ${featurexml} -hills ${hills} -out_csv ${file_base_name}_____features.csv -report_up_to_charge ${params.gf_considered_charges_high}

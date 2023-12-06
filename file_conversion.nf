@@ -82,10 +82,10 @@ process convert_bruker_raw_files {
     publishDir "${params.ctm_outdir}/", mode:'copy'
 
     input:
-    file raw_file
+    path raw_file
     
     output:
-    file("${raw_file.baseName}.mzML")
+    path "${raw_file.baseName}.mzML"
 
     """
     tdf2mzml.py -i ${raw_file} -o ${raw_file.baseName}.mzML --ms1_type centroid

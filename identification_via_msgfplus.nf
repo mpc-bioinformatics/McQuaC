@@ -5,7 +5,7 @@ nextflow.enable.dsl=2
 params.mgf_folder = "$PWD/MGFs" // Input-Directory of MGFs, which should be used for identification
 params.fasta_file = "proteins.fasta" // Database (FASTA-file) used for identification with decoys (prefixed with "DECOY_") or without decoys!
 params.tda = 1 // 0 --> No Target-Decoy appraoch | 1 --> Target-Decoy appraoch (we hardcoded the prefix "DECOY_" )
-params.search_parameter_file = "$PWD/example_configurations/msgfplus_config.txt" //Search Parameters for MSGFPlus
+params.search_parameter_file = "${baseDir}/example_configurations/msgfplus_config.txt" //Search Parameters for MSGFPlus
 
 // Optional Parameters
 params.outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
@@ -40,10 +40,10 @@ workflow {
 process msgfplus_buildsa {
 
     input:
-    file input_fasta
+    path input_fasta
 
     output:
-    file "${input_fasta.baseName}*"
+    path "${input_fasta.baseName}*"
     // file "${input_fasta.baseName}*.fasta"
     // file "${input_fasta.baseName}*.canno"
     // file "${input_fasta.baseName}*.cnlcp"
@@ -61,10 +61,10 @@ process msgfplus_search_mgf {
     publishDir "${params.outdir}/mzid", mode:'copy'
 
     input:
-    tuple file(input_fasta), file(mod_file), file(mgf_file), file(remainder)
+    tuple path(input_fasta), path(mod_file), path(mgf_file), path(remainder)
 
     output: 
-    file "${mgf_file.baseName}.mzid"
+    path "${mgf_file.baseName}.mzid"
 
     """
     touch -m ${input_fasta.baseName}*

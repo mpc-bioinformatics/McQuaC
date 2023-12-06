@@ -32,7 +32,7 @@ include {get_custom_headers} from PROJECT_DIR + '/get_custom_columns_from_file_d
 // Parameters required for the standalone execution of this main-nextflow script
 params.main_raw_spectra_folder = "" // The folder containing the raw spectra
 params.main_fasta_file = "" // A SINGLE-Fasta-file of the species to be searched (should also contain the SpikeIns if needed)
-params.main_comet_params = "$PWD/example_configurations/comet_config.txt" // Main-Search-Parameters for the comet search engine
+params.main_comet_params = "${baseDir}/example_configurations/comet_config.txt" // Main-Search-Parameters for the comet search engine
 params.main_outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
 
 
@@ -102,10 +102,10 @@ process combine_output_to_table {
 	publishDir "${params.main_outdir}/qc_results", mode:'copy'
 
 	input:
-	file(input_csv_files)
+	path(input_csv_files)
 
     output:
-    file("quality_control.csv")
+    path("quality_control.csv")
 
     """
 	CONCAT_CSVS=""
@@ -125,12 +125,12 @@ process visualize_results {
 	publishDir "${params.main_outdir}/qc_results", mode:'copy'
 
 	input:
-	file(complete_csv)
+	path(complete_csv)
 
     output:
-    file("*.json")
-	file("*.html")
-	file("*.csv")
+    path("*.json")
+	path("*.html")
+	path("*.csv")
 	path("fig13_ionmaps")
 	path("THERMO_PLOTS_FIG15")
 

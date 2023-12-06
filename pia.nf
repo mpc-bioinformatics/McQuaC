@@ -39,10 +39,10 @@ process pia_compilation {
     publishDir "${params.pia_outdir}/", mode: "copy"
 
     input:
-    file idXML
+    path idXML
 
     output:
-    tuple file("${idXML.baseName}_____pia-compilation.xml"), val("${idXML.baseName}")
+    tuple path("${idXML.baseName}_____pia-compilation.xml"), val("${idXML.baseName}")
 
     """
     echo "Starting Compilation"
@@ -62,10 +62,10 @@ process pia_analysis {
     publishDir "${params.pia_outdir}/", mode: "copy"
 
     input:
-    tuple file(compilation), val(basename)
+    tuple path(compilation), val(basename)
 
     output:
-    tuple file("${compilation.simpleName}-piaExport-PSM.mzTab"), file("${compilation.simpleName}-piaExport-peptides.csv"), file("${compilation.simpleName}-piaExport-proteins.mzTab"), val(basename)
+    tuple path("${compilation.simpleName}-piaExport-PSM.mzTab"), path("${compilation.simpleName}-piaExport-peptides.csv"), path("${compilation.simpleName}-piaExport-proteins.mzTab"), val(basename)
 
     script:
     """
@@ -91,10 +91,10 @@ process pia_extraction {
     publishDir "${params.pia_outdir}/", mode: "copy"
 
     input:
-    tuple file(psms), file(peptides), file(proteins), val(basename)
+    tuple path(psms), path(peptides), path(proteins), val(basename)
 
     output:
-    file "${basename}_____pia_extraction.csv"
+    path "${basename}_____pia_extraction.csv"
 
     script:
     """
