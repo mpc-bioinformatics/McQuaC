@@ -49,6 +49,8 @@ workflow {
 	fasta_file = Channel.fromPath(params.main_fasta_file).first()
 	comet_params = Channel.fromPath(params.main_comet_params).first()
 
+	feature_finder_params = get_feature_finder_params_from_comet_params(comet_params)
+
 
 	// File conversion into open formats
 	mzmls = convert_to_mzml(thermo_raw_files, bruker_raw_files)
@@ -77,7 +79,7 @@ workflow {
 	}
 
 	// Run Feature Finding and Statistics
-	get_features(mzmls, execute_pia.out[0].map { it[0] })
+	get_features(mzmls, execute_pia.out[0].map { it[0] }, feature_finder_params)
 
 	// Get Thermospecific information from raw
 	get_custom_headers(thermo_raw_files, bruker_raw_files)
@@ -96,6 +98,26 @@ workflow {
 	// // Visualize the results
 	visualize_results(combine_output_to_table.out)
 
+}
+
+/**
+ * This process is used to convert the comet parameters into the parameters needed for the feature finder.
+ * 
+ * @param comet_params The comet parameters file
+ * @return The feature finder parameters (value channel)
+ */
+process get_feature_finder_params_from_comet_params {
+	container 'mpc/nextqcflow-python:latest'
+
+	input:
+	path comet_params
+
+	output:
+	stdout
+
+	"""
+	comet_params_to_feature_finder_params.py -c ${comet_params}
+	"""
 }
 
 process combine_output_to_table {

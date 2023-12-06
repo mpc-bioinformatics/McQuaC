@@ -4,6 +4,7 @@ nextflow.enable.dsl=2
 // Parameters required for standalone execution
 params.gf_thermo_raws = "$PWD/raws"  // Folder of Thermo-RAW-files
 params.gf_ident_files = "$PWD/raws"  // Folder of mzTab Identification files (already FDR-filtered). Names should be identical to raw files for matching
+params.feature_finder_params = "-algorithm:mz_tolerance 5.0 -algorithm:mz_unit ppm" // Mass spectrometer specific parameters for FeatureFinder
 
 // Optional Parameters
 // Parameters for Feature Detection
@@ -23,7 +24,8 @@ params.gf_num_procs_conversion = Runtime.runtime.availableProcessors()  // Numbe
 workflow {
     mzmls = Channel.fromPath(params.gf_thermo_raws + "/*.mzML")
     mztabfiles = Channel.fromPath(params.gf_ident_files + "/*.mzTab")
-    get_features(mzmls, mztabfiles)
+    feature_finder_params = Channel.value(params.feature_finder_params)
+    get_features(mzmls, mztabfiles, feature_finder_params)
 }
 
 /**
@@ -31,11 +33,13 @@ workflow {
  * 
  * @param mzmls Channel of mzML files
  * @param mztabfiles Channel of mzTab files
+ * @param feature_finder_params Channel of feature finder parameters
  */
 workflow get_features {
     take:
         mzmls  // MS1 should be peak picked for feature-finding
         mztabfiles
+        feature_finder_params
     main:
         // Match files according to their baseName
         mztabs_tuple = mztabfiles.map {
@@ -52,7 +56,7 @@ workflow get_features {
         }
 
         // Get features with OpenMS' or Dinosaur feature finder
-        run_feature_finder(mzml_and_id)
+        run_feature_finder(mzml_and_id, feature_finder_params)
 
         // Map Identification with Features (using mzTab and featureXML)
         map_features_with_idents(run_feature_finder.out)
@@ -68,6 +72,7 @@ process run_feature_finder {
 
     input:
     tuple path(mzml), path(ident)
+    val feature_finder_params
 
     output:
     tuple path("${mzml.baseName}.featureXML"), path("${mzml.baseName}.hills.csv"), path(ident)
@@ -80,12 +85,12 @@ process run_feature_finder {
     # Multiplex FF
     # Suggested by OpenMS developers, even if there is no multiplexing (just pass empty labels)
     # Ensure params fit to your mass spectrometer, otherise this will eat up your memory faster than Chrome.
+    # Just use charge state 2 - 5 as this are common charge states for peptides lower won't be identified anyway
     FeatureFinderMultiplex -in ${mzml} -out ${mzml.baseName}.featureXML \
         -algorithm:labels "" \
-        -algorithm:mz_tolerance 5.0 \
-        -algorithm:mz_unit ppm \
         -algorithm:charge "2:5" \
-        -threads ${params.gf_num_procs_conversion}
+        -threads ${params.gf_num_procs_conversion} \
+        ${params.feature_finder_params}
     touch ${mzml.baseName}.hills.csv
     
     # Dinosaur FF
