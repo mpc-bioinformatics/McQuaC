@@ -22,7 +22,9 @@ workflow retrieve_spikeins {
         raw_files
         mztabfiles
     main:
-        spikeins = Channel.fromPath(params.spk_spike_ins)
+        // Create a value channel for concurrent processing
+        // TODO: should be a parameter of the workflow to support other spike-ins when calling from main
+        spikeins = Channel.fromPath(params.spk_spike_ins).first()
 
         // Map the raw files to their corresponding mzTab files
         // Format: (basename, raw, mztab)
