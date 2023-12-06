@@ -19,7 +19,7 @@ nextflow run \
 // Include all the needed workflows from the sub-workflows
 // Extend this to also extend the QC-Workflow 
 PROJECT_DIR = workflow.projectDir
-include {convert_to_mgf_mzml} from PROJECT_DIR + '/convert_to_mgf_mzml.nf'
+include {convert_to_mzml; convert_to_mgf; convert_to_idxml} from PROJECT_DIR + '/file_conversion.nf'
 include {get_various_mzml_infos} from PROJECT_DIR + '/get_mzml_chromatogram_and_more.nf'
 include {ident_via_comet} from PROJECT_DIR + '/identification_via_comet.nf'
 include {execute_pia} from PROJECT_DIR + '/pia.nf'
@@ -41,59 +41,64 @@ params.main_is_isa = true // Parameter to check if we execute a isa specific xic
 
 // MAIN WORKFLOW
 workflow {
-	// Retrieve RAW-Spectra
-    rawspectra = Channel.fromPath(params.main_raw_spectra_folder + "/*.{raw,d}", type: "any")
-
-	// Convert to needed formats:
-	// TODO: Split up thermo and bruker conversion so differen containers can be used
-	convert_to_mgf_mzml(rawspectra) // 0 --> .mgf | 1 --> .mzML (peak-picked)
-	
-	// Retreive MZML Statistics
-	get_various_mzml_infos(convert_to_mgf_mzml.out[1])
-
-	/* Identify with multiple search engines */
+	// Retrieve inpit files
+	thermo_raw_files = Channel.fromPath(params.main_raw_spectra_folder + "/*.raw")
+	bruker_raw_files = Channel.fromPath(params.main_raw_spectra_folder + "/*.d", type: 'dir')
 	fasta_file = Channel.fromPath(params.main_fasta_file)
-	// Comet
 	comet_params = Channel.fromPath(params.main_comet_params)
-	ident_via_comet(convert_to_mgf_mzml.out[0], fasta_file, comet_params)
-	// MS-GF+
-	// convert_to_mgf(rawspectra) //MS-GF+ Workflow requires MGFs
-	// TODO ||| HERE goes the code!
-	/* END Identify with multiple search engines */
 
-	// Execute PIA and filter by FDR ||| TODO do we combine the search engine results?
-	execute_pia(ident_via_comet.out)
+
+	// File conversion into open formats
+	mzmls = convert_to_mzml(thermo_raw_files, bruker_raw_files)
+	// mgfs = convert_to_mgf(mzmls)
+	
+	// // Retreive MZML Statistics
+	get_various_mzml_infos(mzmls)
+
+	// /* Identify with multiple search engines */
+	// // Comet
+	pepxmls = ident_via_comet(mzmls, fasta_file, comet_params)
+	idxmls = convert_to_idxml(pepxmls)
+	
+	// // MS-GF+
+	// // convert_to_mgf(rawspectra) //MS-GF+ Workflow requires MGFs
+	// // TODO ||| HERE goes the code!
+	// /* END Identify with multiple search engines */
+
+	// // Execute PIA and filter by FDR ||| TODO do we combine the search engine results?
+	execute_pia(idxmls.collect())
 
 	// Specific to ISA: Do XIC-Extraction if specified
 	if (params.main_is_isa) {
-		retrieve_spikeins(rawspectra, execute_pia.out[0].map { it[0] })
+		raw_files = thermo_raw_files.concat(bruker_raw_files)
+		retrieve_spikeins(raw_files, execute_pia.out[0].map { it[0] })
 	}
 
 	// Run Feature Finding and Statistics
-	get_features(convert_to_mgf_mzml.out[1], execute_pia.out[0].map { it[0] })
+	get_features(mzmls, execute_pia.out[0].map { it[0] })
 
 	// Get Thermospecific information from raw
-	// get_custom_headers(rawspectra)
+	get_custom_headers(thermo_raw_files, bruker_raw_files)
 
 
-	// Concatenate to large csv
+	// // Concatenate to large csv
 	combined_csvs = get_various_mzml_infos.out.collect().concat(
 		retrieve_spikeins.out.collect(),
 		get_features.out.map { it[1] }.collect(),
 		execute_pia.out[1].collect(),
-		// TODO: Uncomment when thermorawfileparser (TRFP) and this fisher-py are processed by different container
-		// as the mono version of TRFP is not compatible with fisher-py (got an ugly assemply error)
-		// get_custom_headers.out.collect()
+		get_custom_headers.out.collect()
 	).collect()
 	combine_output_to_table(combined_csvs)
 	
 
-	// Visualize the results
+	// // Visualize the results
 	visualize_results(combine_output_to_table.out)
 
 }
 
 process combine_output_to_table {
+	container 'mpc/nextqcflow-python:latest'
+
 	publishDir "${params.main_outdir}/qc_results", mode:'copy'
 
 	input:
@@ -115,6 +120,8 @@ process combine_output_to_table {
 }
 
 process visualize_results {
+	container 'mpc/nextqcflow-python:latest'
+
 	publishDir "${params.main_outdir}/qc_results", mode:'copy'
 
 	input:

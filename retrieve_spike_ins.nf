@@ -19,13 +19,14 @@ workflow {
 
 workflow retrieve_spikeins {
     take:
-        rawfiles
+        raw_files
         mztabfiles
     main:
-        spikeins = Channel.from(file(params.spk_spike_ins))
-        
-        // Match files according to their baseName
-        rawfiles_tuple = rawfiles.map {
+        spikeins = Channel.fromPath(params.spk_spike_ins)
+
+        // Map the raw files to their corresponding mzTab files
+        // Format: (basename, raw, mztab)
+        rawfiles_tuple = raw_files.map {
             file -> tuple(file.baseName, file)
         }
         mztabs_tuple = mztabfiles.map {
@@ -36,13 +37,22 @@ workflow retrieve_spikeins {
             by: 0
         )
 
-        // And combine all with the spike ins 
-        raw_id_spikes = raw_and_id.combine(spikeins)
-
         // Finally, we generate the input json, retrieve it via trfp and parse back this results into a csv-format
-        generate_json_and_association(raw_id_spikes)
-        retrieve_xics_from_raw_spectra(generate_json_and_association.out)
-        get_statistics(retrieve_xics_from_raw_spectra.out)
+        json_and_association = generate_json_and_association(raw_and_id, spikeins)
+
+
+        json_and_association.branch {
+            thermo: it[0].getExtension() == 'raw'
+            bruker: it[0].getExtension() == 'd'
+        }.set{ filtered_json_and_association }
+
+
+        thermo_xics = retrieve_xics_from_thermo_raw_spectra(filtered_json_and_association.thermo)
+        bruker_xics = retrieve_xics_from_bruker_raw_spectra(filtered_json_and_association.bruker)
+
+        xics = thermo_xics.concat(bruker_xics)
+
+        get_statistics(xics)
 
     emit:
         get_statistics.out
@@ -50,8 +60,11 @@ workflow retrieve_spikeins {
 
 // Uses the Identification file and Spike Ins and maps according to the accession identified spike ins. We also generate here the query for TRFP 
 process generate_json_and_association {
+    container 'mpc/nextqcflow-python:latest'
+
     input:
-    tuple val(file_base_name), file(raw), file(ident), file(spike_ins)
+    tuple val(file_base_name), path(raw), path(ident)
+    path spike_ins
 
     output:
     tuple file(raw), file("trfp_input.json"), file("association.txt")
@@ -62,9 +75,10 @@ process generate_json_and_association {
 }
 
 // Actual retrieval of the XICs using TRFP (Wrapper)
-process retrieve_xics_from_raw_spectra {
+process retrieve_xics_from_thermo_raw_spectra {
+    container 'quay.io/biocontainers/thermorawfileparser:1.4.3--ha8f3691_0'
+
     maxForks params.spk_num_procs_extraction
-    stageInMode "copy"
 
     input:
     tuple file(raw), file(trfp_input), file(associations)
@@ -72,15 +86,25 @@ process retrieve_xics_from_raw_spectra {
     output:
     tuple file(associations), file("${raw.baseName}.json")
 
+    """
+    thermorawfileparser xic -i $raw -j $trfp_input 
+    """
+}
+
+// Actual retrieval of the XICs using TRFP (Wrapper)
+process retrieve_xics_from_bruker_raw_spectra {
+    container 'mpc/nextqcflow-python:latest'
+
+    maxForks params.spk_num_procs_extraction
+
+    input:
+    tuple file(raw), file(trfp_input), file(associations)
+
+    output:
+    tuple file(associations), file("${raw.baseName}.json")
 
     """
-    if [[ "${raw}" == *.raw ]]; then
-        thermorawfileparser xic -i $raw -j $trfp_input 
-    fi
-
-    if [[ "${raw}" == *.d ]]; then
-        extract_xic_bruker.py -d_folder ${raw} -in_json ${trfp_input} -out_json ${raw.baseName}.json
-    fi 
+    extract_xic_bruker.py -d_folder ${raw} -in_json ${trfp_input} -out_json ${raw.baseName}.json
     """
 }
 

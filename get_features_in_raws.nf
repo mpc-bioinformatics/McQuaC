@@ -26,6 +26,12 @@ workflow {
     get_features(mzmls, mztabfiles)
 }
 
+/**
+ * Extracts features from peak picked MS1 spectra
+ * 
+ * @param mzmls Channel of mzML files
+ * @param mztabfiles Channel of mzTab files
+ */
 workflow get_features {
     take:
         mzmls  // MS1 should be peak picked for feature-finding
@@ -58,7 +64,7 @@ workflow get_features {
 }
 
 process run_feature_finder {
-    stageInMode "copy"
+    container 'mpc/nextqcflow-python:latest'
 
     input:
     tuple file(mzml), file(ident)
@@ -88,7 +94,7 @@ process run_feature_finder {
 }
 
 process map_features_with_idents {
-    stageInMode "copy"
+    container 'mpc/nextqcflow-python:latest'
 
     input:
     tuple file(featurexml), file(hills), file(ident)
@@ -102,7 +108,7 @@ process map_features_with_idents {
 }
 
 process get_statistics_from_featurexml {
-    stageInMode "copy"
+    container 'mpc/nextqcflow-python:latest'
 
     publishDir "${params.gf_outdir}/", mode:'copy'
 

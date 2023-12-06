@@ -20,16 +20,21 @@ workflow {
 
 workflow get_custom_headers {
     take:
-        raw_files // a list of raw_files
+        thermo_raw_files
+        bruker_raw_files
     main:
         // Extract Information directly from the RAW-file using fisher-py
-        retrieve_custom_headers(raw_files)
+        thermo_headers = retrieve_custom_headers_from_thermo_raw_files(thermo_raw_files)
+        bruker_headers = retrieve_custom_headers_from_bruker_raw_files(bruker_raw_files)
+        headers = thermo_headers.concat(bruker_headers)
     emit:
-        retrieve_custom_headers.out
+        headers
 }
 
-process retrieve_custom_headers {
-    stageInMode "copy"
+process retrieve_custom_headers_from_thermo_raw_files {
+    container 'mpc/nextqcflow-python:latest'
+
+    stageInMode 'copy'
     publishDir "${params.ccff_outdir}/", mode:'copy'
 
     input:
@@ -39,19 +44,28 @@ process retrieve_custom_headers {
     file "${raw.baseName}_____customs.csv"
 
     """
-    if [[ "${raw}" == *.raw ]]; then
-        # Pythonnet sometimes fails to exit and throws a mono error
-        thermo_extract_custom_headers.py -raw ${raw} ${params.ccff_header_in_raws} -out_csv ${raw.baseName}_____customs.csv || true
+    # Pythonnet sometimes fails to exit and throws a mono error
+    thermo_extract_custom_headers.py -raw ${raw} ${params.ccff_header_in_raws} -out_csv ${raw.baseName}_____customs.csv || true
 
-        # Fail Check if no content was written
-        if ! [ -s "${raw.baseName}_____customs.csv" ];then
-            rm ${raw.baseName}_____customs.csv
-        fi
+    # Fail Check if no content was written
+    if ! [ -s "${raw.baseName}_____customs.csv" ];then
+        rm ${raw.baseName}_____customs.csv
     fi
+    """
+}
 
-    if [[ "${raw}" == *.d ]]; then
-        bruker_extract_custom_headers.py -d_folder ${raw} -out_csv ${raw.baseName}_____customs.csv ${params.ccff_header_in_d} ${params.ccff_header_in_d_names}
-    fi 
- 
+process retrieve_custom_headers_from_bruker_raw_files {
+    container 'mpc/nextqcflow-python:latest'
+
+    publishDir "${params.ccff_outdir}/", mode:'copy'
+
+    input:
+    file raw
+
+    output:
+    file "${raw.baseName}_____customs.csv"
+
+    """
+    bruker_extract_custom_headers.py -d_folder ${raw} -out_csv ${raw.baseName}_____customs.csv ${params.ccff_header_in_d} ${params.ccff_header_in_d_names}
     """
 }
