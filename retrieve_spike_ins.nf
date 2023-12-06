@@ -112,6 +112,9 @@ process retrieve_xics_from_bruker_raw_spectra {
 
 // Parsing back the results from TRFP (in JSON) into a CSV-format (while also considering identifications)
 process get_statistics {
+    container 'mpc/nextqcflow-python:latest'
+
+
     publishDir "${params.spk_outdir}/", mode:'copy'
 
     input:
