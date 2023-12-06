@@ -44,8 +44,10 @@ workflow {
 	// Retrieve inpit files
 	thermo_raw_files = Channel.fromPath(params.main_raw_spectra_folder + "/*.raw")
 	bruker_raw_files = Channel.fromPath(params.main_raw_spectra_folder + "/*.d", type: 'dir')
-	fasta_file = Channel.fromPath(params.main_fasta_file)
-	comet_params = Channel.fromPath(params.main_comet_params)
+	// .first() convert the queue channel with only one file to a value channel, making it possible to use multiple time
+	// e.g. to automatically start multiple concurrent identifications (no need for map each raw file with the fasta and config file)
+	fasta_file = Channel.fromPath(params.main_fasta_file).first()
+	comet_params = Channel.fromPath(params.main_comet_params).first()
 
 
 	// File conversion into open formats
@@ -66,7 +68,7 @@ workflow {
 	// /* END Identify with multiple search engines */
 
 	// // Execute PIA and filter by FDR ||| TODO do we combine the search engine results?
-	execute_pia(idxmls.collect())
+	execute_pia(idxmls)
 
 	// Specific to ISA: Do XIC-Extraction if specified
 	if (params.main_is_isa) {
