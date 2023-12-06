@@ -74,15 +74,19 @@ process run_feature_finder {
 
     """
     # Centroided FF
-    FeatureFinderCentroided -in ${mzml} -out ${mzml.baseName}.featureXML -algorithm:isotopic_pattern:charge_low ${params.gf_considered_charges_low} -algorithm:isotopic_pattern:charge_high ${params.gf_considered_charges_high} ${params.gf_resolution_featurefinder}
-    touch ${mzml.baseName}.hills.csv
-    
-    # Multiplex FF
-    # FeatureFinderMultiplex -in ${mzml} -out ${mzml.baseName}.featureXML \
-    #     -algorithm:labels "" \
-    #     -algorithm:charge "1:5"
+    # FeatureFinderCentroided -in ${mzml} -out ${mzml.baseName}.featureXML -algorithm:isotopic_pattern:charge_low ${params.gf_considered_charges_low} -algorithm:isotopic_pattern:charge_high ${params.gf_considered_charges_high} ${params.gf_resolution_featurefinder}
     # touch ${mzml.baseName}.hills.csv
-    # We do not use multiplex, it seems to be broken, mem usage way over 40 GB per RAW file failing by "std::bad_alloc"
+
+    # Multiplex FF
+    # Suggested by OpenMS developers, even if there is no multiplexing (just pass empty labels)
+    # Ensure params fit to your mass spectrometer, otherise this will eat up your memory faster than Chrome.
+    FeatureFinderMultiplex -in ${mzml} -out ${mzml.baseName}.featureXML \
+        -algorithm:labels "" \
+        -algorithm:mz_tolerance 5.0 \
+        -algorithm:mz_unit ppm \
+        -algorithm:charge "2:5" \
+        -threads ${params.gf_num_procs_conversion}
+    touch ${mzml.baseName}.hills.csv
     
     # Dinosaur FF
     # java -jar \$(get_cur_bin_dir.sh)/Dinosaur.jar \
