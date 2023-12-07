@@ -32,7 +32,7 @@ include {get_custom_headers} from PROJECT_DIR + '/get_custom_columns_from_file_d
 // Parameters required for the standalone execution of this main-nextflow script
 params.main_raw_spectra_folder = "" // The folder containing the raw spectra
 params.main_fasta_file = "" // A SINGLE-Fasta-file of the species to be searched (should also contain the SpikeIns if needed)
-params.main_comet_params = "${baseDir}/example_configurations/comet_config.txt" // Main-Search-Parameters for the comet search engine
+params.main_comet_params = "${baseDir}/example_configurations/high-high.comet.params" // Main-Search-Parameters for the comet search engine
 params.main_outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
 
 

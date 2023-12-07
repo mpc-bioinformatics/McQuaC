@@ -48,7 +48,7 @@ Sub-workflows: identification_via_comet.nf and identification_via_msgfplus.nf
 
 The MS2 spectra in the raw files are identified via the Comet and MSGF+ search engines using the provided FASTA files.
 
-For Comet, a configuration file (example_configurations/comet_config.txt) is needed, which contains the necessary parameters. 
+For Comet, a configuration file (example_configurations/high-high.comet.params) is needed, which contains the necessary parameters. 
 By default, peptide mass tolerance is set to 5ppm, fragment tolerance as 20ppm, maximum 2 missed cleavages and Trypsin as the enzyme.
 Oxidation(M) is set as a variable modification and Cabamidomethylation (C) as a fixed modification.
 
