@@ -55,11 +55,11 @@ process comet_search {
 
     """
     sed 's/^decoy_search.*/decoy_search = ${params.ic_tda} /' ${config_file} > ${config_file.baseName}_new.txt
-    sed -i 's/^output_mzidentmlfile.*/output_mzidentmlfile = 1/' ${config_file.baseName}_new.txt
+    sed -i 's/^output_mzidentmlfile.*/output_mzidentmlfile = 0/' ${config_file.baseName}_new.txt
     sed -i 's/^decoy_prefix.*/decoy_prefix = DECOY_/' ${config_file.baseName}_new.txt
     sed -i 's/^database_name.*/database_name = ${input_fasta}/' ${config_file.baseName}_new.txt
     sed -i 's/^output_pepxmlfile.*/output_pepxmlfile = 1/' ${config_file.baseName}_new.txt
-    sed -i 's/^output_txtfile.*/output_txtfile = 1/' ${config_file.baseName}_new.txt
+    sed -i 's/^output_txtfile.*/output_txtfile = 0/' ${config_file.baseName}_new.txt
     sed -i 's/^num_threads.*/num_threads = ${params.ic_num_parallel_threads_per_search} /' ${config_file.baseName}_new.txt
 
 
@@ -68,5 +68,5 @@ process comet_search {
     # CometAdapter -PeptideIndexing:unmatched_action warn  -in ${mzml} -out ${mzml.baseName}.idXML -database ${input_fasta.baseName}_rev.fasta -comet_executable ${workflow.projectDir}/bin/comet.linux_v2022.01.0.exe -default_params_file ${config_file.baseName}_new.txt
 
     comet -P${config_file.baseName}_new.txt -D${input_fasta} ${mzml}
-    """  
+    """
 }
