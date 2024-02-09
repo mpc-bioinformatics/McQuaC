@@ -57,9 +57,7 @@ workflow convert_to_idxml{
 
 
 process convert_thermo_raw_files {
-    container 'chambm/pwiz-skyline-i-agree-to-the-vendor-licenses'
-    // by mounting the parent directory we can use a symlink to the raw file in the workdir
-    containerOptions { "-v ${raw_file.getParent()}:/data" }
+    container 'quay.io/biocontainers/thermorawfileparser:1.4.3--ha8f3691_0'
 
     input:
     path raw_file
@@ -68,7 +66,7 @@ process convert_thermo_raw_files {
     path "${raw_file.baseName}.mzML"
 
     """
-    wine msconvert ${raw_file} --mzML --zlib --filter "peakPicking true 1-"
+    thermorawfileparser ${params.ctm_additional_params} --format=2 --output_file=${raw_file.baseName}.mzML --input=${raw_file}
     """
 }
 
