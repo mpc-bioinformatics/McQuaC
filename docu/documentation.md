@@ -93,45 +93,32 @@ The raw files are converted to mzML (*Why don't we use the mzMLs from step 2?*) 
 ### 8) **Plotting**
 The visualization is done in Python with the plotly package for interactive plots.
 
-The data stem from the different tables in the database. As parameters only the names of the raw files to plot have to be given. In case of regular QC, groups can be defined for colouring the PCA plots. If use_groups = False, the PCA plots will be coloured by timestamp, so that effects of the run order can be assessed.
-
-List of plots (regular QC):
-
-- Figure 0: Show table with all QC metrics (TODO)
-- Figure 1: Barplot for total number of MS1 and MS2 spectra (absolute numbers)
-- Figure 2: Barplot for number of PSMs, peptides, proteins and identified features (absolute numbers)
-- Figure 3: TIC Overlay as Lineplot
-- Figure 4: Barplot TIC quartiles
-- Figure 5: Barplot MS1 TIC quartiles
-- Figure 6: Barplot MS2 TIC quartiles
-- Figure 7: Barplot of precursor charge states (relative)
-- Figure 8: Barplot of PSM charge states (of identified spectra) (relative)
-- Figure 9: Barplot of missed cleavages of PSMs (relative)
-- Figure 10: PCA on all data (a) (+ plot for Loadings (b) (to assess importance of variables for the PCA))
-- Figure 11: PCA on raw data (a) (+ plot for Loadings (b) (to assess importance of variables for the PCA))
-- Figure 12: For each raw files, an ion map (2D density plot with x = RT, y = MZ)
-- Figure 13: Time vs. pump pressure (Lineplot)
-- Figure 14: Time vs. ion injection time (Lineplot)
-- Figure 15: Time vs. Lock mass correction (ppm) (Lineplot)
-
-In the QC_columns_overview.csv table it is indicated which columns are used inside the two PCA plots.
-
-List of plots (ISA QC):
-
-- Figure 0: Show table with important ISA QC metrics (TODO, this corresponds to the run_data table)
-- Figure 1: Barplot with number of proteins, protein groups and unfiltered protein groups (absolute numbers)
-- Figure 2: Barplot with number of peptides (absolute numbers)
-- Figure 3: Barplot with number of PSMs (absolute numbers)
+The data are directly read from the csv file provided by the previous workflow step. 
+The following parameters can be set:
+group (default:None): List of experimental group (comma-separated), will influence the colouring in the PCA plots.
+tic_overlay_offset (default: 0): allows offset for the TIC plots (so there is a distance between them and you can see them better).
 
 
+The data stem from the different tables in the database. 
 
+List of plots/tables for display:
 
-
-
-
-
-
-
+- Table 0: Overview over QC measures. This table shows an overview over the different QC measures (one row per raw file).  
+- Figure 1: Number of MS1 and MS2 spectra. This figure shows the total number of MS1 and MS2 spectra measured in each sample.  
+- Figure 2: Number of PSMs, peptides and protein groups. This figure shows a barplot of the number of peptide-spectrum matches (PSMs) and peptides, each filtered by a false discovery rate of 1%. Additionally, the protein groups formed by PIA as well as the total number of protein accessions in these groups (ungrouped proteins) are shown.
+- Figure 3: Number of features and identified features. This figure shows a barplot of the total number of features and those that were identified in the raw data.
+- Figure 4: TIC overlay. This figure shows the overlay of the total ion chromatograms (TICs) of all raw files. On the x-axis the retention time and on the y-axis the intensity of the TIC is given.
+- Figure 5: TIC quartiles. This barplot shows the TIC quartiles, so how many % of the retention time was needed to measure the first, second, third or fourth 25% of the total TIC. The similarity of TICs between the different samples can be assessed by this figure.
+- Figure 6: MS1 TIC quartiles. This barplot shows the MS1 TIC quartiles, so how many % of the retention time was needed to measure the first, second, third or fourth 25% of the TIC restricted to MS1. The similarity of TICs between the different samples can be assessed by this figure.
+- Figure 7: MS2 TIC quartiles. This barplot shows the MS2 TIC quartiles, so how many % of the retention time was needed to measure the first, second, third or fourth 25% of the TIC restricted to MS2. The similarity of TICs between the different samples can be assessed by this figure.
+- Figure 8: Precursor charge states. This barplot show the relative distribution of charge states (1-5 or more and unknown) of the precursor ions, so before any identification. 
+- Figure 9: PSM charge states. This barplot show the relative distribution of charge states (1-5 or more and unknown) of the ions with a peptide-spectrum match, so after identification. 
+- Figure 10: PSM missed cleavages. This barplot show the relative distribution of missed cleavages (0-3 or more) of the identified peptides. 
+- Figure 11: PCA on all data (a) + loading plot (b). In the PCA each dot stands for one raw file. For calculation of the PCA a set of QC measures before and after identification is used. In the loading plots each dot stands for one of these Qc measures. Important QC measures for the shape of the PCA plot can be derived by looking at the upper, lower and left and right borders. 
+- Figure 12: PCA on raw data (a) + loading plot (b). In the PCA each dot stands for one raw file. For calculation of the PCA a set of QC measures is used, which can be derived directly from the raw data (before any identification). In the loading plots each dot stands for one of these Qc measures. Important QC measures for the shape of the PCA plot can be derived by looking at the upper, lower and left and right borders.
+- Figure 13: Ion Maps. For each raw file an ion map is generated. The x-axis shows the retention time and the y-axis the m/z. The colouring show the MS2 TIC.
+- Figure 14: Pump pressure. This line plot show the pump pressure (y-axis) depending on the retention time (x-axis). 
+- Figure 15: Various additional plots. These line plots show different further variables depending on the retention time, for example ion injection time or lock mass correction.
 
 
 
