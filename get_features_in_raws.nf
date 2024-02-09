@@ -41,12 +41,15 @@ workflow get_features {
         mztabfiles
         feature_finder_params
     main:
+
+        filtered_mzml = filter_mzml(mzmls)
+
         // Match files according to their baseName
         mztabs_tuple = mztabfiles.map {
             file -> tuple(file, file.baseName.split("_____")[0])
         }
-        mzmls_tuple = mzmls.map {
-            file -> tuple(file, file.baseName)
+        mzmls_tuple = filtered_mzml.map {
+            file -> tuple(file, file.getSimpleName())
         }
         mzml_and_id = mzmls_tuple.join(
             mztabs_tuple,
@@ -69,6 +72,7 @@ workflow get_features {
 
 process run_feature_finder {
     container 'mpc/nextqcflow-python:latest'
+    maxForks 1
 
     input:
     tuple path(mzml), path(ident)
@@ -90,6 +94,7 @@ process run_feature_finder {
         -algorithm:labels "" \
         -algorithm:charge "2:5" \
         -threads ${params.gf_num_procs_conversion} \
+        -algorithm:spectrum_type centroid \
         ${params.feature_finder_params}
     touch ${mzml.baseName}.hills.csv
     
@@ -129,5 +134,28 @@ process get_statistics_from_featurexml {
 
     """
     extract_from_featurexml.py -featurexml ${featurexml} -hills ${hills} -out_csv ${file_base_name}_____features.csv -report_up_to_charge ${params.gf_considered_charges_high}
+    """
+}
+
+/**
+ * Removes chormatrograms and empty peak lists from mzML
+ * Necessary to prevent memory issues with FeatureFinder
+ */
+process filter_mzml {
+    container 'mpc/nextqcflow-python:latest'
+
+    input:
+    path(mzml)
+
+    output:
+    path("${mzml.baseName}.filtered.mzML")
+
+    """
+    # Filter mzML for MS1 spectra
+    FileFilter -in ${mzml} -out ${mzml.baseName}.filtered.mzML \
+        -peak_options:remove_chromatograms \
+        -peak_options:remove_empty \
+        -peak_options:sort_peaks \
+        -peak_options:zlib_compression true
     """
 }
