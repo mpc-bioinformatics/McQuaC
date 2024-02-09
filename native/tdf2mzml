@@ -1,0 +1,8 @@
+#!/bin/bash
+# Makes sure all libraries are in the path calls the tdf2mzml package and passes all arguments to it
+
+# Get the library path within the tdf2mzml package and appends it to the LD_LIBRARY_PATH
+TDF2MZML_LIBS=$($(python3 -c "import tdf2mzml; print(tdf2mzml.__file__)"))
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TDF2MZML_LIBS
+
+python3 -m tdf2mzml $@

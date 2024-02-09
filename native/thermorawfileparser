@@ -1,0 +1,7 @@
+#!/bin/bash
+# Calls thermorawfileparser using mono and passes all arguments to it
+
+# Thermorawfileparser is located next to this script
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+mono ${SCRIPT_DIR}/thermorawfileparser/ThermoRawFileParser.exe $@

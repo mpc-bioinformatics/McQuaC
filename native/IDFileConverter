@@ -1,0 +1,7 @@
+#!/bin/bash
+# Calls ID Mapper and passes down all arguments
+
+# IDMapper is located next to this script
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+${SCRIPT_DIR}/openms/usr/bin/IDFileConverter $@

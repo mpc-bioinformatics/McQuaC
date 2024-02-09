@@ -1,5 +1,10 @@
 # Binaries
 nextflow
+# Make sure the wrapper files are ignored after a native installation was used by disallowing anything in 
+# but the python script. If anything new goes in there, which is not a python script, it will be ignored and needs to be added manually
+bin/*
+bin/**
+!bin/*py
 
 # Nextflow outputs
 .nextflow.log*

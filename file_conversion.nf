@@ -85,8 +85,11 @@ process convert_bruker_raw_files {
     output:
     path "${raw_file.baseName}.mzML"
 
+    script:
+    // Container calls the python script tdf2mzml.py, but the wrapper script is called tdf2mzml
+    tdf2mzml_bin = workflow.profile == "docker" ? "tdf2mzml.py" : "tdf2mzml"
     """
-    tdf2mzml.py -i ${raw_file} -o ${raw_file.baseName}.mzML --ms1_type centroid
+    ${tdf2mzml_bin} -i ${raw_file} -o ${raw_file.baseName}.mzML --ms1_type centroid
     """
 }
 

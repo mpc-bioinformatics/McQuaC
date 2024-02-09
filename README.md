@@ -64,6 +64,11 @@ env DOCKER_DEFAULT_PLATFORM=linux/amd64 nextflow run -profile docker main.nf --m
 ```
 TL;DR Some of the used software and containers are only available for x64, therefore Docker writes a warning on stderr that another architecture is used instead of the host architecture, which stops the Nextflow execution. Setting the architecture explicitly using the the env var `DOCKER_DEFAULT_PLATFORM` solves the problems.
 
+#### Native
+Currntly only usable with Ubuntu    
+`make install-native`
+
+Downloads several dependencies into the `bin`-folder and creates some wrapper scripts to make the workflow natively executable.  
 
 ##### Run the workflow
 ```
