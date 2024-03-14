@@ -114,7 +114,7 @@ process map_features_with_idents {
     tuple path(featurexml), path(hills), path(ident)
 
     output:
-    tuple path("${featurexml.baseName}_with_idents.featureXML"), path(hills), val("${featurexml.baseName}")
+    tuple path("${featurexml.baseName}_with_idents.featureXML"), path(hills), val("${featurexml.simpleName}")
     """
     convert_mztab_to_idxml.py -mztab ${ident} -out_idxml ${ident.baseName}.idXML
     IDMapper -id ${ident.baseName}.idXML -in ${featurexml} -out ${featurexml.baseName}_with_idents.featureXML
