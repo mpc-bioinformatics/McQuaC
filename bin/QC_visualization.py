@@ -527,7 +527,7 @@ if __name__ == "__main__":
             height=400,
             title="Empty Plot"
         )
-        fig11_loadings = fig10
+        fig11_loadings = fig11
     if fig_show:
         fig11.show()
     with open(output_path +"/fig11a_PCA_all.json", "w") as json_file:
