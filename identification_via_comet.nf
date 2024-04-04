@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 // Parameters required for standalone execution
 params.ic_raw_folder = "$PWD/MZMLs" // Input-Directory of MGFs, which should be used for identification
 params.ic_fasta_file = "proteins.fasta" // Database (FASTA-file) used for identification with decoys (prefixed with "DECOY_") or without decoys!
-params.ic_search_parameter_file = "$PWD/example_configurations/comet_config.txt" //Search Parameters for Comet
+params.ic_search_parameter_file = "${baseDir}/example_configurations/high-high.comet.params" //Search Parameters for Comet
 
 // Optional Parameters
 params.ic_tda = 1 // 0 --> No Target-Decoy appraoch | 1 --> Target-Decoy appraoch (comet automatically prefixes decoys with "DECOY_" )
@@ -27,49 +27,46 @@ workflow {
 
 workflow ident_via_comet {
     take:
-        mgfs
+        mzmls
         fasta_file
-        modification_file
+        config_file
 
     main:
-        // Combined channel replicated the indexed fasta for each MGF to be reused
-        combined_channel = fasta_file
-            .combine(modification_file)
-            .combine(mgfs)
-        
         // Start search
-        comet_search(combined_channel)
+        idxmls = comet_search(mzmls, fasta_file, config_file)
     emit:
-        comet_search.out[0]
+        idxmls
 }
 
 process comet_search {
+    container 'mpc/nextqcflow-comet:latest'
+
     cpus params.ic_num_parallel_threads_per_search
     publishDir "${params.ic_outdir}/idents", mode:'copy'
-    stageInMode "copy"
 
     input:
-    tuple file(input_fasta), file(mod_file), file(mzml)
+    path(mzml)
+    path(input_fasta)
+    path(config_file)
+
 
     output: 
-    file "${mzml.baseName}.idXML"
-    file "${mzml.baseName}.txt"
+    path "${mzml.baseName}.pep.xml"
 
     """
-    sed 's/^decoy_search.*/decoy_search = ${params.ic_tda} /' ${mod_file} > ${mod_file.baseName}_new.txt
-    sed -i 's/^output_mzidentmlfile.*/output_mzidentmlfile = 1/' ${mod_file.baseName}_new.txt
-    sed -i 's/^decoy_prefix.*/decoy_prefix = DECOY_/' ${mod_file.baseName}_new.txt
-    sed -i 's/^database_name.*/database_name = ${input_fasta}/' ${mod_file.baseName}_new.txt
-    sed -i 's/^output_pepxmlfile.*/output_pepxmlfile = 1/' ${mod_file.baseName}_new.txt
-    sed -i 's/^output_txtfile.*/output_txtfile = 1/' ${mod_file.baseName}_new.txt
-    sed -i 's/^num_threads.*/num_threads = ${params.ic_num_parallel_threads_per_search} /' ${mod_file.baseName}_new.txt
+    sed 's/^decoy_search.*/decoy_search = ${params.ic_tda} /' ${config_file} > ${config_file.baseName}_new.txt
+    sed -i 's/^output_mzidentmlfile.*/output_mzidentmlfile = 0/' ${config_file.baseName}_new.txt
+    sed -i 's/^decoy_prefix.*/decoy_prefix = DECOY_/' ${config_file.baseName}_new.txt
+    sed -i 's/^database_name.*/database_name = ${input_fasta}/' ${config_file.baseName}_new.txt
+    sed -i 's/^output_pepxmlfile.*/output_pepxmlfile = 1/' ${config_file.baseName}_new.txt
+    sed -i 's/^output_txtfile.*/output_txtfile = 0/' ${config_file.baseName}_new.txt
+    sed -i 's/^num_threads.*/num_threads = ${params.ic_num_parallel_threads_per_search} /' ${config_file.baseName}_new.txt
 
 
     # We run the Comet Adapter since PIA does not work with comet output and need to mimic everything to satisfy OpenMS
-    #\$(get_cur_bin_dir.sh)/openms/usr/bin/DecoyDatabase -in ${input_fasta} -out ${input_fasta.baseName}_rev.fasta -decoy_string "DECOY_" -method "reverse"
-    #\$(get_cur_bin_dir.sh)/openms/usr/bin/CometAdapter -PeptideIndexing:unmatched_action warn  -in ${mzml} -out ${mzml.baseName}.idXML -database ${input_fasta.baseName}_rev.fasta -comet_executable ${workflow.projectDir}/bin/comet.linux_v2022.01.0.exe -default_params_file ${mod_file.baseName}_new.txt
+    # DecoyDatabase -in ${input_fasta} -out ${input_fasta.baseName}_rev.fasta -decoy_string "DECOY_" -method "reverse"
+    # CometAdapter -PeptideIndexing:unmatched_action warn  -in ${mzml} -out ${mzml.baseName}.idXML -database ${input_fasta.baseName}_rev.fasta -comet_executable ${workflow.projectDir}/bin/comet.linux_v2022.01.0.exe -default_params_file ${config_file.baseName}_new.txt
 
-    comet.linux_v2022.01.2.exe -P${mod_file.baseName}_new.txt -D${input_fasta} ${mzml}
-    \$(get_cur_bin_dir.sh)/openms/usr/bin/IDFileConverter -in ${mzml.baseName}.pep.xml -out ${mzml.baseName}.idXML 
-    """  
+    comet -P${config_file.baseName}_new.txt -D${input_fasta} ${mzml}
+    """
 }

@@ -14,57 +14,68 @@ Bittremieux W, Meysman P, Martens L, Valkenborg D, Laukens K. Unsupervised Quali
 
 The [table](docu/QC_columns_overview.csv) shows all columns which can be retrieved by this quality control workflow, including a brief description for each.
 
-## Setting up the workflow
+## Usage
+The workflow should be compatible with Linux, MacOS and Windows (WSL2).
 
-In this workflow, you have two options for execution: Either via a container (here: docker, easiest, or conda (TODO)), or locally (more difficult but developer friendlier). The containerized execution allows to execute this workflow on a cluster or any other platform, while the locally version can only be executed under Linux.
+### Requirements
 
-### Execute locally
+* Nextflow
+* Docker
+* `make`
 
-To execute this workflow locally, OS-dependencies need to be installed first. You will need `wget`, `python3.8` (other versions might not work), `unzip`, `java` (17), `mono` and specific libraries for openms.
+Every thing else is maintained within Docker containers.   
+TL;DR Many software projects in academia are abandoned or not updated regularly which makes it difficult to use new and old software in a single native environment as they might need different version of the same dependency. E.g. thermorawfileparser is actually linked against Mono 5 on Conda while fisher_py needs Mono 6 to properly work. This might become worse with more dependencies as the workflow matures. Docker container provide a robust way to keep software within their own environment while Nextflow manages starting containers, mounting data etc. in a transparent manner.   
+The use of Docker containers also increases the compatibility between OSs as everything is running on Linux (VMs) in the background and enables us to run the workflow on one of Nextflow's many distributed executors (K8s, Apptainer, ...).   
+There is also at least on library which includes a vendor library and the permission to distribute it only via Docker container.
 
-For Ubuntu (22.04): Install the following packages:
 
-```shell
-apt-get install -y bash mono-complete openjdk-17-jre python3 python3-pip git curl make build-essential libssl-dev zlib1g-dev \
-   libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm python-is-python3 unzip \
-   libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev \
-   libboost-date-time-dev libboost-iostreams-dev libboost-regex-dev libboost-math-dev \
-   libboost-random-dev zlib1g libbz2-dev libsvm3 libxerces-c-dev libglpk-dev libqt5network5 libqt5opengl5 libqt5svg5 libqt5webkit5 libqt5core5a \
-   libqt5sql5
+### Installation
+Clone the repository
+
+#### Docker
+`make install-docker`
+
+This creates and downloads several docker images
+1. Build the local Docker images (soon available via ghcr.io or similar)
+   * `docker build -t mpc/nextqcflow-python:latest -f docker/python/Dockerfile .`
+     * Environment for Python including dependencies for the Python-script in the `bin`-folder as well as OpenMS because of pyOpenMS
+   * `docker build -t mpc/nextqcflow-comet:latest -f docker/comet/Dockerfile .`   
+      * Comet is infrequently updated on bioconda and biocontainers, therefore we build it ourself, with the tested version
+      * Want to test a new Comet version? Add `--build-arg COMET_VERSION=<VERSION_FROM_GITHUB>`, e.g. `v2023.01.2`
+2. Pre download the other containers:
+   1. `docker pull quay.io/biocontainers/pia:1.4.8--hdfd78af_0`
+   2. `docker pull quay.io/biocontainers/thermorawfileparser:1.4.3--ha8f3691_0`
+   3. `docker pull chambm/pwiz-skyline-i-agree-to-the-vendor-licenses`
+   4. `docker pull mfreitas/tdf2mzml`
+
+
+##### Run the workflow
+```
+nextflow run -profile docker main.nf --main_raw_spectra_folder <FOLDER_WITH_RAWS_FILES --main_fasta_file <FASTA_FILE> --main_comet_params <COMET_CONFIG> --main_outdir <FOLDER_FOR_RESULTS>
 ```
 
-Next, copy this repository via `git` and enter its directory. Depending on the Python 3.8 setup, create a virtual environment so that needed python dependencies can be installed. Then execute the following:
+##### For non-x64-hardware like Apple Silicon (M1, M2) use
+Does not work.
+TL;DR Mono is magically detecting it is running on ARM even in Rosetta emulated Docker containers. When correctly entering a x64-specific file it throws a assertion detection as the magically detected host architecture does not match the execution architecture. As Mono is required for ThermoRawFileParser and the Python module `fisher_py` there is currently no chance of getting rid of it. Use a x64 VM in UTM or VirtualBox.
 
-```shell
-# Dependency Installation
-chmod +x setup_pyenv_download_extract_openms.sh
-./setup_pyenv_downlaod_extract_openms.sh
-
-# Expose executables for nextflow
-Chmod +x ./bin/*
+When we get rid of Mono:   
 ```
+env DOCKER_DEFAULT_PLATFORM=linux/amd64 nextflow run -profile docker main.nf --main_raw_spectra_folder <FOLDER_WITH_RAWS_FILES --main_fasta_file <FASTA_FILE> --main_comet_params <COMET_CONFIG> --main_outdir <FOLDER_FOR_RESULTS>
+```
+TL;DR Some of the used software and containers are only available for x64, therefore Docker writes a warning on stderr that another architecture is used instead of the host architecture, which stops the Nextflow execution. Setting the architecture explicitly using the the env var `DOCKER_DEFAULT_PLATFORM` solves the problems.
+
+
+##### Run the workflow
+```
+nextflow run main.nf --main_raw_spectra_folder <FOLDER_WITH_RAWS_FILES --main_fasta_file <FASTA_FILE> --main_comet_params <COMET_CONFIG> --main_outdir <FOLDER_FOR_RESULTS>
+```
+
+##### For non-x64-hardware like Apple Silicon (M1, M2) use
+Does not work, even with Rosetta due to mono. See section Docker
 
 That’s it! You should now be able to execute `main.nf` and all the other workflows within.
 
-You can also start a very basic gui by executing:
-
-> streamlit run simple_main_gui.py
-
-## Build local docker
-
-A docker image containing all needed dependencies is provided in docker. To build this image (with `docker-buildx`) execute the following in the root directory of this repository:
-
-```shell
-docker build -t nextqcflow:local . -f docker/Dockerfile
-```
-
-An interactive shell can be started with: `docker run -it nextqcflow:local` and all workflows can be executed within via `nextflow`. Workflows can also be executed outside the container as follows:
-
-```shell
-docker run -it nextqcflow:local nextflow main.nf <Parameters>
-```
-
-## Input
+### Arguments
 
 The `main.nf`-workflow requires 3 parameters, which need to be set:
 
@@ -91,6 +102,19 @@ Additionally, many parameters for individual steps can be set. These are prefixe
 Output is saved in a results folder for each individual file, including all of its step results. The folder `qc_results` within, contains a CSV-table, summarising all generated results. NOTE: This table contains binary blobs and might yield errors, if opening with standard tools, like Excel or LibreOffice. Generated plots (as plotly-html and json)  are also located in this folder.
 
 TODO: The results are saved in a database, which can be later retrieved without executing this workflow again. Please refer to the other provided nextflow-workflows
+
+### Need a GUI?
+
+#### Local
+For local use basic GUI is provided. Just install conda and build the    
+TODO: Instructions   
+activate the environment and run
+```
+streamlit run simple_main_gui.py
+```
+
+#### Want to make it available for your Lab?
+Have a look into TODO: Instructions for NF-Cloud
 
 ## Detailed General Workflow
 
@@ -123,7 +147,7 @@ Sub-workflows: `identification_via_comet.nf` (TODO and `identification_via_msgfp
 
 The MS2 spectra in the raw files are identified via the Comet (and MSGF+) search engine using the provided FASTA file.
 
-For Comet, a configuration file (`example_configurations/comet_config.txt`) is needed, which contains the necessary parameters.
+For Comet, a configuration file (`example_configurations/high-high.comet.params`) is needed, which contains the necessary parameters.
 By default, peptide mass tolerance is set to 5ppm, fragment tolerance as 20ppm, maximum 2 missed cleavages and Trypsin as the enzyme.
 Oxidation(M) is set as a variable modification and Cabamidomethylation (C) as a fixed modification.
 
@@ -216,3 +240,17 @@ List of plots (ISA QC, TODO!):
 - Figure 1: Barplot with number of proteins, protein groups and unfiltered protein groups (absolute numbers)
 - Figure 2: Barplot with number of peptides (absolute numbers)
 - Figure 3: Barplot with number of PSMs (absolute numbers)
+
+
+## TODO
+1. Cleanup all commented code
+2. Modularize properly e.g. 
+   1. `feature_finding.nf`
+      1. `get_features_from_raw()`
+   2. `identification.nf`
+      1. `comet()`
+      2. `msgfplus()`
+   3. `inference.nf`
+      1. `pia()`
+   4. find some name for '...custum_columns...', '...mzml_chromatograms_and_more...', e.g. `sensors.nf`?
+3. Create proper module (NF), process (NF) and python script documentation

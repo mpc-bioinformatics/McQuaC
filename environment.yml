@@ -1,0 +1,14 @@
+name: nextqcflow
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.8
+  - pip
+  - setuptools
+  - openms  = 2.8.0
+  - pyopenms = 2.8.0  # needs to be installed by conda to link the correct OpenMS binaries
+  - mono >= 6
+  - pip:
+    - -r ./requirements.txt

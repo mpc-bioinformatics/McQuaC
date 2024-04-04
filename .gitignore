@@ -1,6 +1,12 @@
 # Binaries
 nextflow
 
+# Nextflow outputs
+.nextflow.log*
+.nextflow/
+/work
+/results
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

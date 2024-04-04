@@ -4,6 +4,7 @@ nextflow.enable.dsl=2
 // Parameters required for standalone execution
 params.gf_thermo_raws = "$PWD/raws"  // Folder of Thermo-RAW-files
 params.gf_ident_files = "$PWD/raws"  // Folder of mzTab Identification files (already FDR-filtered). Names should be identical to raw files for matching
+params.feature_finder_params = "-algorithm:mz_tolerance 5.0 -algorithm:mz_unit ppm" // Mass spectrometer specific parameters for FeatureFinder
 
 // Optional Parameters
 // Parameters for Feature Detection
@@ -23,20 +24,32 @@ params.gf_num_procs_conversion = Runtime.runtime.availableProcessors()  // Numbe
 workflow {
     mzmls = Channel.fromPath(params.gf_thermo_raws + "/*.mzML")
     mztabfiles = Channel.fromPath(params.gf_ident_files + "/*.mzTab")
-    get_features(mzmls, mztabfiles)
+    feature_finder_params = Channel.value(params.feature_finder_params)
+    get_features(mzmls, mztabfiles, feature_finder_params)
 }
 
+/**
+ * Extracts features from peak picked MS1 spectra
+ * 
+ * @param mzmls Channel of mzML files
+ * @param mztabfiles Channel of mzTab files
+ * @param feature_finder_params Channel of feature finder parameters
+ */
 workflow get_features {
     take:
         mzmls  // MS1 should be peak picked for feature-finding
         mztabfiles
+        feature_finder_params
     main:
+
+        filtered_mzml = filter_mzml(mzmls)
+
         // Match files according to their baseName
         mztabs_tuple = mztabfiles.map {
             file -> tuple(file, file.baseName.split("_____")[0])
         }
-        mzmls_tuple = mzmls.map {
-            file -> tuple(file, file.baseName)
+        mzmls_tuple = filtered_mzml.map {
+            file -> tuple(file, file.getSimpleName())
         }
         mzml_and_id = mzmls_tuple.join(
             mztabs_tuple,
@@ -46,7 +59,7 @@ workflow get_features {
         }
 
         // Get features with OpenMS' or Dinosaur feature finder
-        run_feature_finder(mzml_and_id)
+        run_feature_finder(mzml_and_id, feature_finder_params)
 
         // Map Identification with Features (using mzTab and featureXML)
         map_features_with_idents(run_feature_finder.out)
@@ -58,61 +71,91 @@ workflow get_features {
 }
 
 process run_feature_finder {
-    stageInMode "copy"
+    container 'mpc/nextqcflow-python:latest'
+    maxForks 1
 
     input:
-    tuple file(mzml), file(ident)
+    tuple path(mzml), path(ident)
+    val feature_finder_params
 
     output:
-    tuple file("${mzml.baseName}.featureXML"), file("${mzml.baseName}.hills.csv"), file(ident)
+    tuple path("${mzml.baseName}.featureXML"), path("${mzml.baseName}.hills.csv"), path(ident)
 
     """
     # Centroided FF
-    \$(get_cur_bin_dir.sh)/openms/usr/bin/FeatureFinderCentroided -in ${mzml} -out ${mzml.baseName}.featureXML -algorithm:isotopic_pattern:charge_low ${params.gf_considered_charges_low} -algorithm:isotopic_pattern:charge_high ${params.gf_considered_charges_high} ${params.gf_resolution_featurefinder}
-    touch ${mzml.baseName}.hills.csv
-    
-    # Multiplex FF
-    # \$(get_cur_bin_dir.sh)/openms/usr/bin/FeatureFinderMultiplex -in ${mzml} -out ${mzml.baseName}.featureXML \
-    #     -algorithm:labels "" \
-    #     -algorithm:charge "1:5"
+    # FeatureFinderCentroided -in ${mzml} -out ${mzml.baseName}.featureXML -algorithm:isotopic_pattern:charge_low ${params.gf_considered_charges_low} -algorithm:isotopic_pattern:charge_high ${params.gf_considered_charges_high} ${params.gf_resolution_featurefinder}
     # touch ${mzml.baseName}.hills.csv
-    # We do not use multiplex, it seems to be broken, mem usage way over 40 GB per RAW file failing by "std::bad_alloc"
+
+    # Multiplex FF
+    # Suggested by OpenMS developers, even if there is no multiplexing (just pass empty labels)
+    # Ensure params fit to your mass spectrometer, otherise this will eat up your memory faster than Chrome.
+    # Just use charge state 2 - 5 as this are common charge states for peptides lower won't be identified anyway
+    FeatureFinderMultiplex -in ${mzml} -out ${mzml.baseName}.featureXML \
+        -algorithm:labels "" \
+        -algorithm:charge "2:5" \
+        -threads ${params.gf_num_procs_conversion} \
+        -algorithm:spectrum_type centroid \
+        ${params.feature_finder_params}
+    touch ${mzml.baseName}.hills.csv
     
     # Dinosaur FF
     # java -jar \$(get_cur_bin_dir.sh)/Dinosaur.jar \
     #    --writeHills \
     #    --writeMsInspect \
     #    ${params.additional_dinosaur_settings} --mzML ${mzml}
-    # \$(get_cur_bin_dir.sh)/openms/usr/bin/FileConverter -in ${mzml.baseName}.msInspect.tsv -out ${mzml.baseName}.featureXML
+    # FileConverter -in ${mzml.baseName}.msInspect.tsv -out ${mzml.baseName}.featureXML
     """
 }
 
 process map_features_with_idents {
-    stageInMode "copy"
+    container 'mpc/nextqcflow-python:latest'
 
     input:
-    tuple file(featurexml), file(hills), file(ident)
+    tuple path(featurexml), path(hills), path(ident)
 
     output:
-    tuple file("${featurexml.baseName}_with_idents.featureXML"), file(hills), val("${featurexml.baseName}")
+    tuple path("${featurexml.baseName}_with_idents.featureXML"), path(hills), val("${featurexml.simpleName}")
     """
     convert_mztab_to_idxml.py -mztab ${ident} -out_idxml ${ident.baseName}.idXML
-    \$(get_cur_bin_dir.sh)/openms/usr/bin/IDMapper -id ${ident.baseName}.idXML -in ${featurexml} -out ${featurexml.baseName}_with_idents.featureXML
+    IDMapper -id ${ident.baseName}.idXML -in ${featurexml} -out ${featurexml.baseName}_with_idents.featureXML
     """
 }
 
 process get_statistics_from_featurexml {
-    stageInMode "copy"
+    container 'mpc/nextqcflow-python:latest'
 
     publishDir "${params.gf_outdir}/", mode:'copy'
 
     input:
-    tuple file(featurexml), file(hills), val(file_base_name)
+    tuple path(featurexml), path(hills), val(file_base_name)
 
     output:
-    tuple file(featurexml), file("${file_base_name}_____features.csv")
+    tuple path(featurexml), path("${file_base_name}_____features.csv")
 
     """
     extract_from_featurexml.py -featurexml ${featurexml} -hills ${hills} -out_csv ${file_base_name}_____features.csv -report_up_to_charge ${params.gf_considered_charges_high}
+    """
+}
+
+/**
+ * Removes chormatrograms and empty peak lists from mzML
+ * Necessary to prevent memory issues with FeatureFinder
+ */
+process filter_mzml {
+    container 'mpc/nextqcflow-python:latest'
+
+    input:
+    path(mzml)
+
+    output:
+    path("${mzml.baseName}.filtered.mzML")
+
+    """
+    # Filter mzML for MS1 spectra
+    FileFilter -in ${mzml} -out ${mzml.baseName}.filtered.mzML \
+        -peak_options:remove_chromatograms \
+        -peak_options:remove_empty \
+        -peak_options:sort_peaks \
+        -peak_options:zlib_compression true
     """
 }

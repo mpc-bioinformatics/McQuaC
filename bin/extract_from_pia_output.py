@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 """Extract information for the QC_visualization out of the PIA output files.
 TODO 	nrProteins 	nrProteingroups_unfiltered, number-filtered-protein-groups

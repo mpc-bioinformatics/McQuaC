@@ -1,0 +1,7 @@
+numpy==1.23.5
+fisher-py==1.0.21
+pandas
+sqlalchemy
+plotly
+scikit-learn
+alphatims

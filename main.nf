@@ -19,7 +19,7 @@ nextflow run \
 // Include all the needed workflows from the sub-workflows
 // Extend this to also extend the QC-Workflow 
 PROJECT_DIR = workflow.projectDir
-include {convert_to_mgf_mzml} from PROJECT_DIR + '/convert_to_mgf_mzml.nf'
+include {convert_to_mzml; convert_to_mgf; convert_to_idxml} from PROJECT_DIR + '/file_conversion.nf'
 include {get_various_mzml_infos} from PROJECT_DIR + '/get_mzml_chromatogram_and_more.nf'
 include {ident_via_comet} from PROJECT_DIR + '/identification_via_comet.nf'
 include {execute_pia} from PROJECT_DIR + '/pia.nf'
@@ -32,7 +32,7 @@ include {get_custom_headers} from PROJECT_DIR + '/get_custom_columns_from_file_d
 // Parameters required for the standalone execution of this main-nextflow script
 params.main_raw_spectra_folder = "" // The folder containing the raw spectra
 params.main_fasta_file = "" // A SINGLE-Fasta-file of the species to be searched (should also contain the SpikeIns if needed)
-params.main_comet_params = "$PWD/example_configurations/comet_config.txt" // Main-Search-Parameters for the comet search engine
+params.main_comet_params = "${baseDir}/example_configurations/high-high.comet.params" // Main-Search-Parameters for the comet search engine
 params.main_outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
 
 
@@ -41,41 +41,51 @@ params.main_is_isa = true // Parameter to check if we execute a isa specific xic
 
 // MAIN WORKFLOW
 workflow {
-	// Retrieve RAW-Spectra
-    rawspectra = Channel.fromPath(params.main_raw_spectra_folder + "/*.{raw,d}", type: "any")
+	// Retrieve inpit files
+	thermo_raw_files = Channel.fromPath(params.main_raw_spectra_folder + "/*.raw")
+	bruker_raw_files = Channel.fromPath(params.main_raw_spectra_folder + "/*.d", type: 'dir')
+	// .first() convert the queue channel with only one file to a value channel, making it possible to use multiple time
+	// e.g. to automatically start multiple concurrent identifications (no need for map each raw file with the fasta and config file)
+	fasta_file = Channel.fromPath(params.main_fasta_file).first()
+	comet_params = Channel.fromPath(params.main_comet_params).first()
 
-	// Convert to needed formats:
-	convert_to_mgf_mzml(rawspectra) // 0 --> .mgf | 1 --> .mzML (peak-picked)
+	feature_finder_params = get_feature_finder_params_from_comet_params(comet_params)
+
+
+	// File conversion into open formats
+	mzmls = convert_to_mzml(thermo_raw_files, bruker_raw_files)
+	// mgfs = convert_to_mgf(mzmls)
 	
-	// Retreive MZML Statistics
-	get_various_mzml_infos(convert_to_mgf_mzml.out[1])
+	// // Retreive MZML Statistics
+	get_various_mzml_infos(mzmls)
 
-	/* Identify with multiple search engines */
-	fasta_file = Channel.fromPath(params.main_fasta_file)
-	// Comet
-	comet_params = Channel.fromPath(params.main_comet_params)
-	ident_via_comet(convert_to_mgf_mzml.out[0], fasta_file, comet_params)
-	// MS-GF+
-	// convert_to_mgf(rawspectra) //MS-GF+ Workflow requires MGFs
-	// TODO ||| HERE goes the code!
-	/* END Identify with multiple search engines */
+	// /* Identify with multiple search engines */
+	// // Comet
+	pepxmls = ident_via_comet(mzmls, fasta_file, comet_params)
+	idxmls = convert_to_idxml(pepxmls)
+	
+	// // MS-GF+
+	// // convert_to_mgf(rawspectra) //MS-GF+ Workflow requires MGFs
+	// // TODO ||| HERE goes the code!
+	// /* END Identify with multiple search engines */
 
-	// Execute PIA and filter by FDR ||| TODO do we combine the search engine results?
-	execute_pia(ident_via_comet.out)
+	// // Execute PIA and filter by FDR ||| TODO do we combine the search engine results?
+	execute_pia(idxmls)
 
 	// Specific to ISA: Do XIC-Extraction if specified
 	if (params.main_is_isa) {
-		retrieve_spikeins(rawspectra, execute_pia.out[0].map { it[0] })
+		raw_files = thermo_raw_files.concat(bruker_raw_files)
+		retrieve_spikeins(raw_files, execute_pia.out[0].map { it[0] })
 	}
 
 	// Run Feature Finding and Statistics
-	get_features(convert_to_mgf_mzml.out[1], execute_pia.out[0].map { it[0] })
+	get_features(mzmls, execute_pia.out[0].map { it[0] }, feature_finder_params)
 
 	// Get Thermospecific information from raw
-	get_custom_headers(rawspectra)
+	get_custom_headers(thermo_raw_files, bruker_raw_files)
 
 
-	// Concatenate to large csv
+	// // Concatenate to large csv
 	combined_csvs = get_various_mzml_infos.out.collect().concat(
 		retrieve_spikeins.out.collect(),
 		get_features.out.map { it[1] }.collect(),
@@ -85,19 +95,41 @@ workflow {
 	combine_output_to_table(combined_csvs)
 	
 
-	// Visualize the results
+	// // Visualize the results
 	visualize_results(combine_output_to_table.out)
 
 }
 
+/**
+ * This process is used to convert the comet parameters into the parameters needed for the feature finder.
+ * 
+ * @param comet_params The comet parameters file
+ * @return The feature finder parameters (value channel)
+ */
+process get_feature_finder_params_from_comet_params {
+	container 'mpc/nextqcflow-python:latest'
+
+	input:
+	path comet_params
+
+	output:
+	stdout
+
+	"""
+	comet_params_to_feature_finder_params.py -c ${comet_params}
+	"""
+}
+
 process combine_output_to_table {
+	container 'mpc/nextqcflow-python:latest'
+
 	publishDir "${params.main_outdir}/qc_results", mode:'copy'
 
 	input:
-	file(input_csv_files)
+	path(input_csv_files)
 
     output:
-    file("quality_control.csv")
+    path("quality_control.csv")
 
     """
 	CONCAT_CSVS=""
@@ -112,15 +144,17 @@ process combine_output_to_table {
 }
 
 process visualize_results {
+	container 'mpc/nextqcflow-python:latest'
+
 	publishDir "${params.main_outdir}/qc_results", mode:'copy'
 
 	input:
-	file(complete_csv)
+	path(complete_csv)
 
     output:
-    file("*.json")
-	file("*.html")
-	file("*.csv")
+    path("*.json")
+	path("*.html")
+	path("*.csv")
 	path("fig13_ionmaps")
 	path("THERMO_PLOTS_FIG15")
 

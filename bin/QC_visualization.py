@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 # %%
 import re
@@ -712,9 +712,9 @@ if __name__ == "__main__":
         y = []
         fn = []
         for index in df.index:
-            #if pd.isnull(df["THERMO_pump_preasure_bar_x_axis"].iloc[index]):
-                # Skip, there is no Pump pressure available
-            #    continue
+            if pd.isnull(df["THERMO_pump_pressure_bar_x_axis_____pickle_zlib"].iloc[index]) \
+                or pd.isnull(df["THERMO_pump_pressure_bar_y_axis_____pickle_zlib"].iloc[index]) :
+                continue
             x_locally = unbase64_uncomp_unpickle(df["THERMO_pump_pressure_bar_x_axis_____pickle_zlib"].iloc[index])
             y_locally = unbase64_uncomp_unpickle(df["THERMO_pump_pressure_bar_y_axis_____pickle_zlib"].iloc[index])
 
