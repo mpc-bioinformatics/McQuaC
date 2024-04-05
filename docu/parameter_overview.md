@@ -20,7 +20,6 @@ Overview of all parameters, broken down for each individual step.
 | `--ccff_outdir`            | Output folder for results                 | `$PWD/results`             |
 | `--ccff_header_in_raws`    | Headers to extract in Thermo-files        | `<empty>`                  |
 | `--ccff_header_in_d`       | Headers to extract in Bruker-files        | See detailed description   |
-| `--ccff_header_in_d_names` | Column-Names for extracted Bruker-headers | See detailed description   |
 | `--gf_thermo_raws`               | Input mzMLs (centroided?)                         | `$PWD/raws`                            |
 | `--gf_ident_files`               | Input mzTabs, filtered by an FDR                  | `$PWD/raws`                            |
 | `--gf_outdir`                    | Output folder for results                         | `$PWD/results`                         |
@@ -117,7 +116,6 @@ Overview of all parameters, broken down for each individual step.
 | `--ccff_outdir`            | Output folder for results                 | `$PWD/results`             |
 | `--ccff_header_in_raws`    | Headers to extract in Thermo-files        | `<empty>`                  |
 | `--ccff_header_in_d`       | Headers to extract in Bruker-files        | See detailed description   |
-| `--ccff_header_in_d_names` | Column-Names for extracted Bruker-headers | See detailed description   |
 
 
 ### Detailed Description
@@ -171,12 +169,8 @@ Overview of all parameters, broken down for each individual step.
 
 **Examples**: `" -htp 'Digitizer_CurrentTemp' "` for extracting the digitizer current temperature only.
 
-**References**: TODO: Provide resource, which lists all available Headers!
+**References**: You can use and SQLite Browser to determine available headers. Alternatively, run `bruker_extract_custom_headers.py`, which will print all possible headers that can be extracted.
 
-
-### `--ccff_header_in_d_names`
-
-TODO: To Be Removed. This only sets the column names of the above argument. This will be automaized in future
 
 ---
 
@@ -324,6 +318,7 @@ TODO: To Be Removed. This only sets the column names of the above argument. This
 
 **TODO**: This process only allows one Fork?
 
+---
 
 ## Get mzML Chromatogram and more
 

@@ -8,8 +8,7 @@ params.ccff_input_thermo = "$PWD/raws"  // Folder of Thermo-RAW-files
 params.ccff_outdir = "$PWD/results"  // Output-Directory of the MGFs. Here it is <Input_file>.mgf
 params.ccff_header_in_raws = ""  // Headers which we want to extract from thermo
 
-params.ccff_header_in_d = "-htp 'Vacuum_CurrentFore' -htp 'Vacuum_Extra4thGauge' -htp 'Vacuum_CurrentHigh' -htp 'Vacuum_CurrentFunnel' -htp 'Digitizer_CurrentTemp' -htp 'TOF_DeviceTempCurrentValue1' -htp 'TOF_DeviceTempCurrentValue2'"
-params.ccff_header_in_d_names = "-cn 'BRUKER_Vacuum_CurrentFore_pickle_zlib' -cn 'BRUKER_Vacuum_Extra4thGauge_pickle_zlib' -cn 'BRUKER_Vacuum_CurrentHigh_pickle_zlib' -cn 'BRUKER_Vacuum_CurrentFunnel_pickle_zlib' -cn 'BRUKER_Digitizer_CurrentTemp_pickle_zlib' -cn 'BRUKER_TOF_DeviceTempCurrentValue1_pickle_zlib' -cn 'BRUKER_TOF_DeviceTempCurrentValue2_pickle_zlib'"
+params.ccff_header_in_d = "" // Extract headers from Bruker raw measurements-
 
 // Standalone Workflow
 workflow {

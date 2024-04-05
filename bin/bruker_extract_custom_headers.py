@@ -23,15 +23,6 @@ def argparse_setup():
         "TOF_DeviceTempCurrentValue2"
     ])
 
-    parser.add_argument("-headers_to_parse_column_name", "-cn", help="The Headers column name which was parsed (in same order). Can be applied multiple times", action="append", default=[
-        "BRUKER_Vacuum_CurrentFore_pickle_zlib",
-        "BRUKER_Vacuum_Extra4thGauge_pickle_zlib",
-        "BRUKER_Vacuum_CurrentHigh_pickle_zlib",
-        "BRUKER_Vacuum_CurrentFunnel_pickle_zlib",
-        "BRUKER_Digitizer_CurrentTemp_pickle_zlib",
-        "BRUKER_TOF_DeviceTempCurrentValue1_pickle_zlib",
-        "BRUKER_TOF_DeviceTempCurrentValue2_pickle_zlib"
-    ])
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -48,15 +39,19 @@ if __name__ == "__main__":
     properties = res.fetchall()
     property_names = [x[1] for x in properties]
 
+    print("Available Properties: ")
+    for p in property_names:
+        print("\t" + p)
+
     # Filter to only needed ones
     p_index = []
     p_name = []
     p_col_name = []
-    for n, col_n in zip(args.headers_to_parse, args.headers_to_parse_column_name):
+    for n in args.headers_to_parse:
         try:
             p_index.append(properties[property_names.index(n)][0])
             p_name.append(n)
-            p_col_name.append(col_n)
+            p_col_name.append("BRUKER_" + n + "_____pickle_zlib")
         except:
             print("WARNING: Property '{}' not found!".format(n))
 
@@ -76,9 +71,9 @@ if __name__ == "__main__":
     )
     frame_data = res.fetchall()
     sorted_frame_data = sorted(frame_data, key=lambda x: x[0])
-    data_dict["BRUKER_Time_pickle_zlib"] = [x[1] for x in sorted_frame_data]
-    data_dict["BRUKER_MsMsType_pickle_zlib"] = [x[2] for x in sorted_frame_data]
-    data_dict["BRUKER_Pressure_pickle_zlib"] = [x[3] for x in sorted_frame_data]
+    data_dict["BRUKER_Time_____pickle_zlib"] = [x[1] for x in sorted_frame_data]
+    data_dict["BRUKER_MsMsType_____pickle_zlib"] = [x[2] for x in sorted_frame_data]
+    data_dict["BRUKER_Pressure_____pickle_zlib"] = [x[3] for x in sorted_frame_data]
 
     res.close()
     cur.close()
@@ -126,7 +121,6 @@ if __name__ == "__main__":
 
     # Write Output
     with open(args.out_csv, "w") as csv_out:
-
         csv_writer = csv.DictWriter(csv_out, fieldnames=data_dict.keys())
         csv_writer.writeheader()
         csv_writer.writerow(data_dict)
