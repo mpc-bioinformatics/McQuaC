@@ -3,15 +3,58 @@
 
 ## File Conversion
 
-| **Parameter**                | <div style="width:350px">Description</div>                                                                                                                                                   | **Possible Values**                          | **Examples**                | **Default**     | **References**                                   | TODO                                                              |
-| ---------------------------  | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | -------------------------   | -------------   | ------------------------------------------------ | ------------------------------------------------------------- |
-| `--ctm_input_spectra`        | Path to the folder, containing the \*.raw or \*.d measured spectras.                                                                                              | \<Path to folder containing .d or .raw files> | `/mnt/data/raw_and_d_files` | `$PWD/raws`     | \-                                               | Input                                                              |
-| `--ctm_outdir`               | The Output-Folder, wh<br>ere to<br> sa<br>ve the converted spectra.                                                                                                           | \<Output folder for the converted spectra>    | `/mnt/data/converted_files` | `$PWD/results`  |                                                  | Output                                                              |
-| `--ctm_additional_params`    | Set additional parameters for the ThermoRawFileParser. See Reference for possible options. Some settings my interfere with already set parameters in this script. | See Reference                                | E.G.: `-a`                        | \<empty>        | https://github.com/compomics/ThermoRawFileParser |                                                               |
-| `--ctm_num_procs_conversion` | Set the number of parallel conversions done at once.                                                                                                              | \<Nonzero Positive Number>                    | `16` or `24`                | `MAX_NUM_PROCS` |                                                  | Nicht auf convert_mzml und nicht auf convert_thermo_raw_files |
+### Parameter Overview
+| **Parameter**                | **Short Description**                         | **Default**   |
+| ---------------------------- | --------------------------------------------- | ------------- |
+| `--ctm_input_spectra`        | Input Spectra                                 | `$PWD/raws`     |
+| `--ctm_outdir`               | Output folder for results                     | `$PWD/results`  |
+| `--ctm_additional_params`    | Set additional conversion parameters for TRFP | `<empty>`       |
+| `--ctm_num_procs_conversion` | Set the number of parallel conversions        | `MAX_NUM_PROCS` |
 
 
-## Get Custom Columsn From File
+### Detailed Description
+
+### `--ctm_input_spectra`
+
+**Description**: Path to the folder, containing the *.raw or *.d measured spectras.
+
+**Possible Values** `<Path to folder containing .d or .raw files>`
+
+**Default**: `$PWD/raws`
+
+**Examples**: `/mnt/data/raw_and_d_files` or `/my/path/to/a/folder`
+
+**References**:
+
+
+### `--ctm_outdir` 
+
+**Description**: The Output-Folder, where to save the converted spectra.
+
+**Possible Values** `<Output folder for the converted spectra>`
+
+**Default**: `$PWD/results`
+
+**Examples**: `/mnt/data/converted_files` or `/path/to/an/output/folder`
+
+**References**:
+
+
+### `--ctm_additional_params` 
+
+**Description**: Set additional parameters for the ThermoRawFileParser. See Reference for possible options. Some settings my interfere with already set parameters in this script.
+
+**Possible Values** See Reference
+
+**Default**: `<empty>`
+
+**Examples**: `-a`
+
+**References**: A complete of possible parameters can be found [here](https://github.com/compomics/ThermoRawFileParser)
+
+
+
+## Get Custom Column From File
 
 Parameter	Description	Possible Values	Examples	Default	Reference
 
