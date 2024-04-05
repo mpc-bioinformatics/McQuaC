@@ -19,7 +19,7 @@ Overview of all parameters, broken down for each individual step.
 | `--ccff_input_thermo`      | Input Spectra                             | `$PWD/raws`                |
 | `--ccff_outdir`            | Output folder for results                 | `$PWD/results`             |
 | `--ccff_header_in_raws`    | Headers to extract in Thermo-files        | `<empty>`                  |
-| `--ccff_header_in_d`       | Headers to extract in Bruker-files        | See detailed description   |
+| `--ccff_header_in_d`       | Headers to extract in Bruker-files        | `<empty`                   |
 | `--gf_thermo_raws`               | Input mzMLs (centroided?)                         | `$PWD/raws`                            |
 | `--gf_ident_files`               | Input mzTabs, filtered by an FDR                  | `$PWD/raws`                            |
 | `--gf_outdir`                    | Output folder for results                         | `$PWD/results`                         |
@@ -115,7 +115,7 @@ Overview of all parameters, broken down for each individual step.
 | `--ccff_input_thermo`      | Input Spectra                             | `$PWD/raws`                |
 | `--ccff_outdir`            | Output folder for results                 | `$PWD/results`             |
 | `--ccff_header_in_raws`    | Headers to extract in Thermo-files        | `<empty>`                  |
-| `--ccff_header_in_d`       | Headers to extract in Bruker-files        | See detailed description   |
+| `--ccff_header_in_d`       | Headers to extract in Bruker-files        | `<empty`                   |
 
 
 ### Detailed Description
@@ -165,7 +165,7 @@ Overview of all parameters, broken down for each individual step.
 
 **Possible Values**: See Description and Reference
 
-**Default**: `"-htp 'Vacuum_CurrentFore' -htp 'Vacuum_Extra4thGauge' -htp 'Vacuum_CurrentHigh' -htp 'Vacuum_CurrentFunnel' -htp 'Digitizer_CurrentTemp' -htp 'TOF_DeviceTempCurrentValue1' -htp 'TOF_DeviceTempCurrentValue2'"` extracting seven headers if available.
+**Default**: `<empty>`, this extracts seven headers if available (since it uses the deafaults set in `bruker_extract_custom_headers.py`).
 
 **Examples**: `" -htp 'Digitizer_CurrentTemp' "` for extracting the digitizer current temperature only.
 
