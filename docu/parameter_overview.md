@@ -12,6 +12,44 @@ Overview of all parameters, broken down for each individual step.
 * [Pia](#pia)
 * [Retrive SpikeIns](#retrieve-spiekeins)
 
+## Short Overview over all parameters
+
+| **Parameter**              | **Short Description**                     | **Default**                |
+| -------------------------- | ----------------------------------------- | -------------------------- |
+| `--ccff_input_thermo`      | Input Spectra                             | `$PWD/raws`                |
+| `--ccff_outdir`            | Output folder for results                 | `$PWD/results`             |
+| `--ccff_header_in_raws`    | Headers to extract in Thermo-files        | `<empty>`                  |
+| `--ccff_header_in_d`       | Headers to extract in Bruker-files        | See detailed description   |
+| `--ccff_header_in_d_names` | Column-Names for extracted Bruker-headers | See detailed description   |
+| `--gf_thermo_raws`               | Input mzMLs (centroided?)                         | `$PWD/raws`                            |
+| `--gf_ident_files`               | Input mzTabs, filtered by an FDR                  | `$PWD/raws`                            |
+| `--gf_outdir`                    | Output folder for results                         | `$PWD/results`                         |
+| `--feature_finder_params`        | Set additional parameters to generate features    | `<empty>`                              |
+| `--gf_resolution_featurefinder`  | Set resolution the in input spectra for features  | Defaults to high resolution settings   |
+| `--gf_considered_charges_low`    | Set lowest considered charge                      | `1`                                    |
+| `--gf_considered_charges_high`   | Set highest considered charge                     | `6`                                    |
+| `--additional_dinosaur_settings` | Set additional parameters for Dinosaur            | `<empty>`                              |
+| `--gf_num_procs_conversion`      | Set the number of parallel processes used         | `MAX_NUM_PROCS`                        |
+| `--gmc_thermo_raws`          | Input mzMLs (centroided?) | `$PWD/raws`     |
+| `--gmc_outdir`               | Output folder for results | `$PWD/results`  |
+| `--gmc_num_procs_conversion` | NOT USED?                 | `MAX_NUM_PROCS` |
+| `--ic_raw_folder`                      | Input mzMLs                                            | `$PWD/MZMLs`                                               |
+| `--ic_fasta_file`                      | Input FASTA-database                                   | `proteins.fasta`                                           |
+| `--ic_search_parameter_file`           | Input search parameters for Comet                      | [this file](../example_configurations/high-high.comet.params) |
+| `--ic_outdir`                          | Output folder for results                              | `$PWD/results`                                             |
+| `--ic_tda`                             | Flag to decide if a decoy database should be generated | `1`                                                        |
+| `--ic_num_parallel_threads_per_search` | Number of parallel processes per search                | `4`                                                        |
+| `--pia_idents`          | Input idXML files                         | `$PWD/identifications`                                |
+| `--pia_analysis_file`   | Input parameter file for Pia              | [this file](../example_configurations/pia-analysis.json) |
+| `--pia_parameters_file` | Input ??? (TODO currently not used)       | `<empty>`                                             |
+| `--pia_outdir`          | Output folder for results                 | `$PWD/results`                                        |
+| `--pia_memory`          | JVM-parameter, limiting memory allocation | `8g`                                                  |
+| `--spk_raw_spectra`          | Input Spectra                               | `$PWD/raws`                                       |
+| `--spk_identification_files` | Input mzTABSs, filtered by FDR              | `$PWD/idents`                                     |
+| `--spk_spike_ins`            | Input csv table defining spike-Ins          | [this file](../example_configurations/spike_ins.csv) |
+| `--spk_outdir`               | Output folder for results                   | `$PWD/results`                                    |
+| `--spk_num_procs_extraction` | Number of parallel extractions done at once | `MAX_NUM_PROCS`                                   |
+
 
 ## File Conversion
 
