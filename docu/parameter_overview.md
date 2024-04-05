@@ -52,7 +52,9 @@
 
 **References**: A complete of possible parameters can be found [here](https://github.com/compomics/ThermoRawFileParser)
 
+**TODO**: Currently not used in process `convert_mzml`  and `convert_thermo_raw_files`
 
+---
 
 ## Get Custom Column From File
 
@@ -126,8 +128,103 @@
 
 TODO: To Be Removed. This only sets the column names of the above argument. This will be automaized in future
 
+---
 
-##
+## Get Features in Raws
+
+
+### Parameter Overview
+| **Parameter**                    | **Short Description**                            | **Default**                          |
+| -------------------------------- | ------------------------------------------------ | ------------------------------------ |
+| `--gf_thermo_raws`               | Input mzMLs (centroided?)                        | $PWD/raws                            |
+| `--gf_ident_files`               | Input mzTabs, filtered by an FDR                 | $PWD/raws                            |
+| `--gf_outdir`                    | Output folder for results                        | $PWD/results                         |
+| `--feature_finder_params`        | Set additional parameters to generate features   | <empty>                              |
+| `--gf_resolution_featurefinder`  | Set resolution the in input spectra for features | Defaults to high resolution settings |
+| `--gf_considered_charges_low`    | Set lowest considered charge                     | 1                                    |
+| `--gf_considered_charges_high`   | Set highest considered charge                    | 6                                    |
+| `--additional_dinosaur_settings` | Set additional parameters for Dinosaur           | <empty>                              |
+| `--gf_num_procs_conversion`      | Set the number of parallel processes used         | MAX_NUM_PROCS                        |
+
+
+### Detailed Description
+
+### ``
+
+**Description**: 
+
+**Possible Values** ``
+
+**Default**: ``
+
+**Examples**: ``
+
+**References**:
+
+
+### ``
+
+**Description**: 
+
+**Possible Values** ``
+
+**Default**: ``
+
+**Examples**: ``
+
+**References**:
+
+
+### ``
+
+**Description**: 
+
+**Possible Values** ``
+
+**Default**: ``
+
+**Examples**: ``
+
+**References**:
+
+
+### ``
+
+**Description**: 
+
+**Possible Values** ``
+
+**Default**: ``
+
+**Examples**: ``
+
+**References**:
+
+
+### ``
+
+**Description**: 
+
+**Possible Values** ``
+
+**Default**: ``
+
+**Examples**: ``
+
+**References**:
+
+
+### ``
+
+**Description**: 
+
+**Possible Values** ``
+
+**Default**: ``
+
+**Examples**: ``
+
+**References**:
 
 
 ### ``
