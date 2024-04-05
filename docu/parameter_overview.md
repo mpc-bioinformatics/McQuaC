@@ -42,7 +42,7 @@
 
 ### `--ctm_additional_params` 
 
-**Description**: Set additional parameters for the ThermoRawFileParser. See Reference for possible options. Some settings my interfere with already set parameters in this script.
+**Description**: Set additional parameters for the ThermoRawFileParser. See Reference for possible options. Some settings may interfere with already set parameters in this script.
 
 **Possible Values** See Reference
 
@@ -55,6 +55,97 @@
 
 
 ## Get Custom Column From File
+
+
+### Parameter Overview
+
+| **Parameter**              | **Short Description**                     | **Default**                |
+| -------------------------- | ----------------------------------------- | -------------------------- |
+| `--ccff_input_thermo`      | Input Spectra                             | `$PWD/raws`                |
+| `--ccff_outdir`            | Output folder for results                 | `$PWD/results`             |
+| `--ccff_header_in_raws`    | Headers to extract in Thermo-files        | `<empty>`                  |
+| `--ccff_header_in_d`       | Headers to extract in Bruker-files        | See detailed description   |
+| `--ccff_header_in_d_names` | Column-Names for extracted Bruker-headers | See detailed description   |
+
+
+### Detailed Description
+
+### `--ccff_input_thermo`
+
+**Description**: Path to the folder, containing the *.raw or *.d measured spectras.
+
+**Possible Values** `<Path to folder containing .d or .raw files>`
+
+**Default**: `$PWD/raws`
+
+**Examples**: `/mnt/data/raw_and_d_files` or `/my/path/to/a/folder`
+
+**References**:
+
+
+### `--ccff_outdir`
+
+**Description**: The Output-Folder, where to save extracted headers from *.d or *.raw files
+
+**Possible Values** `<Output folde for the extracted headers>`
+
+**Default**: `$PWD/results`
+
+**Examples**: `/mnt/data/extracted_headers` or `/my/path/where/to/save/extracted/headers/folder`
+
+**References**:
+
+
+### `--ccff_header_in_raws`
+
+**Description**: Headers to be extracted from RAW-files. These need to be added as additional parameters prefixed with `-ehtp`/`-thtp`/`-lhtp` (for extra/tune or log headers) followed by the header name as displayed e.g. in FreeStyle. In the example, two headers are extracted. 
+
+**Possible Values** See Description and Reference
+
+**Default**: `<empty>` (see `thermo_extract_custom_headers.py`, where basic headers are always extracted if available)
+
+**Examples**: `"-lhtp 'Ambient temp. (°C)' –ehtp 'Ion Injection Time (ms)'"` to extract Ambient temperature and Ion Injection time directly from raws
+
+**References**: See FreeStyle or other programs, which can list headers in RAW-files. As an alternative, you can use `thermo_extract_custom_headers.py`, which prints all available headers.
+
+
+### `--ccff_header_in_d`
+
+**Description**: Headers to be extracted from .d-files. These need to be added as additional parameters (similar as to RAW files). In Bruker-files, there is no distinction between header types and simply `-htp` followed by the header name to be extracted is sufficient.
+
+**Possible Values** See Description and Reference
+
+**Default**: `"-htp 'Vacuum_CurrentFore' -htp 'Vacuum_Extra4thGauge' -htp 'Vacuum_CurrentHigh' -htp 'Vacuum_CurrentFunnel' -htp 'Digitizer_CurrentTemp' -htp 'TOF_DeviceTempCurrentValue1' -htp 'TOF_DeviceTempCurrentValue2'"` extracting seven headers if available.
+
+**Examples**: `" -htp 'Digitizer_CurrentTemp' "` for extracting the digitizer current temperature only.
+
+**References**: TODO: Provide resource, which lists all available Headers!
+
+
+### `--ccff_header_in_d_names`
+
+TODO: To Be Removed. This only sets the column names of the above argument. This will be automaized in future
+
+
+##
+
+
+### ``
+
+**Description**: 
+
+**Possible Values** ``
+
+**Default**: ``
+
+**Examples**: ``
+
+**References**:
+
+
+
+
+
 
 Parameter	Description	Possible Values	Examples	Default	Reference
 
