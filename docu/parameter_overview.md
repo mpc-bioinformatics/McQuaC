@@ -1,5 +1,17 @@
 # Parameter Overview
 
+Overview of all parameters, broken down for each individual step.
+
+## Quick Links to each section
+
+* [File Conversion](#file-conversion)
+* [Get Custom Column From File](#get-custom-column-from-file)
+* [Get Features in Raws](#get-features-in-raws)
+* [Get mzML Chromatogram and more](#get-mzml-chromatogram-and-more)
+* [Identificatin via Comet](#identification-via-comet)
+* [Pia](#pia)
+* [Retrive SpikeIns](#retrieve-spiekeins)
+
 
 ## File Conversion
 
@@ -335,7 +347,7 @@ TODO: To Be Removed. This only sets the column names of the above argument. This
 | -------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------- |
 | `--ic_raw_folder`                      | Input mzMLs                                            | `$PWD/MZMLs`                                               |
 | `--ic_fasta_file`                      | Input FASTA-database                                   | `proteins.fasta`                                           |
-| `--ic_search_parameter_file`           | Input search parameters for Comet                      | [this file](example_configurations/high-high.comet.params) |
+| `--ic_search_parameter_file`           | Input search parameters for Comet                      | [this file](../example_configurations/high-high.comet.params) |
 | `--ic_outdir`                          | Output folder for results                              | `$PWD/results`                                             |
 | `--ic_tda`                             | Flag to decide if a decoy database should be generated | `1`                                                        |
 | `--ic_num_parallel_threads_per_search` | Number of parallel processes per search                | `4`                                                        |
@@ -427,7 +439,7 @@ TODO: To Be Removed. This only sets the column names of the above argument. This
 | **Parameter**           | **Short Description**                     | **Default**                                           |
 | ----------------------- | ----------------------------------------- | ----------------------------------------------------- |
 | `--pia_idents`          | Input idXML files                         | `$PWD/identifications`                                |
-| `--pia_analysis_file`   | Input parameter file for Pia              | [this file](example_configurations/pia-analysis.json) |
+| `--pia_analysis_file`   | Input parameter file for Pia              | [this file](../example_configurations/pia-analysis.json) |
 | `--pia_parameters_file` | Input ??? (TODO currently not used)       | `<empty>`                                             |
 | `--pia_outdir`          | Output folder for results                 | `$PWD/results`                                        |
 | `--pia_memory`          | JVM-parameter, limiting memory allocation | `8g`                                                  |
@@ -500,7 +512,7 @@ TODO: is this the same as above?
 | ---------------------------- | ------------------------------------------- | ------------------------------------------------- |
 | `--spk_raw_spectra`          | Input Spectra                               | `$PWD/raws`                                       |
 | `--spk_identification_files` | Input mzTABSs, filtered by FDR              | `$PWD/idents`                                     |
-| `--spk_spike_ins`            | Input csv table defining spike-Ins          | [this file](example_configurations/spike_ins.csv) |
+| `--spk_spike_ins`            | Input csv table defining spike-Ins          | [this file](../example_configurations/spike_ins.csv) |
 | `--spk_outdir`               | Output folder for results                   | `$PWD/results`                                    |
 | `--spk_num_procs_extraction` | Number of parallel extractions done at once | `MAX_NUM_PROCS`                                   |
 
@@ -543,7 +555,7 @@ TODO: is this the same as above?
 
 **Examples**: `/mnt/data/custom_spike_ins.csv`
 
-**References**: Use the example [file](example_configurations/spike_ins.csv) as a reference
+**References**: Use the example [file](../example_configurations/spike_ins.csv) as a reference
 
 
 ### `--spk_outdir`
