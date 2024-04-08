@@ -2,7 +2,7 @@
 nextflow.enable.dsl=2
 
 // Parameters required for standalone execution
-params.ccff_input_thermo = "$PWD/raws"  // Folder of Thermo-RAW-files
+params.ccff_input_spectra = "$PWD/raws"  // Folder of Thermo-RAW-files
 
 // Optional Parameters
 params.ccff_outdir = "$PWD/results"  // Output-Directory of the MGFs. Here it is <Input_file>.mgf
@@ -12,7 +12,7 @@ params.ccff_header_in_d = "" // Extract headers from Bruker raw measurements-
 
 // Standalone Workflow
 workflow {
-    rawfiles = Channel.fromPath(params.ccff_input_thermo + "/*.raw")
+    rawfiles = Channel.fromPath(params.ccff_input_spectra + "/*.raw")
     get_custom_headers(rawfiles)
 }
 

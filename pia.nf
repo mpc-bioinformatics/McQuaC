@@ -3,13 +3,12 @@ nextflow.enable.dsl=2
 
 // Parameters required for standalone execution
 params.pia_idents = "$PWD/identifications"  // Peptide Identifications by search machine, which is working with PIA
+params.pia_analysis_file = "${baseDir}/example_configurations/pia-analysis.json" // Parameters file to configure PIA (e.g. FDR-Calculation)
 
 // Optional Parameters TODO
-params.pia_outdir = "$PWD/results"  // Output-Directory of the PIA results.
-params.pia_parameters_file = ""  // Parameters file to configure PIA (e.g. FDR-Calculation)
-
 params.pia_memory = "8g"  // memory in Java format, passed like "-Xmx[PIA_MEMORY]"
-params.pia_analysis_file = "${baseDir}/example_configurations/pia-analysis.json"
+params.pia_outdir = "$PWD/results"  // Output-Directory of the PIA results.
+
 
 workflow {
     // Run PIA protein inference

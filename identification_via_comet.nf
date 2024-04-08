@@ -2,7 +2,7 @@
 nextflow.enable.dsl=2
 
 // Parameters required for standalone execution
-params.ic_raw_folder = "$PWD/MZMLs" // Input-Directory of MGFs, which should be used for identification
+params.ic_mzmls = "$PWD/MZMLs" // Input-Directory of MGFs, which should be used for identification
 params.ic_fasta_file = "proteins.fasta" // Database (FASTA-file) used for identification with decoys (prefixed with "DECOY_") or without decoys!
 params.ic_search_parameter_file = "${baseDir}/example_configurations/high-high.comet.params" //Search Parameters for Comet
 
@@ -14,7 +14,7 @@ params.ic_num_parallel_threads_per_search = 4
 
 workflow {
     // Get all MGF files which should be identified
-    mgfs = Channel.fromPath(params.ic_raw_folder + "/*.mgf")
+    mgfs = Channel.fromPath(params.ic_mzmls + "/*.mzML")
 
     // Get FASTA-file
     fasta_file = Channel.fromPath(params.ic_fasta_file)

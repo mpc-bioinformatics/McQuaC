@@ -2,8 +2,8 @@
 nextflow.enable.dsl=2
 
 // Parameters required for standalone execution
-params.gf_thermo_raws = "$PWD/raws"  // Folder of Thermo-RAW-files
-params.gf_ident_files = "$PWD/raws"  // Folder of mzTab Identification files (already FDR-filtered). Names should be identical to raw files for matching
+params.gf_mzmls = "$PWD/mzmls"  // Folder of mzML-Files
+params.gf_ident_files = "$PWD/idents"  // Folder of mzTab Identification files (already FDR-filtered). Names should be identical to raw files for matching
 params.feature_finder_params = "-algorithm:mz_tolerance 5.0 -algorithm:mz_unit ppm" // Mass spectrometer specific parameters for FeatureFinder
 
 // Optional Parameters
@@ -22,7 +22,7 @@ params.gf_num_procs_conversion = Runtime.runtime.availableProcessors()  // Numbe
 
 
 workflow {
-    mzmls = Channel.fromPath(params.gf_thermo_raws + "/*.mzML")
+    mzmls = Channel.fromPath(params.gf_mzmls + "/*.mzML")
     mztabfiles = Channel.fromPath(params.gf_ident_files + "/*.mzTab")
     feature_finder_params = Channel.value(params.feature_finder_params)
     get_features(mzmls, mztabfiles, feature_finder_params)

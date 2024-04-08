@@ -2,11 +2,11 @@
 nextflow.enable.dsl=2
 
 // Parameters required for standalone execution
-params.gmc_thermo_raws = "$PWD/raws"  // Folder of Thermo-RAW-files
+params.gmc_thermo_raws = "$PWD/raws"  // Folder of mzMLs
 
 // Optional Parameters
 params.gmc_outdir = "$PWD/results"  // Output-Directory of the mzMLs. Here it is <Input_file>.mzML
-params.gmc_num_procs_conversion = Runtime.runtime.availableProcessors()  // Number of process used to convert (CAUTION: This can be very resource intensive!)
+params.gmc_num_forks = Runtime.runtime.availableProcessors()  // Number of process used to convert (CAUTION: This can be very resource intensive!)
 
 // Standalone Workflow
 workflow {
@@ -29,6 +29,8 @@ process retrieve_data_from_mzml {
     container 'mpc/nextqcflow-python:latest'
 
     publishDir "${params.gmc_outdir}/", mode:'copy'
+
+    maxForks params.gmc_num_forks
 
     input:
     path(mzml)

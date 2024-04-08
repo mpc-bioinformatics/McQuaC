@@ -16,12 +16,12 @@ Overview of all parameters, broken down for each individual step.
 
 | **Parameter**              | **Short Description**                     | **Default**                |
 | -------------------------- | ----------------------------------------- | -------------------------- |
-| `--ccff_input_thermo`      | Input Spectra                             | `$PWD/raws`                |
+| `--ccff_input_spectra`     | Input Spectra                             | `$PWD/raws`                |
 | `--ccff_outdir`            | Output folder for results                 | `$PWD/results`             |
 | `--ccff_header_in_raws`    | Headers to extract in Thermo-files        | `<empty>`                  |
 | `--ccff_header_in_d`       | Headers to extract in Bruker-files        | `<empty`                   |
-| `--gf_thermo_raws`               | Input mzMLs (centroided?)                         | `$PWD/raws`                            |
-| `--gf_ident_files`               | Input mzTabs, filtered by an FDR                  | `$PWD/raws`                            |
+| `--gf_mzmls`                     | Input mzMLs (centroided)                         | `$PWD/mzmls`                           |
+| `--gf_ident_files`               | Input mzTabs, filtered by an FDR                  | `$PWD/idents`                          |
 | `--gf_outdir`                    | Output folder for results                         | `$PWD/results`                         |
 | `--feature_finder_params`        | Set additional parameters to generate features    | `<empty>`                              |
 | `--gf_resolution_featurefinder`  | Set resolution the in input spectra for features  | Defaults to high resolution settings   |
@@ -29,10 +29,10 @@ Overview of all parameters, broken down for each individual step.
 | `--gf_considered_charges_high`   | Set highest considered charge                     | `6`                                    |
 | `--additional_dinosaur_settings` | Set additional parameters for Dinosaur            | `<empty>`                              |
 | `--gf_num_procs_conversion`      | Set the number of parallel processes used         | `MAX_NUM_PROCS`                        |
-| `--gmc_thermo_raws`          | Input mzMLs (centroided?) | `$PWD/raws`     |
-| `--gmc_outdir`               | Output folder for results | `$PWD/results`  |
-| `--gmc_num_procs_conversion` | NOT USED?                 | `MAX_NUM_PROCS` |
-| `--ic_raw_folder`                      | Input mzMLs                                            | `$PWD/MZMLs`                                               |
+| `--gmc_input_mzmls`          | Input mzMLs (centroided)      | `$PWD/mzmls`    |
+| `--gmc_outdir`               | Output folder for results     | `$PWD/results`  |
+| `--gmc_num_forks`            | Number of parallel executions | `MAX_NUM_PROCS` |
+| `--ic_mzmls`                           | Input mzMLs (centroided)                               | `$PWD/MZMLs`                                               |
 | `--ic_fasta_file`                      | Input FASTA-database                                   | `proteins.fasta`                                           |
 | `--ic_search_parameter_file`           | Input search parameters for Comet                      | [this file](../example_configurations/high-high.comet.params) |
 | `--ic_outdir`                          | Output folder for results                              | `$PWD/results`                                             |
@@ -40,7 +40,6 @@ Overview of all parameters, broken down for each individual step.
 | `--ic_num_parallel_threads_per_search` | Number of parallel processes per search                | `4`                                                        |
 | `--pia_idents`          | Input idXML files                         | `$PWD/identifications`                                |
 | `--pia_analysis_file`   | Input parameter file for Pia              | [this file](../example_configurations/pia-analysis.json) |
-| `--pia_parameters_file` | Input ??? (TODO currently not used)       | `<empty>`                                             |
 | `--pia_outdir`          | Output folder for results                 | `$PWD/results`                                        |
 | `--pia_memory`          | JVM-parameter, limiting memory allocation | `8g`                                                  |
 | `--spk_raw_spectra`          | Input Spectra                               | `$PWD/raws`                                       |
@@ -112,15 +111,15 @@ Overview of all parameters, broken down for each individual step.
 
 | **Parameter**              | **Short Description**                     | **Default**                |
 | -------------------------- | ----------------------------------------- | -------------------------- |
-| `--ccff_input_thermo`      | Input Spectra                             | `$PWD/raws`                |
+| `--ccff_input_spectra`     | Input Spectra                             | `$PWD/raws`                |
 | `--ccff_outdir`            | Output folder for results                 | `$PWD/results`             |
 | `--ccff_header_in_raws`    | Headers to extract in Thermo-files        | `<empty>`                  |
-| `--ccff_header_in_d`       | Headers to extract in Bruker-files        | `<empty`                   |
+| `--ccff_header_in_d`       | Headers to extract in Bruker-files        | `<empty>`                   |
 
 
 ### Detailed Description
 
-### `--ccff_input_thermo`
+### `--ccff_input_spectra`
 
 **Description**: Path to the folder, containing the *.raw or *.d measured spectras.
 
@@ -169,7 +168,7 @@ Overview of all parameters, broken down for each individual step.
 
 **Examples**: `" -htp 'Digitizer_CurrentTemp' "` for extracting the digitizer current temperature only.
 
-**References**: You can use and SQLite Browser to determine available headers. Alternatively, run `bruker_extract_custom_headers.py`, which will print all possible headers that can be extracted.
+**References**: You can use SQLite-Browser to determine available headers. Alternatively, run `bruker_extract_custom_headers.py`, which will print all possible headers that can be extracted.
 
 
 ---
@@ -180,8 +179,8 @@ Overview of all parameters, broken down for each individual step.
 ### Parameter Overview
 | **Parameter**                    | **Short Description**                             | **Default**                            |
 | -------------------------------- | ------------------------------------------------- | -------------------------------------- |
-| `--gf_thermo_raws`               | Input mzMLs (centroided?)                         | `$PWD/raws`                            |
-| `--gf_ident_files`               | Input mzTabs, filtered by an FDR                  | `$PWD/raws`                            |
+| `--gf_mzmls`                     | Input mzMLs (centroided)                          | `$PWD/mzmls`                            |
+| `--gf_ident_files`               | Input mzTabs, filtered by an FDR                  | `$PWD/idents`                            |
 | `--gf_outdir`                    | Output folder for results                         | `$PWD/results`                         |
 | `--feature_finder_params`        | Set additional parameters to generate features    | `<empty>`                              |
 | `--gf_resolution_featurefinder`  | Set resolution the in input spectra for features  | Defaults to high resolution settings   |
@@ -193,19 +192,17 @@ Overview of all parameters, broken down for each individual step.
 
 ### Detailed Description
 
-### `--gf_thermo_raws`
+### `--gf_mzmls`
 
-**Description**: A path containing (TODO centroided?) mzML files. Their filenames MUST correspond with the mzTAB filenames. These could be generated by the `File Conversion` workflow.
+**Description**: A path containing centroided mzML files. Their filenames MUST correspond with the mzTAB filenames. These could be generated by the `File Conversion` workflow.
 
 **Possible Values**: `<Path to folder containing mzML files. >`
 
-**Default**: `$PWD/raws`
+**Default**: `$PWD/mzmls`
 
 **Examples**: `/mnt/data/converted_files` or `path/to/folder/containing/converted/files`
 
 **References**:
-
-**TODO**: Parameter is not named correctly
 
 
 ### `--gf_ident_files`
@@ -214,7 +211,7 @@ Overview of all parameters, broken down for each individual step.
 
 **Possible Values**: `<Path to folder already filtered mzTAB identification files >`
 
-**Default**: `$PWD/raws`
+**Default**: `$PWD/idents`
 
 **Examples**: `/mnt/data/identifications` or `path/to/identiciation/files/folder`
 
@@ -323,21 +320,21 @@ Overview of all parameters, broken down for each individual step.
 ## Get mzML Chromatogram and more
 
 ### Parameter Overview
-| **Parameter**                | **Short Description**     | **Default**     |
-| ---------------------------- | ------------------------- | --------------- |
-| `--gmc_thermo_raws`          | Input mzMLs (centroided?) | `$PWD/raws`     |
-| `--gmc_outdir`               | Output folder for results | `$PWD/results`  |
-| `--gmc_num_procs_conversion` | NOT USED?                 | `MAX_NUM_PROCS` |
+| **Parameter**                | **Short Description**         | **Default**     |
+| ---------------------------- | ----------------------------- | --------------- |
+| `--gmc_input_mzmls`          | Input mzMLs (centroided)      | `$PWD/mzmls`    |
+| `--gmc_outdir`               | Output folder for results     | `$PWD/results`  |
+| `--gmc_num_forks` | Number of parallel executions | `MAX_NUM_PROCS` |
 
 ### Detailed Description
 
-### `--gmc_thermo_raws`
+### `--gmc_input_mzmls`
 
 **Description**: A path to the mzML files. These must be peak picked. These could be generated by the `File Conversion` workflow. 
 
 **Possible Values**: `<Path to folder containing mzML files>`
 
-**Default**: `$PWD/raws`
+**Default**: `$PWD/mzmls`
 
 **Examples**: `/mnt/data/converted_files` or `path/to/fileconversion/converted/files`
 
@@ -357,19 +354,17 @@ Overview of all parameters, broken down for each individual step.
 **References**:
 
 
-### `--gmc_num_procs_conversion`
+### `--gmc_num_forks`
 
-**Description**: 
+**Description**: Number of parallel executions to extract the mzml and chromatogram statistics.
 
 **Possible Values**: `<Nonzero Positive Number>`
 
 **Default**: `16`
 
-**Examples**: ``
+**Examples**: `8` to only extract eight mzmls at once
 
 **References**:
-
-**TODO**: This is currently not used in the worklfow. This should limit the number of parallel executions!
 
 ---
 
@@ -378,7 +373,7 @@ Overview of all parameters, broken down for each individual step.
 ### Parameter Overview
 | **Parameter**                          | **Short Description**                                  | **Default**                                              |
 | -------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------- |
-| `--ic_raw_folder`                      | Input mzMLs                                            | `$PWD/MZMLs`                                               |
+| `--ic_mzmls`                           | Input mzMLs (centroided)                               | `$PWD/MZMLs`                                               |
 | `--ic_fasta_file`                      | Input FASTA-database                                   | `proteins.fasta`                                           |
 | `--ic_search_parameter_file`           | Input search parameters for Comet                      | [this file](../example_configurations/high-high.comet.params) |
 | `--ic_outdir`                          | Output folder for results                              | `$PWD/results`                                             |
@@ -387,7 +382,7 @@ Overview of all parameters, broken down for each individual step.
 
 ### Detailed Description
 
-### `--ic_raw_folder`
+### `--ic_mzmls`
 
 **Description**: The path to peak picked mzML files for the Comet-Search-Engine to do identification
 
@@ -399,7 +394,6 @@ Overview of all parameters, broken down for each individual step.
 
 **References**:
 
-**TODO**: This parameter is not named correctly!
 
 ### `--ic_fasta_file`
 
@@ -473,7 +467,6 @@ Overview of all parameters, broken down for each individual step.
 | ----------------------- | ----------------------------------------- | ----------------------------------------------------- |
 | `--pia_idents`          | Input idXML files                         | `$PWD/identifications`                                |
 | `--pia_analysis_file`   | Input parameter file for Pia              | [this file](../example_configurations/pia-analysis.json) |
-| `--pia_parameters_file` | Input ??? (TODO currently not used)       | `<empty>`                                             |
 | `--pia_outdir`          | Output folder for results                 | `$PWD/results`                                        |
 | `--pia_memory`          | JVM-parameter, limiting memory allocation | `8g`                                                  |
 
@@ -504,11 +497,6 @@ Overview of all parameters, broken down for each individual step.
 **Examples**: `/mnt/data/pia_analysis.json`
 
 **References**: [Project](https://github.com/medbioinf/pia)
-
-
-### `--pia_parameters_file`
-
-TODO: is this the same as above?
 
 
 ### `--pia_outdir`
@@ -543,7 +531,7 @@ TODO: is this the same as above?
 ### Parameter Overview
 | **Parameter**                | **Short Description**                       | **Default**                                       |
 | ---------------------------- | ------------------------------------------- | ------------------------------------------------- |
-| `--spk_raw_spectra`          | Input Spectra                               | `$PWD/raws`                                       |
+| `--spk_raw_spectra`          | Input Spectra                           F    | `$PWD/raws`                                       |
 | `--spk_identification_files` | Input mzTABSs, filtered by FDR              | `$PWD/idents`                                     |
 | `--spk_spike_ins`            | Input csv table defining spike-Ins          | [this file](../example_configurations/spike_ins.csv) |
 | `--spk_outdir`               | Output folder for results                   | `$PWD/results`                                    |
