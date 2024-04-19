@@ -2,7 +2,7 @@
 nextflow.enable.dsl=2
 
 // Parameters required for standalone execution
-params.gmc_thermo_raws = "$PWD/raws"  // Folder of mzMLs
+params.gmc_input_mzmls = "$PWD/mzmls"  // Folder of mzMLs
 
 // Optional Parameters
 params.gmc_outdir = "$PWD/results"  // Output-Directory of the mzMLs. Here it is <Input_file>.mzML
@@ -10,7 +10,7 @@ params.gmc_num_forks = Runtime.runtime.availableProcessors()  // Number of proce
 
 // Standalone Workflow
 workflow {
-    mzmlfiles = Channel.fromPath(params.gmc_thermo_raws + "/*.mzML")
+    mzmlfiles = Channel.fromPath(params.gmc_mzmls + "/*.mzML")
     get_various_mzml_infos(mzmlfiles)
 }
 

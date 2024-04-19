@@ -12,8 +12,8 @@ params.ccff_header_in_d = "" // Extract headers from Bruker raw measurements-
 
 // Standalone Workflow
 workflow {
-    rawfiles = Channel.fromPath(params.ccff_input_spectra + "/*.raw")
-    get_custom_headers(rawfiles)
+    raw_spectra = Channel.fromPath(params.ccff_input_spectra + "/*.raw")
+    get_custom_headers(raw_spectra)
 }
 
 
