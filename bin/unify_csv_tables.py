@@ -4,6 +4,7 @@ import sys
 import os
 import argparse
 import time
+import datetime
 import csv
 csv.field_size_limit(sys.maxsize)
 from collections import defaultdict
@@ -20,9 +21,8 @@ if __name__ == "__main__":
     args = argparse_setup()
 
     # Get timestamp of the actual identification
-    ts = time.time()
+    ts = '{date:%Y-%m-%d_%H:%M:%S}'.format( date=datetime.datetime.now() )# time.time()
     
-
     data_dict = defaultdict(lambda: dict())
 
     # Gather all the resources
