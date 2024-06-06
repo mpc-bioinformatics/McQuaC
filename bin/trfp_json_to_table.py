@@ -4,6 +4,10 @@ import sys
 import csv
 import json
 import argparse
+import zlib
+import pickle
+import base64
+import pandas as pd
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
@@ -89,11 +93,19 @@ if __name__ == "__main__":
                     ] = sum(xic["Intensities"] if xic["Intensities"] else [])
                     break
 
+    # pickle the final table and create a dataframe with only one column and one line
+    final_table_pickled = base64.b64encode(zlib.compress(pickle.dumps(final_table), level=9)).decode("utf-8")
+    final_table_pickled = {'MPCSPIKEINS_____pickle_zlib': final_table_pickled}
+    final_table_pickled = pd.DataFrame(final_table_pickled, index=[0])
 
-    with open(args.ocsv, "w") as final_output:
-        writer = csv.DictWriter(final_output, fieldnames=final_table.keys())
 
-        writer.writeheader()
-        writer.writerow(final_table)
+    final_table_pickled.to_csv(args.ocsv)
+
+
+    #with open(args.ocsv, "w") as final_output:
+    #    writer = csv.DictWriter(final_output, fieldnames=final_table.keys())
+
+    #   writer.writeheader()
+    #    writer.writerow(final_table)
     pass
 
