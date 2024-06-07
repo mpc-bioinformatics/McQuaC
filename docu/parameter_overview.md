@@ -23,11 +23,11 @@ Overview of all parameters, broken down for each individual step.
 | `--gf_mzmls`                     | Input mzMLs (centroided)                         | `$PWD/mzmls`                           |
 | `--gf_ident_files`               | Input mzTabs, filtered by an FDR                  | `$PWD/idents`                          |
 | `--gf_outdir`                    | Output folder for results                         | `$PWD/results`                         |
-| `--feature_finder_params`        | Set additional parameters to generate features    | `<empty>`                              |
+| `--gf_feature_finder_params`        | Set additional parameters to generate features    | `<empty>`                              |
 | `--gf_resolution_featurefinder`  | Set resolution the in input spectra for features  | Defaults to high resolution settings   |
 | `--gf_considered_charges_low`    | Set lowest considered charge                      | `1`                                    |
 | `--gf_considered_charges_high`   | Set highest considered charge                     | `6`                                    |
-| `--additional_dinosaur_settings` | Set additional parameters for Dinosaur            | `<empty>`                              |
+| `--gf_additional_dinosaur_settings` | Set additional parameters for Dinosaur            | `<empty>`                              |
 | `--gf_num_procs_conversion`      | Set the number of parallel processes used         | `MAX_NUM_PROCS`                        |
 | `--gmc_input_mzmls`          | Input mzMLs (centroided)      | `$PWD/mzmls`    |
 | `--gmc_outdir`               | Output folder for results     | `$PWD/results`  |
@@ -182,11 +182,11 @@ Overview of all parameters, broken down for each individual step.
 | `--gf_mzmls`                     | Input mzMLs (centroided)                          | `$PWD/mzmls`                            |
 | `--gf_ident_files`               | Input mzTabs, filtered by an FDR                  | `$PWD/idents`                            |
 | `--gf_outdir`                    | Output folder for results                         | `$PWD/results`                         |
-| `--feature_finder_params`        | Set additional parameters to generate features    | `<empty>`                              |
+| `--gf_feature_finder_params`        | Set additional parameters to generate features    | `<empty>`                              |
 | `--gf_resolution_featurefinder`  | Set resolution the in input spectra for features  | Defaults to high resolution settings   |
 | `--gf_considered_charges_low`    | Set lowest considered charge                      | `1`                                    |
 | `--gf_considered_charges_high`   | Set highest considered charge                     | `6`                                    |
-| `--additional_dinosaur_settings` | Set additional parameters for Dinosaur            | `<empty>`                              |
+| `--gf_additional_dinosaur_settings` | Set additional parameters for Dinosaur            | `<empty>`                              |
 | `--gf_num_procs_conversion`      | Set the number of parallel processes used         | `MAX_NUM_PROCS`                        |
 
 
