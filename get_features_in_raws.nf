@@ -95,7 +95,7 @@ process run_feature_finder {
         -algorithm:charge "2:5" \
         -threads ${params.gf_num_procs_conversion} \
         -algorithm:spectrum_type centroid \
-        ${params.feature_finder_params}
+        ${params.gf_feature_finder_params}
     touch ${mzml.baseName}.hills.csv
     
     # Dinosaur FF
