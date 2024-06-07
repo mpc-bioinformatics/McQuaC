@@ -2,9 +2,9 @@
 nextflow.enable.dsl=2
 
 // Parameters required for standalone execution
-params.gf_thermo_raws = "$PWD/raws"  // Folder of Thermo-RAW-files
-params.gf_ident_files = "$PWD/raws"  // Folder of mzTab Identification files (already FDR-filtered). Names should be identical to raw files for matching
-params.feature_finder_params = "-algorithm:mz_tolerance 5.0 -algorithm:mz_unit ppm" // Mass spectrometer specific parameters for FeatureFinder
+params.gf_mzmls = "$PWD/mzmls"  // Folder of mzML-Files
+params.gf_ident_files = "$PWD/idents"  // Folder of mzTab Identification files (already FDR-filtered). Names should be identical to raw files for matching
+params.gf_feature_finder_params = "-algorithm:mz_tolerance 5.0 -algorithm:mz_unit ppm" // Mass spectrometer specific parameters for FeatureFinder
 
 // Optional Parameters
 // Parameters for Feature Detection
@@ -12,7 +12,7 @@ params.feature_finder_params = "-algorithm:mz_tolerance 5.0 -algorithm:mz_unit p
 params.gf_resolution_featurefinder = "-algorithm:mass_trace:mz_tolerance 0.004 -algorithm:isotopic_pattern:mz_tolerance 0.005"   // Parameters for High Resolution Machines (LTQ-OrbiTrap)
 params.gf_considered_charges_low = "1"  // Charges for the feature finder to use to extract features. In QC this was set to 2:5
 params.gf_considered_charges_high = "6"  // Charges for the feature finder to use to extract features. In QC this was set to 2:5
-params.additional_dinosaur_settings = "" // Additional Parameters which can be set for Dinosaur
+params.gf_additional_dinosaur_settings = "" // Additional Parameters which can be set for Dinosaur
 
 
 // Output Directory
@@ -22,9 +22,9 @@ params.gf_num_procs_conversion = Runtime.runtime.availableProcessors()  // Numbe
 
 
 workflow {
-    mzmls = Channel.fromPath(params.gf_thermo_raws + "/*.mzML")
+    mzmls = Channel.fromPath(params.gf_mzmls + "/*.mzML")
     mztabfiles = Channel.fromPath(params.gf_ident_files + "/*.mzTab")
-    feature_finder_params = Channel.value(params.feature_finder_params)
+    feature_finder_params = Channel.value(params.gf_feature_finder_params)
     get_features(mzmls, mztabfiles, feature_finder_params)
 }
 
@@ -95,14 +95,14 @@ process run_feature_finder {
         -algorithm:charge "2:5" \
         -threads ${params.gf_num_procs_conversion} \
         -algorithm:spectrum_type centroid \
-        ${params.feature_finder_params}
+        ${params.gf_feature_finder_params}
     touch ${mzml.baseName}.hills.csv
     
     # Dinosaur FF
     # java -jar \$(get_cur_bin_dir.sh)/Dinosaur.jar \
     #    --writeHills \
     #    --writeMsInspect \
-    #    ${params.additional_dinosaur_settings} --mzML ${mzml}
+    #    ${params.gf_additional_dinosaur_settings} --mzML ${mzml}
     # FileConverter -in ${mzml.baseName}.msInspect.tsv -out ${mzml.baseName}.featureXML
     """
 }
