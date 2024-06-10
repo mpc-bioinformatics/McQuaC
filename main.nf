@@ -167,8 +167,13 @@ process visualize_results {
 	path("fig13_ionmaps")
 	path("THERMO_PLOTS_FIG15")
 
-    """
-	QC_visualization.py -csv_file $complete_csv -output "." 
+	"""
+	if ${params.main_is_isa}
+	then 
+		QC_visualization.py -csv_file $complete_csv -output "." -isa
+	else
+		QC_visualization.py -csv_file $complete_csv -output "."
+	fi
     """
 }
 

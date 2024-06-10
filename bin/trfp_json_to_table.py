@@ -99,7 +99,7 @@ if __name__ == "__main__":
     final_table_pickled = pd.DataFrame(final_table_pickled, index=[0])
 
 
-    final_table_pickled.to_csv(args.ocsv)
+    final_table_pickled.to_csv(args.ocsv, index = False)
 
 
     #with open(args.ocsv, "w") as final_output:
