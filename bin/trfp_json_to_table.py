@@ -48,48 +48,59 @@ if __name__ == "__main__":
     final_table = dict()
     headers = [ # Example header for MPCSPIKE1 (old-isa) (Replace XXX with peptide)
         "run_file" ,
-        "FIXED_MPCSPIKE1_PEP_XXX_RT_XXX",
-        "IDENT_MPCSPIKE1_COUNT",
-        "IDENT_MPCSPIKE1_DELTA_RT",
-        "IDENT_MPCSPIKE1_PEP_XXX_RT_DELTA",
+        "SPIKE_MPCSPIKE1_MZ_XXX_RT_XXX_intensity"
+        "SPIKE_MPCSPIKE1_IDENT_PSMcount",
+        "SPIKE_MPCSPIKE1_IDENT_RT",
+        "SPIKE_MPCSPIKE1_IDENT_RTdelta",
+        "SPIKE_MPCSPIKE1_IDENT_intensity",
     ]
 
     for ass, xic in zip(associations, xics["Content"]):
-        if ass[0] not in headers_included:
+        if ass[0] not in headers_included:  # only the first PSM is used. TODO: do we want to change that?
             # If not already included add all information including headers
             final_table[
-                "FIXED_" + ass[0] + "_PEP_" + ass[1] + "_MZ_" + ass[2] + "_RT_" + ass[3]
+                "SPIKE_" + ass[0] + "_MZ_" + ass[2] + "_RT_" + ass[3] + "_intensity"
             ] = sum(xic["Intensities"] if xic["Intensities"] else [])
 
             final_table[
-                "IDENT_" + ass[0] + "_COUNT"
+                "SPIKE_" + ass[0] + "_IDENT_PSMcount"
             ] = 0
-
+            
             final_table[
-                "IDENT_" + ass[0] + "_DELTA_RT"
+                "SPIKE_" + ass[0] + "_IDENT_RT"
             ] = None
 
             final_table[
-                "IDENT_" + ass[0] + "_PEP_" + ass[1] + "_MZ_" + ass[2] + "_RT_DELTA"
+                "SPIKE_" + ass[0] + "_IDENT_RTdelta"
+            ] = None
+
+            final_table[
+                "SPIKE_" + ass[0] + "_IDENT_intensity"
             ] = None
 
             headers_included.append(ass[0])
         else:
-            # We found an Identification:
+            # Count the PSMs matching to the sequence of the spike-in peptide:
             final_table[
-                "IDENT_" + ass[0] + "_COUNT"
+                "SPIKE_" + ass[0] + "_IDENT_PSMcount"
             ] += 1
 
-            # Retrieve the info from previous associations
-
+            # Retrieve the info from previous associations (retention time and intensity of identifications)
             for ass_ass in associations:
                 if ass_ass[0] == ass[0]:
+                    ### retention time of first matching PSM
                     final_table[
-                        "IDENT_" + ass[0] + "_DELTA_RT"
-                    ] = (float(ass[3]) - float(ass_ass[3]))  # Subtract found_rt by expecte_rt
+                        "SPIKE_" + ass[0] + "_IDENT_RTdelta"
+                    ] = float(ass_ass[3])
+                    
+                    ### difference between found ans expected retention time
+                    final_table[
+                        "SPIKE_" + ass[0] + "IDENT_RTdelta"
+                    ] = (float(ass[3]) - float(ass_ass[3]))  # Subtract found_rt by expected_rt
 
+                    ### intensity of PSM
                     final_table[
-                        "IDENT_" + ass[0] + "_PEP_" + ass_ass[1] + "_MZ_" + ass_ass[2] + "_RT_DELTA"
+                        "SPIKE_" + ass[0] + "_IDENT_intensity"
                     ] = sum(xic["Intensities"] if xic["Intensities"] else [])
                     break
 
