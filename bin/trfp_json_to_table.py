@@ -90,12 +90,12 @@ if __name__ == "__main__":
                 if ass_ass[0] == ass[0]:
                     ### retention time of first matching PSM
                     final_table[
-                        "SPIKE_" + ass[0] + "_IDENT_RTdelta"
-                    ] = float(ass_ass[3])
+                        "SPIKE_" + ass[0] + "_IDENT_RT"
+                    ] = float(ass[3])
                     
                     ### difference between found ans expected retention time
                     final_table[
-                        "SPIKE_" + ass[0] + "IDENT_RTdelta"
+                        "SPIKE_" + ass[0] + "_IDENT_RTdelta"
                     ] = (float(ass[3]) - float(ass_ass[3]))  # Subtract found_rt by expected_rt
 
                     ### intensity of PSM
