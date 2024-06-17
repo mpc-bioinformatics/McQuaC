@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     headers_included = []
     final_table = dict()
-    headers = [ # Example header for MPCSPIKE1 (old-isa) (Replace XXX with peptide)
+    headers = [ # Example header for MPCSPIKE1 (old-isa) (Replace XXX with specific peptide information)
         "run_file" ,
         "SPIKE_MPCSPIKE1_MZ_XXX_RT_XXX_intensity"
         "SPIKE_MPCSPIKE1_IDENT_PSMcount",
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     ]
 
     for ass, xic in zip(associations, xics["Content"]):
-        if ass[0] not in headers_included:  # only the first PSM is used. TODO: do we want to change that?
+        if ass[0] not in headers_included:  # only the first PSM in the list is used, which is the one with the lowest q-value (the "best" PSM).
             # If not already included add all information including headers
             final_table[
                 "SPIKE_" + ass[0] + "_MZ_" + ass[2] + "_RT_" + ass[3] + "_intensity"
@@ -109,14 +109,7 @@ if __name__ == "__main__":
     final_table_pickled = {'MPCSPIKEINS_____pickle_zlib': final_table_pickled}
     final_table_pickled = pd.DataFrame(final_table_pickled, index=[0])
 
-
     final_table_pickled.to_csv(args.ocsv, index = False)
 
-
-    #with open(args.ocsv, "w") as final_output:
-    #    writer = csv.DictWriter(final_output, fieldnames=final_table.keys())
-
-    #   writer.writeheader()
-    #    writer.writerow(final_table)
     pass
 
