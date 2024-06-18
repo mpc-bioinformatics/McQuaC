@@ -170,6 +170,17 @@ if __name__ == "__main__":
     df_table0 = df[valid_features]
     df_table0 = df_table0.loc[:,:].copy()
     df_table0.loc[:,"timestamp"] = x
+    
+    ### if file ISAs are analyzed, add the spike-ins to the table
+    
+    if isa:
+        spikes = []
+        for index in df.index:
+            spike_tmp = unbase64_uncomp_unpickle(df["MPCSPIKEINS_____pickle_zlib"].iloc[index])
+            spikes.append(spike_tmp)
+        spikes_df = pd.DataFrame(spikes)
+        df_table0 = pd.concat([df_table0, spikes_df], axis = 1)
+        
     df_table0.to_csv(output_path + "/table0_summary.csv")
 
 ################################################################################################

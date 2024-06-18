@@ -4,6 +4,10 @@ import sys
 import csv
 import json
 import argparse
+import zlib
+import pickle
+import base64
+import pandas as pd
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
@@ -42,58 +46,70 @@ if __name__ == "__main__":
 
     headers_included = []
     final_table = dict()
-    headers = [ # Example header for MPCSPIKE1 (old-isa) (Replace XXX with peptide)
+    headers = [ # Example header for MPCSPIKE1 (old-isa) (Replace XXX with specific peptide information)
         "run_file" ,
-        "FIXED_MPCSPIKE1_PEP_XXX_RT_XXX",
-        "IDENT_MPCSPIKE1_COUNT",
-        "IDENT_MPCSPIKE1_DELTA_RT",
-        "IDENT_MPCSPIKE1_PEP_XXX_RT_DELTA",
+        "SPIKE_MPCSPIKE1_MZ_XXX_RT_XXX_intensity"
+        "SPIKE_MPCSPIKE1_IDENT_PSMcount",
+        "SPIKE_MPCSPIKE1_IDENT_RT",
+        "SPIKE_MPCSPIKE1_IDENT_RTdelta",
+        "SPIKE_MPCSPIKE1_IDENT_intensity",
     ]
 
     for ass, xic in zip(associations, xics["Content"]):
-        if ass[0] not in headers_included:
+        if ass[0] not in headers_included:  # only the first PSM in the list is used, which is the one with the lowest q-value (the "best" PSM).
             # If not already included add all information including headers
             final_table[
-                "FIXED_" + ass[0] + "_PEP_" + ass[1] + "_MZ_" + ass[2] + "_RT_" + ass[3]
+                "SPIKE_" + ass[0] + "_MZ_" + ass[2] + "_RT_" + ass[3] + "_intensity"
             ] = sum(xic["Intensities"] if xic["Intensities"] else [])
 
             final_table[
-                "IDENT_" + ass[0] + "_COUNT"
+                "SPIKE_" + ass[0] + "_IDENT_PSMcount"
             ] = 0
-
+            
             final_table[
-                "IDENT_" + ass[0] + "_DELTA_RT"
+                "SPIKE_" + ass[0] + "_IDENT_RT"
             ] = None
 
             final_table[
-                "IDENT_" + ass[0] + "_PEP_" + ass[1] + "_MZ_" + ass[2] + "_RT_DELTA"
+                "SPIKE_" + ass[0] + "_IDENT_RTdelta"
+            ] = None
+
+            final_table[
+                "SPIKE_" + ass[0] + "_IDENT_intensity"
             ] = None
 
             headers_included.append(ass[0])
         else:
-            # We found an Identification:
+            # Count the PSMs matching to the sequence of the spike-in peptide:
             final_table[
-                "IDENT_" + ass[0] + "_COUNT"
+                "SPIKE_" + ass[0] + "_IDENT_PSMcount"
             ] += 1
 
-            # Retrieve the info from previous associations
-
+            # Retrieve the info from previous associations (retention time and intensity of identifications)
             for ass_ass in associations:
                 if ass_ass[0] == ass[0]:
+                    ### retention time of first matching PSM
                     final_table[
-                        "IDENT_" + ass[0] + "_DELTA_RT"
-                    ] = (float(ass[3]) - float(ass_ass[3]))  # Subtract found_rt by expecte_rt
+                        "SPIKE_" + ass[0] + "_IDENT_RT"
+                    ] = float(ass[3])
+                    
+                    ### difference between found ans expected retention time
+                    final_table[
+                        "SPIKE_" + ass[0] + "_IDENT_RTdelta"
+                    ] = (float(ass[3]) - float(ass_ass[3]))  # Subtract found_rt by expected_rt
 
+                    ### intensity of PSM
                     final_table[
-                        "IDENT_" + ass[0] + "_PEP_" + ass_ass[1] + "_MZ_" + ass_ass[2] + "_RT_DELTA"
+                        "SPIKE_" + ass[0] + "_IDENT_intensity"
                     ] = sum(xic["Intensities"] if xic["Intensities"] else [])
                     break
 
+    # pickle the final table and create a dataframe with only one column and one line
+    final_table_pickled = base64.b64encode(zlib.compress(pickle.dumps(final_table), level=9)).decode("utf-8")
+    final_table_pickled = {'MPCSPIKEINS_____pickle_zlib': final_table_pickled}
+    final_table_pickled = pd.DataFrame(final_table_pickled, index=[0])
 
-    with open(args.ocsv, "w") as final_output:
-        writer = csv.DictWriter(final_output, fieldnames=final_table.keys())
+    final_table_pickled.to_csv(args.ocsv, index = False)
 
-        writer.writeheader()
-        writer.writerow(final_table)
     pass
 
