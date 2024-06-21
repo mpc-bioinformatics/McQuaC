@@ -5,7 +5,7 @@ import argparse
 from pathlib import Path
 import re
 
-PEPTIDE_MASS_TOLERANCE_REGEX = re.compile(r"peptide_mass_tolerance = (?P<tolerance>\d+\.\d+)")
+PEPTIDE_MASS_TOLERANCE_REGEX = re.compile(r"peptide_mass_tolerance_upper = (?P<tolerance>\d+\.\d+)")
 """Regex to extract the peptide mass tolerance from comet.params
 """
 
