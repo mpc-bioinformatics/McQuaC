@@ -21,9 +21,8 @@ nextflow run \
 include {convert_raws_to_mzml} from workflow.projectDir + '/src/io/raw_file_conversion.nf'
 include {identification_with_comet} from workflow.projectDir + '/src/identification/comet.nf'
 
-include {convert_to_mgf; convert_to_idxml} from workflow.projectDir + '/file_conversion.nf'
+include {convert_to_idxml} from workflow.projectDir + '/file_conversion.nf'
 include {get_various_mzml_infos} from workflow.projectDir + '/get_mzml_chromatogram_and_more.nf'
-include {ident_via_comet} from workflow.projectDir + '/identification_via_comet.nf'
 include {execute_pia} from workflow.projectDir + '/pia.nf'
 include {retrieve_spikeins} from workflow.projectDir + '/retrieve_spike_ins.nf' // We could also consider to expose params.spk_spike_ins, however it is always fixed for our ISA-stadard!
 include {get_features} from workflow.projectDir + '/get_features_in_raws.nf'
