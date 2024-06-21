@@ -39,14 +39,12 @@ This creates and downloads several docker images
 1. Build the local Docker images (soon available via ghcr.io or similar)
    * `docker build -t mpc/nextqcflow-python:latest -f docker/python/Dockerfile .`
      * Environment for Python including dependencies for the Python-script in the `bin`-folder as well as OpenMS because of pyOpenMS
-   * `docker build -t mpc/nextqcflow-comet:latest -f docker/comet/Dockerfile .`   
-      * Comet is infrequently updated on bioconda and biocontainers, therefore we build it ourself, with the tested version
-      * Want to test a new Comet version? Add `--build-arg COMET_VERSION=<VERSION_FROM_GITHUB>`, e.g. `v2023.01.2`
 2. Pre download the other containers:
    1. `docker pull quay.io/biocontainers/pia:1.4.8--hdfd78af_0`
    2. `docker pull quay.io/biocontainers/thermorawfileparser:1.4.3--ha8f3691_0`
-   3. `docker pull chambm/pwiz-skyline-i-agree-to-the-vendor-licenses`
-   4. `docker pull mfreitas/tdf2mzml`
+   3. `docker pull quay.io/medbioinf/comet-ms:v2024.01.0`
+   4. `docker pull chambm/pwiz-skyline-i-agree-to-the-vendor-licenses`
+   5. `docker pull mfreitas/tdf2mzml`
 
 
 ##### Run the workflow

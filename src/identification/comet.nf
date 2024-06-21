@@ -30,7 +30,7 @@ workflow identification_with_comet {
  * @return pepxml Path to pepXML file
  */
 process comet_search {
-    container 'mpc/nextqcflow-comet:latest'
+    container 'quay.io/medbioinf/comet-ms:v2024.01.0'
     cpus 8 // hardcode for now
 
     input:
