@@ -176,7 +176,7 @@ if __name__ == "__main__":
     if isa:
         spikes = []
         for index in df.index:
-            spike_tmp = unbase64_uncomp_unpickle(df["MPCSPIKEINS_____pickle_zlib"].iloc[index])
+            spike_tmp = unbase64_uncomp_unpickle(df["SPIKEINS_____pickle_zlib"].iloc[index])
             spikes.append(spike_tmp)
         spikes_df = pd.DataFrame(spikes)
         df_table0 = pd.concat([df_table0, spikes_df], axis = 1)

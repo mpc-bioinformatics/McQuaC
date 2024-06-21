@@ -20,8 +20,8 @@ if __name__ == "__main__":
 
     args = argparse_setup()
 
-    # args.itrfp_json = "/home/luxii/Downloads/fsatas/OEI37731stdtest.json"
-    # args.iassociations = "/home/luxii/git/Next-QC-Flow/association.txt"
+    # args.itrfp_json = "/home/luxii/git/Luxii/Next-QC-Flow/work/6d/7e9463f039a556b16eb8be989e4c89/EX05999std.json"
+    # args.iassociations = "/home/luxii/git/Luxii/Next-QC-Flow/work/6d/7e9463f039a556b16eb8be989e4c89/association.txt"
     # args.ocsv = "output_stat.csv"
 
     json_struct = []
@@ -46,70 +46,57 @@ if __name__ == "__main__":
 
     headers_included = []
     final_table = dict()
-    headers = [ # Example header for MPCSPIKE1 (old-isa) (Replace XXX with specific peptide information)
-        "run_file" ,
-        "SPIKE_MPCSPIKE1_MZ_XXX_RT_XXX_intensity"
-        "SPIKE_MPCSPIKE1_IDENT_PSMcount",
-        "SPIKE_MPCSPIKE1_IDENT_RT",
-        "SPIKE_MPCSPIKE1_IDENT_RTdelta",
-        "SPIKE_MPCSPIKE1_IDENT_intensity",
-    ]
+
+    # Example header for MPCSPIKE1 (old-isa) (Replace IDENTIFIER/XXX with specific peptide information)
+    # headers = [ 
+    #     "run_file" ,
+    #     "SPIKE_IDENTIFIER_MZ_XXX_RT_XXX_Maximum_Intensity"
+    #     "SPIKE_IDENTIFIER_MZ_XXX_RT_XXX_RT_at_Maximum_Intensity"
+    #     "SPIKE_IDENTIFIER_MZ_XXX_RT_XXX_FoundPSMs",
+    #     "SPIKE_IDENTIFIER_MZ_XXX_RT_XXX_Delta_to_expected_RT",
+    # ]
 
     for ass, xic in zip(associations, xics["Content"]):
-        if ass[0] not in headers_included:  # only the first PSM in the list is used, which is the one with the lowest q-value (the "best" PSM).
-            # If not already included add all information including headers
-            final_table[
-                "SPIKE_" + ass[0] + "_MZ_" + ass[2] + "_RT_" + ass[3] + "_intensity"
-            ] = sum(xic["Intensities"] if xic["Intensities"] else [])
+
+        # Map to original SpikeIn (one of the first entries):
+        ass = associations[[x[0] for x in associations].index(ass[0])]
+
+        # Get maximum intensity, its RT as well as the delta from the extracted xic
+        max_intens = max(xic["Intensities"]) if xic["Intensities"] else None
+        rt_at_max_intens = 60*xic["RetentionTimes"][xic["Intensities"].index(max_intens)] if xic["Intensities"] else None
+        rt_delta = float(ass[3]) - rt_at_max_intens  #  "Expected retention time" - "Actual Retention Time of SpikeIn (highest peak)""
+
+        # Append inormation to the table
+        final_table[
+            "SPIKE_" + ass[0] + "_MZ_" + ass[2] + "_RT_" + ass[3] + "_Maximum_Intensity"
+        ] = max_intens
+
+        final_table[
+            "SPIKE_" + ass[0] + "_MZ_" + ass[2] + "_RT_" + ass[3] + "_RT_at_Maximum_Intensity"
+        ] = rt_at_max_intens
+
+        final_table[
+            "SPIKE_" + ass[0] + "_MZ_" + ass[2] + "_RT_" + ass[3] + "_Delta_to_expected_RT"
+        ] = rt_delta
+
+        if ass[0] not in headers_included: 
+            # CASE: Not included in the final table, therefore we have a Spike-In extracted from the initial table
 
             final_table[
-                "SPIKE_" + ass[0] + "_IDENT_PSMcount"
+                "SPIKE_" + ass[0] + "_MZ_" + ass[2] + "_RT_" + ass[3] + "_Found_PSMs"
             ] = 0
             
-            final_table[
-                "SPIKE_" + ass[0] + "_IDENT_RT"
-            ] = None
-
-            final_table[
-                "SPIKE_" + ass[0] + "_IDENT_RTdelta"
-            ] = None
-
-            final_table[
-                "SPIKE_" + ass[0] + "_IDENT_intensity"
-            ] = None
-
             headers_included.append(ass[0])
         else:
-            # Count the PSMs matching to the sequence of the spike-in peptide:
+            # CASRA: We already inlcluded this entry. Therefore, this information must come from a PSM!
             final_table[
-                "SPIKE_" + ass[0] + "_IDENT_PSMcount"
-            ] += 1
+                "SPIKE_" + ass[0] + "_MZ_" + ass[2] + "_RT_" + ass[3] + "_Found_PSMs"
+            ] +=1  # We count up, because we have two entries of it --> Therefore 1 PSM (for three enries, 2 PSMs, etc...)
 
-            # Retrieve the info from previous associations (retention time and intensity of identifications)
-            for ass_ass in associations:
-                if ass_ass[0] == ass[0]:
-                    ### retention time of first matching PSM
-                    final_table[
-                        "SPIKE_" + ass[0] + "_IDENT_RT"
-                    ] = float(ass[3])
-                    
-                    ### difference between found ans expected retention time
-                    final_table[
-                        "SPIKE_" + ass[0] + "_IDENT_RTdelta"
-                    ] = (float(ass[3]) - float(ass_ass[3]))  # Subtract found_rt by expected_rt
-
-                    ### intensity of PSM
-                    final_table[
-                        "SPIKE_" + ass[0] + "_IDENT_intensity"
-                    ] = sum(xic["Intensities"] if xic["Intensities"] else [])
-                    break
-
-    # pickle the final table and create a dataframe with only one column and one line
+    # Pickle the final table and create a dataframe with only one column and one line
     final_table_pickled = base64.b64encode(zlib.compress(pickle.dumps(final_table), level=9)).decode("utf-8")
-    final_table_pickled = {'MPCSPIKEINS_____pickle_zlib': final_table_pickled}
+    final_table_pickled = {"SPIKEINS_____pickle_zlib": final_table_pickled}
     final_table_pickled = pd.DataFrame(final_table_pickled, index=[0])
 
+    # Save to csv
     final_table_pickled.to_csv(args.ocsv, index = False)
-
-    pass
-
