@@ -105,6 +105,11 @@ if __name__ == "__main__":
                     "total_num_ident_features",
                     "total_num_features",
                     "RT_duration", 
+                    "Base_Peak_Intensity_Max",
+                    "Base_Peak_Intensity_Max_Up_To_105",
+                    "Total_Ion_Current_Max",
+                    "accumulated-MS1_TIC",
+                    "accumulated-MS2_TIC",
                     "RT_TIC_Q_000-025",
                     "RT_TIC_Q_025-050",
                     "RT_TIC_Q_050-075",
@@ -137,8 +142,6 @@ if __name__ == "__main__":
                     "MS2_PrecZ_4",
                     "MS2_PrecZ_5",
                     "MS2_PrecZ_more", 
-                    "accumulated-MS1_TIC", 
-                    "accumulated-MS2_TIC",
                     "num_features_charge_1",
                     "num_features_charge_2",
                     "num_features_charge_3",
@@ -169,7 +172,8 @@ if __name__ == "__main__":
     valid_features = [feature for feature in feature_list if feature in df.columns]
     df_table0 = df[valid_features]
     df_table0 = df_table0.loc[:,:].copy()
-    df_table0.loc[:,"timestamp"] = x
+    df_table0.insert(1, "timestamp", x)
+    #df_table0.loc[:,"timestamp"] = x
     
     ### if file ISAs are analyzed, add the spike-ins to the table
     
@@ -181,7 +185,7 @@ if __name__ == "__main__":
         spikes_df = pd.DataFrame(spikes)
         df_table0 = pd.concat([df_table0, spikes_df], axis = 1)
         
-    df_table0.to_csv(output_path + "/table0_summary.csv")
+    df_table0.to_csv(output_path + "/table0_summary.csv", index = False)
 
 ################################################################################################
     # Figure 1: Barplot for total number of MS1 and MS2 spectra
