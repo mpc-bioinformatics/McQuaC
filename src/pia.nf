@@ -14,6 +14,7 @@ pia_mem_params= "-Xms4g -Xmx16g"  // additional PIA parameters to set the memory
  * @param do_psm_export whether PSM level data should be returned
  * @param do_peptide_export whether peptide level data should be returned
  * @param do_protein_export whether protein level data should be returned
+ * @param fdr_filter whether FDR filtering should be performed (on any level)
  *
  * @return return_files tuples containing the PSM, peptide and protein level results each (may be empty, if level was not returned)
  */
@@ -23,10 +24,11 @@ workflow pia_analysis {
         do_psm_export
         do_peptide_export
         do_protein_export
+        fdr_filter
     
     main:
         pia_xmls = compile_pia_xmls(identifications)
-        analysis_json = prepare_analysis_json(do_psm_export, do_peptide_export, do_protein_export)
+        analysis_json = prepare_analysis_json(do_psm_export, do_peptide_export, do_protein_export, fdr_filter)
         pia_all_report_files = pia_run_analysis(pia_xmls, analysis_json)
 
         return_files = pia_all_report_files.psms.collect()
@@ -52,7 +54,7 @@ workflow pia_analysis_full {
         identifications
 
     main:
-        pia_report_files = pia_analysis(identifications, true, true, true)
+        pia_report_files = pia_analysis(identifications, true, true, true, true)
     
     emit:
         pia_report_files
@@ -62,15 +64,17 @@ workflow pia_analysis_full {
  * Performs PIA's FDR and protein iference on the given files and PSM level only.
  *
  * @param identifications search engine results
+ * @param fdr_filter whether FDR-filtering should be performed
  *
  * @return psm_file the results on PSM level
  */
 workflow pia_analysis_psm_only {
     take:
         identifications
+        fdr_filter
     
     main:
-        pia_report_files = pia_analysis(identifications, true, false, false)
+        pia_report_files = pia_analysis(identifications, true, false, false, fdr_filter)
 
     emit:
         pia_report_files
@@ -140,6 +144,7 @@ process prepare_analysis_json {
     val psm_export
     val peptide_export
     val protein_export
+    val fdr_filter
 
     output:
     path "pia_analysis.json"
@@ -152,7 +157,6 @@ process prepare_analysis_json {
     sed -i 's;"createPSMsets": .*,;"createPSMsets": false,;g' pia_analysis.json
     sed -i 's;"psmLevelFileID": .*,;"psmLevelFileID": 1,;g' pia_analysis.json
     sed -i 's;"calculateCombinedFDRScore": .*,;"calculateCombinedFDRScore": false,;g' pia_analysis.json
-    sed -i '/psmFilters/{n;s/.*/    "psm_score_filter_psm_fdr_score <= 0.01",\\n    "psm_accessions_filter !regex_only DECOY_.*"/g;}' pia_analysis.json
     if [ ${psm_export} = true ];
     then
       sed -i 's;"psmExportFile":.*,;"psmExportFile": "piaExport-PSMs.mzTab",;g' pia_analysis.json
@@ -169,7 +173,6 @@ process prepare_analysis_json {
       sed -i 's;"peptideExportFile":.*,;;g' pia_analysis.json
     fi
     sed -i 's;"peptideLevelFileID":.*,;"peptideLevelFileID": 1,;g' pia_analysis.json
-    sed -i '/peptideFilters/{n;s/.*/    "psm_score_filter_psm_fdr_score <= 0.01",\\n    "peptide_accessions_filter !regex_only DECOY_.*"/g;}' pia_analysis.json
 
     if [ ${protein_export} = true ];
     then
@@ -178,13 +181,25 @@ process prepare_analysis_json {
       sed -i '/inferenceFilters/{n;s/.*/    "psm_score_filter_psm_fdr_score <= 0.01"/g;}' pia_analysis.json
       sed -i 's;"scoringBaseScore":.*,;"scoringBaseScore": "psm_fdr_score",;g' pia_analysis.json
       sed -i 's;"scoringPSMs":.*,;"scoringPSMs": "best",;g' pia_analysis.json
-      sed -i '/proteinFilters/{n;s/.*/    "protein_q_value_filter <= 0.01",\\n    "protein_accessions_filter !regex_only DECOY_.*"/g;}' pia_analysis.json
       sed -i 's;"proteinExportFile":.*,;"proteinExportFile": "piaExport-proteins.mzTab",;g' pia_analysis.json
       sed -i 's;"proteinExportWithPSMs":.*,;"proteinExportWithPSMs": true,;g' pia_analysis.json
     else
       sed -i 's;"infereProteins":.*,;"infereProteins": false,;g' pia_analysis.json
       sed -i 's;"proteinExportFile":.*,;;g' pia_analysis.json
     fi
+
+    if [ ${fdr_filter} = true ];
+    then
+      sed -i '/psmFilters/{n;s/.*/    "psm_score_filter_psm_fdr_score <= 0.01",\\n    "psm_accessions_filter !regex_only DECOY_.*"/g;}' pia_analysis.json
+      sed -i '/peptideFilters/{n;s/.*/    "psm_score_filter_psm_fdr_score <= 0.01",\\n    "peptide_accessions_filter !regex_only DECOY_.*"/g;}' pia_analysis.json
+      sed -i '/proteinFilters/{n;s/.*/    "protein_q_value_filter <= 0.01",\\n    "protein_accessions_filter !regex_only DECOY_.*"/g;}' pia_analysis.json
+    else
+      sed -i '/psmFilters/{n;s/.*//g;}' pia_analysis.json
+      sed -i '/peptideFilters/{n;s/.*//g;}' pia_analysis.json
+      sed -i '/proteinFilters/{n;s/.*//g;}' pia_analysis.json
+    fi
+
+
     """
 }
 
