@@ -26,7 +26,7 @@ include {convert_to_idxml as convert_to_labelled_idxml} from workflow.projectDir
 include {get_various_mzml_infos} from workflow.projectDir + '/get_mzml_chromatogram_and_more.nf'
 include {pia_analysis_full; pia_analysis_psm_only; pia_extract_metrics} from workflow.projectDir + '/src/pia.nf'
 include {retrieve_spike_ins_information} from workflow.projectDir + '/src/retrieve_spike_ins.nf'
-include {get_features} from workflow.projectDir + '/get_features_in_raws.nf'
+include {get_feature_metrics} from workflow.projectDir + '/src/feature_detection.nf'
 include {get_custom_headers} from workflow.projectDir + '/get_custom_columns_from_file_directly.nf'
 
 // Parameters required for the standalone execution of this main-nextflow script
@@ -51,8 +51,6 @@ workflow {
 	fasta_file = Channel.fromPath(params.main_fasta_file).first()
 	comet_params = Channel.fromPath(params.main_comet_params).first()
 
-	feature_finder_params = get_feature_finder_params_from_comet_params(comet_params)
-
 	raw_files = thermo_raw_files.concat(bruker_raw_folders)
 	// File conversion into open formats
 	mzmls = convert_raws_to_mzml(thermo_raw_files, bruker_raw_folders)
@@ -66,6 +64,11 @@ workflow {
 
 	// Execute protein inference and filter by FDR
 	pia_report_files = pia_analysis_full(comet_idxmls)
+	pia_report_psm_mztabs = pia_report_files
+				.toList()
+            	.transpose()
+            	.first()
+            	.flatten()
 	pia_extract_csv = pia_extract_metrics(pia_report_files)
 
 	// search additionally for labelled PSMs
@@ -84,22 +87,18 @@ workflow {
 		if (params.search_labelled_spikeins) {
 			psm_results = labelled_pia_report_files
 		} else {
-			psm_results = pia_report_files
-				.toList()
-            	.transpose()
-            	.first()
-            	.flatten()
+			psm_results = pia_report_psm_mztabs
 		}
 
 		retrieve_spike_ins_information(raw_files, psm_results, spike_ins_table)
 	}
 	 
-	// // Run Feature Finding and Statistics
-	// get_features(mzmls, pia_analysis.out[0].map { it[0] }, feature_finder_params)
+	// Run Feature Finding
+	feature_finder_params = get_feature_finder_params_from_comet_params(comet_params)
+	get_feature_metrics(mzmls, pia_report_psm_mztabs, feature_finder_params)
 
-	// // Get Thermospecific information from raw
-	// get_custom_headers(thermo_raw_files, bruker_raw_folders)
-
+	// Get Thermospecific information from raw
+	get_custom_headers(thermo_raw_files, bruker_raw_folders)
 
 	// // // Concatenate to large csv
 	// combined_csvs = get_various_mzml_infos.out.collect()
