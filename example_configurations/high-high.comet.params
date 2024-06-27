@@ -1,4 +1,4 @@
-# comet_version 2021.01 rev. 0
+# comet_version 2024.01 rev. 0
 # Comet MS/MS search engine parameters file.
 # Everything following the '#' symbol is treated as a comment.
 
@@ -12,7 +12,8 @@ num_threads = 4                        # 0=poll CPU to set num threads; else spe
 #
 # masses
 #
-peptide_mass_tolerance = 5.00
+peptide_mass_tolerance_lower = -5.00
+peptide_mass_tolerance_upper = 5.00
 peptide_mass_units = 2                 # 0=amu, 1=mmu, 2=ppm
 mass_type_parent = 1                   # 0=average masses, 1=monoisotopic masses
 mass_type_fragment = 1                 # 0=average masses, 1=monoisotopic masses
