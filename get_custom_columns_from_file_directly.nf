@@ -65,6 +65,6 @@ process retrieve_custom_headers_from_bruker_raw_files {
     path "${raw.baseName}_____customs.csv"
 
     """
-    bruker_extract_custom_headers.py -d_folder ${raw} -out_csv ${raw.baseName}_____customs.csv ${params.ccff_header_in_d} ${params.ccff_header_in_d_names}
+    bruker_extract_custom_headers.py -d_folder ${raw} -out_csv ${raw.baseName}_____customs.csv ${params.ccff_header_in_d}
     """
 }
