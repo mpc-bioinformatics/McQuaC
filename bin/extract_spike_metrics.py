@@ -3,6 +3,10 @@
 import json
 import csv
 import argparse
+import base64
+import zlib
+import pickle
+import pandas as pd
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
@@ -71,28 +75,18 @@ if __name__ == "__main__":
             comment_to_data[comment]["delta_rt"] = max_int_rt - comment_to_data[comment]["expected_rt"]
     
     # prepare output
-    headers_out = []
-    data_out = []
+    data_out = dict()
     for comment, data in comment_to_data.items():
-        # "SPIKE_IDENTIFIER_MZ_XXX_RT_XXX_Maximum_Intensity"
-        # "SPIKE_IDENTIFIER_MZ_XXX_RT_XXX_RT_at_Maximum_Intensity"
-        # "SPIKE_IDENTIFIER_MZ_XXX_RT_XXX_FoundPSMs",
-        # "SPIKE_IDENTIFIER_MZ_XXX_RT_XXX_Delta_to_expected_RT",
         spikeident = f"SPIKE_{comment}_MZ_{data['expected_mz']:.4f}_RT_{data['expected_rt']:.0f}"
+        data_out[f"{spikeident}_Maximum_Intensity"] = str(data['maximum_int'])
+        data_out[f"{spikeident}_RT_at_Maximum_Intensity"] = str(data['rt_at_maximum'])
+        data_out[f"{spikeident}_PSMs"] = str(data['identifications'])
+        data_out[f"{spikeident}_Delta_to_expected_RT"] = str(data['delta_rt'])
+    
+    # Pickle the final table and create a dataframe with only one column and one line
+    final_table_pickled = base64.b64encode(zlib.compress(pickle.dumps(data_out), level=9)).decode("utf-8")
+    final_table_pickled = {"SPIKEINS_____pickle_zlib": final_table_pickled}
+    final_table_pickled = pd.DataFrame(final_table_pickled, index=[0])
 
-        headers_out.append(f"{spikeident}_Maximum_Intensity")
-        data_out.append(str(data['maximum_int']))
-
-        headers_out.append(f"{spikeident}_RT_at_Maximum_Intensity")
-        data_out.append(str(data['rt_at_maximum']))
-
-        headers_out.append(f"{spikeident}_PSMs")
-        data_out.append(str(data['identifications']))
-
-        headers_out.append(f"{spikeident}_Delta_to_expected_RT")
-        data_out.append(str(data['delta_rt']))
-
-    # Write out the metrics
-    with open(args.ocsv, "w") as output_csv:
-        output_csv.write(",".join(headers_out) + "\n")
-        output_csv.write(",".join(data_out))
+    # Save to csv
+    final_table_pickled.to_csv(args.ocsv, index = False)

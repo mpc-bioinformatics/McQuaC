@@ -162,6 +162,6 @@ process get_spike_in_metrics {
     path "${xic_json.baseName}-spikeins.csv"
 
     """
-    extract_xic_metrics.py -itrfp_json ${xic_json} -iidentifications ${identifications} -ispikeins ${spike_ins_table} -ocsv ${xic_json.baseName}-spikeins.csv
+    extract_spike_metrics.py -itrfp_json ${xic_json} -iidentifications ${identifications} -ispikeins ${spike_ins_table} -ocsv ${xic_json.baseName}-spikeins.csv
     """
 }
