@@ -54,7 +54,7 @@ def run_pia_extraction():
                                                                        compresslevel=9,
                                                                        arcname=args.pia_proteins.split(os.sep)[-1])
     with open("pia_extractions.zip", "rb") as pia_b:
-        pia_str_bs64 = base64.b64encode(pia_b.read())
+        pia_str_bs64 = base64.b64encode(pia_b.read()).decode("utf-8")
         df["pia_output.zip"] = pia_str_bs64
         df.to_csv(args.output, index=False)
 
