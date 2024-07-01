@@ -53,7 +53,7 @@ if __name__ == "__main__":
         header = ["total_num_features", "total_num_ident_features"] + \
             ["num_features_charge_" + str(i) for i in range(1, int(args.report_up_to_charge) + 1)] + \
             ["num_ident_features_charge_" + str(i) for i in range(1, int(args.report_up_to_charge) + 1)] + \
-            ["feature_data.featureXML.zip", "feature_data.hills.csv.zip"]
+            ["feature_data.featureXML.zip"]
 
         row = [str(total_num_features), str(total_num_ident_features)] + \
             [str(num_features_charge[i]) for i in range(1, int(args.report_up_to_charge) + 1)] + \
