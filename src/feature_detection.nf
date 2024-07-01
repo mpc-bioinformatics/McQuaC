@@ -18,13 +18,14 @@ workflow get_feature_metrics {
     take:
         mzmls  // MS1 should be peak picked for feature-finding
         mztabfiles
-        feature_finder_params
+        comet_params
     
     main:
         // filter out empty spectra and chromatograms
         filtered_mzml = filter_mzml(mzmls)
 
-        // Get features with OpenMS' or Dinosaur feature finder
+        // Get features with OpenMS feature finder
+        feature_finder_params = get_feature_finder_params_from_comet_params(comet_params)
         feature_xml = run_feature_finder(filtered_mzml, feature_finder_params)
 
         // map identification to features (using mzTab and featureXML)
@@ -44,6 +45,26 @@ workflow get_feature_metrics {
         
     emit:
          feature_metrics
+}
+
+/**
+ * This process is used to convert the comet parameters into the parameters needed for the feature finder.
+ * 
+ * @param comet_params The comet parameters file
+ * @return The feature finder parameters (value channel)
+ */
+process get_feature_finder_params_from_comet_params {
+	container { python_image }
+
+	input:
+	path comet_params
+
+	output:
+	stdout
+
+	"""
+	comet_params_to_feature_finder_params.py -c ${comet_params}
+	"""
 }
 
 process run_feature_finder {

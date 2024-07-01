@@ -40,15 +40,15 @@ process retrieve_custom_headers_from_thermo_raw_files {
     path raw
 
     output:
-    path "${raw.baseName}_____customs.csv"
+    path "${raw.baseName}-custom_headers.csv"
 
     """
     # Pythonnet sometimes fails to exit and throws a mono error
-    thermo_extract_custom_headers.py -raw ${raw} ${params.ccff_header_in_raws} -out_csv ${raw.baseName}_____customs.csv || true
+    thermo_extract_custom_headers.py -raw ${raw} ${params.ccff_header_in_raws} -out_csv ${raw.baseName}-custom_headers.csv || true
 
     # Fail Check if no content was written
-    if ! [ -s "${raw.baseName}_____customs.csv" ];then
-        rm ${raw.baseName}_____customs.csv
+    if ! [ -s "${raw.baseName}-custom_headers.csv" ];then
+        rm ${raw.baseName}-custom_headers.csv
     fi
     """
 }
@@ -62,9 +62,9 @@ process retrieve_custom_headers_from_bruker_raw_files {
     path raw
 
     output:
-    path "${raw.baseName}_____customs.csv"
+    path "${raw.baseName}-custom_headers.csv"
 
     """
-    bruker_extract_custom_headers.py -d_folder ${raw} -out_csv ${raw.baseName}_____customs.csv ${params.ccff_header_in_d}
+    bruker_extract_custom_headers.py -d_folder ${raw} -out_csv ${raw.baseName}-custom_headers.csv ${params.ccff_header_in_d}
     """
 }

@@ -38,7 +38,7 @@ def argparse_setup():
     parser.add_argument("-output", help="Output folder for the plots as json files.", default = "graphics")
     parser.add_argument("-tic_overlay_offset", help = "Offset for TIC overlay plots", default = 0)
     parser.add_argument("-fig_show", help = "Show figures, e.g. for debugging?", default = False, action = "store_true")
-    parser.add_argument("-isa", help = "Is this ISA QC?", default = False, action = "store_true")
+    parser.add_argument("-spikeins", help = "Whether to analyse spike-ins", default = False, action = "store_true")
     return parser.parse_args()
 
 
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     output_path = args.output    
 
     fig_show = args.fig_show
-    isa = args.isa
+    analyse_spikeins = args.spikeins
 
     #csv_file = "temp/quality_control_20230920.csv"
 
@@ -173,14 +173,12 @@ if __name__ == "__main__":
     df_table0 = df[valid_features]
     df_table0 = df_table0.loc[:,:].copy()
     df_table0.insert(1, "timestamp", x)
-    #df_table0.loc[:,"timestamp"] = x
-    
-    ### if file ISAs are analyzed, add the spike-ins to the table
-    
-    if isa:
+
+    ### if spike-ins are analyzed, add them to the table
+    if analyse_spikeins:
         spikes = []
         for index in df.index:
-            spike_tmp = unbase64_uncomp_unpickle(df["MPCSPIKEINS_____pickle_zlib"].iloc[index])
+            spike_tmp = unbase64_uncomp_unpickle(df["SPIKEINS_____pickle_zlib"].iloc[index])
             spikes.append(spike_tmp)
         spikes_df = pd.DataFrame(spikes)
         df_table0 = pd.concat([df_table0, spikes_df], axis = 1)
