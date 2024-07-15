@@ -1,6 +1,13 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
+// Memory for the Thermo Raw File Parser, used 24 GB for a Raw file with 257409 MS scans 
+/// and 4GB for a Raw file with 11352 MS scans (measured with `/usr/bin/time -v ...`). 10 GB seems legit for most cases.
+params.file_conversion__thermo_raw_conversion_mem = "10 GB"
+// Memory for the tdf2mzml, used 0.39 GB for a Raw file with 298748 MS scans 
+/// and 0.14GB for a Raw file with 35023 MS scans (measured with `/usr/bin/time -v ...`). 5 GB seems more then enough.
+params.file_conversion__bruker_raw_conversion_mem = "5 GB"
+
 /**
  * Convert raw files (Thermo Fisher .raw-files and Bruker tdf-files) to mzML files
  * @params thermo_raw_files Thermo Fisher .raw-files
@@ -27,6 +34,11 @@ workflow convert_raws_to_mzml {
 process convert_thermo_raw_files {
     container 'quay.io/biocontainers/thermorawfileparser:1.4.3--ha8f3691_0'
     errorStrategy 'ignore'
+    // Thermo Raw File parser is currently limited to 2 CPUs, see:
+    // * https://github.com/compomics/ThermoRawFileParser/issues/23
+    // * https://github.com/compomics/ThermoRawFileParser/issues/95
+    cpus 2
+    memory params.file_conversion__thermo_raw_conversion_mem
 
     input:
     path raw_file
@@ -49,6 +61,9 @@ process convert_bruker_raw_folders {
     container 'mfreitas/tdf2mzml'
     containerOptions { "-v ${raw_folder.getParent()}:/data" }
     errorStrategy 'ignore'
+    // Uses all cores
+    cpus Runtime.runtime.availableProcessors()
+    memory params.file_conversion__bruker_raw_conversion_mem
 
     input:
     path raw_folder
