@@ -7,7 +7,12 @@ params.ctm_input_spectra = "$PWD/raws"  // Folder of Thermo (.RAW) or Bruker (.d
 // Optional Parameters
 params.ctm_outdir = "$PWD/results"  // Output-Directory of the MGFs. Here it is <Input_file>.mgf
 params.ctm_additional_params = ""  // Addtional parameters for the TRFP
-params.ctm_num_procs_conversion = Runtime.runtime.availableProcessors()  // Number of process used to convert (CAUTION: This can be very resource intensive!)
+// Memory for the Thermo Raw File Parser, used 24 GB for a Raw file with 257409 MS scans 
+/// and 4GB for a Raw file with 11352 MS scans (measured with `/usr/bin/time -v ...`). 10 GB seems legit for most cases.
+params.file_conversion__thermo_raw_conversion_mem = "10 GB"
+// Memory for the tdf2mzml, used 0.39 GB for a Raw file with 298748 MS scans 
+/// and 0.14GB for a Raw file with 35023 MS scans (measured with `/usr/bin/time -v ...`). 5 GB seems more then enough.
+params.file_conversion__bruker_raw_conversion_mem = "5 GB"
 
 // Standalone Workflow
 workflow {
@@ -58,6 +63,11 @@ workflow convert_to_idxml{
 
 process convert_thermo_raw_files {
     container 'quay.io/biocontainers/thermorawfileparser:1.4.3--ha8f3691_0'
+    // Thermo Raw File parser is currently limited to 2 CPUs, see:
+    // * https://github.com/compomics/ThermoRawFileParser/issues/23
+    // * https://github.com/compomics/ThermoRawFileParser/issues/95
+    cpus 2
+    memory params.file_conversion__thermo_raw_conversion_mem
 
     input:
     path raw_file
@@ -74,8 +84,10 @@ process convert_thermo_raw_files {
 process convert_bruker_raw_files {
     container 'mfreitas/tdf2mzml'
     containerOptions { "-v ${raw_file.getParent()}:/data" }
+    // Uses all cores
+    cpus Runtime.runtime.availableProcessors()
+    memory params.file_conversion__bruker_raw_conversion_mem
 
-    maxForks params.ctm_num_procs_conversion
 
     publishDir "${params.ctm_outdir}/", mode:'copy'
 
