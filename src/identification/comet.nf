@@ -2,7 +2,12 @@
 nextflow.enable.dsl=2
 
 comet_image = 'quay.io/medbioinf/comet-ms:v2024.01.0'
-comet_threads = 8 // hardcoded for now
+
+params.identification__comet_threads = 8
+// Memory per comet search
+// ~6 GB for 35000 MS and 35 MB of FASTA
+// Virtual and real memory were roughly equal
+params.identification__comet_mem = "10 GB"
 
 /*
  * Identifies peptides in MS/MS spectra using Comet
@@ -48,7 +53,7 @@ process adjust_comet_params {
     """
     cp ${comet_params} adjusted.comet.params
 
-    sed -i 's/^num_threads.*/num_threads = ${comet_threads} /' adjusted.comet.params
+    sed -i 's/^num_threads.*/num_threads = ${params.identification__comet_threads} /' adjusted.comet.params
 
     sed -i 's/^output_sqtfile.*/output_sqtfile = 0/' adjusted.comet.params
     sed -i 's/^output_txtfile.*/output_txtfile = 0/' adjusted.comet.params
@@ -56,7 +61,7 @@ process adjust_comet_params {
     sed -i 's/^output_mzidentmlfile.*/output_mzidentmlfile = 1/' adjusted.comet.params
     sed -i 's/^output_percolatorfile.*/output_percolatorfile = 0/' adjusted.comet.params
 
-    if [ ${search_labelled} = true ];       # hordcoded for now
+    if [ ${search_labelled} = true ];       # hardcoded for now
     then
         sed -i 's/^add_K_lysine.*/add_K_lysine  = 8.014199/' adjusted.comet.params
         sed -i 's/^add_R_arginine.*/add_R_arginine  = 10.008269/' adjusted.comet.params
@@ -74,7 +79,8 @@ process adjust_comet_params {
  */
 process comet_search {
     container { comet_image }
-    cpus { comet_threads } // hardcode for now
+    cpus { identification__comet_threads }
+    memory { identification__comet_mem }
 
     input:
     path mzml

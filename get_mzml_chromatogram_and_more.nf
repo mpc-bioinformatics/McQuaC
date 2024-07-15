@@ -6,7 +6,9 @@ params.gmc_input_mzmls = "$PWD/mzmls"  // Folder of mzMLs
 
 // Optional Parameters
 params.gmc_outdir = "$PWD/results"  // Output-Directory of the mzMLs. Here it is <Input_file>.mzML
-params.gmc_num_forks = Runtime.runtime.availableProcessors()  // Number of process used to convert (CAUTION: This can be very resource intensive!)
+
+/// Tracing show up to 4.7 GB virtual memory for 30000 MS scans
+params.get_mzml_chromatogram__get_various_mzml_info = " 7 GB"
 
 // Standalone Workflow
 workflow {
@@ -28,7 +30,10 @@ workflow get_various_mzml_infos {
 process retrieve_data_from_mzml {
     container 'mpc/nextqcflow-python:latest'
 
-    maxForks params.gmc_num_forks
+    publishDir "${params.gmc_outdir}/", mode:'copy'
+
+    cpus 1
+    memory params.get_mzml_chromatogram__get_various_mzml_info
 
     input:
     path(mzml)

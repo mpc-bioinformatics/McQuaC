@@ -10,6 +10,13 @@ params.ccff_header_in_raws = ""  // Headers which we want to extract from thermo
 
 params.ccff_header_in_d = "" // Extract headers from Bruker raw measurements-
 
+// Memory for the Thermo Raw File Parser, used 24 GB for a Raw file with 257409 MS scans 
+/// and 4GB for a Raw file with 11352 MS scans (measured with `/usr/bin/time -v ...`). 10 GB seems legit for most cases.
+params.get_custom_columns__thermo_raw_mem = "10 GB"
+// Memory for the tdf2mzml, used 0.39 GB for a Raw file with 298748 MS scans 
+/// and 0.14GB for a Raw file with 35023 MS scans (measured with `/usr/bin/time -v ...`). 5 GB seems more then enough.
+params.get_custom_columns__bruker_raw_mem = "1 GB"
+
 // Standalone Workflow
 workflow {
     raw_spectra = Channel.fromPath(params.ccff_input_spectra + "/*.raw")
@@ -34,6 +41,8 @@ process retrieve_custom_headers_from_thermo_raw_files {
     container 'mpc/nextqcflow-python:latest'
     errorStrategy 'ignore'
 
+    memory params.get_custom_columns__thermo_raw_mem
+
     stageInMode 'copy'
 
     input:
@@ -56,6 +65,8 @@ process retrieve_custom_headers_from_thermo_raw_files {
 process retrieve_custom_headers_from_bruker_raw_files {
     container 'mpc/nextqcflow-python:latest'
     errorStrategy 'ignore'
+
+    memory params.get_custom_columns__bruker_raw_mem
 
     input:
     path raw
