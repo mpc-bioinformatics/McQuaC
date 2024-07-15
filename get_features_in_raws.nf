@@ -15,6 +15,11 @@ params.gf_considered_charges_high = "6"  // Charges for the feature finder to us
 params.gf_additional_dinosaur_settings = "" // Additional Parameters which can be set for Dinosaur
 
 
+// Tracing show up to 3.5 GB virtual memory for 30000 MS scans
+//
+params.get_features__feature_finder_mem = "6 GB"
+
+
 // Output Directory
 params.gf_outdir = "$PWD/results"  // Output-Directory of the mzMLs. Here it is <Input_file>.mzML
 
@@ -72,7 +77,9 @@ workflow get_features {
 
 process run_feature_finder {
     container 'mpc/nextqcflow-python:latest'
+    
     maxForks 1
+    memory params.get_features__feature_finder_mem
 
     input:
     tuple path(mzml), path(ident)

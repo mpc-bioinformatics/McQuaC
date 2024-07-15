@@ -11,6 +11,11 @@ params.ic_tda = 1 // 0 --> No Target-Decoy appraoch | 1 --> Target-Decoy appraoc
 params.ic_outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
 params.ic_num_parallel_threads_per_search = 4
 
+// Memory per comet search
+// ~6 GB for 35000 MS and 35 MB of FASTA
+// Virtual and real memory were roughly equal
+params.identification_via_comet__comet_mem = "10 GB"
+
 
 workflow {
     // Get all MGF files which should be identified
@@ -42,6 +47,8 @@ process comet_search {
     container 'mpc/nextqcflow-comet:latest'
 
     cpus params.ic_num_parallel_threads_per_search
+    memory params.identification_via_comet__comet_mem
+
     publishDir "${params.ic_outdir}/idents", mode:'copy'
 
     input:
