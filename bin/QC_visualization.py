@@ -96,18 +96,22 @@ if __name__ == "__main__":
 
     ############################################################################################
     # Table 0: table with overview over QC measures. 
-    feature_list = ["file_and_analysis_timestamp",
-                    "total_num_ms1",
-                    "total_num_ms2",
-                    "number_filtered_psms",
-                    "number_filtered_peptides", 
-                    "number_proteins", 
-                    "total_num_ident_features",
+    feature_list1 = ["filename",
+                     #"timestamp", # time stamp will be inserted later after transforming it into date format
+                     "number_ungrouped_proteins",
+                     "number_proteins",
+                     "number_filtered_peptides",
+                     "number_filtered_psms",
+                     "total_num_ms1",
+                     "total_num_ms2",
+                     "Total_Ion_Current_Max",
+                     "Base_Peak_Intensity_Max",
+                     "Total_Ion_Current_Max_Up_To_105",
+                     "Base_Peak_Intensity_Max_Up_To_105" 
+                    ]
+    feature_list2 = ["total_num_ident_features",
                     "total_num_features",
                     "RT_duration", 
-                    "Base_Peak_Intensity_Max",
-                    "Base_Peak_Intensity_Max_Up_To_105",
-                    "Total_Ion_Current_Max",
                     "accumulated-MS1_TIC",
                     "accumulated-MS2_TIC",
                     "RT_TIC_Q_000-025",
@@ -169,9 +173,12 @@ if __name__ == "__main__":
     x = [datetime.datetime.utcfromtimestamp(x) for x in df["timestamp"]] # convert timestamp to datetime
     
     ### for now, just check if the items in featurelist are really in the data frame and if not, skip them
-    valid_features = [feature for feature in feature_list if feature in df.columns]
-    df_table0 = df[valid_features]
-    df_table0 = df_table0.loc[:,:].copy()
+    valid_features1 = [feature for feature in feature_list1 if feature in df.columns]
+    df_table0_1 = df[valid_features1]
+    valid_features2 = [feature for feature in feature_list2 if feature in df.columns]
+    df_table0_2 = df[valid_features2]
+    
+    df_table0 = df_table0_1.loc[:,:].copy()
     df_table0.insert(1, "timestamp", x)
     #df_table0.loc[:,"timestamp"] = x
     
@@ -184,8 +191,10 @@ if __name__ == "__main__":
             spikes.append(spike_tmp)
         spikes_df = pd.DataFrame(spikes)
         df_table0 = pd.concat([df_table0, spikes_df], axis = 1)
-        
-    df_table0.to_csv(output_path + "/table0_summary.csv", index = False)
+
+
+    df_table0 = pd.concat([df_table0, df_table0_2], axis = 1)
+    df_table0.to_csv(output_path + "/00_table_summary.csv", index = False)
 
 ################################################################################################
     # Figure 1: Barplot for total number of MS1 and MS2 spectra
