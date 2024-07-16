@@ -21,10 +21,10 @@ workflow identification_with_comet {
 
     main:
         adj_comet_params = adjust_comet_params(comet_params, search_labelled)
-        pepxmls = comet_search(mzmls, fasta_file, adj_comet_params)
+        id_results = comet_search(mzmls, fasta_file, adj_comet_params)
     
     emit:
-        pepxmls
+        mzids = id_results.mzids
 }
 
 
@@ -52,8 +52,8 @@ process adjust_comet_params {
 
     sed -i 's/^output_sqtfile.*/output_sqtfile = 0/' adjusted.comet.params
     sed -i 's/^output_txtfile.*/output_txtfile = 0/' adjusted.comet.params
-    sed -i 's/^output_pepxmlfile.*/output_pepxmlfile = 1/' adjusted.comet.params
-    sed -i 's/^output_mzidentmlfile.*/output_mzidentmlfile = 0/' adjusted.comet.params
+    sed -i 's/^output_pepxmlfile.*/output_pepxmlfile = 0/' adjusted.comet.params
+    sed -i 's/^output_mzidentmlfile.*/output_mzidentmlfile = 1/' adjusted.comet.params
     sed -i 's/^output_percolatorfile.*/output_percolatorfile = 0/' adjusted.comet.params
 
     if [ ${search_labelled} = true ];       # hordcoded for now
@@ -81,8 +81,8 @@ process comet_search {
     path input_fasta
     path config_file
 
-    output: 
-    path "${mzml.baseName}.pep.xml"
+    output:
+    path "${mzml.baseName}.mzid", emit: mzids
 
     """
     comet -P${config_file} -D${input_fasta} ${mzml}

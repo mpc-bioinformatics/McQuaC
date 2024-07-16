@@ -1,11 +1,17 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-pia_image = 'quay.io/biocontainers/pia:1.5.0--hdfd78af_0'
+pia_image = 'quay.io/biocontainers/pia:1.5.5--hdfd78af_0'
 python_image = 'mpc/nextqcflow-python:latest'
-comet_threads = 8 // hardcoded for now
-pia_mem_params= "-Xms4g -Xmx16g"  // additional PIA parameters to set the memory consumption
 
+params.pia_gb_ram = 16
+params.pia_threads = 8
+
+pia_mem_params = "-Xmx" + params.pia_gb_ram + "g"  // additional PIA parameters to set the memory consumption
+
+// Note for CPUs: PIA needs/takes very shortly all available processors, but rather idles on them later.
+// On the memory-side, it uses a lot the more PSMs are found...
+// Use this information to adjust number of parallel threads.
 
 /*
  * Performs PIA's FDR and protein iference on the given files and levels.
@@ -113,9 +119,8 @@ workflow pia_extract_metrics {
 process compile_pia_xmls {
     container { pia_image }
     
-    cpus {Runtime.runtime.availableProcessors()}    // hardcoded for now
-    maxForks 1                                      // hardcoded for now
-    memory 16.GB                                    // hardcoded for now
+    cpus {params.pia_threads}
+    memory {params.pia_gb_ram + ".GB"}
 
     input:
     path identifications
@@ -124,7 +129,7 @@ process compile_pia_xmls {
     path "${identifications.baseName}.pia.xml"
 
     """
-    pia ${pia_mem_params} --compile -o ${identifications.baseName}.pia.xml ${identifications}
+    pia ${pia_mem_params} --threads ${params.pia_threads} --compile -o ${identifications.baseName}.pia.xml ${identifications}
     """
 }
 
@@ -198,8 +203,6 @@ process prepare_analysis_json {
       sed -i '/peptideFilters/{n;s/.*//g;}' pia_analysis.json
       sed -i '/proteinFilters/{n;s/.*//g;}' pia_analysis.json
     fi
-
-
     """
 }
 
@@ -218,9 +221,8 @@ process prepare_analysis_json {
 process pia_run_analysis {
     container { pia_image }
 
-    cpus {Runtime.runtime.availableProcessors()}    // hardcoded for now
-    maxForks 1                                      // hardcoded for now
-    memory 16.GB                                    // hardcoded for now
+    cpus {params.pia_threads}
+    memory {params.pia_gb_ram + ".GB"}
 
     input:
     path pia_xml
@@ -245,7 +247,7 @@ process pia_run_analysis {
     sed -i 's;"peptideExportFile": .*;"peptideExportFile": "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-peptides.csv",;g' \${jsonfile}
     sed -i 's;"proteinExportFile": .*;"proteinExportFile": "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-proteins.mzTab",;g' \${jsonfile}
 
-    pia ${pia_mem_params} \${jsonfile} ${pia_xml}
+    pia ${pia_mem_params} --threads ${params.pia_threads} \${jsonfile} ${pia_xml}
     """
 }
 

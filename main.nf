@@ -19,10 +19,7 @@ nextflow run \
 // Include all the needed workflows from the sub-workflows
 // Extend this to also extend the QC-Workflow 
 include {convert_raws_to_mzml} from workflow.projectDir + '/src/io/raw_file_conversion.nf'
-include {identification_with_comet} from workflow.projectDir + '/src/identification/comet.nf'
-include {identification_with_comet as identification_labelled_with_comet} from workflow.projectDir + '/src/identification/comet.nf'
-include {convert_to_idxml} from workflow.projectDir + '/file_conversion.nf'
-include {convert_to_idxml as convert_to_labelled_idxml} from workflow.projectDir + '/file_conversion.nf'
+include {identification_with_comet; identification_with_comet as identification_labelled_with_comet} from workflow.projectDir + '/src/identification/comet.nf'
 include {get_various_mzml_infos} from workflow.projectDir + '/get_mzml_chromatogram_and_more.nf'
 include {pia_analysis_full; pia_analysis_psm_only; pia_extract_metrics} from workflow.projectDir + '/src/pia.nf'
 include {retrieve_spike_ins_information} from workflow.projectDir + '/src/retrieve_spike_ins.nf'
@@ -61,11 +58,10 @@ workflow {
 	mzml_metrics = get_various_mzml_infos(mzmls)
 
 	// Identify spectra using Comet
-	comet_pepxmls = identification_with_comet(mzmls, fasta_file, comet_params, false)
-	comet_idxmls = convert_to_idxml(comet_pepxmls)
+	comet_ids = identification_with_comet(mzmls, fasta_file, comet_params, false)
 
 	// Execute protein inference and filter by FDR
-	pia_report_files = pia_analysis_full(comet_idxmls)
+	pia_report_files = pia_analysis_full(comet_ids.mzids)
 	pia_report_psm_mztabs = pia_report_files
 				.toList()
             	.transpose()
@@ -75,11 +71,10 @@ workflow {
 
 	// search additionally for labelled PSMs
 	if (params.search_labelled_spikeins) {
-		comet_labelled_pepxmls = identification_labelled_with_comet(mzmls, fasta_file, comet_params, true)
-		comet_labelled_idxmls = convert_to_labelled_idxml(comet_labelled_pepxmls)
+		comet_labelled_ids = identification_labelled_with_comet(mzmls, fasta_file, comet_params, true)
 
 		// set the filter to true to count only FDR filtered labelled PSMs - but the FDR is skewed anyways, as the labelling is set to "static"!
-		labelled_pia_report_files = pia_analysis_psm_only(comet_labelled_idxmls, false)
+		labelled_pia_report_files = pia_analysis_psm_only(comet_labelled_ids.mzids, false)
 	}
 
 	// extract spike-ins information
