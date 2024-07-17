@@ -26,6 +26,7 @@ include {retrieve_spike_ins_information} from workflow.projectDir + '/src/retrie
 include {get_feature_metrics} from workflow.projectDir + '/src/feature_detection.nf'
 include {get_custom_headers} from workflow.projectDir + '/get_custom_columns_directly_from_raw.nf'
 include {combine_metric_csvs} from workflow.projectDir + '/src/io/combine_metric_csvs.nf'
+include {output_processing_success} from workflow.projectDir + '/src/io/output_processing_success.nf'
 
 // Parameters required for the standalone execution of this main-nextflow script
 params.main_raw_spectra_folder = "" // The folder containing the raw spectra
@@ -113,6 +114,8 @@ workflow {
 
 	// Visualize the results (and move them to the results folder)
 	visualize_results(combined_metrics)
+
+	output_processing_success(raw_files, csvs_per_run.toList().transpose().first().flatten())
 }
 
 /**

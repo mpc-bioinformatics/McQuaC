@@ -32,6 +32,7 @@ workflow get_custom_headers {
 
 process retrieve_custom_headers_from_thermo_raw_files {
     container 'mpc/nextqcflow-python:latest'
+    errorStrategy 'ignore'
 
     stageInMode 'copy'
     publishDir "${params.ccff_outdir}/", mode:'copy'
@@ -55,6 +56,7 @@ process retrieve_custom_headers_from_thermo_raw_files {
 
 process retrieve_custom_headers_from_bruker_raw_files {
     container 'mpc/nextqcflow-python:latest'
+    errorStrategy 'ignore'
 
     publishDir "${params.ccff_outdir}/", mode:'copy'
 

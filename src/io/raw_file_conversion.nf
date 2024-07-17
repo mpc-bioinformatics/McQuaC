@@ -26,6 +26,7 @@ workflow convert_raws_to_mzml {
  */
 process convert_thermo_raw_files {
     container 'quay.io/biocontainers/thermorawfileparser:1.4.3--ha8f3691_0'
+    errorStrategy 'ignore'
 
     input:
     path raw_file
@@ -47,6 +48,7 @@ process convert_thermo_raw_files {
 process convert_bruker_raw_folders {
     container 'mfreitas/tdf2mzml'
     containerOptions { "-v ${raw_folder.getParent()}:/data" }
+    errorStrategy 'ignore'
 
     input:
     path raw_folder
