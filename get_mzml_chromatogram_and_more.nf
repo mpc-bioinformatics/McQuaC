@@ -28,8 +28,6 @@ workflow get_various_mzml_infos {
 process retrieve_data_from_mzml {
     container 'mpc/nextqcflow-python:latest'
 
-    publishDir "${params.gmc_outdir}/", mode:'copy'
-
     maxForks params.gmc_num_forks
 
     input:
