@@ -6,6 +6,7 @@ nextflow
 .nextflow/
 /work
 /results
+trace-*.txt
 
 # OS specific
 .DS_store
