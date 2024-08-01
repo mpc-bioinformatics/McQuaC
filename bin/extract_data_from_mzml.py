@@ -12,7 +12,7 @@ import csv
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-mzml", help="FeatureXML with already annotated identifications")
+    parser.add_argument("-mzml", help="mzML file to extract data from")
     parser.add_argument("-out_csv", help="The Output statistics CSV")
     return parser.parse_args()
 

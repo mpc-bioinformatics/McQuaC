@@ -20,11 +20,10 @@ nextflow run \
 // Extend this to also extend the QC-Workflow 
 include {convert_raws_to_mzml} from workflow.projectDir + '/src/io/raw_file_conversion.nf'
 include {identification_with_comet; identification_with_comet as identification_labelled_with_comet} from workflow.projectDir + '/src/identification/comet.nf'
-include {get_various_mzml_infos} from workflow.projectDir + '/get_mzml_chromatogram_and_more.nf'
 include {pia_analysis_full; pia_analysis_psm_only; pia_extract_metrics} from workflow.projectDir + '/src/pia.nf'
 include {retrieve_spike_ins_information} from workflow.projectDir + '/src/retrieve_spike_ins.nf'
 include {get_feature_metrics} from workflow.projectDir + '/src/feature_detection.nf'
-include {get_custom_headers} from workflow.projectDir + '/get_custom_columns_directly_from_raw.nf'
+include {get_headers; get_mzml_infos} from workflow.projectDir + '/src/metrics/ms_run_metrics.nf'
 include {combine_metric_csvs} from workflow.projectDir + '/src/io/combine_metric_csvs.nf'
 include {output_processing_success} from workflow.projectDir + '/src/io/output_processing_success.nf'
 
@@ -56,7 +55,7 @@ workflow {
 	mzmls = convert_raws_to_mzml(thermo_raw_files, bruker_raw_folders)
 	
 	// Retreive MZML Metrics
-	mzml_metrics = get_various_mzml_infos(mzmls)
+	mzml_metrics = get_mzml_infos(mzmls)
 
 	// Identify spectra using Comet
 	comet_ids = identification_with_comet(mzmls, fasta_file, comet_params, false)
@@ -95,7 +94,7 @@ workflow {
 	feature_metrics = get_feature_metrics(mzmls, pia_report_psm_mztabs, comet_params)
 
 	// Get Thermospecific information from raw
-	custom_header_infos = get_custom_headers(thermo_raw_files, bruker_raw_folders)
+	custom_header_infos = get_headers(thermo_raw_files, bruker_raw_folders)
 
 	// Concatenate to one merged metric CSV
 	csvs_per_run = mzml_metrics.map{file -> tuple(file.name.take(file.name.lastIndexOf('-mzml_info.csv')), file)}
