@@ -144,7 +144,7 @@ streamlit run simple_main_gui.py
 ```
 
 #### Want to make it available for your Lab?
-Have a look into TODO: Instructions for NF-Cloud
+Have a look into [MaCWorP](https://github.com/cubimedrub/macworp)! We already added a configuration for integrating McQuaC under `./example_configurations/macworp.json`.
 
 ## Detailed General Workflow
 
