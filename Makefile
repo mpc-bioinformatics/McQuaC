@@ -1,4 +1,4 @@
-install-docker:
+docker-imgs:
 	docker build -t mpc/nextqcflow-python:latest -f docker/python/Dockerfile .
 	docker pull quay.io/medbioinf/comet-ms:v2024.01.0
 	docker pull quay.io/biocontainers/pia:1.5.5--hdfd78af_0

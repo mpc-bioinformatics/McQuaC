@@ -33,18 +33,7 @@ There is also at least on library which includes a vendor library and the permis
 Clone the repository
 
 #### Docker
-`make install-docker`
-
-This creates and downloads several docker images
-1. Build the local Docker images (soon available via ghcr.io or similar)
-   * `docker build -t mpc/nextqcflow-python:latest -f docker/python/Dockerfile .`
-     * Environment for Python including dependencies for the Python-script in the `bin`-folder as well as OpenMS because of pyOpenMS
-2. Pre download the other containers:
-   1. `docker pull quay.io/biocontainers/pia:1.4.8--hdfd78af_0`
-   2. `docker pull quay.io/biocontainers/thermorawfileparser:1.4.3--ha8f3691_0`
-   3. `docker pull quay.io/medbioinf/comet-ms:v2024.01.0`
-   4. `docker pull chambm/pwiz-skyline-i-agree-to-the-vendor-licenses`
-   5. `docker pull mfreitas/tdf2mzml`
+`make docker-imgs` to build/pull the necessary Docker images
 
 
 ##### Run the workflow
