@@ -4,10 +4,6 @@
 
 This is the actual Comet-Parameter file (search parameters are set here for the workflow)
 
-## MS-GF+ Configuration
-
-Same as for Comet. We also set all parameters here for the search
-
 ## Spike-Ins.csv
 
 This is a custom format for this QC-Workflow. Which gives us the information which PSMs in the identification have/can be found to also extract the XICs from.
