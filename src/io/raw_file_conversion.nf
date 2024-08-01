@@ -1,12 +1,17 @@
 #!/usr/bin/env nextflow
+
+/**
+ * Workflows and processes file conversions, e.g. from vendor file formats to open standards like mzML 
+ */
+
 nextflow.enable.dsl=2
 
 // Memory for the Thermo Raw File Parser, used 24 GB for a Raw file with 257409 MS scans 
-/// and 4GB for a Raw file with 11352 MS scans (measured with `/usr/bin/time -v ...`). 10 GB seems legit for most cases.
+// and 4GB for a Raw file with 11352 MS scans (measured with `/usr/bin/time -v ...`). 10 GB seems legit for most cases.
 // Based on max virtual memory 
 params.file_conversion__thermo_raw_conversion_mem = "10 GB"
 // Memory for the tdf2mzml, used 0.39 GB for a Raw file with 298748 MS scans 
-/// and 0.14GB for a Raw file with 35023 MS scans (measured with `/usr/bin/time -v ...`). 5 GB seems more then enough.
+// and 0.14GB for a Raw file with 35023 MS scans (measured with `/usr/bin/time -v ...`). 5 GB seems more then enough.
 // Based on max virtual memory 
 params.file_conversion__bruker_raw_conversion_mem = "5 GB"
 

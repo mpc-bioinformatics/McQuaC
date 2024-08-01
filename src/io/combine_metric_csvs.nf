@@ -1,4 +1,10 @@
 #!/usr/bin/env nextflow
+
+/**
+ * Workflows and processes for merging the generated quality control metrics
+ */
+
+
 nextflow.enable.dsl=2
 
 python_image = 'mpc/nextqcflow-python:latest'

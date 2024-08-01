@@ -1,4 +1,10 @@
 #!/usr/bin/env nextflow
+
+/**
+ * Workflows and processes for handling process exit informations.
+ * Makes sure the user knows if a file was processed successfully or not.
+ */
+
 nextflow.enable.dsl=2
 
 python_image = 'mpc/nextqcflow-python:latest'
@@ -9,7 +15,7 @@ python_image = 'mpc/nextqcflow-python:latest'
  * @param raw_files the raw files of the complete project
  * @param processed_basenames the basenames of the successfully processed files
  *
- * @return collected_information a file containing human readable information about whether teh files were processed successfully
+ * @return collected_information a file containing human readable information about whether the files were processed successfully
  */
 workflow output_processing_success {
     take:

@@ -1,4 +1,10 @@
 #!/usr/bin/env nextflow
+
+/**
+ * Workflows and processees for checking spike-in existance and XIC extraction
+ */
+
+
 nextflow.enable.dsl=2
 
 python_image = 'mpc/nextqcflow-python:latest'
@@ -8,14 +14,14 @@ params.max_parallel_xic_extractors = Runtime.runtime.availableProcessors() / 2
 
 /*
  * Extracts for each defined spike-in the XIC in the respective m/z and RT region, looks
- * for identifications of the respective sequence and returns the highest peak of teh XIC,
+ * for identifications of the respective sequence and returns the highest peak of the XIC,
  * its RT and the number of identifications.
  *
  * @param raw_files the raw files (.raw or .d)
  * @param psm_mztab_files the PSM results in mzTab
  * @param spike_ins_table the spike-ins defined in CSV format
  *
- * @return spike_in_metrics the metrics of teh spike-ins
+ * @return spike_in_metrics the metrics of the spike-ins
  */
 workflow retrieve_spike_ins_information {
     take:

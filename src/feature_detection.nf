@@ -1,4 +1,10 @@
 #!/usr/bin/env nextflow
+
+/**
+ * Workflows for feature detection
+ */
+
+
 nextflow.enable.dsl=2
 
 python_image = 'mpc/nextqcflow-python:latest'

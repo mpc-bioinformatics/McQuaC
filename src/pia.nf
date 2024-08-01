@@ -1,4 +1,11 @@
 #!/usr/bin/env nextflow
+
+
+/**
+ * Workflows and processes for protein inference using PIA
+ */
+
+
 nextflow.enable.dsl=2
 
 pia_image = 'quay.io/biocontainers/pia:1.5.5--hdfd78af_0'

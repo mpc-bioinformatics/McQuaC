@@ -1,4 +1,10 @@
 #!/usr/bin/env nextflow
+
+/**
+ * Workflows and processes for peptide identification using Comet
+ */
+
+
 nextflow.enable.dsl=2
 
 comet_image = 'quay.io/medbioinf/comet-ms:v2024.01.0'
