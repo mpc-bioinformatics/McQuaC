@@ -64,25 +64,68 @@ That’s it! You should now be able to execute `main.nf` and all the other workf
 
 ### Arguments
 
-The `main.nf`-workflow requires 3 parameters, which need to be set:
+#### Main DDA workflow
+| name | default | used in | description |
+| --- | --- | --- | --- |
+| `--main_raw_spectra_folder` | n/a | `main.nf` | Folder where your raw-files (Thermo) or .d-folders (Bruker) are located |
+| `--main_fasta_file` | n/a | `main.nf` | FASTA file containing your targets and optionally spikein if needed |
+| `--main_comet_params` | `"${baseDir}/example_configurations/high-high.comet.params"` | `main.nf` | Comet paramter file adjusted to your MS and experiment. See [Comet's documentation](https://uwpr.github.io/Comet/parameters/parameters_202401/) for more information. Use `make comet-params` to generate a new parameters file for the used Comet version. |
+| `--spike_ins_table` | `"${baseDir}/example_configurations/spike_ins.csv"` | `main.nf` | CSV with your spike-in peptides information |
+| `--main_outdir` | `"$PWD/results"` | `main.nf` | Directory to store the results |
+| `--search_spike_ins` | `true` | `main.nf` | Set to false if you do not have any spike-in peptides in your sample |
+| `--search_labelled_spikeins` | `true` | `main.nf` | Set to false, if your spike ins are not labelled |
 
-| Parameter                 | Input                                     | Description                                                                                                                                       |
-|---------------------------|-------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
-| `main_raw_spectra_folder` | < Path to folder containing raw spectra > | Path a folder containing .RAW (or .d → Bruker) spectra                                                                                            |
-| `main_fasta_file`         | < Path to a FASTA-file >                  | The FASTA-file, which will be used  for identification (NOTE: if you want to use more than one FASTA-file, simply concatenate them beforehand)    |
-| `main_comet_params`       | < Path to comet parameters file in txt >  | Configuration for the Comet-Search-Engine. Here, PTMs, tolerances and more need to be specified. (see: [here](https://uwpr.github.io/Comet/parameters/) ) |
+#### Main DIA workflow
+Not ready yet
 
-Additionally, many parameters for individual steps can be set. These are prefixed with the steps name (e.g. “main_” for a parameter in the main script,  “ic_” for the identification via comet step). For each individual parameter, a brief description at the source code for each nextflow-script (under the section “optional parameters”) is provided. Below is a list of optional parameters which a user may want to set, but can leave at default values:
+| name | default | used in | description |
+| --- | --- | --- | --- |
+| `--main_raw_spectra_folder` | `""` | `main_dia.nf` |  |
+| `--main_outdir` | `"$PWD/results"` | `main_dia.nf` |  |
+| `--main_is_isa` | `true` | `main_dia.nf` |  |
 
-| Parameter                        | Input                                                  | Description                                                                                                                                                                                                              |
-|----------------------------------|--------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `main_is_isa`                    | Flag (True/False)                                      | A flag to also extract specific intensities, Here, the sum intensity is extracted from specified entries from `spk_spike_ins`                                                                                            |
-| `spk_spike_ins`                  | < Path to a association-CSV-table-file >               | Association table which is used to extract intensities, As above, here the intensities (with identifications) can be specified. A corresponding FASTA-file can be alsobe provided with peptides containing the spike ins |
-| `pia_parameters_file`            | < Path to comet parameters file in txt >               | Parameters for PIA. This sets the FDR-cutoff and inference strategy                                                                                                                                                      |
-| `gf_resolution_featurefinder`    | < OpenMS-CLI-Parameter >                               | OpenMS-Parameter for high or low resolution of mass spectra, Needs to be set depending on high or low resolution data for feature finding                                                                                |
-| `gf_considered_charges_low/high` | < Low/High-Charges, Integer >                          | Define which precursor charges for feature finding should be considered/reported                                                                                                                                         |
-| `ccff_header_in_raws(_names)`    | < Comma-seperated list of headers to extract in .RAW > | Extraction of RAW-Headers (Thermo-specific). Defines which headers should be additionally extracted from the Thermo-RAW-files                                                                                            |
-| `ccff_header_in_d(_names)`       | < Comma-seperated list of headers to extract in .d >   | Extraction of Bruker-Headers (Bruker-specific). Defines which headers should be additionally extracted from the Bruker-files                                                                                             |
+#### Subworkflows
+Each subworklow has parameters of its own which are mainly used for scaling. These can be adjusted by simply adding the parameter to the main workflow.
+
+Some of the paramters are not a hard limit but a estimation of how much ressources are used so Nextflow can anticipate how much processes to start. This is especially true for memory usage.
+
+
+#### Subworkflow: Feature detection
+| name | default | used in | description |
+| --- | --- | --- | --- |
+| `--openms_threads` | `8` | `src/feature_detection.nf` | Max. cores to use per feature finder execution |
+| `--min_charge` | `2` | `src/feature_detection.nf` | Minimum charge to consider |
+| `--max_charge` | `5` | `src/feature_detection.nf` | Maximum charge to consider |
+
+#### Subworkflow: Comet identification
+| name | default | used in | description |
+| --- | --- | --- | --- |
+| `--identification__comet_threads` | `8` | `src/identification/comet.nf` | Max. cores to use for Comet |
+| `--identification__comet_mem` | `"10 GB"` | `src/identification/comet.nf` | Max. memory usage anticipated when running Comet. This is not a hard limit. |
+
+#### Subworkflow: File conversions
+| name | default | used in | description |
+| --- | --- | --- | --- |
+| `--file_conversion__thermo_raw_conversion_mem` | `"10 GB"` | `src/io/raw_file_conversion.nf` | Maximum memory usage anticipated when converting a Thermo rawfile. This is not a hard limit. |
+| `--file_conversion__bruker_raw_conversion_mem` | `"5 GB"` | `src/io/raw_file_conversion.nf` | Maximum memory usage anticipated when converting a Bruker .d-folders. This is not a hard limit. |
+
+#### Subworkflow: Inference with PIA
+| name | default | used in | description |
+| --- | --- | --- | --- |
+| `--pia_gb_ram` | `16` | `src/pia.nf` | Maximum memory used by the Java VM and PIA |
+| `--pia_threads` | `8` | `src/pia.nf` | Maximum cores used by PIA |
+
+#### Subworkflow: Spike in retrieval
+| name | default | used in | description |
+| --- | --- | --- | --- |
+| `--max_parallel_xic_extractors` | `available cores / 2` | `src/retrieve_spike_ins.nf` |  |
+
+#### Subworkflow: MS metadata extraction
+| `--ms_run_metrics__thermo_headers` | n/a | `src/metrics/ms_run_metrics.nf` | Set iuf you want only a specific set of headers extracted |
+| `--ms_run_metrics__bruker_headers` | n/a | `src/metrics/ms_run_metrics.nf` | Set iuf you want only a specific set of headers extracted |
+| `--ms_run_metrics__thermo_raw_mem` | `"10 GB"` | `src/metrics/ms_run_metrics.nf` | Maximum memory usage anticipated when extracting headers. Not a hard limit. |
+| `--ms_run_metrics__bruker_raw_mem` | `"1 GB"` | `src/metrics/ms_run_metrics.nf` | Maximum memory usage anticipated when extracting headers. Not a hard limit. |
+| `--ms_run_metrics__mzml_mem` | `"7 GB"` | `src/metrics/ms_run_metrics.nf` | Maximum memory usage anticipated when extracting headers. Not a hard limit. |
 
 ## Output
 
