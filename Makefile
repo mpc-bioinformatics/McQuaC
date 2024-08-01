@@ -6,4 +6,4 @@ install-docker:
 	docker pull mfreitas/tdf2mzml
 
 comet-params:
-	docker run --rm -it quay.io/medbioinf/comet-ms:v2024.01.0 comet -p > new.comet.params
+	docker run --rm -it quay.io/medbioinf/comet-ms:v2024.01.0 bash -c 'comet -p; cat comet.params.new' > comet.params.new
