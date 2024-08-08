@@ -85,6 +85,15 @@ if __name__ == "__main__":
     df = df.sort_values(by = "filename")
     df.reset_index(drop = True, inplace = True)
     
+    
+    ### does the dataframe contain data from Bruker or Thermo files?
+    def contains_prefix(dataframe, prefix):
+        return any(column.startswith(prefix) for column in dataframe.columns)
+    
+    contains_bruker = contains_prefix(df, prefix = "BRUKER_")
+    contains_thermo = contains_prefix(df, prefix = "THERMO_")
+
+    
 
 ####################################################################################################
     # short function to extract infos from compressed columns
@@ -724,51 +733,51 @@ if __name__ == "__main__":
 ################################################################################################
     ### Figure 14: Pump Pressure
 
+    if contains_thermo:
+        if "THERMO_pump_pressure_bar_x_axis_____pickle_zlib" in df.columns:
 
-    if "THERMO_pump_pressure_bar_x_axis_____pickle_zlib" in df.columns:
+            ### TODO: generate empty plot if this column is missing
+            ### TODO: why is this plot also misisng for EXII???
+            ### extract data from compressed columns and put them into long format
+            x = []
+            y = []
+            fn = []
+            for index in df.index:
+                if pd.isnull(df["THERMO_pump_pressure_bar_x_axis_____pickle_zlib"].iloc[index]) \
+                    or pd.isnull(df["THERMO_pump_pressure_bar_y_axis_____pickle_zlib"].iloc[index]) :
+                    continue
+                x_locally = unbase64_uncomp_unpickle(df["THERMO_pump_pressure_bar_x_axis_____pickle_zlib"].iloc[index])
+                y_locally = unbase64_uncomp_unpickle(df["THERMO_pump_pressure_bar_y_axis_____pickle_zlib"].iloc[index])
 
-        ### TODO: generate empty plot if this column is missing
-        ### TODO: why is this plot also misisng for EXII???
-        ### extract data from compressed columns and put them into long format
-        x = []
-        y = []
-        fn = []
-        for index in df.index:
-            if pd.isnull(df["THERMO_pump_pressure_bar_x_axis_____pickle_zlib"].iloc[index]) \
-                or pd.isnull(df["THERMO_pump_pressure_bar_y_axis_____pickle_zlib"].iloc[index]) :
-                continue
-            x_locally = unbase64_uncomp_unpickle(df["THERMO_pump_pressure_bar_x_axis_____pickle_zlib"].iloc[index])
-            y_locally = unbase64_uncomp_unpickle(df["THERMO_pump_pressure_bar_y_axis_____pickle_zlib"].iloc[index])
+                # TODO Add Bruker pump pressure!
 
-            # TODO Add Bruker pump pressure!
-
-            if x_locally is None:
-                #print(f"x is None at {index} => {df['filename'].iloc[index]}")
-                continue
-            if y_locally is None:
-                #print(f"y is None at {index} => {df['filename'].iloc[index]}")
-                continue
-            if len(x_locally) != len(y_locally):
-                raise ValueError("x and y does not have same length")
+                if x_locally is None:
+                    #print(f"x is None at {index} => {df['filename'].iloc[index]}")
+                    continue
+                if y_locally is None:
+                    #print(f"y is None at {index} => {df['filename'].iloc[index]}")
+                    continue
+                if len(x_locally) != len(y_locally):
+                    raise ValueError("x and y does not have same length")
 
 
-            # With more than 10000 datapoints plotting the data
-            # leads to unnecessary delay. Interpolating 10000 datapoints is usually enough.
-            if len(x_locally) > 10000:
-                samples = int(len(x_locally) / 10000)
-                # Explictly adding the last datapoint to make sure we cover rounding errors when calculating `sample`
-                x_locally = [x_locally[i] for i in range(0, len(x_locally), samples)] + x_locally[-1:]
-                y_locally = [y_locally[i] for i in range(0, len(y_locally), samples)] + y_locally[-1:]
-            x += x_locally
-            y += y_locally
-            fn += [df["filename"].iloc[index]] * len(x_locally)
+                # With more than 10000 datapoints plotting the data
+                # leads to unnecessary delay. Interpolating 10000 datapoints is usually enough.
+                if len(x_locally) > 10000:
+                    samples = int(len(x_locally) / 10000)
+                    # Explictly adding the last datapoint to make sure we cover rounding errors when calculating `sample`
+                    x_locally = [x_locally[i] for i in range(0, len(x_locally), samples)] + x_locally[-1:]
+                    y_locally = [y_locally[i] for i in range(0, len(y_locally), samples)] + y_locally[-1:]
+                x += x_locally
+                y += y_locally
+                fn += [df["filename"].iloc[index]] * len(x_locally)
 
-        pp_df2 = pd.DataFrame({
-            "filename": fn,
-            "x": x,
-            "y": y
-        })
-        
+            pp_df2 = pd.DataFrame({
+                "filename": fn,
+                "x": x,
+                "y": y
+            })
+            
     else: 
         pp_df2 = pd.DataFrame()
         
@@ -807,72 +816,74 @@ if __name__ == "__main__":
 ################################################################################################
     # Figure 15_XXX: visualize all THERMO_LOG and THERMO_EXTRA (without a filter)
 
+    if contains_thermo:
+        for column_header in df.columns:
+            if column_header.startswith("THERMO_LOG_") or column_header.startswith("THERMO_EXTRA_"):
+                ### extract data from compressed columns and put them into long format
+                x = [] # x-axis Scan_StartTime_zlib
+                y = [] # y-axis THERMO HEADER
+                fn = [] # filename
 
-    for column_header in df.columns:
-        if column_header.startswith("THERMO_LOG_") or column_header.startswith("THERMO_EXTRA_"):
-            ### extract data from compressed columns and put them into long format
-            x = [] # x-axis Scan_StartTime_zlib
-            y = [] # y-axis THERMO HEADER
-            fn = [] # filename
+                for index in df.index:
+                    column_display_header = column_header
 
-            for index in df.index:
-                column_display_header = column_header
+                    if pd.isnull(df[column_header].iloc[index]):
+                        # Skip, there is no info available
+                        continue
 
-                if pd.isnull(df[column_header].iloc[index]):
-                    # Skip, there is no info available
-                    continue
+                    y_locally = unbase64_uncomp_unpickle(df[column_header].iloc[index])
+                    x_locally = unbase64_uncomp_unpickle(df["THERMO_Scan_StartTime_____pickle_zlib"].iloc[index])  # All of THERMO_EXTRA and THERMO_LOG are defined over the Retention tims / Scan StartTime
+                    
+                    # Keep only values for MS1 spectra  (e.g. for Lock Mass Correction or Ion Injection Time)
+                    if any(x in column_header for x in ["Ion Injection Time", "LM Correction", "LM m/z-Correction"]):
+                        mslevel = unbase64_uncomp_unpickle(df["THERMO_Scan_msLevel_____pickle_zlib"].iloc[index])
+                        x_locally = [x for x,y in zip(x_locally, mslevel) if y == 1]
+                        y_locally = [float(x) for x,y in zip(y_locally, mslevel) if y == 1]
+                        column_display_header = column_header.split("_____")[0] + " (MS1 Level filtered)_____" + column_header.split("_____")[1]
 
-                y_locally = unbase64_uncomp_unpickle(df[column_header].iloc[index])
-                x_locally = unbase64_uncomp_unpickle(df["THERMO_Scan_StartTime_____pickle_zlib"].iloc[index])  # All of THERMO_EXTRA and THERMO_LOG are defined over the Retention tims / Scan StartTime
-                
-                # Keep only values for MS1 spectra  (e.g. for Lock Mass Correction or Ion Injection Time)
-                if any(x in column_header for x in ["Ion Injection Time", "LM Correction", "LM m/z-Correction"]):
-                    mslevel = unbase64_uncomp_unpickle(df["THERMO_Scan_msLevel_____pickle_zlib"].iloc[index])
-                    x_locally = [x for x,y in zip(x_locally, mslevel) if y == 1]
-                    y_locally = [float(x) for x,y in zip(y_locally, mslevel) if y == 1]
-                    column_display_header = column_header.split("_____")[0] + " (MS1 Level filtered)_____" + column_header.split("_____")[1]
-
-                x += [float(_x) for _x in x_locally]
-                y += [float(_y) for _y in y_locally]
-                fn += [df["filename"].iloc[index]] * len(x_locally)
+                    x += [float(_x) for _x in x_locally]
+                    y += [float(_y) for _y in y_locally]
+                    fn += [df["filename"].iloc[index]] * len(x_locally)
 
 
-            local_df = pd.DataFrame({
-                "filename": fn,
-                "x": x,
-                "y": y
-            })
+                local_df = pd.DataFrame({
+                    "filename": fn,
+                    "x": x,
+                    "y": y
+                })
 
-            column_title = column_display_header.split("_____")[0]
-            if not local_df.empty:
-                fig15 = px.line(local_df, x="x", y="y", color = "filename", title = column_title)
-                fig15.update_traces(line=dict(width=0.5))
-                fig15.update_yaxes(exponentformat="E") 
-                fig15.update_layout(width = int(1000), height = int(1000), 
-                                    xaxis_title = "Time (min)", 
-                                    yaxis_title = column_title)
+                column_title = column_display_header.split("_____")[0]
+                if not local_df.empty:
+                    fig15 = px.line(local_df, x="x", y="y", color = "filename", title = column_title)
+                    fig15.update_traces(line=dict(width=0.5))
+                    fig15.update_yaxes(exponentformat="E") 
+                    fig15.update_layout(width = int(1000), height = int(1000), 
+                                        xaxis_title = "Time (min)", 
+                                        yaxis_title = column_title)
 
-            else: 
-                fig15 = go.Figure()
-                fig15.add_annotation(
-                    x=0.5,
-                    y=0.5,
-                    text="No '{}' available!".format(column_title),
-                    showarrow=False,
-                    font=dict(size=14)
-                )
-                fig15.update_layout(
-                    width=600,
-                    height=400,
-                    title="Empty Plot"
-                )
+                else: 
+                    fig15 = go.Figure()
+                    fig15.add_annotation(
+                        x=0.5,
+                        y=0.5,
+                        text="No '{}' available!".format(column_title),
+                        showarrow=False,
+                        font=dict(size=14)
+                    )
+                    fig15.update_layout(
+                        width=600,
+                        height=400,
+                        title="Empty Plot"
+                    )
 
-            os.makedirs(output_path + os.sep + "THERMO_PLOTS_FIG15", exist_ok=True)
-            if fig_show:
-                fig15.show()
-            with open(output_path + os.sep + "THERMO_PLOTS_FIG15" + os.sep + "{}.json".format(re.sub('\W+','', column_title)), "w") as json_file:
-                json_file.write(plotly.io.to_json(fig15))
-            fig15.write_html(file = output_path + os.sep + "THERMO_PLOTS_FIG15" + os.sep + "{}.html".format(re.sub('\W+','', column_title)), auto_open = False)
+                os.makedirs(output_path + os.sep + "THERMO_PLOTS_FIG15", exist_ok=True)
+                if fig_show:
+                    fig15.show()
+                with open(output_path + os.sep + "THERMO_PLOTS_FIG15" + os.sep + "{}.json".format(re.sub('\W+','', column_title)), "w") as json_file:
+                    json_file.write(plotly.io.to_json(fig15))
+                fig15.write_html(file = output_path + os.sep + "THERMO_PLOTS_FIG15" + os.sep + "{}.html".format(re.sub('\W+','', column_title)), auto_open = False)
+    else:
+        os.makedirs(output_path + os.sep + "THERMO_PLOTS_FIG15", exist_ok=True) ## TODO: handle this folder when having TIMSTof data
 
 
 # %%
