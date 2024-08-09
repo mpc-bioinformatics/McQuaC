@@ -372,8 +372,8 @@ if __name__ == "__main__":
             font=dict(size=14)
         )
         fig9.update_layout(
-            width=600,
-            height=400,
+            width=1500,
+            height=1000,
             title="Empty Plot"
         )
     if fig_show:
@@ -402,8 +402,8 @@ if __name__ == "__main__":
             font=dict(size=14)
         )
         fig10.update_layout(
-            width=600,
-            height=400,
+            width=1500,
+            height=1000,
             title="Empty Plot"
         )  
     
@@ -538,12 +538,15 @@ if __name__ == "__main__":
                             "t_scaled": "timestamp"
                         })
             
+        fig11.update_layout(width = int(1500), height = int(1000))
+            
         # Table and plot with feature loadings (weights of the variables in the PCA)
         loadings = pd.DataFrame(pca.components_.T, columns=['PC1', 'PC2'], index=valid_features)
         loadings["length"] = np.sqrt(loadings["PC1"]**2+ loadings["PC2"]**2)
         loadings["variable"] = loadings.index
         fig11_loadings = px.scatter(loadings, x = "PC1", y = "PC2", title = "PCA loadings (all data)", 
             hover_name="variable", hover_data=["PC1", "PC2"],)
+        fig11_loadings.update_layout(width = int(1500), height = int(1000))
     else:
         fig11 = go.Figure()
         fig11.add_annotation(
@@ -554,8 +557,8 @@ if __name__ == "__main__":
             font=dict(size=14)
         )
         fig11.update_layout(
-            width=600,
-            height=400,
+            width=1500,
+            height=1000,
             title="Empty Plot"
         )
         fig11_loadings = fig11
@@ -663,6 +666,8 @@ if __name__ == "__main__":
                             "pca2": label_y,
                             "t_scaled": "timestamp"
                         })
+        fig12.update_layout(width = int(1500), height = int(1000))
+            
             
         # Table and plot with feature loadings (weights of the variables in the PCA)
         loadings = pd.DataFrame(pca.components_.T, columns=['PC1', 'PC2'], index=valid_features)
@@ -670,6 +675,7 @@ if __name__ == "__main__":
         loadings["variable"] = loadings.index
         fig12_loadings = px.scatter(loadings, x = "PC1", y = "PC2", title = "PCA loadings (raw data)", 
             hover_name="variable", hover_data=["PC1", "PC2"],)
+        fig12_loadings.update_layout(width = int(1500), height = int(1000))
     else:
         fig12 = go.Figure()
         fig12.add_annotation(
@@ -680,8 +686,8 @@ if __name__ == "__main__":
             font=dict(size=14)
         )
         fig12.update_layout(
-            width=600,
-            height=400,
+            width=1500,
+            height=1000,
             title="Empty Plot"
         )
         fig12_loadings = fig12
@@ -719,6 +725,9 @@ if __name__ == "__main__":
         ionmap_df2_tmp = ionmap_df2[ionmap_df2["filename"] == file]
         fig13_tmp = px.density_contour(ionmap_df2_tmp, x="RT", y="MZ", title = file, nbinsx = 50, nbinsy = 50)
         fig13_tmp.update_traces(contours_coloring="fill", contours_showlabels = True)
+        fig13_tmp.update_layout(width = 1500, height = 1000, 
+                    xaxis_title = "Retention Time (seconds)", 
+                    yaxis_title = "m/z")
         #if fig_show: 
             #fig12_tmp.show()
         with open(output_path +"/fig13_ionmaps/fig13_ionmap_" + file + ".json", "w") as json_file:
@@ -785,7 +794,7 @@ if __name__ == "__main__":
         fig14 = px.line(pp_df2, x="x", y="y", color = "filename", title = "Pump Pressure")
         fig14.update_traces(line=dict(width=0.5))
         fig14.update_yaxes(exponentformat="E") 
-        fig14.update_layout(width = int(1000), height = int(1000), 
+        fig14.update_layout(width = 1500, height = 1000, 
                             xaxis_title = "Time (min)", 
                             yaxis_title = "Pump pressure")
         
@@ -800,8 +809,8 @@ if __name__ == "__main__":
             font=dict(size=14)
         )
         fig14.update_layout(
-            width=600,
-            height=400,
+            width=1500,
+            height=1000,
             title="Empty Plot"
         )
         
@@ -857,7 +866,7 @@ if __name__ == "__main__":
                     fig15 = px.line(local_df, x="x", y="y", color = "filename", title = column_title)
                     fig15.update_traces(line=dict(width=0.5))
                     fig15.update_yaxes(exponentformat="E") 
-                    fig15.update_layout(width = int(1000), height = int(1000), 
+                    fig15.update_layout(width = int(1500), height = int(1000), 
                                         xaxis_title = "Time (min)", 
                                         yaxis_title = column_title)
 
@@ -871,8 +880,8 @@ if __name__ == "__main__":
                         font=dict(size=14)
                     )
                     fig15.update_layout(
-                        width=600,
-                        height=400,
+                        width=1500,
+                        height=1000,
                         title="Empty Plot"
                     )
 
@@ -884,6 +893,80 @@ if __name__ == "__main__":
                 fig15.write_html(file = output_path + os.sep + "THERMO_PLOTS_FIG15" + os.sep + "{}.html".format(re.sub('\W+','', column_title)), auto_open = False)
     else:
         os.makedirs(output_path + os.sep + "THERMO_PLOTS_FIG15", exist_ok=True) ## TODO: handle this folder when having TIMSTof data
+        
+        
+        
+    
+    ################################################################################################
+    # Figure 15_XXX: visualize all additional Bruker data (without a filter)
+
+    if contains_bruker:
+        #bruker_time = unbase64_uncomp_unpickle(df["BRUKER_Time_____pickle_zlib"].iloc[0])
+        for column_header in df.columns:
+            if column_header == "BRUKER_Time_____pickle_zlib":
+                continue
+            if column_header == "BRUKER_MsMsType_____pickle_zlib":  # MsMsType codes for DIA/DDA for example. Doesn't need to be plotted.
+                continue
+            if column_header.startswith("BRUKER_"):
+                ### extract data from compressed columns and put them into long format
+                x = [] # x-axis Scan_StartTime_zlib
+                y = [] # y-axis BRUKER HEADER
+                fn = [] # filename
+
+                for index in df.index:
+                    column_display_header = column_header
+
+                    if pd.isnull(df[column_header].iloc[index]):
+                        # Skip, there is no info available
+                        continue
+
+                    y_locally = unbase64_uncomp_unpickle(df[column_header].iloc[index])
+                    x_locally = unbase64_uncomp_unpickle(df["BRUKER_Time_____pickle_zlib"].iloc[index]) 
+                    
+                    x += [float(_x) for _x in x_locally]
+                    y += [np.nan if _y is None else float(_y) for _y in y_locally]
+                    fn += [df["filename"].iloc[index]] * len(x_locally)
+
+
+                local_df = pd.DataFrame({
+                    "filename": fn,
+                    "x": x,
+                    "y": y
+                })
+
+                column_title = column_display_header.split("_____")[0]
+                if not local_df.empty:
+                    fig15 = px.line(local_df, x="x", y="y", color = "filename", title = column_title)
+                    fig15.update_traces(line=dict(width=0.5))
+                    fig15.update_yaxes(exponentformat="E") 
+                    fig15.update_layout(width = int(1500), height = int(1000), 
+                                        xaxis_title = "Time (seconds)", 
+                                        yaxis_title = column_title)
+
+                else: 
+                    fig15 = go.Figure()
+                    fig15.add_annotation(
+                        x=0.5,
+                        y=0.5,
+                        text="No '{}' available!".format(column_title),
+                        showarrow=False,
+                        font=dict(size=14)
+                    )
+                    fig15.update_layout(
+                        width=1500,
+                        height=1000,
+                        title="Empty Plot"
+                    )
+
+                os.makedirs(output_path + os.sep + "BRUKER_PLOTS_FIG15", exist_ok=True)
+                if fig_show:
+                    fig15.show()
+                with open(output_path + os.sep + "BRUKER_PLOTS_FIG15" + os.sep + "{}.json".format(re.sub('\W+','', column_title)), "w") as json_file:
+                    json_file.write(plotly.io.to_json(fig15))
+                fig15.write_html(file = output_path + os.sep + "BRUKER_PLOTS_FIG15" + os.sep + "{}.html".format(re.sub('\W+','', column_title)), auto_open = False)
+    else:
+        os.makedirs(output_path + os.sep + "BRUKER_PLOTS_FIG15", exist_ok=True) 
+    
 
 
 # %%
