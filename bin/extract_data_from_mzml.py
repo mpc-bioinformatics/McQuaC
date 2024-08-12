@@ -9,11 +9,18 @@ from collections import defaultdict
 import datetime
 import time
 import csv
+import pickle
+import base64
+import zlib
+
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
     parser.add_argument("-mzml", help="mzML file to extract data from")
     parser.add_argument("-out_csv", help="The Output statistics CSV")
+    parser.add_argument("-filter_threshold", default=0.00001, type=float, help="Threshold for the MS1 peaks, to be"
+        " included in the output file. Defaults to 0.00001 (0.001%) of the highest overall MS1 peak. Values lower"
+        " will be disregarded.")
     return parser.parse_args()
 
 
@@ -34,6 +41,7 @@ if __name__ == "__main__":
     data_dict = dict()
 
     args.mzml = "/home/luxii/git/Next-QC-Flow/work/88/9ca37069866ebe170af5531e24f0b5/K_13_1_QEXI16187.mzML"
+    args.out_csv = "/home/luxii/Desktop/temp/raws_qc/test.csv"
 
     # Load MZML
     exp = pyopenms.MSExperiment()
@@ -52,7 +60,6 @@ if __name__ == "__main__":
     accum_tic_ms2 = get_accumulated_TIC(exp, 2)
     data_dict["accumulated-MS1_TIC"] = accum_tic_ms1
     data_dict["accumulated-MS2_TIC"] = accum_tic_ms2
-
 
     # Get Number of MS 1 and 2 Spectra and also the precursors of the MS2 by counted charge
     num_ms1_spectra = 0
@@ -81,17 +88,57 @@ if __name__ == "__main__":
     rt_duration = spectrum.getRT() # In Seconds: How long the MS has acquired spectra 
     data_dict["RT_duration"] = rt_duration
 
+    # Get Base_peak_Intensity total_ion_current and up to
+    ms1_ms2_basepeaks = []
+    ms1_ms2_rt = []
+    ms1_ms2_tic = []
+    for spectrum in exp.getSpectra():
+        ms1_ms2_rt.append(spectrum.getRT())
+        peaks = spectrum.get_peaks()[1]
+        ms1_ms2_basepeaks.append(max(peaks) if len(peaks) != 0 else 0)
+        ms1_ms2_tic.append(sum(spectrum.get_peaks()[1]))
+
+    base_peak_intensity_max = max(ms1_ms2_basepeaks)
+    total_ion_current_max = max(ms1_ms2_tic)
+
+    data_dict["Base_Peak_Intensity_Max"] = base_peak_intensity_max
+    data_dict["Total_Ion_Current_Max"] = total_ion_current_max
+
+    # and up to 105 minutes
+    break_on = 105*60
+    for i in range(len(ms1_ms2_rt)):
+        if break_on < ms1_ms2_rt[i]:
+            break
+    base_peak_intensity_max_up_to_105m = max(ms1_ms2_basepeaks[:i-1])
+    total_ion_current_max_up_to_105m = max(ms1_ms2_tic[:i-1])
+
+    data_dict["Base_Peak_Intensity_Max_Up_To_105"] = base_peak_intensity_max_up_to_105m
+    data_dict["Total_Ion_Current_Max_Up_To_105"] = total_ion_current_max_up_to_105m
+    ###
+
     # Get MS1 and MS2 TICs
     ms1_tic = [] # This is the MS1-TIC-BLOB 
-    ms1_rt = []  # This is the MS1-TIC-BLOB
+    ms1_rt = []  # This is the MS1-RT-BLOB
+    ms1_map_rt = []  # This is the MS1-RT-BLOB (for heatmap purpose, data is transformed to 3 dimensions)
+    ms1_map_intens = []  # This is the MS1-RT-BLOB (for heatmap purpose, data is transformed to 3 dimensions)
+    ms1_map_mz = []  # This is the MS1-RT-BLOB (for heatmap purpose, data is transformed to 3 dimensions)
     ms2_tic = [] # This is the MS2-TIC-BLOB
-    ms2_rt = []  # This is the MS2-TIC-BLOB
+    ms2_rt = []  # This is the MS2-RT-BLOB
     ms2_mz = []  # This is the MS2-MZ-BLOB (needed or the Ion-Map)
+    BASE_PEAK_NOISE_THRESHOLD = base_peak_intensity_max*args.filter_threshold  
     for spectrum in exp.getSpectra():
         if spectrum.getMSLevel() == 1:
-            ms1_rt.append(spectrum.getRT())
+            rt = spectrum.getRT()
+            ms1_rt.append(rt)
             ms1_tic.append(sum(spectrum.get_peaks()[1]))
-            precs = spectrum.getPrecursors()
+
+            # Filter by basepeak intensity 
+            mz, intens = spectrum.get_peaks()
+            for m, i in zip(mz, intens):
+                if i >= BASE_PEAK_NOISE_THRESHOLD:
+                    ms1_map_mz.append(m)
+                    ms1_map_intens.append(i)
+                    ms1_map_rt.append(rt)
         elif spectrum.getMSLevel() == 2:
             ms2_rt.append(spectrum.getRT())
             ms2_tic.append(sum(spectrum.get_peaks()[1]))
@@ -102,16 +149,19 @@ if __name__ == "__main__":
                 ms2_mz.append(precs[0].getMZ())
     data_dict["ms1_tic_array"] = ms1_tic
     data_dict["ms1_rt_array"]  = ms1_rt
+    data_dict["ms1_map_rt_array_____pickle_zlib"] = base64.b64encode(zlib.compress(pickle.dumps(ms1_map_rt), level=9)).decode("utf-8")
+    data_dict["ms1_map_intens_array_____pickle_zlib"] = base64.b64encode(zlib.compress(pickle.dumps(ms1_map_intens), level=9)).decode("utf-8")
+    data_dict["ms1_map_mz_array_____pickle_zlib"] = base64.b64encode(zlib.compress(pickle.dumps(ms1_map_mz), level=9)).decode("utf-8")
     data_dict["ms2_tic_array"] = ms2_tic
     data_dict["ms2_rt_array"]  = ms2_rt
     data_dict["ms2_mz_array"]  = ms2_mz
+    ###
 
     ### Calculate the diffenrece in RT between 25%, 50%, 75% and 100% of data (relative) (RT-MS1_Q1-4)
     # Normalize data between 0 and 1
     rt_ms1_q25_temp = np.quantile(ms1_rt, 0.25)
     rt_ms1_q50_temp = np.quantile(ms1_rt, 0.50)
     rt_ms1_q75_temp = np.quantile(ms1_rt, 0.75)
-
 
     rt_ms1_q025 = (rt_ms1_q25_temp - 0)  / rt_duration
     rt_ms1_q050 = (rt_ms1_q50_temp - rt_ms1_q25_temp) / rt_duration
@@ -128,7 +178,6 @@ if __name__ == "__main__":
     rt_ms2_q25_temp = np.quantile(ms2_rt, 0.25)
     rt_ms2_q50_temp = np.quantile(ms2_rt, 0.50)
     rt_ms2_q75_temp = np.quantile(ms2_rt, 0.75)
-
 
     rt_ms2_q025 = (rt_ms2_q25_temp - 0)  / rt_duration
     rt_ms2_q050 = (rt_ms2_q50_temp - rt_ms2_q25_temp) / rt_duration
@@ -171,8 +220,6 @@ if __name__ == "__main__":
     data_dict["RT_TIC_Q_075-100"] = rt_ms1_ms2_part_100
     ###
 
-
-
     # Get MS1-Freq-Max (in Hz)
     np_ms1_rt = np.array(ms1_rt)
     ms1_num_of_elements = []
@@ -196,7 +243,7 @@ if __name__ == "__main__":
         )
     ms2_freq_max = max(ms2_num_of_elements) / 60
     data_dict["MS2_Freq_Max"] = ms2_freq_max
-        
+    ###
     
     # MS1-Density-Q1-4 MS2-Density-Q1-4
     ms1_num_peaks = []
@@ -224,7 +271,7 @@ if __name__ == "__main__":
     data_dict["MS2_Density_Q1"] = ms2_density_q25
     data_dict["MS2_Density_Q2"] = ms2_density_q50
     data_dict["MS2_Density_Q3"] = ms2_density_q75
-
+    ###
 
     # MS1-TIC-Change-Q1-4, see paper for explanation (https://doi.org/10.1021/acs.jproteome.6b00028)
     ms1_tic_change = []
@@ -247,8 +294,7 @@ if __name__ == "__main__":
     data_dict["MS1-TIC-Change-Q2"] = ms1_change_q2
     data_dict["MS1-TIC-Change-Q3"] = ms1_change_q3
     data_dict["MS1-TIC-Change-Q4"] = ms1_change_q4
-
-
+    ###
 
     # MS1-TIC-Q1-4, see paper for explanation (https://doi.org/10.1021/acs.jproteome.6b00028)
     ms1_tic_q25 = np.quantile(ms1_tic, 0.25)
@@ -263,39 +309,8 @@ if __name__ == "__main__":
     data_dict["MS1-TIC-Q3"] = ms1_tic_q3
     data_dict["MS1-TIC-Q4"] = ms1_tic_q4
 
-
-    # Get Base_peak_Intensity total_ion_current and up to
-    ms1_ms2_basepeaks = []
-    ms1_ms2_rt = []
-    ms1_ms2_tic = []
-    for spectrum in exp.getSpectra():
-        ms1_ms2_rt.append(spectrum.getRT())
-        peaks = spectrum.get_peaks()[1]
-        ms1_ms2_basepeaks.append(max(peaks) if len(peaks) != 0 else 0)
-        ms1_ms2_tic.append(sum(spectrum.get_peaks()[1]))
-
-    base_peak_intensity_max = max(ms1_ms2_basepeaks)
-    total_ion_current_max = max(ms1_ms2_tic)
-
-    data_dict["Base_Peak_Intensity_Max"] = base_peak_intensity_max
-    data_dict["Total_Ion_Current_Max"] = total_ion_current_max
-
-    # and up to 105 minutes
-    break_on = 105*60
-    for i in range(len(ms1_ms2_rt)):
-        if break_on < ms1_ms2_rt[i]:
-            break
-    base_peak_intensity_max_up_to_105m = max(ms1_ms2_basepeaks[:i-1])
-    total_ion_current_max_up_to_105m = max(ms1_ms2_tic[:i-1])
-
-    data_dict["Base_Peak_Intensity_Max_Up_To_105"] = base_peak_intensity_max_up_to_105m
-    data_dict["Total_Ion_Current_Max_Up_To_105"] = total_ion_current_max_up_to_105m
-
-
-
     # Write Output
     with open(args.out_csv, "w") as csv_out:
-
         csv_writer = csv.DictWriter(csv_out, fieldnames=data_dict.keys())
 
         csv_writer.writeheader()
