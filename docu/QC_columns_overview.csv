@@ -83,6 +83,7 @@ psm_missed_1,float,,proportion of PSMs with a sequence containing 1 missed cleav
 psm_missed_2,float,,proportion of PSMs with a sequence containing 2 missed cleavages,,,,,
 psm_missed_3,float,,proportion of PSMs with a sequence containing 3 missed cleavages,,,,,
 psm_missed_more,float,,proportion of PSMs with a sequence containing 4 or more missed cleavages,,,,,
+filtered_psms_ppm_error_____pickle_zlib,pickle_zlib,ppm,PPM-Error from the calculated (theoretical) to the experimental (measured) precursor. We calculated here “theoretical – calc”. ,extract_from_pia_output.py,,,can be used for a PPM-Error Histogram Plot,
 timestamp,,,,,,,,
 total_num_features,int,,Total number of features found in raw file,get_features_in_raws.nf -> extract_from_featurexml.py,,,,
 total_num_ident_features,int,,Total number of features,,,,,

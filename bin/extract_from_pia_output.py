@@ -12,6 +12,8 @@ import csv
 import argparse
 import zipfile
 import base64
+import zlib
+import pickle
 import os
 import io
 
@@ -28,15 +30,22 @@ def argparse_setup():
 
 def run_pia_extraction():
     args = argparse_setup()
+
+    args.pia_peptides = "/home/luxii/git/Next-QC-Flow/work/d0/70402d6dc04943572ba1b36d9c2ebf/K_13_1_QEXI16187-piaExport-peptides.csv"
+    args.pia_proteins = "/home/luxii/git/Next-QC-Flow/work/d0/70402d6dc04943572ba1b36d9c2ebf/K_13_1_QEXI16187-piaExport-proteins.mzTab"
+    args.pia_PSMs = "/home/luxii/git/Next-QC-Flow/work/d0/70402d6dc04943572ba1b36d9c2ebf/K_13_1_QEXI16187-piaExport-PSM.mzTab"
+    args.output = "/home/luxii/Desktop/temp/raws_qc/delme_pia.csv"
+
+
     number_proteins, number_ungrouped_proteins = count_nr_Proteins(args.pia_proteins)
     peptide_count = count_nr_filtered_peptides(args.pia_peptides)
-    PSM_counts , charge_counts, miss_counts = read_mzTab(args.pia_PSMs)
-    dics = [number_proteins, number_ungrouped_proteins, peptide_count, PSM_counts, charge_counts, miss_counts]
+    PSM_counts , charge_counts, miss_counts, ppm_error = read_mzTab(args.pia_PSMs)
+    dicts = [number_proteins, number_ungrouped_proteins, peptide_count, PSM_counts, charge_counts, miss_counts, ppm_error]
 
     # geschrieben von Dirk (er muss debuggen falls kaputt geht)
     data = {
         key: [value]
-        for d in dics
+        for d in dicts
         for key, value in d.items()
     }
     df = pd.DataFrame(data=data)
@@ -121,6 +130,17 @@ def read_mzTab(file):
         # remove decoys and filter PSM columns
         psm_df = psm_df.loc[psm_df['opt_global_cv_MS:1002217_decoy_peptide'] == 0]
         psm_df = psm_df.loc[:,["PSM_ID", "sequence", "accession", "unique", "retention_time", "charge", "opt_global_missed_cleavages", "modifications", "retention_time", "exp_mass_to_charge", "calc_mass_to_charge", "spectra_ref", psm_score_header]]
+        
+
+        ### Calculate ppm error
+        exp_calc_diff = (psm_df["exp_mass_to_charge"] - psm_df["calc_mass_to_charge"])
+        exp_calc_diff_removed_isotopes = (exp_calc_diff - (exp_calc_diff.round()).astype(int)) # Remove Isotopes, since calc_mass expects none
+        ppm_error_df = ((exp_calc_diff_removed_isotopes * 1000000) / psm_df["calc_mass_to_charge"])
+        ppm_error = {"filtered_psms_ppm_error_____pickle_zlib": base64.b64encode(zlib.compress(pickle.dumps(ppm_error_df.to_list()), level=9)).decode("utf-8")}
+        # Get the ppm error to the theoretical masses
+
+        (psm_df["calc_mass_to_charge"] - exp_calc_diff_removed_isotopes) # measured
+        psm_df["calc_mass_to_charge"] # expected
 
         # group the accessions
         gbseries = psm_df.groupby(by=['PSM_ID'])['accession']
@@ -157,8 +177,9 @@ def read_mzTab(file):
         charge_counts = {"psm_charge1": 0, "psm_charge2": 0, "psm_charge3": 0, "psm_charge4": 0, "psm_charge5": 0, "psm_charge_more": 0}
         miss_counts = {"psm_missed_0": 0, "psm_missed_1": 0, "psm_missed_2": 0, "psm_missed_3": 0, "psm_missed_more": 0}
 
-    return PSM_count, charge_counts, miss_counts
+    return PSM_count, charge_counts, miss_counts, ppm_error
 
 
 # %% call the script
-run_pia_extraction()
+if __name__ == "__main__":
+    run_pia_extraction()
