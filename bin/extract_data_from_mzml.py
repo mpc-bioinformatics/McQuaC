@@ -33,6 +33,8 @@ if __name__ == "__main__":
     args = argparse_setup()
     data_dict = dict()
 
+    args.mzml = "/home/luxii/git/Next-QC-Flow/work/88/9ca37069866ebe170af5531e24f0b5/K_13_1_QEXI16187.mzML"
+
     # Load MZML
     exp = pyopenms.MSExperiment()
     pyopenms.MzMLFile().load(args.mzml, exp)
@@ -269,14 +271,14 @@ if __name__ == "__main__":
     for spectrum in exp.getSpectra():
         ms1_ms2_rt.append(spectrum.getRT())
         peaks = spectrum.get_peaks()[1]
-        ms1_ms2_basepeaks.append(sum(peaks) if len(peaks) != 0 else 0)
+        ms1_ms2_basepeaks.append(max(peaks) if len(peaks) != 0 else 0)
         ms1_ms2_tic.append(sum(spectrum.get_peaks()[1]))
 
     base_peak_intensity_max = max(ms1_ms2_basepeaks)
-    total_ion_curretn_max = max(ms1_ms2_tic)
+    total_ion_current_max = max(ms1_ms2_tic)
 
     data_dict["Base_Peak_Intensity_Max"] = base_peak_intensity_max
-    data_dict["Total_Ion_Current_Max"] = total_ion_curretn_max
+    data_dict["Total_Ion_Current_Max"] = total_ion_current_max
 
     # and up to 105 minutes
     break_on = 105*60
@@ -284,10 +286,10 @@ if __name__ == "__main__":
         if break_on < ms1_ms2_rt[i]:
             break
     base_peak_intensity_max_up_to_105m = max(ms1_ms2_basepeaks[:i-1])
-    total_ion_curretn_max_up_to_105m = max(ms1_ms2_tic[:i-1])
+    total_ion_current_max_up_to_105m = max(ms1_ms2_tic[:i-1])
 
     data_dict["Base_Peak_Intensity_Max_Up_To_105"] = base_peak_intensity_max_up_to_105m
-    data_dict["Total_Ion_Current_Max_Up_To_105"] = total_ion_curretn_max_up_to_105m
+    data_dict["Total_Ion_Current_Max_Up_To_105"] = total_ion_current_max_up_to_105m
 
 
 
