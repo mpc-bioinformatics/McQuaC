@@ -40,9 +40,6 @@ if __name__ == "__main__":
     args = argparse_setup()
     data_dict = dict()
 
-    args.mzml = "/home/luxii/git/Next-QC-Flow/work/88/9ca37069866ebe170af5531e24f0b5/K_13_1_QEXI16187.mzML"
-    args.out_csv = "/home/luxii/Desktop/temp/raws_qc/test.csv"
-
     # Load MZML
     exp = pyopenms.MSExperiment()
     pyopenms.MzMLFile().load(args.mzml, exp)
