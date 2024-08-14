@@ -21,7 +21,7 @@ params.ms_run_metrics__thermo_raw_mem = "10 GB"
 /// and 0.14GB for a Raw file with 35023 MS scans (measured with `/usr/bin/time -v ...`). 5 GB seems more then enough.
 params.ms_run_metrics__bruker_raw_mem = "1 GB"
 /// Tracing showed up to 4.7 GB virtual memory for 30000 MS scans
-params.ms_run_metrics__mzml_mem = "7 GB"
+params.ms_run_metrics__mzml_mem = "10 GB"
 
 /**
  * Get metadata headers from Thermo and Bruker raw files, like 

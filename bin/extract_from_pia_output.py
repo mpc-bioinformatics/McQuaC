@@ -31,12 +31,6 @@ def argparse_setup():
 def run_pia_extraction():
     args = argparse_setup()
 
-    args.pia_peptides = "/home/luxii/git/Next-QC-Flow/work/d0/70402d6dc04943572ba1b36d9c2ebf/K_13_1_QEXI16187-piaExport-peptides.csv"
-    args.pia_proteins = "/home/luxii/git/Next-QC-Flow/work/d0/70402d6dc04943572ba1b36d9c2ebf/K_13_1_QEXI16187-piaExport-proteins.mzTab"
-    args.pia_PSMs = "/home/luxii/git/Next-QC-Flow/work/d0/70402d6dc04943572ba1b36d9c2ebf/K_13_1_QEXI16187-piaExport-PSM.mzTab"
-    args.output = "/home/luxii/Desktop/temp/raws_qc/delme_pia.csv"
-
-
     number_proteins, number_ungrouped_proteins = count_nr_Proteins(args.pia_proteins)
     peptide_count = count_nr_filtered_peptides(args.pia_peptides)
     PSM_counts , charge_counts, miss_counts, ppm_error = read_mzTab(args.pia_PSMs)
