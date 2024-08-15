@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
         # Indexing as follows: raw_data[RT_in_Secs, Scan_Index, Prec_Index, MZ, Intensity]
         result = dict(
-            Meta=dict(MzStart=min_mz, MzEnd=max_mz, RtStart=entry["rt_start"], RtEnd=entry["rt_end"]),
+            Meta=dict(MzStart=min_mz, MzEnd=max_mz, RtStart=entry["rt_start"], RtEnd=entry["rt_end"], Comment=entry["comment"]),
             RetentionTimes=list(raw_data[rt_start:rt_end, :, :, min_mz:max_mz, :]["rt_values"]/60),
             Intensities=list(raw_data[rt_start:rt_end, :, :, min_mz:max_mz, :]["intensity_values"])
         )
