@@ -67,8 +67,13 @@ if __name__ == "__main__":
             rts = xic["RetentionTimes"]
             intensities = xic["Intensities"]
 
-            max_int = max(intensities)
-            max_int_rt = rts[intensities.index(max_int)] * 60
+            # default value if no intensities are found
+            max_int = 0
+            max_int_rt = -1
+
+            if len(intensities) > 0:
+                max_int = max(intensities)
+                max_int_rt = rts[intensities.index(max_int)] * 60
 
             comment_to_data[comment]["rt_at_maximum"] = max_int_rt
             comment_to_data[comment]["maximum_int"] = max_int
