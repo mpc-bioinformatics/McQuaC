@@ -91,6 +91,8 @@ if __name__ == "__main__":
             seq_to_data[seq]["rt_start"] = new_rt - tol
             seq_to_data[seq]["rt_end"] = new_rt + tol
     
+    for seq in seq_to_data.keys():
+        seq_to_data[seq]["rt_start"] = max(0, seq_to_data[seq]["rt_start"])
     
     # Write Output JSON-File
     with open(args.ojson, "w") as o_json:
