@@ -1,113 +1,112 @@
 #!/usr/bin/env python
 
-"""Extract information for the QC_visualization out of the PIA output files.
-TODO 	nrProteins 	nrProteingroups_unfiltered, number-filtered-protein-groups
-
-DONE number-filtered-peptides, psmZ1-5, psm_missed 0-3 ,number-filtered-psms,
-"""
-
-# %% imports
 import pandas as pd
-import csv
+import numpy as np
 import argparse
 import zipfile
 import base64
-import zlib
-import pickle
 import os
 import io
+import h5py
 
-# %% functions
+
 def argparse_setup():
     parser = argparse.ArgumentParser()
     parser.add_argument("--pia_peptides", help="peptides.txt from PIA output")
     parser.add_argument("--pia_proteins", help="Proteins.mzID from PIA output")
     parser.add_argument("--pia_PSMs", help="PSM.mzTab from PIA output")
-    parser.add_argument("--output", help="path where output should be saved")
+    parser.add_argument("--out_hdf5", help="Output HDF5 with statistics")
 
     return parser.parse_args()
+
+
+def add_entry_to_hdf5(f, key: str, value, array_shape: tuple, data_type: str, unit: str, description: str, compression: str=None):
+    """ Adds an entry into the hdf5 file """
+    f.create_dataset(key, array_shape, dtype=data_type, compression=compression)
+    f[key].attrs["unit"] = unit
+    f[key].attrs["Description"] = description
+    f[key].write_direct(np.array(value, dtype=data_type))
 
 
 def run_pia_extraction():
     args = argparse_setup()
 
-    number_proteins, number_ungrouped_proteins = count_nr_Proteins(args.pia_proteins)
-    peptide_count = count_nr_filtered_peptides(args.pia_peptides)
-    PSM_counts , charge_counts, miss_counts, ppm_error = read_mzTab(args.pia_PSMs)
-    dicts = [number_proteins, number_ungrouped_proteins, peptide_count, PSM_counts, charge_counts, miss_counts, ppm_error]
+    # Open HDF5 file in write mode
+    with h5py.File(args.out_hdf5, 'w') as out_h5:
+        count_nr_Proteins(args.pia_proteins, out_h5)
+        count_nr_filtered_peptides(args.pia_peptides, out_h5)
+        read_mzTab(args.pia_PSMs, out_h5)
 
-    # geschrieben von Dirk (er muss debuggen falls kaputt geht)
-    data = {
-        key: [value]
-        for d in dicts
-        for key, value in d.items()
-    }
-    df = pd.DataFrame(data=data)
-
-    zipfile.ZipFile("pia_extractions.zip", mode="w", compresslevel=9).write(args.pia_peptides,
-                                                                       compress_type=zipfile.ZIP_DEFLATED,
-                                                                       compresslevel=9,
-                                                                       arcname=args.pia_peptides.split(os.sep)[-1])
-    zipfile.ZipFile("pia_extractions.zip", mode="w", compresslevel=9).write(args.pia_PSMs,
-                                                                       compress_type=zipfile.ZIP_DEFLATED,
-                                                                       compresslevel=9,
-                                                                       arcname=args.pia_PSMs.split(os.sep)[-1])
-    zipfile.ZipFile("pia_extractions.zip", mode="w", compresslevel=9).write(args.pia_proteins,
-                                                                       compress_type=zipfile.ZIP_DEFLATED,
-                                                                       compresslevel=9,
-                                                                       arcname=args.pia_proteins.split(os.sep)[-1])
-    with open("pia_extractions.zip", "rb") as pia_b:
-        pia_str_bs64 = base64.b64encode(pia_b.read()).decode("utf-8")
-        df["pia_output.zip"] = pia_str_bs64
-        df.to_csv(args.output, index=False)
+        # Save the zip files also in HDF5
+        zipfile.ZipFile("pia_extractions.zip", mode="w", compresslevel=9).write(args.pia_peptides,
+                                                                        compress_type=zipfile.ZIP_DEFLATED,
+                                                                        compresslevel=9,
+                                                                        arcname=args.pia_peptides.split(os.sep)[-1])
+        zipfile.ZipFile("pia_extractions.zip", mode="w", compresslevel=9).write(args.pia_PSMs,
+                                                                        compress_type=zipfile.ZIP_DEFLATED,
+                                                                        compresslevel=9,
+                                                                        arcname=args.pia_PSMs.split(os.sep)[-1])
+        zipfile.ZipFile("pia_extractions.zip", mode="w", compresslevel=9).write(args.pia_proteins,
+                                                                        compress_type=zipfile.ZIP_DEFLATED,
+                                                                        compresslevel=9,
+                                                                        arcname=args.pia_proteins.split(os.sep)[-1])
+        with open("pia_extractions.zip", "rb") as pia_b:
+            pia_str_bs64 = base64.b64encode(pia_b.read()).decode("utf-8")
+        out_h5.create_dataset("pia_output.zip", data=pia_str_bs64)
+        out_h5["pia_output.zip"].attrs["unit"] = "zip File"
+        out_h5["pia_output.zip"].attrs["Description"] = "A zip container containing the used PSM-mzTAB, Peptide-CSV and Proteins-mzTAB file from the PIA-Output. This zip file was base64 encoded to be represented as a string"
 
 
-def count_nr_filtered_peptides(file) -> int:
+def count_nr_filtered_peptides(pia_peptide, out_hdf5) -> int:
     # needs the PIA peptides.csv output file and counts PEPTIDE occurences
     # peptides are already filtered for FDR and decoys by the PIA export
-    with open(file) as f:
+    with open(pia_peptide) as f:
         text = "\n".join([line for line in f if line.startswith("PEPTIDE") or line.startswith("COLS_PEPTIDE") or line.startswith('"COLS_PEPTIDE"')])
 
     if text:
         peptide_df = pd.read_csv(io.StringIO(text), sep=",")
-        
-        peptide_count = {}
-        peptide_count["number_filtered_peptides"] = peptide_df.shape[0]
+        number_filtered_peptides = peptide_df.shape[0]
     else:
-        peptide_count = {}
-        peptide_count["number_filtered_peptides"] = 0
-    return peptide_count
+        number_filtered_peptides = 0
+
+    add_entry_to_hdf5(
+        out_hdf5, "number_filtered_peptides", number_filtered_peptides, (1,), "int32", "none", 
+        description="Peptides filtered by an FDR-Score of 0.01"
+    )
 
 
-def count_nr_Proteins(file):
+def count_nr_Proteins(pia_prots, out_hdf5):
     # read in proteins
-    with open(file) as f:
+    with open(pia_prots) as f:
         text = "\n".join([line for line in f if line.startswith("PRH") or line.startswith("PRT")])
 
     if text:
         protein_df = pd.read_csv(io.StringIO(text), sep="\t")
 
         # proteins are already FDR and decoy filtered by json parameters
-        number_proteins = {}
-        number_proteins["number_proteins"] = protein_df.shape[0]
+        number_proteins = protein_df.shape[0]
 
         ungrouped_proteins = list()
         ungrouped_proteins.extend(protein_df['accession'].values.tolist())
         ungrouped_proteins.extend(protein_df[pd.isna(protein_df['ambiguity_members']) == False]['ambiguity_members'].values.tolist())
-        number_ungrouped_proteins = {}
-        number_ungrouped_proteins["number_ungrouped_proteins"] = len(set(ungrouped_proteins))
+        number_ungrouped_proteins = len(set(ungrouped_proteins))
     else:
-        number_proteins = {}
-        number_proteins["number_proteins"] = 0
-        number_ungrouped_proteins = {}
-        number_ungrouped_proteins["number_ungrouped_proteins"] = 0
+        number_proteins = 0
+        number_ungrouped_proteins = 0
 
-    return number_proteins, number_ungrouped_proteins
+    add_entry_to_hdf5(
+        out_hdf5, "number_proteins", number_proteins, (1,), "int32", "none", 
+        description="Number of protein groups."
+    )
+    add_entry_to_hdf5(
+        out_hdf5, "number_ungrouped_proteins", number_ungrouped_proteins, (1,), "int32", "none", 
+        description="Total number of protein accessions within the protein groups."
+    )
 
 
-def read_mzTab(file):
+def read_mzTab(pia_mzTAB, out_hdf5):
     # get header for PSM FDR Score
-    with open(file) as f:
+    with open(pia_mzTAB) as f:
         text = "\n".join([line for line in f if line.startswith("MTD")])
 
     if text: 
@@ -116,7 +115,7 @@ def read_mzTab(file):
         psm_score_header = psm_score_header[4:]     # remove "psm_" at beginning
 
         ## read in PSMs
-        with open(file) as f:
+        with open(pia_mzTAB) as f:
             text = "\n".join([line for line in f if line.startswith("PS")])
 
         psm_df = pd.read_csv(io.StringIO(text), sep="\t")
@@ -130,7 +129,7 @@ def read_mzTab(file):
         exp_calc_diff = (psm_df["exp_mass_to_charge"] - psm_df["calc_mass_to_charge"])
         exp_calc_diff_removed_isotopes = (exp_calc_diff - (exp_calc_diff.round()).astype(int)) # Remove Isotopes, since calc_mass expects none
         ppm_error_df = ((exp_calc_diff_removed_isotopes * 1000000) / psm_df["calc_mass_to_charge"])
-        ppm_error = {"filtered_psms_ppm_error_____pickle_zlib": base64.b64encode(zlib.compress(pickle.dumps(ppm_error_df.to_list()), level=9)).decode("utf-8")}
+        ppm_error = {"filtered_psms_ppm_error": ppm_error_df.to_list()}
         # Get the ppm error to the theoretical masses
 
         (psm_df["calc_mass_to_charge"] - exp_calc_diff_removed_isotopes) # measured
@@ -166,14 +165,46 @@ def read_mzTab(file):
         miss_counts = {"psm_missed_0": miss_count_0, "psm_missed_1": miss_count_1, "psm_missed_2": miss_count_2, "psm_missed_3": miss_count_3, "psm_missed_more": miss_count_more}
 
     else:
-        PSM_count = {}
-        PSM_count["number_filtered_psms"] = 0
+        PSM_count = {"number_filtered_psms": 0}
         charge_counts = {"psm_charge1": 0, "psm_charge2": 0, "psm_charge3": 0, "psm_charge4": 0, "psm_charge5": 0, "psm_charge_more": 0}
         miss_counts = {"psm_missed_0": 0, "psm_missed_1": 0, "psm_missed_2": 0, "psm_missed_3": 0, "psm_missed_more": 0}
+        ppm_error = {"filtered_psms_ppm_error": [np.nan]}
 
-    return PSM_count, charge_counts, miss_counts, ppm_error
+    # concat all entries into a single dict
+    dicts = [PSM_count, charge_counts, miss_counts]
+    data = {
+        key: [value]
+        for d in dicts
+        for key, value in d.items()
+    }
+    
+    # Keys are added in order in dict, therefore we could leave out the order, but set this order statically to be save just in case!!!
+    keys = ["number_filtered_psms","psm_charge1","psm_charge2","psm_charge3","psm_charge4","psm_charge5","psm_charge_more","psm_missed_0","psm_missed_2","psm_missed_3","psm_missed_more"]
+    descriptions = [
+        "PSMs filtered by an FDR-Score of 0.01",
+        "proportion of identified MS2 spectra with charge 1",
+        "proportion of identified MS2 spectra with charge 2",
+        "proportion of identified MS2 spectra with charge 3",
+        "proportion of identified MS2 spectra with charge 4",
+        "proportion of identified MS2 spectra with charge 5",
+        "proportion of identified MS2 spectra with charge 6 or more",
+        "proportion of PSMs with a sequence containing 0 missed cleavages",
+        "proportion of PSMs with a sequence containing 1 missed cleavages",
+        "proportion of PSMs with a sequence containing 2 missed cleavages",
+        "proportion of PSMs with a sequence containing 3 missed cleavages",
+        "proportion of PSMs with a sequence containing 4 ore more missed cleavages"
+    ]
 
+    for k, d in zip(keys, descriptions):
+        add_entry_to_hdf5(
+            out_hdf5, k, data[k], (1,), "int32", "none", 
+            description=d
+        )
 
-# %% call the script
+    add_entry_to_hdf5(
+        out_hdf5, "filtered_psms_ppm_error", ppm_error["filtered_psms_ppm_error"], (len(ppm_error["filtered_psms_ppm_error"]),), "float64", "ppm", 
+        description="PPM-Error from the calculated (theoretical) to the experimental (measured) precursor. We calculated here 'theoretical - calc'. "
+    )
+
 if __name__ == "__main__":
     run_pia_extraction()

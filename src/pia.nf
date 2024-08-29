@@ -98,11 +98,11 @@ workflow pia_analysis_psm_only {
 }
 
 /**
- * Extracts the QC metrics from the PIA results and writes them into a CSV
+ * Extracts the QC metrics from the PIA results and writes them into a HFD5
  *
  * @param pia_results the PIA results as tuples, as returned by the pia_analysis
  *
- * @return extract_csv the metrics written into the CSV file
+ * @return extracted hdf5 metrics written into the HFD5 file
  */
 workflow pia_extract_metrics {
     take:
@@ -266,11 +266,11 @@ process pia_extract_csv {
     tuple path(psm_results), path(peptide_results), path(protein_results)
 
     output:
-    path "${psm_results.name.take(psm_results.name.lastIndexOf('-piaExport-PSM.mzTab'))}-pia_extraction.csv"
+    path "${psm_results.name.take(psm_results.name.lastIndexOf('-piaExport-PSM.mzTab'))}-pia_extraction.hdf5"
 
     script:
     """
-    outfile="${psm_results.name.take(psm_results.name.lastIndexOf('-piaExport-PSM.mzTab'))}-pia_extraction.csv"
-    extract_from_pia_output.py --pia_PSMs ${psm_results} --pia_peptides ${peptide_results} --pia_proteins ${protein_results} --output \${outfile}
+    outfile="${psm_results.name.take(psm_results.name.lastIndexOf('-piaExport-PSM.mzTab'))}-pia_extraction.hdf5"
+    extract_from_pia_output.py --pia_PSMs ${psm_results} --pia_peptides ${peptide_results} --pia_proteins ${protein_results} --out_hdf5 \${outfile}
     """
 }

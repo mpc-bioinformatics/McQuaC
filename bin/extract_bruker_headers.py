@@ -26,10 +26,10 @@ def argparse_setup():
 
 def add_entry_to_hdf5(f, key: str, value, array_shape: tuple, data_type: str, unit: str, description: str, compression: str=None):
     """ Adds an entry into the hdf5 file """
-    out_h5.create_dataset(key, array_shape, dtype=data_type, compression=compression)
-    out_h5[key].attrs["unit"] = unit
-    out_h5[key].attrs["Description"] = description
-    out_h5[key].write_direct(np.array(value, dtype=data_type))
+    f.create_dataset(key, array_shape, dtype=data_type, compression=compression)
+    f[key].attrs["unit"] = unit
+    f[key].attrs["Description"] = description
+    f[key].write_direct(np.array(value, dtype=data_type))
 
 
 if __name__ == "__main__":
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
 
     # Open HDF5 file in write mode
-    with h5py.File(args.out_hdf5, 'a') as out_h5:
+    with h5py.File(args.out_hdf5, 'w') as out_h5:
 
         # Extract data for each frame:
         for idx, name, col_name in zip(p_index, p_name, p_col_name):

@@ -26,10 +26,10 @@ def argparse_setup():
 
 def add_entry_to_hdf5(f, key: str, value, array_shape: tuple, data_type: str, unit: str, description: str, compression: str=None):
     """ Adds an entry into the hdf5 file """
-    out_h5.create_dataset(key, array_shape, dtype=data_type, compression=compression)
-    out_h5[key].attrs["unit"] = unit
-    out_h5[key].attrs["Description"] = description
-    out_h5[key].write_direct(np.array(value, dtype=data_type))
+    f.create_dataset(key, array_shape, dtype=data_type, compression=compression)
+    f[key].attrs["unit"] = unit
+    f[key].attrs["Description"] = description
+    f[key].write_direct(np.array(value, dtype=data_type))
 
 # Total Ion Current Calculation taken from:
 # https://pyopenms.readthedocs.io/en/latest/first_steps.html?highlight=TIC#total-ion-current-calculation
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     pyopenms.MzMLFile().load(args.mzml, exp)
 
     # Open HDF5 file in write mode
-    with h5py.File(args.out_hdf5, 'a') as out_h5:
+    with h5py.File(args.out_hdf5, 'w') as out_h5:
 
         # Get Date and Time of Measurement (timestamp)
         hh_mm_ss_str = exp.getDateTime().getTime()
