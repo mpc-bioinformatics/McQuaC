@@ -6,11 +6,13 @@ import base64
 import zipfile
 import pyopenms
 from collections import defaultdict
+import h5py
+import numpy as np
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
     parser.add_argument("-featurexml", help="FeatureXML with already annotated identifications")
-    parser.add_argument("-out_csv", help="The Output statistics CSV")
+    parser.add_argument("-out_hdf5", help="The Output statistics HDF5")
     parser.add_argument("-report_up_to_charge", default=5, help="Upper limit of range to be reported in a csv table for the charge")
 
     return parser.parse_args()
@@ -47,23 +49,32 @@ if __name__ == "__main__":
     with open("featurexml.zip", "rb") as fb:
         feature_str_bs64 = base64.b64encode(fb.read())
 
-    with open(args.out_csv, "w") as csv_out:
-
+    with h5py.File(args.out_hdf5, 'w') as out_h5:
         # First create header:
         header = ["total_num_features", "total_num_ident_features"] + \
             ["num_features_charge_" + str(i) for i in range(1, int(args.report_up_to_charge) + 1)] + \
-            ["num_ident_features_charge_" + str(i) for i in range(1, int(args.report_up_to_charge) + 1)] + \
-            ["feature_data.featureXML.zip"]
+            ["num_ident_features_charge_" + str(i) for i in range(1, int(args.report_up_to_charge) + 1)] 
 
+        # Then create data
         row = [str(total_num_features), str(total_num_ident_features)] + \
             [str(num_features_charge[i]) for i in range(1, int(args.report_up_to_charge) + 1)] + \
-            [str(num_ident_features_charge[i]) for i in range(1, int(args.report_up_to_charge) + 1)] + \
-            [feature_str_bs64.decode()]
+            [str(num_ident_features_charge[i]) for i in range(1, int(args.report_up_to_charge) + 1)]
 
-        csv_out.write(
-            ",".join(header) + "\n"
-        )
+        # And also its description
+        description = [
+            "Total number of features found in raw file.",
+            "Total number of features with an annotated identificaiton.",
+            *["Total number of features with charge " + str(i)  for i in range(1, int(args.report_up_to_charge) + 1)],
+            *["Total number of identified features with charge " + str(i) for i in range(1, int(args.report_up_to_charge) + 1)]
+        ]
 
-        csv_out.write(
-            ",".join(row) + "\n"
-        )
+        for header, row, desc in zip (header, row, description):
+            out_h5.create_dataset(header, (1,), dtype="int32")
+            out_h5[header].attrs["unit"] = "none"
+            out_h5[header].attrs["Description"] = desc
+            out_h5[header].write_direct(np.array(row, dtype="int32"))
+
+        # Save binary blob
+        out_h5.create_dataset("feature_data.featureXML.zip", data=feature_str_bs64.decode())
+        out_h5["feature_data.featureXML.zip"].attrs["unit"] = "ZIP File"
+        out_h5["feature_data.featureXML.zip"].attrs["Description"] = "A featureXML file in a ZIP container containing all features. This file was base64 encoded to be represented as a string"

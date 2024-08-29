@@ -46,7 +46,7 @@ workflow get_feature_metrics {
             )
         feature_xml_identified = map_features_to_idents(runbase_to_featurexml_and_mztab)
 
-        // Retrieve the actual data and report a csv file
+        // Retrieve the actual data and report a HDF5 file
         feature_metrics = get_metrics_from_featurexml(feature_xml_identified)
         
     emit:
@@ -119,12 +119,12 @@ process get_metrics_from_featurexml {
     path featurexml
 
     output:
-    path "${featurexml.name.take(featurexml.name.lastIndexOf('.filtered_with_idents.featureXML'))}-features.csv"
+    path "${featurexml.name.take(featurexml.name.lastIndexOf('.filtered_with_idents.featureXML'))}-features.hdf5"
 
     """
     extract_from_featurexml.py -featurexml ${featurexml} \
         -report_up_to_charge ${params.max_charge} \
-        -out_csv ${featurexml.name.take(featurexml.name.lastIndexOf('.filtered_with_idents.featureXML'))}-features.csv 
+        -out_hdf5 ${featurexml.name.take(featurexml.name.lastIndexOf('.filtered_with_idents.featureXML'))}-features.hdf5 
     """
 }
 
