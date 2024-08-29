@@ -130,9 +130,9 @@ process extract_data_from_mzml {
     path(mzml)
 
     output:
-    path("${mzml.baseName}-mzml_info.csv")
+    path("${mzml.baseName}-mzml_info.hdf5")
 
     """
-    extract_data_from_mzml.py -mzml ${mzml} -out_csv ${mzml.baseName}-mzml_info.csv
+    extract_data_from_mzml.py -mzml ${mzml} -out_hdf5 ${mzml.baseName}-mzml_info.hdf5
     """
 }

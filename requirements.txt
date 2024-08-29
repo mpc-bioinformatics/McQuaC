@@ -5,3 +5,4 @@ sqlalchemy
 plotly
 scikit-learn
 alphatims
+h5py
