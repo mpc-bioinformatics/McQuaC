@@ -10,71 +10,62 @@ nextflow.enable.dsl=2
 python_image = 'mpc/nextqcflow-python:latest'
 
 /*
- * Combines the metrics into one big CSV file
+ * Combines the metrics into one big HDF5 file
  * 
- * @param runbase_to_csvs tuple of val(fileBaseName) and list(path(metric_CSVs))
+ * @param runbase_to_hdf5 tuple of val(fileBaseName) and list(path(metric_HDF5s))
  *
  * @return final_table a merged, big CSV file containing data of all files
  */
 workflow combine_metric_csvs {
 	take:
-		runbase_to_csvs
+		runbase_to_hdf5
 	
 	main:
-	 	merged_files = merge_metrics(runbase_to_csvs)
-		final_table = merged_files.collectFile(name: "quality_control.csv", keepHeader: true)
+	 	merged_files = merge_metrics(runbase_to_hdf5)
+		complete_hdf_file = merge_metrics_to_one_file(merged_files.collect())
 	
 	emit:
-		final_table
+		complete_hdf_file
 }
 
 /*
  * Writes the metrics for one raw file into one CSV file (with one line)
  * 
- * @param runbase_to_csvs tuple of val(fileBaseName) and list(path(metric_CSVs))
+ * @param runbase_to_hdf5 tuple of val(fileBaseName) and list(path(metric_CSVs))
  *
- * @return final_table a merged, big CSV file of teh single metrics
+ * @return final_table a merged, big CSV file of the single metrics
  */
 
 process merge_metrics {
 	container {python_image}
 
+	publishDir "${params.main_outdir}/qc_hdf5_data", mode:'copy'		// TODO: this should probably rather use the new reporting facilities
+
+
 	input:
 	tuple val(runBaseName), path(metrics)
 
 	output:
-	path "${runBaseName}-data.csv"
+	path "${runBaseName}.hdf5"
 
 	"""
-	csvfile="${runBaseName}-data.csv"
+	combine_hdf5_files.py -hdf_out_name ${runBaseName}.hdf5 $metrics
+	"""
+}
 
-	# first write the headers
-	echo -n "file_and_analysis_timestamp" > \${csvfile}
+process merge_metrics_to_one_file {
+	container {python_image}
 
-	declare -a files=(${metrics})
-	for file in \${files[@]}
-	do
-		# some files contain windows linebreaks, remove these
-		line=\$(head -n -1 \${file} | sed -e "s;\\r\$;;g")
-		echo -n ",\${line}" >> \${csvfile}
-	done
+	publishDir "${params.main_outdir}/qc_hdf5_data", mode:'copy'		// TODO: this should probably rather use the new reporting facilities
 
-	# next line, write out the data
-	echo >> \${csvfile}
 
-	# first write out the current file_and_analysis_timestamp
-	echo -n "${runBaseName}_" >> \${csvfile}
-	echo -n \$(date +"%Y_%m_%d_%H_%M_%S") >> \${csvfile}
+	input:
+	path(metrics)
 
-	declare -a files=(${metrics})
-	for file in \${files[@]}
-	do
-		# some files contain windows linebreaks, remove these
-		line=\$(tail -n 1 \${file} | sed -e "s;\\r\$;;g")
-		echo -n ",\${line}" >>  \${csvfile}
-	done
+	output:
+	path "complete_qc_data.hdf5"
 
-	# final line break (makes things easier)
-	echo >> \${csvfile}
+	"""
+	combine_hdf5_files.py -put_under_subdataset -hdf_out_name complete_qc_data.hdf5 $metrics
 	"""
 }
