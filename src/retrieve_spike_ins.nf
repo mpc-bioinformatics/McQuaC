@@ -165,9 +165,9 @@ process get_spike_in_metrics {
     path spike_ins_table
 
     output:
-    path "${xic_json.baseName}-spikeins.csv"
+    path "${xic_json.baseName}-spikeins.hdf5"
 
     """
-    extract_spike_metrics.py -itrfp_json ${xic_json} -iidentifications ${identifications} -ispikeins ${spike_ins_table} -ocsv ${xic_json.baseName}-spikeins.csv
+    extract_spike_metrics.py -itrfp_json ${xic_json} -iidentifications ${identifications} -ispikeins ${spike_ins_table} -ohdf5 ${xic_json.baseName}-spikeins.hdf5
     """
 }
