@@ -90,11 +90,6 @@ def get_headers_to_parse(headers, headers_from_raw):
 if __name__ == "__main__":
     args = argparse_setup()
 
-    args.raw = "/home/luxii/Documents/RAWs_BRUKER/EX04295std.raw"
-    args.out_hdf5 = "dsfddsfsadfasdf.hdf5"
-
-
-
     data_dict = defaultdict(lambda: list())
     raw_file = RawFileReaderAdapter.file_factory(args.raw)
     raw_file.select_instrument(Device.MS, 1)  # Selecting the MS
@@ -117,7 +112,6 @@ if __name__ == "__main__":
 
     # Open HDF5 file in write mode
     with h5py.File(args.out_hdf5, 'a') as out_h5:
-
 
         # Retrieve all the information 
         first_scan_number = raw_file.run_header_ex.first_spectrum
@@ -147,7 +141,7 @@ if __name__ == "__main__":
                 desc = key[len("THERMO_"):]
             add_entry_to_hdf5(
                 out_h5, key.replace("/", ""), val, (len(val),), "float64", "refer to description", 
-                description=desc
+                description=desc, compression="gzip"
             )
 
 
@@ -186,12 +180,12 @@ if __name__ == "__main__":
 
         entries_in_pp = len(pump_pressure_dict["THERMO_pump_pressure_bar_x_axis"])
         add_entry_to_hdf5(
-            out_h5, "THERMO_pump_pressure_bar_x_axis", pump_pressure_dict["THERMO_pump_pressure_bar_x_axis"], (entries_in_pp,), "float64", "refer to description", 
-            description="Times when pump pressure was measured (is NaN if nothing was recorded)"
+            out_h5, "THERMO_pump_pressure_bar_x_axis", pump_pressure_dict["THERMO_pump_pressure_bar_x_axis"], (entries_in_pp,), "float64", "minutes", 
+            description="Times when pump pressure was measured (is NaN if nothing was recorded)", compression="gzip"
         )
         add_entry_to_hdf5(
             out_h5, "THERMO_pump_pressure_bar_y_axis", pump_pressure_dict["THERMO_pump_pressure_bar_x_axis"], (entries_in_pp,), "float64", "refer to description", 
-            description="The pump pressure over time  (is NaN if nothing was recorded)"
+            description="The pump pressure over time  (is NaN if nothing was recorded)", compression="gzip"
         )
 
     # Close raw-file
