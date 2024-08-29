@@ -14,9 +14,9 @@ python_image = 'mpc/nextqcflow-python:latest'
  * 
  * @param runbase_to_hdf5 tuple of val(fileBaseName) and list(path(metric_HDF5s))
  *
- * @return final_table a merged, big CSV file containing data of all files
+ * @return final_table a merged, big HDF5 file containing data of all files
  */
-workflow combine_metric_csvs {
+workflow combine_metric_hdf5 {
 	take:
 		runbase_to_hdf5
 	
@@ -29,11 +29,11 @@ workflow combine_metric_csvs {
 }
 
 /*
- * Writes the metrics for one raw file into one CSV file (with one line)
+ * Writes the metrics for one raw file into one hdf5 file
  * 
- * @param runbase_to_hdf5 tuple of val(fileBaseName) and list(path(metric_CSVs))
+ * @param runbase_to_hdf5 tuple of val(fileBaseName) and list(path(metric_hdf5s))
  *
- * @return final_table a merged, big CSV file of the single metrics
+ * @return final_table a merged, big hdf5 file of the single metrics
  */
 
 process merge_metrics {

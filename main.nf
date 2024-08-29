@@ -24,7 +24,7 @@ include {pia_analysis_full; pia_analysis_psm_only; pia_extract_metrics} from wor
 include {retrieve_spike_ins_information} from workflow.projectDir + '/src/retrieve_spike_ins.nf'
 include {get_feature_metrics} from workflow.projectDir + '/src/feature_detection.nf'
 include {get_headers; get_mzml_infos} from workflow.projectDir + '/src/metrics/ms_run_metrics.nf'
-include {combine_metric_csvs} from workflow.projectDir + '/src/io/combine_metric_csvs.nf'
+include {combine_metric_hdf5} from workflow.projectDir + '/src/io/combine_metric_hdf5.nf'
 include {output_processing_success} from workflow.projectDir + '/src/io/output_processing_success.nf'
 
 // Parameters required for the standalone execution of this main-nextflow script
@@ -110,7 +110,7 @@ workflow {
 		.groupTuple()
 
 	
-	combined_metrics = combine_metric_csvs(hdf5s_per_run)
+	combined_metrics = combine_metric_hdf5(hdf5s_per_run)
 
 	// Visualize the results (and move them to the results folder)
 	visualize_results(combined_metrics)
@@ -130,7 +130,7 @@ process visualize_results {
 	publishDir "${params.main_outdir}/qc_results", mode:'copy'		// TODO: this should probably rather use the new reporting facilities
 
 	input:
-	path(combined_metrics_csv)
+	path(combined_metrics_hdf5)
 
     output:
     path("*.json")
@@ -142,9 +142,9 @@ process visualize_results {
 	"""
 	if ${params.search_spike_ins}
 	then 
-		QC_visualization.py -csv_file ${combined_metrics_csv} -output "." -spikeins
+		QC_visualization.py -hdf5_file ${combined_metrics_hdf5} -output "." -spikeins
 	else
-		QC_visualization.py -csv_file ${combined_metrics_csv} -output "."
+		QC_visualization.py -hdf5_file ${combined_metrics_hdf5} -output "."
 	fi
     """
 }
