@@ -27,13 +27,14 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+import h5py
 
 pio.renderers.default = "png"
 
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-csv_file", help="CSV file with QC data.", default=None)
+    parser.add_argument("-hdf5_file", help="CSV file with QC data.", default=None)
     parser.add_argument("-group", help="List of the experimental group (comma-separated).", default=None)
     parser.add_argument("-output", help="Output folder for the plots as json files.", default = "graphics")
     parser.add_argument("-tic_overlay_offset", help = "Offset for TIC overlay plots", default = 0)
@@ -44,13 +45,15 @@ def argparse_setup():
 
 if __name__ == "__main__":
     args = argparse_setup()
+    args.spikeins = True  # DEBUG
+    args.hdf5_file = "/home/luxii/git/Next-QC-Flow/work/fd/216ae9989df85a54eb0fb909417dae/complete_qc_data.hdf5"  # DEBUG
 
 
 ####################################################################################################
     # parameters
 
     ### use HCC dataset for testing
-    csv_file = args.csv_file#.split(",")
+    hdf5file = args.hdf5_file 
 
     ### grouping
     ### If use_groups = False, PCA plots are coloured by timestamp. If True, PCA plots are coloured by group.
@@ -70,7 +73,29 @@ if __name__ == "__main__":
 
 ####################################################################################################
     # read csv file
-    df = pd.read_csv(csv_file)
+
+    # Wrap from hdf5 back to pd dataframe
+    with h5py.File(hdf5file, "r") as in_h5:
+        files = list(in_h5.keys())
+        all_columns = set([y for f in files for y in in_h5[f].keys()] + ["filename"])
+        df = pd.DataFrame(columns=list(all_columns))
+
+        for f in files:
+            new_row = pd.Series()
+            for c in all_columns:
+                if c.endswith(".zip"):
+                    new_row[c] = None  # Skip files
+                elif c in "filename":
+                    new_row[c] = f  # Skip files
+                elif f + "/" + c in in_h5:
+                    new_row[c] = in_h5[f + "/" + c][:]
+                    if len(new_row[c]) == 1:
+                        new_row[c] = new_row[c][0]
+                else:
+                    new_row[c] = None
+            df = pd.concat([df, pd.DataFrame([new_row], columns=new_row.index)]).reset_index(drop=True)
+
+
     nr_rawfiles = len(df)
 
     # add filenames if not present
@@ -191,16 +216,17 @@ if __name__ == "__main__":
     df_table0.insert(1, "timestamp", x)
 
     ### if spike-ins are analyzed, add them to the table
-    if analyse_spikeins:
-        spikes = []
-        for index in df.index:
-            spike_tmp = unbase64_uncomp_unpickle(df["SPIKEINS_____pickle_zlib"].iloc[index])
-            spikes.append(spike_tmp)
-        spikes_df = pd.DataFrame(spikes)
-        df_table0 = pd.concat([df_table0, spikes_df], axis = 1)
+    # TODO KS --> SpikeIns are already in HDF5 file if flag is set. Otherwise these columns are missing
+    # if analyse_spikeins:
+    #     spikes = []
+    #     for index in df.index:
+    #         spike_tmp = unbase64_uncomp_unpickle(df["SPIKEINS"].iloc[index])
+    #         spikes.append(spike_tmp)
+    #     spikes_df = pd.DataFrame(spikes)
+    #     df_table0 = pd.concat([df_table0, spikes_df], axis = 1)
 
 
-    df_table0 = pd.concat([df_table0, df_table0_2], axis = 1)
+    # df_table0 = pd.concat([df_table0, df_table0_2], axis = 1)
     df_table0.to_csv(output_path + "/00_table_summary.csv", index = False)
 
 ################################################################################################
@@ -272,9 +298,9 @@ if __name__ == "__main__":
 
     tic_df = []
     for index in df.index:
-        tic = dict(TIC=ast.literal_eval(df["ms1_tic_array"].iloc[index]),
-            RT=ast.literal_eval(df["ms1_rt_array"].iloc[index]),
-            filename=[df["filename"].iloc[index]]*len(ast.literal_eval(df["ms1_tic_array"].iloc[index])))
+        tic = dict(TIC=df["ms1_tic_array"].iloc[index],
+            RT=df["ms1_rt_array"].iloc[index],
+            filename=[df["filename"].iloc[index]]*len(df["ms1_tic_array"].iloc[index]))
         tic = pd.DataFrame(tic)
         tic_df.append(tic)
     tic_df2 = pd.concat(tic_df)
@@ -709,10 +735,10 @@ if __name__ == "__main__":
     ### Fig 13: Ion Maps (one for each raw file)
     ionmap_df = []
     for index in df.index:
-        tmp = dict(RT = ast.literal_eval(df["ms2_rt_array"].iloc[index]),
-            MZ = ast.literal_eval(df["ms2_mz_array"].iloc[index]),
-            TIC = ast.literal_eval(df["ms2_tic_array"].iloc[index]),
-            filename = [df["filename"].iloc[index]]*len(ast.literal_eval(df["ms2_rt_array"].iloc[index])))
+        tmp = dict(RT = df["ms2_rt_array"].iloc[index],
+            MZ = df["ms2_mz_array"].iloc[index],
+            TIC = df["ms2_tic_array"].iloc[index],
+            filename = [df["filename"].iloc[index]]*len(df["ms2_rt_array"].iloc[index]))
         tmp = pd.DataFrame(tmp)
         ionmap_df.append(tmp)
     ionmap_df2 = pd.concat(ionmap_df)
@@ -743,7 +769,7 @@ if __name__ == "__main__":
     ### Figure 14: Pump Pressure
 
     if contains_thermo:
-        if "THERMO_pump_pressure_bar_x_axis_____pickle_zlib" in df.columns:
+        if "THERMO_pump_pressure_bar_x_axis" in df.columns:
 
             ### TODO: generate empty plot if this column is missing
             ### TODO: why is this plot also misisng for EXII???
@@ -752,11 +778,13 @@ if __name__ == "__main__":
             y = []
             fn = []
             for index in df.index:
-                if pd.isnull(df["THERMO_pump_pressure_bar_x_axis_____pickle_zlib"].iloc[index]) \
-                    or pd.isnull(df["THERMO_pump_pressure_bar_y_axis_____pickle_zlib"].iloc[index]) :
+                if df["THERMO_pump_pressure_bar_x_axis"].iloc[index] is None:
                     continue
-                x_locally = unbase64_uncomp_unpickle(df["THERMO_pump_pressure_bar_x_axis_____pickle_zlib"].iloc[index])
-                y_locally = unbase64_uncomp_unpickle(df["THERMO_pump_pressure_bar_y_axis_____pickle_zlib"].iloc[index])
+                if all(pd.isnull(df["THERMO_pump_pressure_bar_x_axis"].iloc[index])) \
+                    or all(pd.isnull(df["THERMO_pump_pressure_bar_y_axis"].iloc[index])) :
+                    continue
+                x_locally = list(df["THERMO_pump_pressure_bar_x_axis"].iloc[index])
+                y_locally = list(df["THERMO_pump_pressure_bar_y_axis"].iloc[index])
 
                 # TODO Add Bruker pump pressure!
 
@@ -836,19 +864,19 @@ if __name__ == "__main__":
                 for index in df.index:
                     column_display_header = column_header
 
-                    if pd.isnull(df[column_header].iloc[index]):
+                    if df[column_header].iloc[index] is None:
                         # Skip, there is no info available
                         continue
 
-                    y_locally = unbase64_uncomp_unpickle(df[column_header].iloc[index])
-                    x_locally = unbase64_uncomp_unpickle(df["THERMO_Scan_StartTime_____pickle_zlib"].iloc[index])  # All of THERMO_EXTRA and THERMO_LOG are defined over the Retention tims / Scan StartTime
+                    y_locally = df[column_header].iloc[index]
+                    x_locally = df["THERMO_Scan_StartTime"].iloc[index]  # All of THERMO_EXTRA and THERMO_LOG are defined over the Retention tims / Scan StartTime
                     
                     # Keep only values for MS1 spectra  (e.g. for Lock Mass Correction or Ion Injection Time)
                     if any(x in column_header for x in ["Ion Injection Time", "LM Correction", "LM m/z-Correction"]):
-                        mslevel = unbase64_uncomp_unpickle(df["THERMO_Scan_msLevel_____pickle_zlib"].iloc[index])
+                        mslevel = df["THERMO_Scan_msLevel"].iloc[index]
                         x_locally = [x for x,y in zip(x_locally, mslevel) if y == 1]
                         y_locally = [float(x) for x,y in zip(y_locally, mslevel) if y == 1]
-                        column_display_header = column_header.split("_____")[0] + " (MS1 Level filtered)_____" + column_header.split("_____")[1]
+                        column_display_header = column_header + " (MS1 Level filtered)"
 
                     x += [float(_x) for _x in x_locally]
                     y += [float(_y) for _y in y_locally]
@@ -901,11 +929,13 @@ if __name__ == "__main__":
     # Figure 15_XXX: visualize all additional Bruker data (without a filter)
 
     if contains_bruker:
-        #bruker_time = unbase64_uncomp_unpickle(df["BRUKER_Time_____pickle_zlib"].iloc[0])
+        #bruker_time = unbase64_uncomp_unpickle(df["BRUKER_Time"].iloc[0])
         for column_header in df.columns:
-            if column_header == "BRUKER_Time_____pickle_zlib":
+            if column_header == "BRUKER_Time":
                 continue
-            if column_header == "BRUKER_MsMsType_____pickle_zlib":  # MsMsType codes for DIA/DDA for example. Doesn't need to be plotted.
+            if column_header == "BRUKER_MsMsType":  # MsMsType codes for DIA/DDA for example. Doesn't need to be plotted.
+                continue
+            if column_header.startswith("BRUKER_pump_pressure_bar"):  # Skip Pump Pressure
                 continue
             if column_header.startswith("BRUKER_"):
                 ### extract data from compressed columns and put them into long format
@@ -916,12 +946,12 @@ if __name__ == "__main__":
                 for index in df.index:
                     column_display_header = column_header
 
-                    if pd.isnull(df[column_header].iloc[index]):
+                    if df[column_header].iloc[index] is None:
                         # Skip, there is no info available
                         continue
 
-                    y_locally = unbase64_uncomp_unpickle(df[column_header].iloc[index])
-                    x_locally = unbase64_uncomp_unpickle(df["BRUKER_Time_____pickle_zlib"].iloc[index]) 
+                    y_locally = df[column_header].iloc[index]
+                    x_locally = df["BRUKER_Time"].iloc[index]
                     
                     x += [float(_x) for _x in x_locally]
                     y += [np.nan if _y is None else float(_y) for _y in y_locally]

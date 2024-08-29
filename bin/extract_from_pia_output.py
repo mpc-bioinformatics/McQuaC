@@ -179,7 +179,8 @@ def read_mzTab(pia_mzTAB, out_hdf5):
     }
     
     # Keys are added in order in dict, therefore we could leave out the order, but set this order statically to be save just in case!!!
-    keys = ["number_filtered_psms","psm_charge1","psm_charge2","psm_charge3","psm_charge4","psm_charge5","psm_charge_more","psm_missed_0","psm_missed_2","psm_missed_3","psm_missed_more"]
+    keys = ["number_filtered_psms","psm_charge1","psm_charge2","psm_charge3","psm_charge4","psm_charge5","psm_charge_more",
+        "psm_missed_0","psm_missed_1","psm_missed_2","psm_missed_3","psm_missed_more"]
     descriptions = [
         "PSMs filtered by an FDR-Score of 0.01",
         "proportion of identified MS2 spectra with charge 1",
@@ -197,7 +198,7 @@ def read_mzTab(pia_mzTAB, out_hdf5):
 
     for k, d in zip(keys, descriptions):
         add_entry_to_hdf5(
-            out_hdf5, k, data[k], (1,), "int32", "none", 
+            out_hdf5, k, data[k], (1,), "float64", "none", 
             description=d
         )
 

@@ -101,12 +101,12 @@ if __name__ == "__main__":
 
         prec_unknown = 0 if 0 not in num_ms2_prec_charges else num_ms2_prec_charges[0] / num_ms2_spectra    
         add_entry_to_hdf5(
-            out_h5, "MS2_PrecZ_Unknown", prec_unknown, (1,), "int32", "none",
+            out_h5, "MS2_PrecZ_Unknown", prec_unknown, (1,), "float64", "none",
             "Proportion of MS2 precursors with unknown charge state (may happen for older machines)."
         )
         for i in range(1, 6):
             add_entry_to_hdf5(
-                out_h5, "MS2_PrecZ_" + str(i), num_ms2_prec_charges[i] / num_ms2_spectra, (1,), "int32", "none",
+                out_h5, "MS2_PrecZ_" + str(i), num_ms2_prec_charges[i] / num_ms2_spectra, (1,), "float64", "none",
                 "Proportion of MS2 precursors with charge " + str(1) + "."
             )
         
@@ -115,7 +115,7 @@ if __name__ == "__main__":
             if key > 5:
                 precz_more += num_ms2_prec_charges[key]
         add_entry_to_hdf5(
-            out_h5, "MS2_PrecZ_more", precz_more / num_ms2_spectra, (1,), "int32", "none",
+            out_h5, "MS2_PrecZ_more", precz_more / num_ms2_spectra, (1,), "float64", "none",
             "Proportion of MS2 precursors with charge 6 and more."
         )
         
