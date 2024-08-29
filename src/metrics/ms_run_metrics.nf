@@ -78,15 +78,15 @@ process extract_headers_from_thermo_raw_files {
     path raw
 
     output:
-    path "${raw.baseName}-custom_headers.csv"
+    path "${raw.baseName}-custom_headers.hdf5"
 
     """
     # Pythonnet sometimes fails to exit and throws a mono error
-    extract_thermo_headers.py -raw ${raw} ${params.ms_run_metrics__thermo_headers} -out_csv ${raw.baseName}-custom_headers.csv || true
+    extract_thermo_headers.py -raw ${raw} ${params.ms_run_metrics__thermo_headers} -out_hdf5 ${raw.baseName}-custom_headers.hdf5 || true
 
     # Fail Check if no content was written
-    if ! [ -s "${raw.baseName}-custom_headers.csv" ];then
-        rm ${raw.baseName}-custom_headers.csv
+    if ! [ -s "${raw.baseName}-custom_headers.hdf5" ];then
+        rm ${raw.baseName}-custom_headers.hdf5
     fi
     """
 }
