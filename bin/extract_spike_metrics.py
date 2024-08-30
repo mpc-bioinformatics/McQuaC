@@ -79,7 +79,7 @@ if __name__ == "__main__":
             max_int = 0
             max_int_rt = -1
 
-            if len(intensities) > 0:
+            if intensities is not None and len(intensities) > 0:
                 max_int = max(intensities)
                 max_int_rt = rts[intensities.index(max_int)] * 60
 
