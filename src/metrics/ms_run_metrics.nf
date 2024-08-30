@@ -14,6 +14,9 @@ params.ms_run_metrics__thermo_headers = ""
  // Set if you want to extract specific headers from Bruker raw measurements, otherwise the default is used.
  // Have a look into the corresponding python script for the headers.
 params.ms_run_metrics__bruker_headers = ""
+// Set additional parameters for the mzml-statistics geeneration.
+// Have a look into the corresponding python script possible parameters.
+params.ms_run_metrics__mzml_statistics = ""
 // Memory for the Thermo Raw File Parser, used 24 GB for a Raw file with 257409 MS scans 
 /// and 4GB for a Raw file with 11352 MS scans (measured with `/usr/bin/time -v ...`). 10 GB seems legit for most cases.
 params.ms_run_metrics__thermo_raw_mem = "10 GB"
@@ -133,6 +136,6 @@ process extract_data_from_mzml {
     path("${mzml.baseName}-mzml_info.hdf5")
 
     """
-    extract_data_from_mzml.py -mzml ${mzml} -out_hdf5 ${mzml.baseName}-mzml_info.hdf5
+    extract_data_from_mzml.py -mzml ${mzml} -out_hdf5 ${mzml.baseName}-mzml_info.hdf5 ${params.ms_run_metrics__mzml_statistics}
     """
 }
