@@ -202,10 +202,16 @@ def read_mzTab(pia_mzTAB, out_hdf5):
             description=d
         )
 
-    add_entry_to_hdf5(
-        out_hdf5, "filtered_psms_ppm_error", ppm_error["filtered_psms_ppm_error"], (len(ppm_error["filtered_psms_ppm_error"]),), "float64", "ppm", 
-        description="PPM-Error from the calculated (theoretical) to the experimental (measured) precursor. We calculated here 'theoretical - calc'. "
-    )
+    if len(ppm_error["filtered_psms_ppm_error"]) > 0:
+        add_entry_to_hdf5(
+            out_hdf5, "filtered_psms_ppm_error", ppm_error["filtered_psms_ppm_error"], (len(ppm_error["filtered_psms_ppm_error"]),), "float64", "ppm", 
+            description="PPM-Error from the calculated (theoretical) to the experimental (measured) precursor. We calculated here 'theoretical - calc'. "
+        )
+    else:
+        add_entry_to_hdf5(
+            out_hdf5, "filtered_psms_ppm_error", np.nan, (1,), "float64", "ppm", 
+            description="PPM-Error from the calculated (theoretical) to the experimental (measured) precursor. We calculated here 'theoretical - calc'. "
+        )
 
 if __name__ == "__main__":
     run_pia_extraction()
