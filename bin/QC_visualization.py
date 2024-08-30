@@ -15,6 +15,7 @@ import base64
 import pickle
 import zlib
 import datetime
+import math
 
 # 3rd party imports
 import pandas as pd
@@ -45,9 +46,6 @@ def argparse_setup():
 
 if __name__ == "__main__":
     args = argparse_setup()
-    args.spikeins = True  # DEBUG
-    args.hdf5_file = "/home/luxii/git/Next-QC-Flow/work/fd/216ae9989df85a54eb0fb909417dae/complete_qc_data.hdf5"  # DEBUG
-
 
 ####################################################################################################
     # parameters
@@ -780,6 +778,9 @@ if __name__ == "__main__":
             for index in df.index:
                 if df["THERMO_pump_pressure_bar_x_axis"].iloc[index] is None:
                     continue
+                if type(df["THERMO_pump_pressure_bar_x_axis"].iloc[index]) is float \
+                    and math.isnan(df["THERMO_pump_pressure_bar_x_axis"].iloc[index]):
+                    continue
                 if all(pd.isnull(df["THERMO_pump_pressure_bar_x_axis"].iloc[index])) \
                     or all(pd.isnull(df["THERMO_pump_pressure_bar_y_axis"].iloc[index])) :
                     continue
@@ -867,6 +868,9 @@ if __name__ == "__main__":
                     if df[column_header].iloc[index] is None:
                         # Skip, there is no info available
                         continue
+                    if type(df[column_header].iloc[index]) is float \
+                        and math.isnan(df[column_header].iloc[index]):
+                        continue
 
                     y_locally = df[column_header].iloc[index]
                     x_locally = df["THERMO_Scan_StartTime"].iloc[index]  # All of THERMO_EXTRA and THERMO_LOG are defined over the Retention tims / Scan StartTime
@@ -948,6 +952,9 @@ if __name__ == "__main__":
 
                     if df[column_header].iloc[index] is None:
                         # Skip, there is no info available
+                        continue
+                    if type(df[column_header].iloc[index]) is float \
+                        and math.isnan(df[column_header].iloc[index]):
                         continue
 
                     y_locally = df[column_header].iloc[index]

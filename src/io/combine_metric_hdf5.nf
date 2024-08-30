@@ -39,8 +39,7 @@ workflow combine_metric_hdf5 {
 process merge_metrics {
 	container {python_image}
 
-	publishDir "${params.main_outdir}/qc_hdf5_data", mode:'copy'		// TODO: this should probably rather use the new reporting facilities
-
+	// publishDir "${params.main_outdir}/qc_hdf5_data", mode:'copy'		// TODO: this should probably rather use the new reporting facilities
 
 	input:
 	tuple val(runBaseName), path(metrics)
@@ -56,8 +55,7 @@ process merge_metrics {
 process merge_metrics_to_one_file {
 	container {python_image}
 
-	publishDir "${params.main_outdir}/qc_hdf5_data", mode:'copy'		// TODO: this should probably rather use the new reporting facilities
-
+	// publishDir "${params.main_outdir}/qc_hdf5_data", mode:'copy'		// TODO: this should probably rather use the new reporting facilities
 
 	input:
 	path(metrics)
