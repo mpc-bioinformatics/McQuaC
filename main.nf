@@ -136,7 +136,7 @@ process visualize_results {
     path("*.json")
 	path("*.html")
 	path("*.csv")
-	path("*.hdf5")
+	path(combined_metrics_hdf5)
 	path("fig13_ionmaps")
 	path("THERMO_PLOTS_FIG15")
 
