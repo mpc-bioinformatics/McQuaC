@@ -69,7 +69,7 @@ process convert_bruker_raw_folders {
     containerOptions { "-v ${raw_folder.getParent()}:/data" }
     errorStrategy 'ignore'
     // Uses all cores
-    cpus Runtime.runtime.availableProcessors()
+    cpus 4
     memory params.file_conversion__bruker_raw_conversion_mem
 
     input:
