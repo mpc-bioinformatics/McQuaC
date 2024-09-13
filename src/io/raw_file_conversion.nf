@@ -70,7 +70,7 @@ process convert_bruker_raw_folders {
     container 'mfreitas/tdf2mzml'
     containerOptions { "-v ${raw_folder.getParent()}:/data" }
     errorStrategy 'ignore'
-    // Uses all cores
+    
     cpus params.file_conversion__bruker_raw_conversion_cpu
     memory params.file_conversion__bruker_raw_conversion_mem
 
