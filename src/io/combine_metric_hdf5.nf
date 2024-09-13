@@ -22,10 +22,10 @@ workflow combine_metric_hdf5 {
 	
 	main:
 	 	merged_files = merge_metrics(runbase_to_hdf5)
-		complete_hdf_file = merge_metrics_to_one_file(merged_files.collect())
+		complete_hdf_files = merged_files.collect()
 	
 	emit:
-		complete_hdf_file
+		complete_hdf_files
 }
 
 /*
@@ -49,21 +49,5 @@ process merge_metrics {
 
 	"""
 	combine_hdf5_files.py -hdf_out_name ${runBaseName}.hdf5 $metrics
-	"""
-}
-
-process merge_metrics_to_one_file {
-	container {python_image}
-
-	// publishDir "${params.main_outdir}/qc_hdf5_data", mode:'copy'		// TODO: this should probably rather use the new reporting facilities
-
-	input:
-	path(metrics)
-
-	output:
-	path "complete_qc_data.hdf5"
-
-	"""
-	combine_hdf5_files.py -put_under_subdataset -hdf_out_name complete_qc_data.hdf5 $metrics
 	"""
 }
