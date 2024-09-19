@@ -16,6 +16,7 @@ import pickle
 import zlib
 import datetime
 import math
+import pathlib
 
 # 3rd party imports
 import pandas as pd
@@ -35,7 +36,7 @@ pio.renderers.default = "png"
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-hdf5_file", help="CSV file with QC data.", default=None)
+    parser.add_argument("-hdf5_folder", help="Folder containing hdf5 files, one for each processed raw file", default=None)
     parser.add_argument("-group", help="List of the experimental group (comma-separated).", default=None)
     parser.add_argument("-output", help="Output folder for the plots as json files.", default = "graphics")
     parser.add_argument("-tic_overlay_offset", help = "Offset for TIC overlay plots", default = 0)
@@ -50,8 +51,11 @@ if __name__ == "__main__":
 ####################################################################################################
     # parameters
 
-    ### use HCC dataset for testing
-    hdf5file = args.hdf5_file 
+    ### get hdf5 files
+    hdf5_folder = args.hdf5_folder
+    hdf5_files = [f for f in os.listdir(hdf5_folder) if f.endswith('.hdf5')] 
+    hdf5_file_names = [re.sub(r'\.hdf5$', '', f) for f in hdf5_files] # file names without file ending
+    nr_rawfiles = len(hdf5_files)
 
     ### grouping
     ### If use_groups = False, PCA plots are coloured by timestamp. If True, PCA plots are coloured by group.
@@ -67,81 +71,22 @@ if __name__ == "__main__":
     fig_show = args.fig_show
     analyse_spikeins = args.spikeins
 
-    #csv_file = "temp/quality_control_20230920.csv"
 
-####################################################################################################
-    # read csv file
-
-    # Wrap from hdf5 back to pd dataframe
-    with h5py.File(hdf5file, "r") as in_h5:
-        files = list(in_h5.keys())
-        all_columns = set([y for f in files for y in in_h5[f].keys()] + ["filename"])
-        df = pd.DataFrame(columns=list(all_columns))
-
-        for f in files:
-            new_row = pd.Series()
-            for c in all_columns:
-                if c.endswith(".zip"):
-                    new_row[c] = None  # Skip files
-                elif c in "filename":
-                    new_row[c] = f  # Skip files
-                elif f + "/" + c in in_h5:
-                    new_row[c] = in_h5[f + "/" + c][:]
-                    if len(new_row[c]) == 1:
-                        new_row[c] = new_row[c][0]
-                else:
-                    new_row[c] = None
-            df = pd.concat([df, pd.DataFrame([new_row], columns=new_row.index)]).reset_index(drop=True)
-
-
-    nr_rawfiles = len(df)
-
-    # add filenames if not present
-    def add_filename_column(dataframe, column_name):
-        if column_name not in dataframe.columns:
-            filenames = [f"file{i}" for i in range(len(dataframe))]
-            dataframe.insert(0, column_name, filenames)
-        return dataframe
-    df = add_filename_column(df, "filename")
-    
-    # sort data by name run name to have the right order for the plots
-    df = df.sort_values(by = "filename")
-    df.reset_index(drop = True, inplace = True)
-    
-    
-    ### does the dataframe contain data from Bruker or Thermo files?
-    def contains_prefix(dataframe, prefix):
-        return any(column.startswith(prefix) for column in dataframe.columns)
-    
-    contains_bruker = contains_prefix(df, prefix = "BRUKER_")
-    contains_thermo = contains_prefix(df, prefix = "THERMO_")
-
-    
-
-####################################################################################################
-    # short function to extract infos from compressed columns
-    def unbase64_uncomp_unpickle(x: bytes) -> list:
-        unb64 = base64.b64decode(x)
-        uncomp = zlib.decompress(unb64)
-        return pickle.loads(uncomp)
-
-
-    ############################################################################################
-    # Table 0: table with overview over QC measures. 
-    feature_list1 = ["filename",
-                     #"timestamp", # time stamp will be inserted later after transforming it into date format
-                     "number_ungrouped_proteins",
-                     "number_proteins",
-                     "number_filtered_peptides",
-                     "number_filtered_psms",
-                     "total_num_ms1",
-                     "total_num_ms2",
-                     "Total_Ion_Current_Max",
-                     "Base_Peak_Intensity_Max",
-                     "Total_Ion_Current_Max_Up_To_105",
-                     "Base_Peak_Intensity_Max_Up_To_105" 
-                    ]
-    feature_list2 = ["total_num_ident_features",
+############################################################################################
+# Feature list: features for initial table 0
+    feature_list = ["filename", # will be filled in later as name of the hdf5 file
+                    "timestamp", # will be converted later to human-readable format
+                    "number_ungrouped_proteins",
+                    "number_proteins",
+                    "number_filtered_peptides",
+                    "number_filtered_psms",
+                    "total_num_ms1",
+                    "total_num_ms2",
+                    "Total_Ion_Current_Max",
+                    "Base_Peak_Intensity_Max",
+                    "Total_Ion_Current_Max_Up_To_105",
+                    "Base_Peak_Intensity_Max_Up_To_105", 
+                    "total_num_ident_features",
                     "total_num_features",
                     "RT_duration", 
                     "accumulated-MS1_TIC",
@@ -178,6 +123,7 @@ if __name__ == "__main__":
                     "MS2_PrecZ_4",
                     "MS2_PrecZ_5",
                     "MS2_PrecZ_more", 
+                    "MS2_PrecZ_Unknown",
                     "num_features_charge_1",
                     "num_features_charge_2",
                     "num_features_charge_3",
@@ -201,31 +147,62 @@ if __name__ == "__main__":
                     # "THEREMO_TUNE_ '''Vaporizer Temp. (+ or +-)'''"
                     # "THEREMO_TUNE_ '''Vaporizer Temp. (-)'''"
                 ]
-    
-    x = [datetime.datetime.utcfromtimestamp(x) for x in df["timestamp"]] # convert timestamp to datetime
-    
-    ### for now, just check if the items in featurelist are really in the data frame and if not, skip them
-    valid_features1 = [feature for feature in feature_list1 if feature in df.columns]
-    df_table0_1 = df[valid_features1]
-    valid_features2 = [feature for feature in feature_list2 if feature in df.columns]
-    df_table0_2 = df[valid_features2]
-    
-    df_table0 = df_table0_1.loc[:,:].copy()
-    df_table0.insert(1, "timestamp", x)
-
-    ### if spike-ins are analyzed, add them to the table
-    # TODO KS --> SpikeIns are already in HDF5 file if flag is set. Otherwise these columns are missing
-    # if analyse_spikeins:
-    #     spikes = []
-    #     for index in df.index:
-    #         spike_tmp = unbase64_uncomp_unpickle(df["SPIKEINS"].iloc[index])
-    #         spikes.append(spike_tmp)
-    #     spikes_df = pd.DataFrame(spikes)
-    #     df_table0 = pd.concat([df_table0, spikes_df], axis = 1)
 
 
-    # df_table0 = pd.concat([df_table0, df_table0_2], axis = 1)
-    df_table0.to_csv(output_path + "/00_table_summary.csv", index = False)
+
+####################################################################################################
+    # build pandas data frame with all columns for table 0
+    # for each hdf5 file fill a new row with the corresponding data
+    df = pd.DataFrame(columns=list(feature_list))
+    for file in hdf5_files:
+        hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
+        new_row = pd.Series(dtype='float64')
+        for feature in feature_list:
+            if feature in hdf5_tmp:
+                new_row[feature] = hdf5_tmp[feature][:]
+                if len(new_row[feature]) == 1:
+                    new_row[feature] = new_row[feature][0]
+            else:
+                new_row[feature] = None
+        df = pd.concat([df, pd.DataFrame([new_row], columns=new_row.index)]).reset_index(drop=True)
+
+    ## add file names
+    ## TODO: get rid of hdf5 file ending!
+    df["filename"] = hdf5_file_names
+    ## convert timestamp to something human-readable
+    x = [datetime.datetime.utcfromtimestamp(x) for x in df["timestamp"]]
+    df["timestamp"] = x
+
+    
+    ### TODO: get info if Bruker or Thermo data is present
+    ### does the dataframe contain data from Bruker or Thermo files?
+    #def contains_prefix(dataframe, prefix):
+    #    return any(column.startswith(prefix) for column in dataframe.columns)
+    
+    #contains_bruker = contains_prefix(df, prefix = "BRUKER_")
+    #contains_thermo = contains_prefix(df, prefix = "THERMO_")
+
+    ############################################################################################
+    # If spike-ins are analyzed, add them to the table
+    if analyse_spikeins:
+        spike_columns = [key for key in hdf5_tmp.keys() if re.match("SPIKE", key)]
+        df_spikes = pd.DataFrame(columns=list(spike_columns))
+        for file in hdf5_files:
+            hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
+            new_row = pd.Series(dtype='float64')
+            for feature in spike_columns:
+                if feature in hdf5_tmp:
+                    new_row[feature] = hdf5_tmp[feature][:]
+                    if len(new_row[feature]) == 1:
+                        new_row[feature] = new_row[feature][0]
+                else:
+                    new_row[feature] = None
+            df_spikes = pd.concat([df_spikes, pd.DataFrame([new_row], columns=new_row.index)]).reset_index(drop=True)
+        df_table0 = pd.concat([df.loc[:,"filename":"Base_Peak_Intensity_Max_Up_To_105"], df_spikes, df.loc[:,"total_num_ident_features":]], axis=1).reindex(df.index)
+    else: 
+        df_table0 = df.copy()
+        
+    df_table0.to_csv(output_path + "/00_table_summary.csv", index = False)        
 
 ################################################################################################
     # Figure 1: Barplot for total number of MS1 and MS2 spectra
@@ -239,7 +216,6 @@ if __name__ == "__main__":
         fig1.show()
     with open(output_path +"/fig1_barplot_MS1_MS2.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig1))
-    #pyo.plot(fig1, filename = output_path +"/fig1_barplot_MS1_MS2.html")
     fig1.write_html(file = output_path +"/fig1_barplot_MS1_MS2.html", auto_open = False)
 
 
@@ -271,7 +247,6 @@ if __name__ == "__main__":
         fig2.show()
     with open(output_path +"/fig2_barplot_PSMs_peptides_proteins.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig2))
-    #pyo.plot(fig2, filename = output_path +"/fig2_barplot_PSMs_peptides_proteins.html")
     fig2.write_html(file = output_path +"/fig2_barplot_PSMs_peptides_proteins.html", auto_open = False)
     
 ################################################################################################
@@ -286,12 +261,36 @@ if __name__ == "__main__":
         fig3.show()
     with open(output_path +"/fig3_barplot_features.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig3))
-    #pyo.plot(fig3, filename = output_path +"/fig3_barplot_features.html")
     fig3.write_html(file = output_path +"/fig3_barplot_features.html", auto_open = False)
 
 
 ####################################################################################################
     ## Figure 4: TIC Overlay as Lineplot
+    
+    tic_df = []
+    i = 0
+    for file in hdf5_files:
+        hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
+        tic = dict(TIC = hdf5_tmp["ms1_tic_array"][:],
+                RT = hdf5_tmp["ms1_rt_array"][:],
+                filename=[hdf5_file_names[i]]*len(hdf5_tmp["ms1_tic_array"][:]))
+        tic = pd.DataFrame(tic)
+        tic_df.append(tic)
+        i += 1
+    tic_df2 = pd.concat(tic_df)
+        
+    fig4 = px.line(tic_df2, x="RT", y="TIC", color = "filename", title = "TIC overlay")
+    fig4.update_traces(line=dict(width=0.5))
+    fig4.update_yaxes(exponentformat="E") 
+    if fig_show:
+        fig4.show()
+    with open(output_path +"/fig4_TIC_overlay.json", "w") as json_file:
+        json_file.write(plotly.io.to_json(fig4))
+    fig4.write_html(file = output_path +"/fig4_TIC_overlay.html", auto_open = False)
+    
+    ### TODO: test the offset functionality
+    
+    '''
     offset_ratio = float(args.tic_overlay_offset)
 
     tic_df = []
@@ -323,7 +322,7 @@ if __name__ == "__main__":
         json_file.write(plotly.io.to_json(fig4))
     #pyo.plot(fig4, filename = output_path +"/fig4_TIC_overlay.html")
     fig4.write_html(file = output_path +"/fig4_TIC_overlay.html", auto_open = False)
-
+    '''
 
 #################################################################################################
     # Figure 5: Barplot TIC quartiles
@@ -335,7 +334,6 @@ if __name__ == "__main__":
         fig5.show()
     with open(output_path +"/fig5_barplot_TIC_quartiles.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig5))
-    #pyo.plot(fig5, filename = output_path +"/fig5_barplot_TIC_quartiles.html")
     fig5.write_html(file = output_path +"/fig5_barplot_TIC_quartiles.html", auto_open = False)
 
 ################################################################################################
@@ -348,7 +346,6 @@ if __name__ == "__main__":
         fig6.show()
     with open(output_path +"/fig6_barplot_MS1_TIC_quartiles.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig6))
-    #pyo.plot(fig6, filename = output_path +"/fig6_barplot_MS1_TIC_quartiles.html")   
     fig6.write_html(file = output_path +"/fig6_barplot_MS1_TIC_quartiles.html", auto_open = False)
 
 ################################################################################################
@@ -361,7 +358,6 @@ if __name__ == "__main__":
         fig7.show()
     with open(output_path +"/fig7_barplot_MS2_TIC_quartiles.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig7))
-    #pyo.plot(fig7, filename = output_path +"/fig7_barplot_MS2_TIC_quartiles.html")
     fig7.write_html(file = output_path +"/fig7_barplot_MS2_TIC_quartiles.html", auto_open = False)
 
 ################################################################################################
@@ -374,12 +370,10 @@ if __name__ == "__main__":
         fig8.show()
     with open(output_path +"/fig8_barplot_precursor_chargestate.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig8))
-    #pyo.plot(fig8, filename = output_path +"/fig8_barplot__precursor_chargestate.html")
     fig8.write_html(file = output_path +"/fig8_barplot__precursor_chargestate.html", auto_open = False)
 
 ################################################################################################
     # Figure 9: PSM charge states (of identified spectra)
-    #### TODO: relative statt absolute Zahlen!
     
     if ("psm_charge1" in df.columns):
         df_pl9 = df[["filename", 'psm_charge1', 'psm_charge2', 'psm_charge3', 'psm_charge4', 'psm_charge5', 'psm_charge_more']]
@@ -404,12 +398,10 @@ if __name__ == "__main__":
         fig9.show()
     with open(output_path +"/fig9_barplot_PSM_chargestate.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig9))
-    #pyo.plot(fig9, filename = output_path +"/fig9_barplot_PSM_chargestate.html")
     fig9.write_html(file = output_path +"/fig9_barplot_PSM_chargestate.html", auto_open = False)
 
 ################################################################################################
     # Figure 10: Missed cleavages of PSMs
-    ### TODO: relative statt absolute Zahlen!
     
     if ("psm_missed_0" in df.columns):
         df_pl10 = df[["filename", 'psm_missed_0', 'psm_missed_1', 'psm_missed_2', 'psm_missed_3', 'psm_missed_more']]
@@ -435,7 +427,6 @@ if __name__ == "__main__":
         fig10.show()
     with open(output_path +"/fig10_barplot_PSM_missedcleavages.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig10))
-    #pyo.plot(fig10, filename = output_path +"/fig10_barplot_PSM_missedcleavages.html")
     fig10.write_html(file = output_path +"/fig10_barplot_PSM_missedcleavages.html", auto_open = False)
 
 
@@ -457,8 +448,6 @@ if __name__ == "__main__":
         else:
             t_scaled_tmp = (t - mintime)/(maxtime-mintime)*100 
         t_scaled.append(t_scaled_tmp)
-
-
 
     # Fig 11 PCA on all data
     if nr_rawfiles > 1:
@@ -590,13 +579,11 @@ if __name__ == "__main__":
         fig11.show()
     with open(output_path +"/fig11a_PCA_all.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig11))
-    #pyo.plot(fig11, filename = output_path +"/fig11a_PCA_all.html")
     fig11.write_html(file = output_path +"/fig11a_PCA_all.html", auto_open = False)
     if fig_show: 
         fig11_loadings.show()
     with open(output_path +"/fig11b_Loadings_all.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig11_loadings))
-    #pyo.plot(fig11_loadings, filename = output_path +"/fig11b_Loadings_all.html")
     fig11_loadings.write_html(file = output_path +"/fig11b_Loadings_all.html", auto_open = False)
 
 ################################################################################################
@@ -719,26 +706,27 @@ if __name__ == "__main__":
         fig12.show()
     with open(output_path +"/fig12a_PCA_raw.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig12)) 
-    #pyo.plot(fig12, filename = output_path +"/fig12_PCA_raw.html")
     fig12.write_html(file = output_path +"/fig12_PCA_raw.html", auto_open = False)
     if fig_show: 
         fig12_loadings.show()
     with open(output_path +"/fig12b_Loadings_raw.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig12_loadings))
-    #pyo.plot(fig12_loadings, filename = output_path +"/fig12b_Loadings_raw.html")
     fig12_loadings.write_html(file = output_path +"/fig12b_Loadings_raw.html", auto_open = False)
         
 
 #################################################################################################
     ### Fig 13: Ion Maps (one for each raw file)
+
     ionmap_df = []
-    for index in df.index:
-        tmp = dict(RT = df["ms2_rt_array"].iloc[index],
-            MZ = df["ms2_mz_array"].iloc[index],
-            TIC = df["ms2_tic_array"].iloc[index],
-            filename = [df["filename"].iloc[index]]*len(df["ms2_rt_array"].iloc[index]))
+    i = 0
+    for file in hdf5_files:
+        hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
+        tmp = dict(RT = hdf5_tmp["ms2_rt_array"][:],
+                MZ = hdf5_tmp["ms2_mz_array"][:],
+                filename=[hdf5_file_names[i]]*len(hdf5_tmp["ms2_rt_array"][:]))
         tmp = pd.DataFrame(tmp)
         ionmap_df.append(tmp)
+        i += 1
     ionmap_df2 = pd.concat(ionmap_df)
 
     # create folder to store ion maps
@@ -752,11 +740,8 @@ if __name__ == "__main__":
         fig13_tmp.update_layout(width = 1500, height = 1000, 
                     xaxis_title = "Retention Time (seconds)", 
                     yaxis_title = "m/z")
-        #if fig_show: 
-            #fig12_tmp.show()
         with open(output_path +"/fig13_ionmaps/fig13_ionmap_" + file + ".json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig13_tmp))
-        #pyo.plot(fig13_tmp, filename = output_path +"/fig13_ionmaps/fig13_ionmap_" + file + ".html")
         fig13_tmp.write_html(file = output_path +"/fig13_ionmaps/fig13_ionmap_" + file + ".html", auto_open = False)
 
     if fig_show:
@@ -766,6 +751,7 @@ if __name__ == "__main__":
 ################################################################################################
     ### Figure 14: Pump Pressure
 
+    '''
     if contains_thermo:
         if "THERMO_pump_pressure_bar_x_axis" in df.columns:
 
@@ -850,6 +836,7 @@ if __name__ == "__main__":
         json_file.write(plotly.io.to_json(fig14))
     #pyo.plot(fig14, filename = output_path +"/fig14_Pump_pressure.html")
     fig14.write_html(file = output_path +"/fig14_Pump_pressure.html", auto_open = False)
+
 
 ################################################################################################
     # Figure 15_XXX: visualize all THERMO_LOG and THERMO_EXTRA (without a filter)
@@ -1003,7 +990,7 @@ if __name__ == "__main__":
                 fig15.write_html(file = output_path + os.sep + "BRUKER_PLOTS_FIG15" + os.sep + "{}.html".format(re.sub('\W+','', column_title)), auto_open = False)
     else:
         os.makedirs(output_path + os.sep + "BRUKER_PLOTS_FIG15", exist_ok=True) 
-    
+    '''
 
 
 # %%
