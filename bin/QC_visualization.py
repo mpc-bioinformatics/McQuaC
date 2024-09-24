@@ -9,14 +9,14 @@ import argparse
 #from io import BytesIO
 #from pathlib import Path
 #import zipfile
-import ast
+#import ast
 import os
-import base64
-import pickle
-import zlib
-import datetime
-import math
-import pathlib
+#import base64
+#import pickle
+#import zlib
+from datetime import datetime, timezone
+#import math
+#import pathlib
 
 # 3rd party imports
 import pandas as pd
@@ -142,10 +142,10 @@ if __name__ == "__main__":
                     "psm_missed_more"   
                     # TODO we should add then dynamically. Iow, we could thest if it contains binary data and if not include it into the list
                     # TODO These below are Thermo TUNE Information which is one dimensional
-                    # "THEREMO_TUNE_ '''Ion Transfer Tube Temperature (+ or +-)'''"
-                    # "THEREMO_TUNE_ '''Ion Transfer Tube Temperature (-)'''"
-                    # "THEREMO_TUNE_ '''Vaporizer Temp. (+ or +-)'''"
-                    # "THEREMO_TUNE_ '''Vaporizer Temp. (-)'''"
+                    # "THERMO_TUNE_ '''Ion Transfer Tube Temperature (+ or +-)'''"
+                    # "THERMO_TUNE_ '''Ion Transfer Tube Temperature (-)'''"
+                    # "THERMO_TUNE_ '''Vaporizer Temp. (+ or +-)'''"
+                    # "THERMO_TUNE_ '''Vaporizer Temp. (-)'''"
                 ]
 
 
@@ -167,20 +167,34 @@ if __name__ == "__main__":
         df = pd.concat([df, pd.DataFrame([new_row], columns=new_row.index)]).reset_index(drop=True)
 
     ## add file names
-    ## TODO: get rid of hdf5 file ending!
     df["filename"] = hdf5_file_names
     ## convert timestamp to something human-readable
-    x = [datetime.datetime.utcfromtimestamp(x) for x in df["timestamp"]]
+    x = [datetime.fromtimestamp(x, timezone.utc) for x in df["timestamp"]]
     df["timestamp"] = x
 
     
-    ### TODO: get info if Bruker or Thermo data is present
-    ### does the dataframe contain data from Bruker or Thermo files?
-    #def contains_prefix(dataframe, prefix):
-    #    return any(column.startswith(prefix) for column in dataframe.columns)
-    
-    #contains_bruker = contains_prefix(df, prefix = "BRUKER_")
-    #contains_thermo = contains_prefix(df, prefix = "THERMO_")
+    ### get info for each file if it is a Bruker or Thermo file
+    is_bruker = []
+    is_thermo = []
+    add_thermo_headers = []
+    add_bruker_headers = []
+
+    for file in hdf5_files:
+        hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
+        keys_tmp = list(hdf5_tmp.keys())
+        
+        if any(keys.startswith("THERMO") for keys in hdf5_tmp.keys()):
+            is_thermo.extend([True])
+            is_bruker.extend([False])
+            add_thermo_headers.extend([key for key in keys_tmp if key.startswith("THERMO")])
+        if any(keys.startswith("BRUKER") for keys in hdf5_tmp.keys()):
+            is_thermo.extend([False])
+            is_bruker.extend([True])
+            add_bruker_headers.extend([key for key in keys_tmp if key.startswith("BRUKER")])
+
+    ### remove duplicates
+    add_thermo_headers = set(add_thermo_headers)
+    add_bruker_headers = set(add_bruker_headers)
 
     ############################################################################################
     # If spike-ins are analyzed, add them to the table
@@ -751,67 +765,47 @@ if __name__ == "__main__":
 ################################################################################################
     ### Figure 14: Pump Pressure
 
-    '''
-    if contains_thermo:
-        if "THERMO_pump_pressure_bar_x_axis" in df.columns:
-
-            ### TODO: generate empty plot if this column is missing
-            ### TODO: why is this plot also misisng for EXII???
-            ### extract data from compressed columns and put them into long format
-            x = []
-            y = []
-            fn = []
-            for index in df.index:
-                if df["THERMO_pump_pressure_bar_x_axis"].iloc[index] is None:
-                    continue
-                if type(df["THERMO_pump_pressure_bar_x_axis"].iloc[index]) is float \
-                    and math.isnan(df["THERMO_pump_pressure_bar_x_axis"].iloc[index]):
-                    continue
-                if all(pd.isnull(df["THERMO_pump_pressure_bar_x_axis"].iloc[index])) \
-                    or all(pd.isnull(df["THERMO_pump_pressure_bar_y_axis"].iloc[index])) :
-                    continue
-                x_locally = list(df["THERMO_pump_pressure_bar_x_axis"].iloc[index])
-                y_locally = list(df["THERMO_pump_pressure_bar_y_axis"].iloc[index])
-
-                # TODO Add Bruker pump pressure!
-
-                if x_locally is None:
-                    #print(f"x is None at {index} => {df['filename'].iloc[index]}")
-                    continue
-                if y_locally is None:
-                    #print(f"y is None at {index} => {df['filename'].iloc[index]}")
-                    continue
-                if len(x_locally) != len(y_locally):
-                    raise ValueError("x and y does not have same length")
-
-
-                # With more than 10000 datapoints plotting the data
-                # leads to unnecessary delay. Interpolating 10000 datapoints is usually enough.
-                if len(x_locally) > 10000:
-                    samples = int(len(x_locally) / 10000)
-                    # Explictly adding the last datapoint to make sure we cover rounding errors when calculating `sample`
-                    x_locally = [x_locally[i] for i in range(0, len(x_locally), samples)] + x_locally[-1:]
-                    y_locally = [y_locally[i] for i in range(0, len(y_locally), samples)] + y_locally[-1:]
-                x += x_locally
-                y += y_locally
-                fn += [df["filename"].iloc[index]] * len(x_locally)
-
-            pp_df2 = pd.DataFrame({
-                "filename": fn,
-                "x": x,
-                "y": y
-            })
+    ### only for Thermo, Bruker pump pressure is plotted as one of the extra plots in figure 15
+    if any(is_thermo):
+        pump_df = []
+        i = 0
+        for file in hdf5_files:
+            #file = hdf5_files[i]
+            hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
+            if "THERMO_pump_pressure_bar_x_axis" in hdf5_tmp.keys() and "THERMO_pump_pressure_bar_y_axis" in hdf5_tmp.keys():
+                x = hdf5_tmp["THERMO_pump_pressure_bar_x_axis"][:]
+                y = hdf5_tmp["THERMO_pump_pressure_bar_y_axis"][:]
+                
+                # use not more than 10000 data points. If data has more than 10000 data points, take every nth data point        
+                if len(x) > 10000: 
+                    samples = int(len(x) / 10000)
+                    x = [x[i] for i in range(0, len(x), samples)] 
+                    y = [y[i] for i in range(0, len(y), samples)] 
+                    
+                pump_df_tmp = dict(filename = hdf5_file_names[i],
+                                    x = x,
+                                    y = y)
+                pump_df_tmp = pd.DataFrame(pump_df_tmp)
+                
+                pump_df.append(pump_df_tmp)
+            i += 1
             
-    else: 
-        pp_df2 = pd.DataFrame()
-        
-    if not pp_df2.empty:
-        fig14 = px.line(pp_df2, x="x", y="y", color = "filename", title = "Pump Pressure")
+
+        pump_df2 = pd.DataFrame()
+        if type(x) == list:
+            pump_df2 = pd.concat(pump_df)
+        elif type(x) == pd.DataFrame:  # if only one raw file has pump pressure data available
+            pump_df2 = pump_df
+
+        ### TODO: what if none of the files has pump pressure data available?
+
+        fig14 = px.line(pump_df2, x="x", y="y", color = "filename", title = "Pump Pressure")
         fig14.update_traces(line=dict(width=0.5))
         fig14.update_yaxes(exponentformat="E") 
         fig14.update_layout(width = 1500, height = 1000, 
                             xaxis_title = "Time (min)", 
                             yaxis_title = "Pump pressure")
+        fig14.write_html(file = output_path +"/fig14_Pump_pressure.html", auto_open = False)
         
     else:     
         
@@ -834,67 +828,76 @@ if __name__ == "__main__":
         fig14.show()
     with open(output_path +"/fig14_Pump_pressure.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig14))
-    #pyo.plot(fig14, filename = output_path +"/fig14_Pump_pressure.html")
     fig14.write_html(file = output_path +"/fig14_Pump_pressure.html", auto_open = False)
 
 
-################################################################################################
-    # Figure 15_XXX: visualize all THERMO_LOG and THERMO_EXTRA (without a filter)
 
-    if contains_thermo:
-        for column_header in df.columns:
-            if column_header.startswith("THERMO_LOG_") or column_header.startswith("THERMO_EXTRA_"):
+
+################################################################################################
+    # Figure 15_XXX: visualize all THERMO_LOG and THERMO_EXTRA data
+
+    os.makedirs(output_path + os.sep + "THERMO_PLOTS_FIG15", exist_ok=True) 
+    if any(is_thermo):
+        for header in add_thermo_headers:
+            if header.startswith("THERMO_LOG_") or header.startswith("THERMO_EXTRA_"):  # this exludes the pump pressure data, MS level and scan start time
                 ### extract data from compressed columns and put them into long format
                 x = [] # x-axis Scan_StartTime_zlib
                 y = [] # y-axis THERMO HEADER
                 fn = [] # filename
+                
+                i = 0
+                for file in hdf5_files:
+                #for index in df.index:
+                    hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
+                    #column_display_header = header
 
-                for index in df.index:
-                    column_display_header = column_header
-
-                    if df[column_header].iloc[index] is None:
-                        # Skip, there is no info available
+                    if header not in hdf5_tmp.keys():
+                        # Skip, there is no info available for this hdf5 file
+                        i += 1
                         continue
-                    if type(df[column_header].iloc[index]) is float \
-                        and math.isnan(df[column_header].iloc[index]):
-                        continue
+                    
+                    #if type(df[header].iloc[index]) is float \
+                    #    and math.isnan(df[header].iloc[index]):
+                    #    continue
 
-                    y_locally = df[column_header].iloc[index]
-                    x_locally = df["THERMO_Scan_StartTime"].iloc[index]  # All of THERMO_EXTRA and THERMO_LOG are defined over the Retention tims / Scan StartTime
+                    y_tmp = hdf5_tmp[header][:]
+                    x_tmp = hdf5_tmp["THERMO_Scan_StartTime"][:]  # All of THERMO_EXTRA and THERMO_LOG are defined over the Retention tims / Scan StartTime
                     
                     # Keep only values for MS1 spectra  (e.g. for Lock Mass Correction or Ion Injection Time)
-                    if any(x in column_header for x in ["Ion Injection Time", "LM Correction", "LM m/z-Correction"]):
-                        mslevel = df["THERMO_Scan_msLevel"].iloc[index]
-                        x_locally = [x for x,y in zip(x_locally, mslevel) if y == 1]
-                        y_locally = [float(x) for x,y in zip(y_locally, mslevel) if y == 1]
-                        column_display_header = column_header + " (MS1 Level filtered)"
+                    display_header = header
+                    if any(x in header for x in ["Ion Injection Time", "LM Correction", "LM m/z-Correction"]):
+                        mslevel = hdf5_tmp["THERMO_Scan_msLevel"][:]
+                        x_tmp = [x for x,y in zip(x_tmp, mslevel) if y == 1]
+                        y_tmp = [float(x) for x,y in zip(y_tmp, mslevel) if y == 1]
+                        display_header = header + " (MS1 Level filtered)" ## add info about MS1 level filtering to the plot title
 
-                    x += [float(_x) for _x in x_locally]
-                    y += [float(_y) for _y in y_locally]
-                    fn += [df["filename"].iloc[index]] * len(x_locally)
+                    x += [float(_x) for _x in x_tmp]
+                    y += [float(_y) for _y in y_tmp]
+                    fn += [hdf5_file_names[i]] * len(x_tmp)
+                    i += 1
 
 
-                local_df = pd.DataFrame({
+                df_tmp = pd.DataFrame({
                     "filename": fn,
                     "x": x,
                     "y": y
                 })
-
-                column_title = column_display_header.split("_____")[0]
-                if not local_df.empty:
-                    fig15 = px.line(local_df, x="x", y="y", color = "filename", title = column_title)
-                    fig15.update_traces(line=dict(width=0.5))
+                
+                #print(df_tmp.head())
+                #column_title = column_display_header.split("_____")[0]
+                if not df_tmp.empty:
+                    fig15 = px.line(df_tmp, x = "x", y = "y", color = "filename", title = display_header)
+                    fig15.update_traces(line = dict(width = 0.5))
                     fig15.update_yaxes(exponentformat="E") 
                     fig15.update_layout(width = int(1500), height = int(1000), 
                                         xaxis_title = "Time (min)", 
-                                        yaxis_title = column_title)
-
+                                        yaxis_title = display_header)
                 else: 
                     fig15 = go.Figure()
                     fig15.add_annotation(
                         x=0.5,
                         y=0.5,
-                        text="No '{}' available!".format(column_title),
+                        text="No '{}' available!".format(display_header),
                         showarrow=False,
                         font=dict(size=14)
                     )
@@ -904,93 +907,91 @@ if __name__ == "__main__":
                         title="Empty Plot"
                     )
 
-                os.makedirs(output_path + os.sep + "THERMO_PLOTS_FIG15", exist_ok=True)
+                #os.makedirs(output_path + os.sep + "THERMO_PLOTS_FIG15", exist_ok=True)
                 if fig_show:
                     fig15.show()
-                with open(output_path + os.sep + "THERMO_PLOTS_FIG15" + os.sep + "{}.json".format(re.sub('\W+','', column_title)), "w") as json_file:
+                with open(output_path + os.sep + "THERMO_PLOTS_FIG15" + os.sep + "{}.json".format(re.sub('\W+','', display_header)), "w") as json_file:
                     json_file.write(plotly.io.to_json(fig15))
-                fig15.write_html(file = output_path + os.sep + "THERMO_PLOTS_FIG15" + os.sep + "{}.html".format(re.sub('\W+','', column_title)), auto_open = False)
-    else:
-        os.makedirs(output_path + os.sep + "THERMO_PLOTS_FIG15", exist_ok=True) ## TODO: handle this folder when having TIMSTof data
+                fig15.write_html(file = output_path + os.sep + "THERMO_PLOTS_FIG15" + os.sep + "{}.html".format(re.sub('\W+','', display_header)), auto_open = False)
         
         
         
-    
+        
+        
     ################################################################################################
-    # Figure 15_XXX: visualize all additional Bruker data (without a filter)
+        # Figure 16_XXX: visualize all additional BRUKER data
 
-    if contains_bruker:
-        #bruker_time = unbase64_uncomp_unpickle(df["BRUKER_Time"].iloc[0])
-        for column_header in df.columns:
-            if column_header == "BRUKER_Time":
+    os.makedirs(output_path + os.sep + "BRUKER_PLOTS_FIG16", exist_ok=True)
+    if any(is_bruker): 
+        for header in add_bruker_headers:
+           
+            if header == "BRUKER_Time": # Time, will be needed as x-axis in all plots
                 continue
-            if column_header == "BRUKER_MsMsType":  # MsMsType codes for DIA/DDA for example. Doesn't need to be plotted.
+            if header == "BRUKER_MsMsType":  # MsMsType codes for DIA/DDA for example. Doesn't need to be plotted.
                 continue
-            if column_header.startswith("BRUKER_pump_pressure_bar"):  # Skip Pump Pressure
+            if header.startswith("BRUKER_pump_pressure_bar"):  # Skip Pump Pressure
                 continue
-            if column_header.startswith("BRUKER_"):
-                ### extract data from compressed columns and put them into long format
-                x = [] # x-axis Scan_StartTime_zlib
-                y = [] # y-axis BRUKER HEADER
-                fn = [] # filename
+            
+            ### extract data from compressed columns and put them into long format
+            x = [] # x-axis Scan_StartTime_zlib
+            y = [] # y-axis BRUKER HEADER
+            fn = [] # filename
+            
+            i = 0
+            for file in hdf5_files:
+                hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
 
-                for index in df.index:
-                    column_display_header = column_header
+                if header not in hdf5_tmp.keys():
+                    # Skip, there is no info available for this hdf5 file
+                    i += 1
+                    continue
+                
+                y_tmp = hdf5_tmp[header][:]
+                x_tmp = hdf5_tmp["BRUKER_Time"][:]  # All BRUKER variables are defined over the time
+                
+                display_header = header
 
-                    if df[column_header].iloc[index] is None:
-                        # Skip, there is no info available
-                        continue
-                    if type(df[column_header].iloc[index]) is float \
-                        and math.isnan(df[column_header].iloc[index]):
-                        continue
-
-                    y_locally = df[column_header].iloc[index]
-                    x_locally = df["BRUKER_Time"].iloc[index]
-                    
-                    x += [float(_x) for _x in x_locally]
-                    y += [np.nan if _y is None else float(_y) for _y in y_locally]
-                    fn += [df["filename"].iloc[index]] * len(x_locally)
+                x += [float(_x) for _x in x_tmp]
+                y += [float(_y) for _y in y_tmp]
+                fn += [hdf5_file_names[i]] * len(x_tmp)
+                i += 1
 
 
-                local_df = pd.DataFrame({
-                    "filename": fn,
-                    "x": x,
-                    "y": y
-                })
+            df_tmp = pd.DataFrame({
+                "filename": fn,
+                "x": x,
+                "y": y
+            })
+        
+            if not df_tmp.empty:
+                fig16 = px.line(df_tmp, x="x", y="y", color = "filename", title = display_header)
+                fig16.update_traces(line=dict(width=0.5))
+                fig16.update_yaxes(exponentformat="E") 
+                fig16.update_layout(width = int(1500), height = int(1000), 
+                                    xaxis_title = "Time (min)", 
+                                    yaxis_title = display_header)
+            else: 
+                fig16 = go.Figure()
+                fig16.add_annotation(
+                    x=0.5,
+                    y=0.5,
+                    text="No '{}' available!".format(display_header),
+                    showarrow=False,
+                    font=dict(size=14)
+                )
+                fig16.update_layout(
+                    width=1500,
+                    height=1000,
+                    title="Empty Plot"
+                )
 
-                column_title = column_display_header.split("_____")[0]
-                if not local_df.empty:
-                    fig15 = px.line(local_df, x="x", y="y", color = "filename", title = column_title)
-                    fig15.update_traces(line=dict(width=0.5))
-                    fig15.update_yaxes(exponentformat="E") 
-                    fig15.update_layout(width = int(1500), height = int(1000), 
-                                        xaxis_title = "Time (seconds)", 
-                                        yaxis_title = column_title)
+            if fig_show:
+                fig16.show()
+            with open(output_path + os.sep + "BRUKER_PLOTS_FIG16" + os.sep + "{}.json".format(re.sub('\W+','', display_header)), "w") as json_file:
+                json_file.write(plotly.io.to_json(fig16))
+            fig16.write_html(file = output_path + os.sep + "BRUKER_PLOTS_FIG16" + os.sep + "{}.html".format(re.sub('\W+','', display_header)), auto_open = False)
 
-                else: 
-                    fig15 = go.Figure()
-                    fig15.add_annotation(
-                        x=0.5,
-                        y=0.5,
-                        text="No '{}' available!".format(column_title),
-                        showarrow=False,
-                        font=dict(size=14)
-                    )
-                    fig15.update_layout(
-                        width=1500,
-                        height=1000,
-                        title="Empty Plot"
-                    )
-
-                os.makedirs(output_path + os.sep + "BRUKER_PLOTS_FIG15", exist_ok=True)
-                if fig_show:
-                    fig15.show()
-                with open(output_path + os.sep + "BRUKER_PLOTS_FIG15" + os.sep + "{}.json".format(re.sub('\W+','', column_title)), "w") as json_file:
-                    json_file.write(plotly.io.to_json(fig15))
-                fig15.write_html(file = output_path + os.sep + "BRUKER_PLOTS_FIG15" + os.sep + "{}.html".format(re.sub('\W+','', column_title)), auto_open = False)
-    else:
-        os.makedirs(output_path + os.sep + "BRUKER_PLOTS_FIG15", exist_ok=True) 
-    '''
-
+        
+      
 
 # %%
