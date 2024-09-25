@@ -130,24 +130,25 @@ process visualize_results {
 	publishDir "${params.main_outdir}/qc_results", mode:'copy'		// TODO: this should probably rather use the new reporting facilities
 
 	input:
-	path(combined_metrics_hdf5s)
+	path(combined_metrics)
 
     output:
     path("*.json")
 	path("*.html")
 	path("*.csv")
-	path(combined_metrics_hdf5)
+	path(combined_metrics)
 	path("fig13_ionmaps")
 	path("THERMO_PLOTS_FIG15")
+	path("BRUKER_PLOTS_FIG16")
 
 	"""
 	if ${params.search_spike_ins}
 	then 
 		# TODO KS: The combined metrics hdf5s are collected single hdf files for each input file.
 		# TODO KS: The script needs to allow variable length number of hdf5s
-		QC_visualization.py -hdf5_file ${combined_metrics_hdf5s} -output "." -spikeins
+		QC_visualization.py -hdf5_files ${combined_metrics} -output "." -spikeins
 	else
-		QC_visualization.py -hdf5_file ${combined_metrics_hdf5s} -output "."
+		QC_visualization.py -hdf5_files ${combined_metrics} -output "."
 	fi
     """
 }

@@ -33,16 +33,26 @@ import h5py
 
 pio.renderers.default = "png"
 
+def check_if_file_exists(s: str):
+    """ checks if a file exists. If not: raise Exception """
+    if os.path.isfile(s):
+        return s
+    else:
+        raise Exception("File '{}' does not exists".format(s))
+
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-hdf5_folder", help="Folder containing hdf5 files, one for each processed raw file", default=None)
-    parser.add_argument("-group", help="List of the experimental group (comma-separated).", default=None)
+    parser.add_argument("-hdf5_files", type=check_if_file_exists, nargs="+", help = "hdf5 files which are used for visualization as string separated by whitespace", default = None)
+    parser.add_argument("-hdf5_folder", help="Folder containing hdf5 files, one for each processed raw file. Alternative to hdf5_files, easier for debugging", default=None)
     parser.add_argument("-output", help="Output folder for the plots as json files.", default = "graphics")
-    parser.add_argument("-tic_overlay_offset", help = "Offset for TIC overlay plots", default = 0)
-    parser.add_argument("-fig_show", help = "Show figures, e.g. for debugging?", default = False, action = "store_true")
     parser.add_argument("-spikeins", help = "Whether to analyse spike-ins", default = False, action = "store_true")
+    parser.add_argument("-group", help="List of the experimental group (comma-separated).", default=None)
+    parser.add_argument("-fig_show", help = "Show figures, e.g. for debugging?", default = False, action = "store_true")
+    
     return parser.parse_args()
+
+### TODO: hdf5folder as alternative argument, grep all hdf5 files from the folder and use them for the analysis
 
 
 if __name__ == "__main__":
@@ -52,9 +62,20 @@ if __name__ == "__main__":
     # parameters
 
     ### get hdf5 files
-    hdf5_folder = args.hdf5_folder
-    hdf5_files = [f for f in os.listdir(hdf5_folder) if f.endswith('.hdf5')] 
-    hdf5_file_names = [re.sub(r'\.hdf5$', '', f) for f in hdf5_files] # file names without file ending
+    #hdf5_folder = args.hdf5_folder
+    
+    # [f for f in os.listdir(hdf5_folder) if f.endswith('.hdf5')] 
+    if args.hdf5_files is not None:
+        hdf5_files = args.hdf5_files
+    else: 
+        if args.hdf5_folder is not None:
+            hdf5_files = [args.hdf5_folder + "/" + f for f in os.listdir(args.hdf5_folder) if f.endswith('.hdf5')]
+        else: 
+            raise Exception("Either hdf5_files or hdf5_folder must be given!")
+    print(hdf5_files)
+    
+    hdf5_file_names = [os.path.basename(f) for f in hdf5_files] # file names without path
+    hdf5_file_names = [re.sub(r'\.hdf5$', '', f) for f in hdf5_file_names] # file names without file ending
     nr_rawfiles = len(hdf5_files)
 
     ### grouping
@@ -155,7 +176,7 @@ if __name__ == "__main__":
     # for each hdf5 file fill a new row with the corresponding data
     df = pd.DataFrame(columns=list(feature_list))
     for file in hdf5_files:
-        hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
+        hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
         new_row = pd.Series(dtype='float64')
         for feature in feature_list:
             if feature in hdf5_tmp:
@@ -180,7 +201,7 @@ if __name__ == "__main__":
     add_bruker_headers = []
 
     for file in hdf5_files:
-        hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
+        hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
         keys_tmp = list(hdf5_tmp.keys())
         
         if any(keys.startswith("THERMO") for keys in hdf5_tmp.keys()):
@@ -202,7 +223,7 @@ if __name__ == "__main__":
         spike_columns = [key for key in hdf5_tmp.keys() if re.match("SPIKE", key)]
         df_spikes = pd.DataFrame(columns=list(spike_columns))
         for file in hdf5_files:
-            hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
+            hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
             new_row = pd.Series(dtype='float64')
             for feature in spike_columns:
                 if feature in hdf5_tmp:
@@ -284,7 +305,7 @@ if __name__ == "__main__":
     tic_df = []
     i = 0
     for file in hdf5_files:
-        hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
+        hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
         tic = dict(TIC = hdf5_tmp["ms1_tic_array"][:],
                 RT = hdf5_tmp["ms1_rt_array"][:],
                 filename=[hdf5_file_names[i]]*len(hdf5_tmp["ms1_tic_array"][:]))
@@ -302,42 +323,7 @@ if __name__ == "__main__":
         json_file.write(plotly.io.to_json(fig4))
     fig4.write_html(file = output_path +"/fig4_TIC_overlay.html", auto_open = False)
     
-    ### TODO: test the offset functionality
-    
-    '''
-    offset_ratio = float(args.tic_overlay_offset)
-
-    tic_df = []
-    for index in df.index:
-        tic = dict(TIC=df["ms1_tic_array"].iloc[index],
-            RT=df["ms1_rt_array"].iloc[index],
-            filename=[df["filename"].iloc[index]]*len(df["ms1_tic_array"].iloc[index]))
-        tic = pd.DataFrame(tic)
-        tic_df.append(tic)
-    tic_df2 = pd.concat(tic_df)
-
-    offset = max(tic_df2["TIC"])
-
-
-    offset_tmp = 0
-    tic_df3 = []
-    for tmp in tic_df:
-        tmp["TIC"] = tmp["TIC"] + offset_tmp
-        tic_df3.append(tmp)
-        offset_tmp = offset_tmp + offset_ratio*offset
-    tic_df = pd.concat(tic_df3)
-
-    fig4 = px.line(tic_df, x="RT", y="TIC", color = "filename", title = "TIC overlay")
-    fig4.update_traces(line=dict(width=0.5))
-    fig4.update_yaxes(exponentformat="E") 
-    if fig_show:
-        fig4.show()
-    with open(output_path +"/fig4_TIC_overlay.json", "w") as json_file:
-        json_file.write(plotly.io.to_json(fig4))
-    #pyo.plot(fig4, filename = output_path +"/fig4_TIC_overlay.html")
-    fig4.write_html(file = output_path +"/fig4_TIC_overlay.html", auto_open = False)
-    '''
-
+ 
 #################################################################################################
     # Figure 5: Barplot TIC quartiles
     df_pl5 = df[["filename", 'RT_TIC_Q_000-025', 'RT_TIC_Q_025-050', 'RT_TIC_Q_050-075', 'RT_TIC_Q_075-100']]
@@ -734,7 +720,7 @@ if __name__ == "__main__":
     ionmap_df = []
     i = 0
     for file in hdf5_files:
-        hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
+        hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
         tmp = dict(RT = hdf5_tmp["ms2_rt_array"][:],
                 MZ = hdf5_tmp["ms2_mz_array"][:],
                 filename=[hdf5_file_names[i]]*len(hdf5_tmp["ms2_rt_array"][:]))
@@ -754,9 +740,9 @@ if __name__ == "__main__":
         fig13_tmp.update_layout(width = 1500, height = 1000, 
                     xaxis_title = "Retention Time (seconds)", 
                     yaxis_title = "m/z")
-        with open(output_path +"/fig13_ionmaps/fig13_ionmap_" + file + ".json", "w") as json_file:
+        with open(output_path + "/fig13_ionmaps/fig13_ionmap_" + file + ".json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig13_tmp))
-        fig13_tmp.write_html(file = output_path +"/fig13_ionmaps/fig13_ionmap_" + file + ".html", auto_open = False)
+        fig13_tmp.write_html(file = output_path + "/fig13_ionmaps/fig13_ionmap_" + file + ".html", auto_open = False)
 
     if fig_show:
         fig13_tmp.show()
@@ -766,12 +752,28 @@ if __name__ == "__main__":
     ### Figure 14: Pump Pressure
 
     ### only for Thermo, Bruker pump pressure is plotted as one of the extra plots in figure 15
+    
+    ### start with empty plot, that is overwritten if pump pressure data is available
+    fig14 = go.Figure()
+    fig14.add_annotation(
+        x=0.5,
+        y=0.5,
+        text="No Pump Pressure data available!",
+        showarrow=False,
+        font=dict(size=14)
+    )
+    fig14.update_layout(
+        width=1500,
+        height=1000,
+        title="Empty Plot"
+    )
+    
     if any(is_thermo):
         pump_df = []
         i = 0
         for file in hdf5_files:
             #file = hdf5_files[i]
-            hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
+            hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
             if "THERMO_pump_pressure_bar_x_axis" in hdf5_tmp.keys() and "THERMO_pump_pressure_bar_y_axis" in hdf5_tmp.keys():
                 x = hdf5_tmp["THERMO_pump_pressure_bar_x_axis"][:]
                 y = hdf5_tmp["THERMO_pump_pressure_bar_y_axis"][:]
@@ -797,33 +799,15 @@ if __name__ == "__main__":
         elif type(x) == pd.DataFrame:  # if only one raw file has pump pressure data available
             pump_df2 = pump_df
 
-        ### TODO: what if none of the files has pump pressure data available?
+        if (not pump_df2.empty):
+            fig14 = px.line(pump_df2, x="x", y="y", color = "filename", title = "Pump Pressure")
+            fig14.update_traces(line=dict(width=0.5))
+            fig14.update_yaxes(exponentformat="E") 
+            fig14.update_layout(width = 1500, height = 1000, 
+                                xaxis_title = "Time (min)", 
+                                yaxis_title = "Pump pressure")
+            fig14.write_html(file = output_path +"/fig14_Pump_pressure.html", auto_open = False)
 
-        fig14 = px.line(pump_df2, x="x", y="y", color = "filename", title = "Pump Pressure")
-        fig14.update_traces(line=dict(width=0.5))
-        fig14.update_yaxes(exponentformat="E") 
-        fig14.update_layout(width = 1500, height = 1000, 
-                            xaxis_title = "Time (min)", 
-                            yaxis_title = "Pump pressure")
-        fig14.write_html(file = output_path +"/fig14_Pump_pressure.html", auto_open = False)
-        
-    else:     
-        
-        fig14 = go.Figure()
-        fig14.add_annotation(
-            x=0.5,
-            y=0.5,
-            text="No Pump Pressure data available!",
-            showarrow=False,
-            font=dict(size=14)
-        )
-        fig14.update_layout(
-            width=1500,
-            height=1000,
-            title="Empty Plot"
-        )
-        
-        
     if fig_show:
         fig14.show()
     with open(output_path +"/fig14_Pump_pressure.json", "w") as json_file:
@@ -848,7 +832,7 @@ if __name__ == "__main__":
                 i = 0
                 for file in hdf5_files:
                 #for index in df.index:
-                    hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
+                    hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
                     #column_display_header = header
 
                     if header not in hdf5_tmp.keys():
@@ -939,7 +923,7 @@ if __name__ == "__main__":
             
             i = 0
             for file in hdf5_files:
-                hdf5_tmp = h5py.File(hdf5_folder + "/" + file,'r')
+                hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
 
                 if header not in hdf5_tmp.keys():
                     # Skip, there is no info available for this hdf5 file
