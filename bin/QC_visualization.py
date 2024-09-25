@@ -52,9 +52,6 @@ def argparse_setup():
     
     return parser.parse_args()
 
-### TODO: hdf5folder as alternative argument, grep all hdf5 files from the folder and use them for the analysis
-
-
 if __name__ == "__main__":
     args = argparse_setup()
 
@@ -69,7 +66,7 @@ if __name__ == "__main__":
         hdf5_files = args.hdf5_files
     else: 
         if args.hdf5_folder is not None:
-            hdf5_files = [args.hdf5_folder + "/" + f for f in os.listdir(args.hdf5_folder) if f.endswith('.hdf5')]
+            hdf5_files = [args.hdf5_folder + os.sep + f for f in os.listdir(args.hdf5_folder) if f.endswith('.hdf5')]
         else: 
             raise Exception("Either hdf5_files or hdf5_folder must be given!")
     print(hdf5_files)
@@ -176,7 +173,7 @@ if __name__ == "__main__":
     # for each hdf5 file fill a new row with the corresponding data
     df = pd.DataFrame(columns=list(feature_list))
     for file in hdf5_files:
-        hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
+        hdf5_tmp = h5py.File(file,'r') 
         new_row = pd.Series(dtype='float64')
         for feature in feature_list:
             if feature in hdf5_tmp:
@@ -201,7 +198,7 @@ if __name__ == "__main__":
     add_bruker_headers = []
 
     for file in hdf5_files:
-        hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
+        hdf5_tmp = h5py.File(file,'r') 
         keys_tmp = list(hdf5_tmp.keys())
         
         if any(keys.startswith("THERMO") for keys in hdf5_tmp.keys()):
@@ -223,7 +220,7 @@ if __name__ == "__main__":
         spike_columns = [key for key in hdf5_tmp.keys() if re.match("SPIKE", key)]
         df_spikes = pd.DataFrame(columns=list(spike_columns))
         for file in hdf5_files:
-            hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
+            hdf5_tmp = h5py.File(file,'r')
             new_row = pd.Series(dtype='float64')
             for feature in spike_columns:
                 if feature in hdf5_tmp:
@@ -237,7 +234,7 @@ if __name__ == "__main__":
     else: 
         df_table0 = df.copy()
         
-    df_table0.to_csv(output_path + "/00_table_summary.csv", index = False)        
+    df_table0.to_csv(output_path + os.sep + "00_table_summary.csv", index = False)        
 
 ################################################################################################
     # Figure 1: Barplot for total number of MS1 and MS2 spectra
@@ -249,9 +246,9 @@ if __name__ == "__main__":
     fig1.update_xaxes(tickangle=-90)
     if fig_show: 
         fig1.show()
-    with open(output_path +"/fig1_barplot_MS1_MS2.json", "w") as json_file:
+    with open(output_path + os.sep + "fig1_barplot_MS1_MS2.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig1))
-    fig1.write_html(file = output_path +"/fig1_barplot_MS1_MS2.html", auto_open = False)
+    fig1.write_html(file = output_path + os.sep + "fig1_barplot_MS1_MS2.html", auto_open = False)
 
 
 ################################################################################################
@@ -280,9 +277,9 @@ if __name__ == "__main__":
         )
     if fig_show: 
         fig2.show()
-    with open(output_path +"/fig2_barplot_PSMs_peptides_proteins.json", "w") as json_file:
+    with open(output_path + os.sep + "fig2_barplot_PSMs_peptides_proteins.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig2))
-    fig2.write_html(file = output_path +"/fig2_barplot_PSMs_peptides_proteins.html", auto_open = False)
+    fig2.write_html(file = output_path + os.sep + "fig2_barplot_PSMs_peptides_proteins.html", auto_open = False)
     
 ################################################################################################
     # Figure 3: Barplot for features and identified features
@@ -294,9 +291,9 @@ if __name__ == "__main__":
     fig3.update_xaxes(tickangle=-90)
     if fig_show: 
         fig3.show()
-    with open(output_path +"/fig3_barplot_features.json", "w") as json_file:
+    with open(output_path + os.sep + "fig3_barplot_features.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig3))
-    fig3.write_html(file = output_path +"/fig3_barplot_features.html", auto_open = False)
+    fig3.write_html(file = output_path + os.sep + "fig3_barplot_features.html", auto_open = False)
 
 
 ####################################################################################################
@@ -305,7 +302,7 @@ if __name__ == "__main__":
     tic_df = []
     i = 0
     for file in hdf5_files:
-        hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
+        hdf5_tmp = h5py.File(file,'r')
         tic = dict(TIC = hdf5_tmp["ms1_tic_array"][:],
                 RT = hdf5_tmp["ms1_rt_array"][:],
                 filename=[hdf5_file_names[i]]*len(hdf5_tmp["ms1_tic_array"][:]))
@@ -319,9 +316,9 @@ if __name__ == "__main__":
     fig4.update_yaxes(exponentformat="E") 
     if fig_show:
         fig4.show()
-    with open(output_path +"/fig4_TIC_overlay.json", "w") as json_file:
+    with open(output_path + os.sep + "fig4_TIC_overlay.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig4))
-    fig4.write_html(file = output_path +"/fig4_TIC_overlay.html", auto_open = False)
+    fig4.write_html(file = output_path + os.sep + "fig4_TIC_overlay.html", auto_open = False)
     
  
 #################################################################################################
@@ -332,9 +329,9 @@ if __name__ == "__main__":
     fig5.update_xaxes(tickangle=-90)
     if fig_show:
         fig5.show()
-    with open(output_path +"/fig5_barplot_TIC_quartiles.json", "w") as json_file:
+    with open(output_path + os.sep + "fig5_barplot_TIC_quartiles.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig5))
-    fig5.write_html(file = output_path +"/fig5_barplot_TIC_quartiles.html", auto_open = False)
+    fig5.write_html(file = output_path + os.sep + "fig5_barplot_TIC_quartiles.html", auto_open = False)
 
 ################################################################################################
     # Figure 6: Barplot MS1 TIC quartiles
@@ -344,9 +341,9 @@ if __name__ == "__main__":
     fig6.update_xaxes(tickangle=-90)
     if fig_show: 
         fig6.show()
-    with open(output_path +"/fig6_barplot_MS1_TIC_quartiles.json", "w") as json_file:
+    with open(output_path + os.sep + "fig6_barplot_MS1_TIC_quartiles.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig6))
-    fig6.write_html(file = output_path +"/fig6_barplot_MS1_TIC_quartiles.html", auto_open = False)
+    fig6.write_html(file = output_path + os.sep + "fig6_barplot_MS1_TIC_quartiles.html", auto_open = False)
 
 ################################################################################################
     # Figure 7: Barplot MS2 TIC quartiles
@@ -356,9 +353,9 @@ if __name__ == "__main__":
     fig7.update_xaxes(tickangle=-90)
     if fig_show:
         fig7.show()
-    with open(output_path +"/fig7_barplot_MS2_TIC_quartiles.json", "w") as json_file:
+    with open(output_path + os.sep + "fig7_barplot_MS2_TIC_quartiles.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig7))
-    fig7.write_html(file = output_path +"/fig7_barplot_MS2_TIC_quartiles.html", auto_open = False)
+    fig7.write_html(file = output_path + os.sep + "fig7_barplot_MS2_TIC_quartiles.html", auto_open = False)
 
 ################################################################################################
     # Figure 8: Precursor charge states
@@ -368,9 +365,9 @@ if __name__ == "__main__":
     fig8.update_xaxes(tickangle=-90)
     if fig_show:
         fig8.show()
-    with open(output_path +"/fig8_barplot_precursor_chargestate.json", "w") as json_file:
+    with open(output_path + os.sep + "fig8_barplot_precursor_chargestate.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig8))
-    fig8.write_html(file = output_path +"/fig8_barplot__precursor_chargestate.html", auto_open = False)
+    fig8.write_html(file = output_path + os.sep + "fig8_barplot__precursor_chargestate.html", auto_open = False)
 
 ################################################################################################
     # Figure 9: PSM charge states (of identified spectra)
@@ -396,9 +393,9 @@ if __name__ == "__main__":
         )
     if fig_show:
         fig9.show()
-    with open(output_path +"/fig9_barplot_PSM_chargestate.json", "w") as json_file:
+    with open(output_path + os.sep + "fig9_barplot_PSM_chargestate.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig9))
-    fig9.write_html(file = output_path +"/fig9_barplot_PSM_chargestate.html", auto_open = False)
+    fig9.write_html(file = output_path + os.sep + "fig9_barplot_PSM_chargestate.html", auto_open = False)
 
 ################################################################################################
     # Figure 10: Missed cleavages of PSMs
@@ -425,9 +422,9 @@ if __name__ == "__main__":
     
     if fig_show:
         fig10.show()
-    with open(output_path +"/fig10_barplot_PSM_missedcleavages.json", "w") as json_file:
+    with open(output_path + os.sep + "fig10_barplot_PSM_missedcleavages.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig10))
-    fig10.write_html(file = output_path +"/fig10_barplot_PSM_missedcleavages.html", auto_open = False)
+    fig10.write_html(file = output_path + os.sep + "fig10_barplot_PSM_missedcleavages.html", auto_open = False)
 
 
 #################################################################################################
@@ -555,8 +552,9 @@ if __name__ == "__main__":
             
         # Table and plot with feature loadings (weights of the variables in the PCA)
         loadings = pd.DataFrame(pca.components_.T, columns=['PC1', 'PC2'], index=valid_features)
-        loadings["length"] = np.sqrt(loadings["PC1"]**2+ loadings["PC2"]**2)
-        loadings["variable"] = loadings.index
+        loadings.insert(0, "length", np.sqrt(loadings["PC1"]**2+ loadings["PC2"]**2))
+        loadings.insert(0, "variable", loadings.index)
+        loadings.sort_values("length", ascending=False, inplace=True)
         fig11_loadings = px.scatter(loadings, x = "PC1", y = "PC2", title = "PCA loadings (all data)", 
             hover_name="variable", hover_data=["PC1", "PC2"],)
         fig11_loadings.update_layout(width = int(1500), height = int(1000))
@@ -575,16 +573,18 @@ if __name__ == "__main__":
             title="Empty Plot"
         )
         fig11_loadings = fig11
+        loadings = pd.DataFrame(columns = ["variable", "length", "PC1", "PC2"])
     if fig_show:
         fig11.show()
-    with open(output_path +"/fig11a_PCA_all.json", "w") as json_file:
+    with open(output_path + os.sep + "fig11a_PCA_all.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig11))
-    fig11.write_html(file = output_path +"/fig11a_PCA_all.html", auto_open = False)
+    fig11.write_html(file = output_path + os.sep + "fig11a_PCA_all.html", auto_open = False)
     if fig_show: 
         fig11_loadings.show()
-    with open(output_path +"/fig11b_Loadings_all.json", "w") as json_file:
+    with open(output_path + os.sep + "fig11b_Loadings_all.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig11_loadings))
-    fig11_loadings.write_html(file = output_path +"/fig11b_Loadings_all.html", auto_open = False)
+    fig11_loadings.write_html(file = output_path + os.sep + "fig11b_Loadings_all.html", auto_open = False)
+    loadings.to_csv(output_path + os.sep + "table_loadings_all.csv", index = False) 
 
 ################################################################################################
     # Fig 12 PCA on raw data (only plotted if we have more than one raw file)
@@ -682,8 +682,9 @@ if __name__ == "__main__":
             
         # Table and plot with feature loadings (weights of the variables in the PCA)
         loadings = pd.DataFrame(pca.components_.T, columns=['PC1', 'PC2'], index=valid_features)
-        loadings["length"] = np.sqrt(loadings["PC1"]**2+ loadings["PC2"]**2)
-        loadings["variable"] = loadings.index
+        loadings.insert(0, "length", np.sqrt(loadings["PC1"]**2+ loadings["PC2"]**2))
+        loadings.insert(0, "variable", loadings.index)
+        loadings.sort_values("length", ascending=False, inplace=True)
         fig12_loadings = px.scatter(loadings, x = "PC1", y = "PC2", title = "PCA loadings (raw data)", 
             hover_name="variable", hover_data=["PC1", "PC2"],)
         fig12_loadings.update_layout(width = int(1500), height = int(1000))
@@ -702,16 +703,18 @@ if __name__ == "__main__":
             title="Empty Plot"
         )
         fig12_loadings = fig12
+        loadings = pd.DataFrame(columns = ["variable", "length", "PC1", "PC2"])
     if fig_show:
         fig12.show()
-    with open(output_path +"/fig12a_PCA_raw.json", "w") as json_file:
+    with open(output_path + os.sep + "fig12a_PCA_raw.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig12)) 
-    fig12.write_html(file = output_path +"/fig12_PCA_raw.html", auto_open = False)
+    fig12.write_html(file = output_path + os.sep + "fig12_PCA_raw.html", auto_open = False)
     if fig_show: 
         fig12_loadings.show()
-    with open(output_path +"/fig12b_Loadings_raw.json", "w") as json_file:
+    with open(output_path + os.sep + "fig12b_Loadings_raw.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig12_loadings))
-    fig12_loadings.write_html(file = output_path +"/fig12b_Loadings_raw.html", auto_open = False)
+    fig12_loadings.write_html(file = output_path + os.sep + "fig12b_Loadings_raw.html", auto_open = False)
+    loadings.to_csv(output_path + os.sep + "table_loadings_raw.csv", index = False) 
         
 
 #################################################################################################
@@ -720,7 +723,7 @@ if __name__ == "__main__":
     ionmap_df = []
     i = 0
     for file in hdf5_files:
-        hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
+        hdf5_tmp = h5py.File(file,'r')
         tmp = dict(RT = hdf5_tmp["ms2_rt_array"][:],
                 MZ = hdf5_tmp["ms2_mz_array"][:],
                 filename=[hdf5_file_names[i]]*len(hdf5_tmp["ms2_rt_array"][:]))
@@ -730,8 +733,8 @@ if __name__ == "__main__":
     ionmap_df2 = pd.concat(ionmap_df)
 
     # create folder to store ion maps
-    if not os.path.exists(output_path + "/fig13_ionmaps"):
-        os.makedirs(output_path + "/fig13_ionmaps")
+    if not os.path.exists(output_path + os.sep + "fig13_ionmaps"):
+        os.makedirs(output_path + os.sep + "fig13_ionmaps")
 
     for file in df["filename"]:
         ionmap_df2_tmp = ionmap_df2[ionmap_df2["filename"] == file]
@@ -740,9 +743,9 @@ if __name__ == "__main__":
         fig13_tmp.update_layout(width = 1500, height = 1000, 
                     xaxis_title = "Retention Time (seconds)", 
                     yaxis_title = "m/z")
-        with open(output_path + "/fig13_ionmaps/fig13_ionmap_" + file + ".json", "w") as json_file:
+        with open(output_path + os.sep + "fig13_ionmaps" + os.sep + "fig13_ionmap_" + file + ".json", "w") as json_file:
             json_file.write(plotly.io.to_json(fig13_tmp))
-        fig13_tmp.write_html(file = output_path + "/fig13_ionmaps/fig13_ionmap_" + file + ".html", auto_open = False)
+        fig13_tmp.write_html(file = output_path + os.sep + "fig13_ionmaps" + os.sep + "fig13_ionmap_" + file + ".html", auto_open = False)
 
     if fig_show:
         fig13_tmp.show()
@@ -773,7 +776,7 @@ if __name__ == "__main__":
         i = 0
         for file in hdf5_files:
             #file = hdf5_files[i]
-            hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
+            hdf5_tmp = h5py.File(file,'r')
             if "THERMO_pump_pressure_bar_x_axis" in hdf5_tmp.keys() and "THERMO_pump_pressure_bar_y_axis" in hdf5_tmp.keys():
                 x = hdf5_tmp["THERMO_pump_pressure_bar_x_axis"][:]
                 y = hdf5_tmp["THERMO_pump_pressure_bar_y_axis"][:]
@@ -806,13 +809,13 @@ if __name__ == "__main__":
             fig14.update_layout(width = 1500, height = 1000, 
                                 xaxis_title = "Time (min)", 
                                 yaxis_title = "Pump pressure")
-            fig14.write_html(file = output_path +"/fig14_Pump_pressure.html", auto_open = False)
+            fig14.write_html(file = output_path + os.sep + "fig14_Pump_pressure.html", auto_open = False)
 
     if fig_show:
         fig14.show()
-    with open(output_path +"/fig14_Pump_pressure.json", "w") as json_file:
+    with open(output_path + os.sep + "fig14_Pump_pressure.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig14))
-    fig14.write_html(file = output_path +"/fig14_Pump_pressure.html", auto_open = False)
+    fig14.write_html(file = output_path + os.sep + "fig14_Pump_pressure.html", auto_open = False)
 
 
 
@@ -832,7 +835,7 @@ if __name__ == "__main__":
                 i = 0
                 for file in hdf5_files:
                 #for index in df.index:
-                    hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
+                    hdf5_tmp = h5py.File(file,'r') 
                     #column_display_header = header
 
                     if header not in hdf5_tmp.keys():
@@ -923,7 +926,7 @@ if __name__ == "__main__":
             
             i = 0
             for file in hdf5_files:
-                hdf5_tmp = h5py.File(file,'r') # hdf5_folder + "/" + 
+                hdf5_tmp = h5py.File(file,'r')
 
                 if header not in hdf5_tmp.keys():
                     # Skip, there is no info available for this hdf5 file
