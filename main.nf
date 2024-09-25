@@ -24,7 +24,7 @@ include {pia_analysis_full; pia_analysis_psm_only; pia_extract_metrics} from wor
 include {retrieve_spike_ins_information} from workflow.projectDir + '/src/retrieve_spike_ins.nf'
 include {get_feature_metrics} from workflow.projectDir + '/src/feature_detection.nf'
 include {get_headers; get_mzml_infos} from workflow.projectDir + '/src/metrics/ms_run_metrics.nf'
-include {combine_metric_csvs} from workflow.projectDir + '/src/io/combine_metric_csvs.nf'
+include {combine_metric_hdf5} from workflow.projectDir + '/src/io/combine_metric_hdf5.nf'
 include {output_processing_success} from workflow.projectDir + '/src/io/output_processing_success.nf'
 
 // Parameters required for the standalone execution of this main-nextflow script
@@ -93,28 +93,29 @@ workflow {
 	// Run Feature Finding
 	feature_metrics = get_feature_metrics(mzmls, pia_report_psm_mztabs, comet_params)
 
-	// Get Thermospecific information from raw
+	// Get Thermo/Bruker specific information from raw_spectra
 	custom_header_infos = get_headers(thermo_raw_files, bruker_raw_folders)
 
 	// Concatenate to one merged metric CSV
-	csvs_per_run = mzml_metrics.map{file -> tuple(file.name.take(file.name.lastIndexOf('-mzml_info.csv')), file)}
+	hdf5s_per_run = mzml_metrics.map{file -> tuple(file.name.take(file.name.lastIndexOf('-mzml_info.hdf5')), file)}
 	if (params.search_spike_ins) {
-		csvs_per_run = csvs_per_run.concat(
-			spike_in_metrics.map{file -> tuple(file.name.take(file.name.lastIndexOf('-spikeins.csv')), file)}
+		hdf5s_per_run = hdf5s_per_run.concat(
+			spike_in_metrics.map{file -> tuple(file.name.take(file.name.lastIndexOf('-spikeins.hdf5')), file)}
 		)
 	}
-	csvs_per_run = csvs_per_run
-		.concat(feature_metrics.map{file -> tuple(file.name.take(file.name.lastIndexOf('-features.csv')), file)})
-		.concat(pia_extract_csv.map{file -> tuple(file.name.take(file.name.lastIndexOf('-pia_extraction.csv')), file)})
-		.concat(custom_header_infos.map{file -> tuple(file.name.take(file.name.lastIndexOf('-custom_headers.csv')), file)})
+	hdf5s_per_run = hdf5s_per_run
+		.concat(feature_metrics.map{file -> tuple(file.name.take(file.name.lastIndexOf('-features.hdf5')), file)})
+		.concat(pia_extract_csv.map{file -> tuple(file.name.take(file.name.lastIndexOf('-pia_extraction.hdf5')), file)})
+		.concat(custom_header_infos.map{file -> tuple(file.name.take(file.name.lastIndexOf('-custom_headers.hdf5')), file)})
 		.groupTuple()
+
 	
-	combined_metrics = combine_metric_csvs(csvs_per_run)
+	combined_metrics = combine_metric_hdf5(hdf5s_per_run)
 
 	// Visualize the results (and move them to the results folder)
 	visualize_results(combined_metrics)
 
-	output_processing_success(raw_files, csvs_per_run.toList().transpose().first().flatten())
+	output_processing_success(raw_files, hdf5s_per_run.toList().transpose().first().flatten())
 }
 
 /**
@@ -129,21 +130,25 @@ process visualize_results {
 	publishDir "${params.main_outdir}/qc_results", mode:'copy'		// TODO: this should probably rather use the new reporting facilities
 
 	input:
-	path(combined_metrics_csv)
+	path(combined_metrics)
 
     output:
     path("*.json")
 	path("*.html")
 	path("*.csv")
+	path(combined_metrics)
 	path("fig13_ionmaps")
 	path("THERMO_PLOTS_FIG15")
+	path("BRUKER_PLOTS_FIG16")
 
 	"""
 	if ${params.search_spike_ins}
 	then 
-		QC_visualization.py -csv_file ${combined_metrics_csv} -output "." -spikeins
+		# TODO KS: The combined metrics hdf5s are collected single hdf files for each input file.
+		# TODO KS: The script needs to allow variable length number of hdf5s
+		QC_visualization.py -hdf5_files ${combined_metrics} -output "." -spikeins
 	else
-		QC_visualization.py -csv_file ${combined_metrics_csv} -output "."
+		QC_visualization.py -hdf5_files ${combined_metrics} -output "."
 	fi
     """
 }

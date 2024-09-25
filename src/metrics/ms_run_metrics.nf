@@ -14,6 +14,9 @@ params.ms_run_metrics__thermo_headers = ""
  // Set if you want to extract specific headers from Bruker raw measurements, otherwise the default is used.
  // Have a look into the corresponding python script for the headers.
 params.ms_run_metrics__bruker_headers = ""
+// Set additional parameters for the mzml-statistics geeneration.
+// Have a look into the corresponding python script possible parameters.
+params.ms_run_metrics__mzml_statistics = ""
 // Memory for the Thermo Raw File Parser, used 24 GB for a Raw file with 257409 MS scans 
 /// and 4GB for a Raw file with 11352 MS scans (measured with `/usr/bin/time -v ...`). 10 GB seems legit for most cases.
 params.ms_run_metrics__thermo_raw_mem = "10 GB"
@@ -30,7 +33,7 @@ params.ms_run_metrics__mzml_mem = "10 GB"
  *
  * @param thermo_raw_files Channel of Thermo raw files
  * @param bruker_raw_files Channel of Bruker .d-folders
- * @return Channel of headers CSV files
+ * @return Channel of headers HDF5 files
  */
 workflow get_headers {
     take:
@@ -49,7 +52,7 @@ workflow get_headers {
  * Get additional data from mzML, e.g. MS1_Density-quartiles, MS2_Density-quartiles, RT-TIC-quartiles, ...
  *
  * @param mzmlfiles Channel of mzML files
- * @return Channel of headers CSV files
+ * @return Channel of headers HDF5 files
  */
 workflow get_mzml_infos {
     take:
@@ -64,7 +67,7 @@ workflow get_mzml_infos {
  * Get metadata headers from Thermo and Bruker raw files, like 
  *
  * @param thermo_raw_files Channel of Thermo raw files
- * @return CSV with 
+ * @return HDF5 with extracted headers
  */
 process extract_headers_from_thermo_raw_files {
     container { python_image}
@@ -78,15 +81,15 @@ process extract_headers_from_thermo_raw_files {
     path raw
 
     output:
-    path "${raw.baseName}-custom_headers.csv"
+    path "${raw.baseName}-custom_headers.hdf5"
 
     """
     # Pythonnet sometimes fails to exit and throws a mono error
-    extract_thermo_headers.py -raw ${raw} ${params.ms_run_metrics__thermo_headers} -out_csv ${raw.baseName}-custom_headers.csv || true
+    extract_thermo_headers.py -raw ${raw} ${params.ms_run_metrics__thermo_headers} -out_hdf5 ${raw.baseName}-custom_headers.hdf5 || true
 
     # Fail Check if no content was written
-    if ! [ -s "${raw.baseName}-custom_headers.csv" ];then
-        rm ${raw.baseName}-custom_headers.csv
+    if ! [ -s "${raw.baseName}-custom_headers.hdf5" ];then
+        rm ${raw.baseName}-custom_headers.hdf5
     fi
     """
 }
@@ -95,7 +98,7 @@ process extract_headers_from_thermo_raw_files {
  * Get metadata headers from Thermo and Bruker raw files, like 
  *
  * @param bruker_raw_files Channel of Bruker .d-folders
- * @return CSV with 
+ * @return HDF5 with extracted headers
  */
 process extract_headers_from_bruker_raw_files {
     container { python_image}
@@ -107,10 +110,10 @@ process extract_headers_from_bruker_raw_files {
     path raw
 
     output:
-    path "${raw.baseName}-custom_headers.csv"
+    path "${raw.baseName}-custom_headers.hdf5"
 
     """
-    extract_bruker_headers.py -d_folder ${raw} -out_csv ${raw.baseName}-custom_headers.csv ${params.ms_run_metrics__bruker_headers}
+    extract_bruker_headers.py -d_folder ${raw} -out_hdf5 ${raw.baseName}-custom_headers.hdf5 ${params.ms_run_metrics__bruker_headers}
     """
 }
 
@@ -118,7 +121,7 @@ process extract_headers_from_bruker_raw_files {
  * Get additional data from mzML, e.g. MS1_Density-quartiles, MS2_Density-quartiles, RT-TIC-quartiles, ...
  *
  * @param mzml Channel of mzML files
- * @return CSV file with the extracted data
+ * @return HDF5 file with the extracted data
  */
 process extract_data_from_mzml {
     container { python_image}
@@ -130,9 +133,9 @@ process extract_data_from_mzml {
     path(mzml)
 
     output:
-    path("${mzml.baseName}-mzml_info.csv")
+    path("${mzml.baseName}-mzml_info.hdf5")
 
     """
-    extract_data_from_mzml.py -mzml ${mzml} -out_csv ${mzml.baseName}-mzml_info.csv
+    extract_data_from_mzml.py -mzml ${mzml} -out_hdf5 ${mzml.baseName}-mzml_info.hdf5 ${params.ms_run_metrics__mzml_statistics}
     """
 }
