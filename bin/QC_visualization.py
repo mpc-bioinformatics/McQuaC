@@ -30,6 +30,7 @@ import plotly.io as pio
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 import h5py
+import matplotlib.pyplot as plt
 
 pio.renderers.default = "png"
 
@@ -720,6 +721,46 @@ if __name__ == "__main__":
 #################################################################################################
     ### Fig 13: Ion Maps (one for each raw file)
 
+    if not os.path.exists(output_path + os.sep + "fig13_ionmaps"):
+        os.makedirs(output_path + os.sep + "fig13_ionmaps")
+
+    i = 0
+    for file in hdf5_files:
+    #file = hdf5_files[0]
+        hdf5_tmp = h5py.File(file,'r')
+
+        data = {"RT": hdf5_tmp["ms1_map_rt_array"][:], 
+                "MZ": hdf5_tmp["ms1_map_mz_array"][:],
+                "intensity": hdf5_tmp["ms1_map_intens_array"][:]}
+        df_ionmap = pd.DataFrame(data)
+
+        ### reduce the number of points to roughly 1 million
+        if (len(df_ionmap) > 1000000):
+                print(len(df_ionmap))
+                samples = int(len(df_ionmap) / 1000000)
+                print(samples)
+                df_ionmap2 = df_ionmap.loc[range(0, len(df_ionmap), samples),:]
+        else: 
+                df_ionmap2 = df_ionmap
+
+        print(len(df_ionmap2))
+        df_ionmap2["log_intensity"] = np.log10(df_ionmap2["intensity"])
+
+        fig,ax = plt.subplots(figsize=(15,6)) # = plt.scatter(df_ionmap2["RT"], df_ionmap2["MZ"], c=df_ionmap2["log_intensity"], s = 1)
+        points = ax.scatter(df_ionmap2["RT"], df_ionmap2["MZ"], c=df_ionmap2["log_intensity"], s=1, cmap="Blues")
+        fig.colorbar(points, label = "log10_intensity")
+        ax.set_xlabel("retention time")
+        ax.set_ylabel("m/z")
+        ax.set_title(hdf5_file_names[i])
+        if fig_show:
+            fig.show()
+        fig.savefig(output_path + os.sep + "fig13_ionmaps" + os.sep + "fig13_ionmap_" + hdf5_file_names[i] + ".png")
+        i += 1
+        
+        
+        
+    '''
+    #### old version   
     ionmap_df = []
     i = 0
     for file in hdf5_files:
@@ -749,7 +790,7 @@ if __name__ == "__main__":
 
     if fig_show:
         fig13_tmp.show()
-
+    '''
 
 ################################################################################################
     ### Figure 14: Pump Pressure
