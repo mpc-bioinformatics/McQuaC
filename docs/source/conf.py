@@ -3,7 +3,7 @@
 # -- Project information
 
 project = 'McQuaC'
-copyright = '2024, Ruhr University Bochum, Medizinisches Proteom-Center and Medical Bioinfomratics'
+copyright = '2024, Ruhr University Bochum, Medizinisches Proteom-Center and Medical Bioinformatics'
 author = 'julianu'
 
 release = '0.1'
