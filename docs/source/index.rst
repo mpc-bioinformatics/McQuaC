@@ -15,6 +15,7 @@ Contents
 --------
 
 .. toctree::
-
+   
+   index
    usage
    
