@@ -76,7 +76,9 @@ if __name__ == "__main__":
     # add filenames if not present
     def add_filename_column(dataframe, column_name):
         if column_name not in dataframe.columns:
-            filenames = [f"file{i}" for i in range(len(dataframe))]
+            filenames = []
+            for i in range(0,len(dataframe)):
+                filenames.append("_".join(dataframe["file_and_analysis_timestamp"][i].split("_")[:-6]))
             dataframe.insert(0, column_name, filenames)
         return dataframe
     df = add_filename_column(df, "filename")
