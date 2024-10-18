@@ -21,6 +21,7 @@ def argparse_setup():
     parser.add_argument("-filter_threshold", default=0.00001, type=float, help="Threshold for the MS1 peaks, to be"
         " included in the output file. Defaults to 0.00001 (0.001%) of the highest overall MS1 peak. Values lower"
         " will be disregarded.")
+    parser.add_argument("-report_up_to_charge", default=5, help="Upper limit of range to be reported in a csv table for the charge")
     return parser.parse_args()
 
 
@@ -152,28 +153,27 @@ if __name__ == "__main__":
         )
         
         
-        ### TODO: as table
-        '''
-        prec_unknown = 0 if 0 not in num_ms2_prec_charges else num_ms2_prec_charges[0] / num_ms2_spectra    
-        add_entry_to_hdf5(
-            out_h5, "MS2_PrecZ_Unknown", prec_unknown, (1,), "float64", "none",
-            "Proportion of MS2 precursors with unknown charge state (may happen for older machines)."
-        )
-        for i in range(1, 6):
-            add_entry_to_hdf5(
-                out_h5, "MS2_PrecZ_" + str(i), num_ms2_prec_charges[i] / num_ms2_spectra, (1,), "float64", "none",
-                "Proportion of MS2 precursors with charge " + str(1) + "."
-            )
-        
+        prec_unknown = 0 if 0 not in num_ms2_prec_charges else num_ms2_prec_charges[0] / num_ms2_spectra 
         precz_more = 0
         for key in num_ms2_prec_charges.keys():
-            if key > 5:
+            if key > int(args.report_up_to_charge):
                 precz_more += num_ms2_prec_charges[key]
-        add_entry_to_hdf5(
-            out_h5, "MS2_PrecZ_more", precz_more / num_ms2_spectra, (1,), "float64", "none",
-            "Proportion of MS2 precursors with charge 6 and more."
+        prec_charge_list = [[num_ms2_prec_charges[i] / num_ms2_spectra] for i in range(1, int(args.report_up_to_charge) + 1)]
+        prec_charge_list = [[prec_unknown]] + prec_charge_list + [[precz_more / num_ms2_spectra]]
+        print(prec_charge_list)
+        add_table_in_hdf5(
+            f = out_h5, 
+            qc_acc = "MS:4000063", 
+            qc_short_name = "MS2_Prec_charge_fraction", 
+            qc_name = "MS2 known precursor charges fractions", 
+            qc_description = ("The fraction of MS/MS precursors of the corresponding charge. " 
+                              "The fractions [0,1] are given in the 'Fraction' column, corresponding charges in the 'Charge state' column. "
+                              "The highest charge state is to be interpreted as that charge state or higher."
+                              ), 
+            column_names = [str(i) for i in range(0, int(args.report_up_to_charge) + 2)],
+            column_data = prec_charge_list, 
+            column_types = ["float64" for i in range(0, int(args.report_up_to_charge) + 2)]
         )
-        '''
         
         
         # Range of the retention time (first and last spectrum)
@@ -182,10 +182,16 @@ if __name__ == "__main__":
         RT_range = [RT_first, RT_last]
         
         add_entry_to_hdf5(
-            f = out_h5, qc_acc = "MS:4000070", qc_short_name = "RT_range", qc_name = "retention time acquisition range", 
+            f = out_h5, 
+            qc_acc = "MS:4000070", 
+            qc_short_name = "RT_range", 
+            qc_name = "retention time acquisition range", 
             qc_description = "Upper and lower limit of retention time at which spectra are recorded.", 
-            value = RT_range, value_shape = (2,), value_type = "float64", 
-            unit_accession = "", unit_name = ""
+            value = RT_range, 
+            value_shape = (2,), 
+            value_type = "float64", 
+            unit_accession = "", 
+            unit_name = ""
         )
         
 
@@ -203,20 +209,20 @@ if __name__ == "__main__":
         total_ion_current_max = max(ms1_ms2_tic)
 
         add_entry_to_hdf5(
-            out_h5, "Base_Peak_Intensity_Max", base_peak_intensity_max, (1,), "float64", "none",
-            "The maximum base peak (highest peak in spectrum) across all MS1 and MS2 spectra."
-        )
-        add_entry_to_hdf5(
-            f = out_h5, qc_acc = "LOCAL:01", qc_short_name = "Base_Peak_Intensity_Max", qc_name = "base peak intensity", 
+            f = out_h5, qc_acc = "LOCAL:01", qc_short_name = "Base_Peak_Intensity_Max", qc_name = "base peak intensity max", 
             qc_description = "The maximum base peak (highest peak in spectrum) across all MS1 and MS2 spectra.", 
             value = num_ms2_spectra, value_shape = (1,), value_type = "int32", 
             unit_accession = "", unit_name = ""
         )
         add_entry_to_hdf5(
-            out_h5, "Total_Ion_Current_Max", total_ion_current_max, (1,), "float64", "none",
-            "The maximum of all TICs across MS1 and MS2 spectra."
+            f = out_h5, qc_acc = "LOCAL:03", qc_short_name = "Total_Ion_Current_Max", qc_name = "total ion current max", 
+            qc_description = "The maximum of all TICs across MS1 and MS2 spectra.", 
+            value = total_ion_current_max, value_shape = (1,), value_type = "int32", 
+            unit_accession = "", unit_name = ""
         )
 
+
+        '''
         # and up to 105 minutes
         break_on = args.base_peak_tic_up_to*60
         for i in range(len(ms1_ms2_rt)):
@@ -234,7 +240,7 @@ if __name__ == "__main__":
             "The maximum of all TICs across MS1 and MS2 spectra up to " + str(args.base_peak_tic_up_to) + " minutes."
         )
         ###
-
+        '''
 
         '''
         # Get MS1 and MS2 TICs
