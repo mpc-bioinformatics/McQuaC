@@ -1,4 +1,8 @@
-# Next-QC-Flow
+# McQuaC
+
+[![Documentation Status](https://readthedocs.org/projects/mcquac/badge/?version=latest)](https://mcquac.readthedocs.io/en/latest/?badge=latest)
+
+## About McQUaC
 
 This workflow does quality control for DDA mass spectrometry proteomics data. The workflow can be used in two different modes (internal standard evaluation = `isa`).
 
@@ -13,6 +17,10 @@ Bittremieux W, Meysman P, Martens L, Valkenborg D, Laukens K. Unsupervised Quali
 ```
 
 The [table](docu/QC_columns_overview.csv) shows all columns which can be retrieved by this quality control workflow, including a brief description for each.
+
+## Getting started
+
+You need to run the workflow with nextflow. For more information see the [documentation](http://mcquac.readthedocs.io/).
 
 ## Usage
 The workflow should be compatible with Linux, MacOS and Windows (WSL2).
