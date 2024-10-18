@@ -14,7 +14,7 @@ python_image = 'mpc/nextqcflow-python:latest'
 params.pia_gb_ram = 16
 params.pia_threads = 8
 
-pia_mem_params = "-Xmx" + params.pia_gb_ram + "g"  // additional PIA parameters to set the memory consumption
+pia_mem_params = "-Xms2g -Xmx" + params.pia_gb_ram + "g"  // additional PIA parameters to set the memory consumption
 
 // Note for CPUs: PIA needs/takes very shortly all available processors, but rather idles on them later.
 // On the memory-side, it uses a lot the more PSMs are found...
@@ -127,7 +127,7 @@ process compile_pia_xmls {
     container { pia_image }
     
     cpus {params.pia_threads}
-    memory {params.pia_gb_ram + ".GB"}
+    memory {params.pia_gb_ram + " GB"}
 
     input:
     path identifications
@@ -229,7 +229,7 @@ process pia_run_analysis {
     container { pia_image }
 
     cpus {params.pia_threads}
-    memory {params.pia_gb_ram + ".GB"}
+    memory {params.pia_gb_ram + " GB"}
 
     input:
     path pia_xml
