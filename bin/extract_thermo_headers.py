@@ -1,21 +1,24 @@
 #!/usr/bin/env python
 
 import argparse
-import pyopenms
-import numpy as np
-import math
-from collections import defaultdict
 import datetime
+import math
 import time
+from collections import defaultdict
+from typing import Any, List
+
 import h5py
-
+import numpy as np
+import pyopenms
 from fisher_py import RawFile
-
-from fisher_py.raw_file_reader import RawFileReaderAdapter, RawFileAccess
-from fisher_py.data.business import GenericDataTypes, ChromatogramTraceSettings, TraceType, ChromatogramSignal, SpectrumPacketType, Scan
-from fisher_py.data.filter_enums import MsOrderType
 from fisher_py.data import Device, ToleranceUnits
+from fisher_py.data.business import (ChromatogramSignal,
+                                     ChromatogramTraceSettings,
+                                     GenericDataTypes, Scan,
+                                     SpectrumPacketType, TraceType)
+from fisher_py.data.filter_enums import MsOrderType
 from fisher_py.mass_precision_estimator import PrecisionEstimate
+from fisher_py.raw_file_reader import RawFileAccess, RawFileReaderAdapter
 
 
 def argparse_setup():
@@ -64,7 +67,6 @@ def argparse_setup():
     return parser.parse_args()
 
 
-
 def add_entry_to_hdf5(
     f, qc_acc: str, qc_short_name: str, qc_name: str, qc_description: str, 
     value, value_shape: tuple, value_type: str, 
@@ -84,7 +86,6 @@ def add_entry_to_hdf5(
     f[key].attrs["qc_description"] = qc_description
     f[key].attrs["unit_accession"] = unit_accession
     f[key].attrs["unit_name"] = unit_name
-
 
 
 def add_table_in_hdf5(
@@ -107,7 +108,8 @@ def add_table_in_hdf5(
         else:
             table_group.create_dataset(n, (len(d),), dtype=t, compression="gzip")
             table_group[n].write_direct(np.array(d, dtype=t))
-    
+
+
 def get_headers_to_parse(headers, headers_from_raw):
     """ Helper function to map which header from which index should be retrieved"""
     statistics_to_retrieve = []
@@ -125,6 +127,8 @@ def get_headers_to_parse(headers, headers_from_raw):
 
 if __name__ == "__main__":
     args = argparse_setup()
+    args.raw = "/home/luxii/Desktop/denopa_hupo_2024/raws/K_14_3_QEXI16175.raw"
+    args.out_hdf5 = "test.h5"
 
     data_dict = defaultdict(lambda: list())
     raw_file = RawFileReaderAdapter.file_factory(args.raw)
@@ -155,38 +159,44 @@ if __name__ == "__main__":
         for scan in range(first_scan_number, last_scan_number + 1):
             scan_statistics = raw_file.get_scan_stats_for_scan_number(scan)
             start_time_of_scan = scan_statistics.start_time
-            data_dict["THERMO_Scan_StartTime"].append(start_time_of_scan)
+            data_dict["Scan_StartTime"].append(start_time_of_scan)
             scan_filter = raw_file.get_filter_for_scan_number(scan)
-            data_dict["THERMO_Scan_msLevel"].append(scan_filter.ms_order.value)
+            data_dict["Scan_msLevel"].append(scan_filter.ms_order.value)
 
             # Get Info of filtered statistics we want to track (log and extra data)
             log_scan_values = raw_file.get_status_log_for_retention_time(start_time_of_scan).values
             for idx, hp in log_statistics_to_retrieve:
-                data_dict["THERMO_LOG_" + hp].append(log_scan_values[idx])
+                data_dict["LOG_" + hp].append(log_scan_values[idx])
             extra_scan_values = raw_file.get_trailer_extra_information(scan).values
             for idx, hp in extra_statistics_to_retrieve:
-                data_dict["THERMO_EXTRA_" + hp].append(extra_scan_values[idx])
+                data_dict["EXTRA_" + hp].append(extra_scan_values[idx])
 
 
-        for key, val in data_dict.items():
-            if "THERMO_LOG_" in key:
-                desc = key[len("THERMO_LOG_"):] 
-            elif "THERMO_EXTRA_" in key:
-                desc = key[len("THERMO_EXTRA_"):]
-            else:
-                desc = key[len("THERMO_"):]
-            add_entry_to_hdf5(
-                out_h5, key.replace("/", ""), val, (len(val),), "float64", "refer to description", 
-                description=desc, compression="gzip"
+        if len(list(data_dict.keys())) != 0:
+            column_name = list(data_dict.keys())
+            column_data = [data_dict[x] for x in column_name]
+            column_type = ["float64"]*len(column_name)
+            add_table_in_hdf5(
+                out_h5, "THERMO", "Extracted_Headers", "The extracted Thermo headers, which have been specified.", 
+                "This table can contain various columns, ranging from 'Temperature', 'Lock Masses' and more. Depending "
+                "on the input RAW-file a column may be present in this table.",
+                [x.replace("/", "") for x in column_name], column_data, column_type
             )
-
 
         # Tune data is one dimensional, therefore single values
         tune_scan_values = raw_file.get_tune_data(0).values
-        for idx, hp in tune_statistics_to_retrieve:
-            add_entry_to_hdf5(
-                out_h5, "THERMO_TUNE_" + hp, tune_scan_values[idx], (1,), "float64", "refer to description", 
-                description=hp
+        if len(tune_statistics_to_retrieve) != 0:
+            tune_dict = dict()
+            for idx, hp in tune_statistics_to_retrieve:
+                tune_dict["TUNE_" + hp], tune_scan_values[idx]
+            column_name = list(tune_dict.keys())
+            column_data = [tune_dict[x] for x in column_name]
+            column_type = ["float64"]*len(column_name)
+            add_table_in_hdf5(
+                out_h5, "THERMO_LOG", "Extracted_Log_Headers", "The extracted Thermo log headers, which have been specified.", 
+                "This table contains various columns of length one, like 'Vaporizer Temperature'. Depending "
+                "on the input RAW-file a column may be present in this table.",
+                [x.replace("/", "") for x in column_name], column_data, column_type
             )
 
         # Get all the information from the instruments (in FreeStyle under Devices)
@@ -206,22 +216,21 @@ if __name__ == "__main__":
             if label in ("Pump_Pressure bar", "NC_Pump_Pressure bar"):
                 # This works for QexHF, QeXI and FLI (NC_Pump_Pressure) and EX, EXI and EXII (Pump_Preasure)
                 data = raw_file.get_chromatogram_data([settings], 1, -1)
-                pump_pressure_dict["THERMO_pump_pressure_bar_y_axis"] = list(data.intensities_array[0])
-                pump_pressure_dict["THERMO_pump_pressure_bar_x_axis"] = list(data.positions_array[0])
-    
-        if "THERMO_pump_pressure_bar_x_axis" not in pump_pressure_dict:
-            # This is currently the case for PROETD and OEI. These are not captured, hence None
-            pump_pressure_dict["THERMO_pump_pressure_bar_x_axis"] = [np.nan]
-            pump_pressure_dict["THERMO_pump_pressure_bar_y_axis"] = [np.nan]
+                pump_pressure_dict["pump_pressure_bar_y_axis"] = list(data.intensities_array[0])
+                pump_pressure_dict["pump_pressure_bar_x_axis"] = list(data.positions_array[0])
 
-        entries_in_pp = len(pump_pressure_dict["THERMO_pump_pressure_bar_x_axis"])
-        add_entry_to_hdf5(
-            out_h5, "THERMO_pump_pressure_bar_x_axis", pump_pressure_dict["THERMO_pump_pressure_bar_x_axis"], (entries_in_pp,), "float64", "minutes", 
-            description="Times when pump pressure was measured (is NaN if nothing was recorded)", compression="gzip"
-        )
-        add_entry_to_hdf5(
-            out_h5, "THERMO_pump_pressure_bar_y_axis", pump_pressure_dict["THERMO_pump_pressure_bar_y_axis"], (entries_in_pp,), "float64", "refer to description", 
-            description="The pump pressure over time  (is NaN if nothing was recorded)", compression="gzip"
+        if "pump_pressure_bar_y_axis" not in pump_pressure_dict:
+            # This is currently the case for PROETD and OEI. These are not captured, hence None
+            pump_pressure_dict["pump_pressure_bar_x_axis"] = [np.nan]
+            pump_pressure_dict["pump_pressure_bar_y_axis"] = [np.nan]
+
+        column_name = ["pump_pressure_x_axis", "pump_pressure_y_axis"]
+        column_data = [pump_pressure_dict["pump_pressure_bar_x_axis"], pump_pressure_dict["pump_pressure_bar_y_axis"]]
+        column_type = ["float64", "float64"]
+        add_table_in_hdf5(
+            out_h5, "LOCAL:21", "Pump_Pressure", "Pump Pressure",
+            "The pump pressure as a table, containing the coordinates.",
+            column_name, column_data, column_type
         )
 
     # Close raw-file
