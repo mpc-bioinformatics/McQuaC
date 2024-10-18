@@ -27,7 +27,7 @@ def argparse_setup():
 def add_entry_to_hdf5(
     f, qc_acc: str, qc_short_name: str, qc_name: str, qc_description: str, 
     value, value_shape: tuple, value_type: str, 
-    unit_accession: str=None, unit_name: str=None,
+    unit_accession: str="", unit_name: str=""
     ): 
     """ Adds an entry into the hdf5 file """
     key = "|".join([qc_acc, qc_short_name])  # ACCESSION|SHORT_DESC
@@ -69,8 +69,6 @@ def add_table_in_hdf5(
     
 
 
-
-
 # Total Ion Current Calculation taken from:
 # https://pyopenms.readthedocs.io/en/latest/first_steps.html?highlight=TIC#total-ion-current-calculation
 # This Could be the columns "accumulated-MS1_TIC" and "accumulated-MS2_TIC"
@@ -96,28 +94,36 @@ if __name__ == "__main__":
         # Get Date and Time of Measurement (timestamp)
         hh_mm_ss_str = exp.getDateTime().getTime()
         yy_mm_dd_str = exp.getDateTime().getDate() # could also be yy_mm_dd
+
         try:
             add_entry_to_hdf5(
-                out_h5, "timestamp", time.mktime(datetime.datetime.strptime(yy_mm_dd_str + "|" + hh_mm_ss_str , "%Y-%m-%d|%H:%M:%S").timetuple()),
-                (1,), "int64", "UNIX timestamp",
-                "Date and time of the measurement as a UNIX timestamp. It is set to -1 if no data is available."
-            ) 
+                f = out_h5, qc_acc = "LOCAL:09", qc_short_name = "timestamp", qc_name = "UNIX timestamp", 
+                qc_description = "Date and time of the measurement as a UNIX timestamp. It is set to -1 if no data is available.", 
+                value = time.mktime(datetime.datetime.strptime(yy_mm_dd_str + "|" + hh_mm_ss_str , "%Y-%m-%d|%H:%M:%S").timetuple()), value_shape = (1,), value_type = "float64", 
+                unit_accession = "", unit_name = ""
+            )
         except:
             add_entry_to_hdf5(
-                out_h5, "timestamp", -1,
-                (1,), "int64", "UNIX timestamp",
-                "Date and time of the measurement as a UNIX timestamp. It is set to -1 if no data is available."
-            ) 
+                f = out_h5, qc_acc = "LOCAL:09", qc_short_name = "timestamp", qc_name = "UNIX timestamp", 
+                qc_description = "Date and time of the measurement as a UNIX timestamp. It is set to -1 if no data is available.", 
+                value = -1, value_shape = (1,), value_type = "int64", 
+                unit_accession = "", unit_name = ""
+            )
 
         # Get accumulated TICs for ms1 and ms2 (accumulated-MS1_TIC)
         add_entry_to_hdf5(
-            out_h5, "accumulated-MS1_TIC", get_accumulated_TIC(exp, 1), (1,), "float64", "none",
-            "The overall sum over all peaks across all MS1 spectra."
-        ) 
+            f = out_h5, qc_acc = "MS:4000029", qc_short_name = "accumulated-MS1_TIC", qc_name = "area under TIC in MS1", 
+            qc_description = "The area under the total ion current chromatogram (MS:1000235) of all MS1 spectra.", 
+            value = get_accumulated_TIC(exp, 1), value_shape = (1,), value_type = "float64", 
+            unit_accession = "", unit_name = ""
+        )
         add_entry_to_hdf5(
-            out_h5, "accumulated-MS2_TIC", get_accumulated_TIC(exp, 2), (1,), "float64", "none",
-            "The overall sum over all peaks across all MS2 spectra."
-        ) 
+            f = out_h5, qc_acc = "MS:4000030", qc_short_name = "accumulated-MS2_TIC", qc_name = "area under TIC in MS2", 
+            qc_description = "The area under the total ion current chromatogram (MS:1000235) of all MS2 spectra.", 
+            value = get_accumulated_TIC(exp, 2), value_shape = (1,), value_type = "float64", 
+            unit_accession = "", unit_name = ""
+        )
+        
 
         # Get Number of MS 1 and 2 Spectra and also the precursors of the MS2 by counted charge
         num_ms1_spectra = 0
@@ -130,15 +136,24 @@ if __name__ == "__main__":
                 num_ms2_spectra +=1
                 num_ms2_prec_charges[spectrum.getPrecursors()[0].getCharge()] += 1
 
-        add_entry_to_hdf5(
-            out_h5, "total_num_ms1", num_ms1_spectra, (1,), "int32", "none",
-            "Number of measured MS1 spectra."
-        ) 
-        add_entry_to_hdf5(
-            out_h5, "total_num_ms2", num_ms2_spectra, (1,), "int32", "none",
-            "Number of measured MS2 spectra"
-        ) 
 
+        add_entry_to_hdf5(
+            f = out_h5, qc_acc = "MS:4000059", qc_short_name = "total_num_ms1", qc_name = "number of MS1 spectra", 
+            qc_description = "The number of MS1 events in the run.", 
+            value = num_ms1_spectra, value_shape = (1,), value_type = "int32", 
+            unit_accession = "", unit_name = ""
+        )
+        
+        add_entry_to_hdf5(
+            f = out_h5, qc_acc = "MS:4000060", qc_short_name = "total_num_ms2", qc_name = "number of MS2 spectra", 
+            qc_description = "The number of MS2 events in the run.", 
+            value = num_ms2_spectra, value_shape = (1,), value_type = "int32", 
+            unit_accession = "", unit_name = ""
+        )
+        
+        
+        ### TODO: as table
+        '''
         prec_unknown = 0 if 0 not in num_ms2_prec_charges else num_ms2_prec_charges[0] / num_ms2_spectra    
         add_entry_to_hdf5(
             out_h5, "MS2_PrecZ_Unknown", prec_unknown, (1,), "float64", "none",
@@ -158,13 +173,21 @@ if __name__ == "__main__":
             out_h5, "MS2_PrecZ_more", precz_more / num_ms2_spectra, (1,), "float64", "none",
             "Proportion of MS2 precursors with charge 6 and more."
         )
+        '''
         
-        # Here we have the last spectrum in "spectrum". We get the Retention Time Duration from it (in seconds)
-        rt_duration = spectrum.getRT() # In Seconds: How long the MS has acquired spectra 
+        
+        # Range of the retention time (first and last spectrum)
+        RT_first = spectrum_first = exp.getSpectrum(0).getRT()
+        RT_last = spectrum.getRT() # Here we have the last spectrum in "spectrum". 
+        RT_range = [RT_first, RT_last]
+        
         add_entry_to_hdf5(
-            out_h5, "RT_duration", rt_duration, (1,), "float64", "seconds",
-            "Scan start time of the last measured spectrum."
+            f = out_h5, qc_acc = "MS:4000070", qc_short_name = "RT_range", qc_name = "retention time acquisition range", 
+            qc_description = "Upper and lower limit of retention time at which spectra are recorded.", 
+            value = RT_range, value_shape = (2,), value_type = "float64", 
+            unit_accession = "", unit_name = ""
         )
+        
 
         # Get Base_peak_Intensity total_ion_current and up to
         ms1_ms2_basepeaks = []
@@ -182,6 +205,12 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             out_h5, "Base_Peak_Intensity_Max", base_peak_intensity_max, (1,), "float64", "none",
             "The maximum base peak (highest peak in spectrum) across all MS1 and MS2 spectra."
+        )
+        add_entry_to_hdf5(
+            f = out_h5, qc_acc = "LOCAL:01", qc_short_name = "Base_Peak_Intensity_Max", qc_name = "base peak intensity", 
+            qc_description = "The maximum base peak (highest peak in spectrum) across all MS1 and MS2 spectra.", 
+            value = num_ms2_spectra, value_shape = (1,), value_type = "int32", 
+            unit_accession = "", unit_name = ""
         )
         add_entry_to_hdf5(
             out_h5, "Total_Ion_Current_Max", total_ion_current_max, (1,), "float64", "none",
@@ -206,6 +235,8 @@ if __name__ == "__main__":
         )
         ###
 
+
+        '''
         # Get MS1 and MS2 TICs
         ms1_tic = [] # This is the MS1-TIC-BLOB 
         ms1_rt = []  # This is the MS1-RT-BLOB
@@ -475,3 +506,4 @@ if __name__ == "__main__":
             out_h5, "MS1-TIC-Q4", ms1_tic_q4, (1,), "float64", "none",
             "log2(100%-quantile / 75%-quantile of the actual TIC)"
         )
+        '''
