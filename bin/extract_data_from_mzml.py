@@ -2,7 +2,7 @@
 
 import sys
 import argparse
-# import pyopenms
+import pyopenms
 import numpy as np
 import math
 from collections import defaultdict
@@ -84,14 +84,14 @@ def get_accumulated_TIC(exp, mslevel):
 
 
 if __name__ == "__main__":
-    # args = argparse_setup()
+    args = argparse_setup()
 
     # # Load MZML
-    # exp = pyopenms.MSExperiment()
-    # pyopenms.MzMLFile().load(args.mzml, exp)
+    exp = pyopenms.MSExperiment()
+    pyopenms.MzMLFile().load(args.mzml, exp)
 
     # Open HDF5 file in write mode
-    with h5py.File("test.h5", 'w') as out_h5:
+    with h5py.File(args.out_hdf5, 'w') as out_h5:
 
         # Get Date and Time of Measurement (timestamp)
         hh_mm_ss_str = exp.getDateTime().getTime()
