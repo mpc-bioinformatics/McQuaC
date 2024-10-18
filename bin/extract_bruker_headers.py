@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
+import argparse
 import os
 import sqlite3
-import argparse
-import numpy as np
+from typing import Any, List
+
 import h5py
+import numpy as np
 
 
 def argparse_setup():
@@ -22,7 +24,6 @@ def argparse_setup():
     ])
 
     return parser.parse_args()
-
 
 
 def add_entry_to_hdf5(
@@ -46,7 +47,6 @@ def add_entry_to_hdf5(
     f[key].attrs["unit_name"] = unit_name
 
 
-
 def add_table_in_hdf5(
     f, qc_acc: str, qc_short_name: str, qc_name: str, qc_description: str, 
     column_names: List[str], column_data: List[List[Any]], column_types: List[str]
@@ -67,10 +67,13 @@ def add_table_in_hdf5(
         else:
             table_group.create_dataset(n, (len(d),), dtype=t, compression="gzip")
             table_group[n].write_direct(np.array(d, dtype=t))
-    
+
+
 if __name__ == "__main__":
 
     args = argparse_setup()
+    args.d_folder = "/home/luxii/Desktop/temp_Svitlana/TIM0002625std_RE2_1_2884.d"
+    args.out_hdf5 = "test.h5"
 
     con = sqlite3.connect(args.d_folder + os.sep + "analysis.tdf")
     cur = con.cursor()
@@ -94,7 +97,6 @@ if __name__ == "__main__":
         try:
             p_index.append(properties[property_names.index(n)][0])
             p_name.append(n)
-            p_col_name.append("BRUKER_" + n)
         except:
             print("WARNING: Property '{}' not found!".format(n))
 
@@ -103,17 +105,14 @@ if __name__ == "__main__":
     with h5py.File(args.out_hdf5, 'w') as out_h5:
 
         # Extract data for each frame:
-        for idx, name, col_name in zip(p_index, p_name, p_col_name):
+        data_dict = dict()
+        for idx, name in zip(p_index, p_name):
             res = cur.execute(
                 "SELECT Frame, Value from Properties WHERE  Property = {}".format(idx)
             )
             metadata = res.fetchall()
 
-            entries = [x[1]if x[1] is not None else np.nan for x in sorted(metadata, key=lambda x: x[0])]
-            add_entry_to_hdf5(
-                out_h5, col_name, entries, (len(entries),), "float64", "refer to description", 
-                description=name
-            )
+            data_dict[name] = [x[1]if x[1] is not None else np.nan for x in sorted(metadata, key=lambda x: x[0])]
 
         # Special CASE: Get MS/MS-Type, Pressure and Measure/RetentionTime
         res = cur.execute(
@@ -122,18 +121,14 @@ if __name__ == "__main__":
         frame_data = res.fetchall()
         sorted_frame_data = sorted(frame_data, key=lambda x: x[0])
 
-        len_entries = len([x[1] for x in sorted_frame_data])
-        add_entry_to_hdf5(
-            out_h5, "BRUKER_Time", [x[1] for x in sorted_frame_data], (len_entries,), "float64", "seconds", 
-            description="Timepoints for BRUKER RAW-arrays in seconds"
-        )
-        add_entry_to_hdf5(
-            out_h5, "BRUKER_MsMsType", [x[2] for x in sorted_frame_data], (len_entries,), "float64", "none", 
-            description="MsMsType ( 8 --> ddaPASEF, 9 --> diaPASSEF)"
-        )
-        add_entry_to_hdf5(
-            out_h5, "BRUKER_Pressure", [x[3] for x in sorted_frame_data], (len_entries,), "float64", "refer to description", 
-            description="Pressure"
+        column_name = list(data_dict.keys()) + ["Time", "MsMsType", "Pressure"]
+        column_data = [data_dict[x] for x in column_name[:-3]] + [[x[1] for x in sorted_frame_data], [x[2] for x in sorted_frame_data], [x[3] for x in sorted_frame_data]]
+        column_type = ["float64"]*len(column_name)
+        add_table_in_hdf5(
+            out_h5, "BRUKER", "Extracted_Headers", "The extracted Bruker headers, which have been specified prior.", 
+            "This table can contain various columns, like 'Temperature' and more. Depending "
+            "on the input Bruker-file a column may be present in this table.",
+            column_name, column_data, column_type
         )
 
         res.close()
@@ -172,11 +167,11 @@ if __name__ == "__main__":
             times, data = [np.nan], [np.nan]
 
         # TODO it is not clear which format the timestamps and the data has. All we know is that the data is provided in little endian
-        add_entry_to_hdf5(
-            out_h5, "BRUKER_pump_pressure_bar_x_axis", times, (len(times),), "float64", "unknown", 
-            description="Pump Pressure x coordinate, NaN if not present", compression="gzip"
-        )
-        add_entry_to_hdf5(
-            out_h5, "BRUKER_pump_pressure_bar_y_axis", data, (len(data),), "float64", "unknown", 
-            description="Pump Pressure y coordinate, NaN if not present", compression="gzip"
+        column_name = ["pump_pressure_x_axis", "pump_pressure_y_axis"]
+        column_data = [times, data]
+        column_type = ["float64", "float64"]
+        add_table_in_hdf5(
+            out_h5, "LOCAL:21", "Pump_Pressure", "Pump Pressure",
+            "The pump pressure as a table, containing the coordinates.",
+            column_name, column_data, column_type
         )
