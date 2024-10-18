@@ -24,14 +24,50 @@ def argparse_setup():
     return parser.parse_args()
 
 
-def add_entry_to_hdf5(f, key: str, value, array_shape: tuple, data_type: str, unit: str, description: str, compression: str=None):
+
+def add_entry_to_hdf5(
+    f, qc_acc: str, qc_short_name: str, qc_name: str, qc_description: str, 
+    value, value_shape: tuple, value_type: str, 
+    unit_accession: str=None, unit_name: str=None,
+    ): 
     """ Adds an entry into the hdf5 file """
-    f.create_dataset(key, array_shape, dtype=data_type, compression=compression)
-    f[key].attrs["unit"] = unit
-    f[key].attrs["Description"] = description
-    f[key].write_direct(np.array(value, dtype=data_type))
+    key = "|".join([qc_acc, qc_short_name])  # ACCESSION|SHORT_DESC
+    if value_type in ("str", h5py.string_dtype()):
+        ds = f.create_dataset(key, shape=value_shape, dtype=h5py.string_dtype(), compression="gzip")
+        ds[:] = value
+    else:
+        f.create_dataset(key, value_shape, dtype=value_type, compression="gzip")
+        f[key].write_direct(np.array(value, dtype=value_type))
+    
+    f[key].attrs["qc_short_name"] = qc_short_name
+    f[key].attrs["qc_name"] = qc_name
+    f[key].attrs["qc_description"] = qc_description
+    f[key].attrs["unit_accession"] = unit_accession
+    f[key].attrs["unit_name"] = unit_name
 
 
+
+def add_table_in_hdf5(
+    f, qc_acc: str, qc_short_name: str, qc_name: str, qc_description: str, 
+    column_names: List[str], column_data: List[List[Any]], column_types: List[str]
+    ): 
+    """Adds a table in groups"""
+
+    key = "|".join([qc_acc, qc_short_name])  # ACCESSION|SHORT_DESC
+    table_group = f.create_group(key)
+    table_group.attrs["qc_short_name"] = qc_short_name
+    table_group.attrs["qc_name"] = qc_name
+    table_group.attrs["qc_description"] = qc_description
+    table_group.attrs["column_order"] = "|".join(column_names)
+    
+    for n, d, t in zip (column_names, column_data, column_types): 
+        if t in ("str", h5py.string_dtype()):
+            ds = table_group.create_dataset(n, shape=len(d), dtype=h5py.string_dtype(), compression="gzip")
+            ds[:] = d
+        else:
+            table_group.create_dataset(n, (len(d),), dtype=t, compression="gzip")
+            table_group[n].write_direct(np.array(d, dtype=t))
+    
 if __name__ == "__main__":
 
     args = argparse_setup()
