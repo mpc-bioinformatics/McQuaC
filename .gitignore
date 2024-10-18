@@ -8,6 +8,9 @@ nextflow
 /results
 trace-*.txt
 
+# vs code
+.vscode/
+
 # OS specific
 .DS_store
 
