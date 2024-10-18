@@ -127,8 +127,6 @@ def get_headers_to_parse(headers, headers_from_raw):
 
 if __name__ == "__main__":
     args = argparse_setup()
-    args.raw = "/home/luxii/Desktop/denopa_hupo_2024/raws/K_14_3_QEXI16175.raw"
-    args.out_hdf5 = "test.h5"
 
     data_dict = defaultdict(lambda: list())
     raw_file = RawFileReaderAdapter.file_factory(args.raw)
