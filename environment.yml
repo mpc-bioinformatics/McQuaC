@@ -1,4 +1,4 @@
-name: nextqcflow
+name: mcquac
 channels:
   - defaults
   - conda-forge
