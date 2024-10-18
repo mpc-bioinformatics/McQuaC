@@ -3,6 +3,7 @@
 import os
 import argparse
 import base64
+from typing import Any, List
 import zipfile
 import pyopenms
 from collections import defaultdict
@@ -95,31 +96,59 @@ if __name__ == "__main__":
         feature_str_bs64 = base64.b64encode(fb.read())
 
     with h5py.File(args.out_hdf5, 'w') as out_h5:
-        # First create header:
-        header = ["total_num_features", "total_num_ident_features"] + \
-            ["num_features_charge_" + str(i) for i in range(1, int(args.report_up_to_charge) + 1)] + \
-            ["num_ident_features_charge_" + str(i) for i in range(1, int(args.report_up_to_charge) + 1)] 
+        add_entry_to_hdf5(
+            out_h5,
+            "MS:4000102",
+            "total_num_features",
+            "number of detected quantification data points",
+            (
+                "The number of data points detected for quantification purposes within the run. "
+                "These data points may be for example XIC profiles, isotopic pattern areas, or reporter ions (see MS:1001805). "
+                "The used type should be noted in the metadata or analysis methods section of the recording file for the respective run.",
+            ),
+            total_num_features,
+            (1,),
+            "int64",
+            unit_accession="UO:0000189",
+            unit_name="count int"
+        )
 
-        # Then create data
-        row = [str(total_num_features), str(total_num_ident_features)] + \
-            [str(num_features_charge[i]) for i in range(1, int(args.report_up_to_charge) + 1)] + \
-            [str(num_ident_features_charge[i]) for i in range(1, int(args.report_up_to_charge) + 1)]
+        add_entry_to_hdf5(
+            out_h5,
+            "MS:4000103",
+            "total_num_ident_features",
+            "number of identified quantification data points",
+            (
+                "The number of identified data points for quantification purposes within the run after user defined acceptance criteria are applied. "
+                "These data points may be for example XIC profiles, isotopic pattern areas, or reporter ions (see MS:1001805). "
+                "The used type should be noted in the metadata or analysis methods section of the recording file for the respective run. "
+                "In case of multiple acceptance criteria (FDR) available in proteomics, PSM-level FDR should be used for better comparability.",
+            ),
+            total_num_ident_features,
+            (1,),
+            "int64",
+            unit_accession="UO:0000189",
+            unit_name="count int"
+        )
 
-        # And also its description
-        description = [
-            "Total number of features found in raw file.",
-            "Total number of features with an annotated identificaiton.",
-            *["Total number of features with charge " + str(i)  for i in range(1, int(args.report_up_to_charge) + 1)],
-            *["Total number of identified features with charge " + str(i) for i in range(1, int(args.report_up_to_charge) + 1)]
-        ]
+        add_table_in_hdf5(
+            out_h5,
+            "LOCAL:06",
+            "num_features_charge",
+            "Number of features with charge",
+            "Number of features with charge",
+            [str(i) for i in range(1, int(args.report_up_to_charge) + 1)],
+            [[num_features_charge[i]] for i in range(1, int(args.report_up_to_charge) + 1)],
+            ["int64" for i in range(1, int(args.report_up_to_charge) + 1)]
+        )
 
-        for header, row, desc in zip (header, row, description):
-            out_h5.create_dataset(header, (1,), dtype="int32")
-            out_h5[header].attrs["unit"] = "none"
-            out_h5[header].attrs["Description"] = desc
-            out_h5[header].write_direct(np.array(row, dtype="int32"))
-
-        # Save binary blob
-        out_h5.create_dataset("feature_data.featureXML.zip", data=feature_str_bs64.decode())
-        out_h5["feature_data.featureXML.zip"].attrs["unit"] = "ZIP File"
-        out_h5["feature_data.featureXML.zip"].attrs["Description"] = "A featureXML file in a ZIP container containing all features. This file was base64 encoded to be represented as a string"
+        add_table_in_hdf5(
+            out_h5,
+            "LOCAL:07",
+            "num_ident_features_charge",
+            "Number of identified features with charge",
+            "Number of identified features with charge",
+            [str(i) for i in range(1, int(args.report_up_to_charge) + 1)],
+            [[num_ident_features_charge[i]] for i in range(1, int(args.report_up_to_charge) + 1)],
+            ["int64" for i in range(1, int(args.report_up_to_charge) + 1)]
+        )
