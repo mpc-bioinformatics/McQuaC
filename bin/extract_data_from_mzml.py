@@ -98,31 +98,52 @@ if __name__ == "__main__":
 
         try:
             add_entry_to_hdf5(
-                f = out_h5, qc_acc = "LOCAL:09", qc_short_name = "timestamp", qc_name = "UNIX timestamp", 
+                f = out_h5, 
+                qc_acc = "LOCAL:10", 
+                qc_short_name = "timestamp", 
+                qc_name = "UNIX timestamp", 
                 qc_description = "Date and time of the measurement as a UNIX timestamp. It is set to -1 if no data is available.", 
-                value = time.mktime(datetime.datetime.strptime(yy_mm_dd_str + "|" + hh_mm_ss_str , "%Y-%m-%d|%H:%M:%S").timetuple()), value_shape = (1,), value_type = "float64", 
-                unit_accession = "", unit_name = ""
+                value = time.mktime(datetime.datetime.strptime(yy_mm_dd_str + "|" + hh_mm_ss_str , "%Y-%m-%d|%H:%M:%S").timetuple()), 
+                value_shape = (1,), 
+                value_type = "float64", 
+                unit_accession = "", 
+                unit_name = ""
             )
         except:
             add_entry_to_hdf5(
-                f = out_h5, qc_acc = "LOCAL:09", qc_short_name = "timestamp", qc_name = "UNIX timestamp", 
+                f = out_h5, qc_acc = "LOCAL:10", 
+                qc_short_name = "timestamp", 
+                qc_name = "UNIX timestamp", 
                 qc_description = "Date and time of the measurement as a UNIX timestamp. It is set to -1 if no data is available.", 
-                value = -1, value_shape = (1,), value_type = "int64", 
-                unit_accession = "", unit_name = ""
+                value = -1, 
+                value_shape = (1,), 
+                value_type = "int64", 
+                unit_accession = "", 
+                unit_name = ""
             )
 
         # Get accumulated TICs for ms1 and ms2 (accumulated-MS1_TIC)
         add_entry_to_hdf5(
-            f = out_h5, qc_acc = "MS:4000029", qc_short_name = "accumulated-MS1_TIC", qc_name = "area under TIC in MS1", 
+            f = out_h5, qc_acc = "MS:4000029", 
+            qc_short_name = "accumulated-MS1_TIC", 
+            qc_name = "area under TIC in MS1", 
             qc_description = "The area under the total ion current chromatogram (MS:1000235) of all MS1 spectra.", 
-            value = get_accumulated_TIC(exp, 1), value_shape = (1,), value_type = "float64", 
-            unit_accession = "", unit_name = ""
+            value = get_accumulated_TIC(exp, 1), 
+            value_shape = (1,), 
+            value_type = "float64", 
+            unit_accession = "", 
+            unit_name = ""
         )
         add_entry_to_hdf5(
-            f = out_h5, qc_acc = "MS:4000030", qc_short_name = "accumulated-MS2_TIC", qc_name = "area under TIC in MS2", 
+            f = out_h5, qc_acc = "MS:4000030", 
+            qc_short_name = "accumulated-MS2_TIC", 
+            qc_name = "area under TIC in MS2", 
             qc_description = "The area under the total ion current chromatogram (MS:1000235) of all MS2 spectra.", 
-            value = get_accumulated_TIC(exp, 2), value_shape = (1,), value_type = "float64", 
-            unit_accession = "", unit_name = ""
+            value = get_accumulated_TIC(exp, 2), 
+            value_shape = (1,), 
+            value_type = "float64", 
+            unit_accession = "", 
+            unit_name = ""
         )
         
 
@@ -139,17 +160,29 @@ if __name__ == "__main__":
 
 
         add_entry_to_hdf5(
-            f = out_h5, qc_acc = "MS:4000059", qc_short_name = "total_num_ms1", qc_name = "number of MS1 spectra", 
+            f = out_h5, 
+            qc_acc = "MS:4000059", 
+            qc_short_name = "total_num_ms1", 
+            qc_name = "number of MS1 spectra", 
             qc_description = "The number of MS1 events in the run.", 
-            value = num_ms1_spectra, value_shape = (1,), value_type = "int32", 
-            unit_accession = "", unit_name = ""
+            value = num_ms1_spectra, 
+            value_shape = (1,), 
+            value_type = "int32", 
+            unit_accession = "UO:0000189", 
+            unit_name = "count unit"
         )
         
         add_entry_to_hdf5(
-            f = out_h5, qc_acc = "MS:4000060", qc_short_name = "total_num_ms2", qc_name = "number of MS2 spectra", 
+            f = out_h5, 
+            qc_acc = "MS:4000060", 
+            qc_short_name = "total_num_ms2", 
+            qc_name = "number of MS2 spectra", 
             qc_description = "The number of MS2 events in the run.", 
-            value = num_ms2_spectra, value_shape = (1,), value_type = "int32", 
-            unit_accession = "", unit_name = ""
+            value = num_ms2_spectra, 
+            value_shape = (1,), 
+            value_type = "int32", 
+            unit_accession = "UO:0000189", 
+            unit_name = "count unit"
         )
         
         
@@ -160,7 +193,6 @@ if __name__ == "__main__":
                 precz_more += num_ms2_prec_charges[key]
         prec_charge_list = [[num_ms2_prec_charges[i] / num_ms2_spectra] for i in range(1, int(args.report_up_to_charge) + 1)]
         prec_charge_list = [[prec_unknown]] + prec_charge_list + [[precz_more / num_ms2_spectra]]
-        print(prec_charge_list)
         add_table_in_hdf5(
             f = out_h5, 
             qc_acc = "MS:4000063", 
@@ -190,8 +222,8 @@ if __name__ == "__main__":
             value = RT_range, 
             value_shape = (2,), 
             value_type = "float64", 
-            unit_accession = "", 
-            unit_name = ""
+            unit_accession = "UO:0000010", 
+            unit_name = "second"
         )
         
 
@@ -209,20 +241,31 @@ if __name__ == "__main__":
         total_ion_current_max = max(ms1_ms2_tic)
 
         add_entry_to_hdf5(
-            f = out_h5, qc_acc = "LOCAL:01", qc_short_name = "Base_Peak_Intensity_Max", qc_name = "base peak intensity max", 
+            f = out_h5, 
+            qc_acc = "LOCAL:01", 
+            qc_short_name = "Base_Peak_Intensity_Max", 
+            qc_name = "base peak intensity max", 
             qc_description = "The maximum base peak (highest peak in spectrum) across all MS1 and MS2 spectra.", 
-            value = num_ms2_spectra, value_shape = (1,), value_type = "int32", 
-            unit_accession = "", unit_name = ""
+            value = num_ms2_spectra, 
+            value_shape = (1,), 
+            value_type = "float64", 
+            unit_accession = "", 
+            unit_name = ""
         )
         add_entry_to_hdf5(
-            f = out_h5, qc_acc = "LOCAL:03", qc_short_name = "Total_Ion_Current_Max", qc_name = "total ion current max", 
+            f = out_h5, qc_acc = "LOCAL:03", 
+            qc_short_name = "Total_Ion_Current_Max", 
+            qc_name = "total ion current max", 
             qc_description = "The maximum of all TICs across MS1 and MS2 spectra.", 
-            value = total_ion_current_max, value_shape = (1,), value_type = "int32", 
-            unit_accession = "", unit_name = ""
+            value = total_ion_current_max, 
+            value_shape = (1,), 
+            value_type = "float64", 
+            unit_accession = "", 
+            unit_name = ""
         )
 
 
-        '''
+
         # and up to 105 minutes
         break_on = args.base_peak_tic_up_to*60
         for i in range(len(ms1_ms2_rt)):
@@ -232,17 +275,30 @@ if __name__ == "__main__":
         total_ion_current_max_up_to_xm = max(ms1_ms2_tic[:i-1])
 
         add_entry_to_hdf5(
-            out_h5, "Base_Peak_Intensity_Max_Up_To_" + str(args.base_peak_tic_up_to), base_peak_intensity_max, (1,), "float64", "none",
-            "The maximum base peak (highest peak in spectrum) across all MS1 and MS2 spectra up to " + str(args.base_peak_tic_up_to) + " minutes."
+            f = out_h5, 
+            qc_acc = "LOCAL:02", 
+            qc_short_name = "Base_Peak_Intensity_Max_Up_To_" + str(args.base_peak_tic_up_to), 
+            qc_name = "base peak intensity max", 
+            qc_description = "The maximum base peak (highest peak in spectrum) across all MS1 and MS2 spectra up to " + str(args.base_peak_tic_up_to) + " minutes.", 
+            value = num_ms2_spectra, 
+            value_shape = (1,), 
+            value_type = "float64", 
+            unit_accession = "", 
+            unit_name = ""
         )
         add_entry_to_hdf5(
-            out_h5, "Total_Ion_Current_Max_Up_To_" + str(args.base_peak_tic_up_to), total_ion_current_max, (1,), "float64", "none",
-            "The maximum of all TICs across MS1 and MS2 spectra up to " + str(args.base_peak_tic_up_to) + " minutes."
+            f = out_h5, qc_acc = "LOCAL:04", 
+            qc_short_name = "Total_Ion_Current_Max_Up_To_" + str(args.base_peak_tic_up_to), 
+            qc_name = "total ion current max", 
+            qc_description = "The maximum of all TICs across MS1 and MS2 spectra up to " + str(args.base_peak_tic_up_to) + " minutes.", 
+            value = total_ion_current_max, 
+            value_shape = (1,), 
+            value_type = "float64", 
+            unit_accession = "", 
+            unit_name = ""
         )
-        ###
-        '''
 
-        '''
+
         # Get MS1 and MS2 TICs
         ms1_tic = [] # This is the MS1-TIC-BLOB 
         ms1_rt = []  # This is the MS1-RT-BLOB
@@ -275,71 +331,74 @@ if __name__ == "__main__":
                 else:
                     ms2_mz.append(precs[0].getMZ())
 
-        # Adding TIC and RT for TIC Plots
-        add_entry_to_hdf5(
-            out_h5, "ms1_tic_array", ms1_tic, (len(ms1_tic),), "float64", "none",
-            "RAW-Array of the TICs of MS1 spectra (to plot tic overlay plot in combination with 'ms1_rt_array')"
+        add_table_in_hdf5(
+            f = out_h5, 
+            qc_acc = "LOCAL:25", 
+            qc_short_name = "MS1_TIC", 
+            qc_name = "MS1 total ion chromatogram", 
+            qc_description = ("MS1 TIC over the retention time. " 
+                              "This table can be used to plot the MS1 TIC over time. "
+                              ), 
+            column_names = ["retention_time", "TIC"],
+            column_data = [ms1_rt, ms1_tic], 
+            column_types = ["float64", "float64"]
         )
-        add_entry_to_hdf5(
-            out_h5, "ms1_rt_array", ms1_rt, (len(ms1_rt),), "float64", "seconds",
-            "RAW-Array of the retention times of MS1 spectra (to plot tic overlay plot in combination with 'ms1_tic_array')"
+       
+        add_table_in_hdf5(
+            f = out_h5, 
+            qc_acc = "LOCAL:26", 
+            qc_short_name = "MS1_map", 
+            qc_name = "MS1 ion map data", 
+            qc_description = ("MS1 intensity, m/z and retention time. " 
+                              "This table can be used to plot the MS1 ion map. "
+                              ), 
+            column_names = ["retention_time", "mz", "intensity"],
+            column_data = [ms1_map_rt, ms1_map_mz, ms1_map_intens], 
+            column_types = ["float64", "float64", "float64"]
         )
+        
+        add_table_in_hdf5(
+            f = out_h5, 
+            qc_acc = "LOCAL:27", 
+            qc_short_name = "MS2_TIC", 
+            qc_name = "MS2 total ion chromatogram", 
+            qc_description = ("MS2 TIC over the retention time. " 
+                              "This table can be used to plot the MS1 TIC over time. "
+                              ), 
+            column_names = ["retention_time", "TIC"],
+            column_data = [ms2_rt, ms2_tic], 
+            column_types = ["float64", "float64"]
+        )
+        
 
-        # Adding MS1 Map Infos
-        add_entry_to_hdf5(
-            out_h5, "ms1_map_rt_array", ms1_map_rt, (len(ms1_map_rt),), "float64", "none",
-            "Transformed RT-Array of all single MS1 peaks (to plot MS1 heatmaps with 'ms1_map_intens_array' and 'ms1_map_mz_array', filtered by "
-            + str(args.filter_threshold) + "% of the highest MS1 peak to remove noise)", compression="gzip"
-        )
-        add_entry_to_hdf5(
-            out_h5, "ms1_map_intens_array", ms1_map_intens, (len(ms1_map_intens),), "float64", "seconds",
-            "RAW-Array of the retention times of MS2 spectra (to plot MS1 heatmaps with 'ms1_map_rt_array' and 'ms1_map_mz_array', filtered by "
-            + str(args.filter_threshold) + "% of the highest MS1 peak to remove noise)", compression="gzip"
-        )
-        add_entry_to_hdf5(
-            out_h5, "ms1_map_mz_array", ms1_map_mz, (len(ms1_map_mz),), "float64", "m/z",
-            "RAW-Array of the TICs of MS2 spectra (to plot MS1 heatmaps with 'ms1_map_intens_array' and 'ms1_map_rt_array', filtered by "
-            + str(args.filter_threshold) + "% of the highest MS1 peak to remove noise)", compression="gzip"
-        )
-
-        # Adding MS2 HeatMap Infos
-        add_entry_to_hdf5(
-            out_h5, "ms2_tic_array", ms2_tic, (len(ms2_tic),), "float64", "none",
-            "RAW-Array of the TICs of the MS2 spectra (to plot MS2 heatmaps with 'ms2_rt_array' and 'ms2_mz_array')", compression="gzip"
-        )
-        add_entry_to_hdf5(
-            out_h5, "ms2_rt_array", ms2_rt, (len(ms2_rt),), "float64", "seconds",
-            "RAW-Array of the retention times of MS2 spectra  (to plot MS2 heatmaps with 'ms2_tic_array' and 'ms2_mz_array')", compression="gzip"
-        )
-        add_entry_to_hdf5(
-            out_h5, "ms2_mz_array", ms2_mz, (len(ms2_mz),), "float64", "m/z",
-            "RAW-Array of the m/z of MS2 spectra  (to plot MS2 heatmaps with 'ms2_rt_array' and 'ms2_tic_array')", compression="gzip"
-        )
-        ###
-
-        ### Calculate the diffenrece in RT between 25%, 50%, 75% and 100% of data (relative) (RT-MS1_Q1-4)
+        ### Calculate the difference in RT between 25%, 50%, 75% and 100% of data (relative) (RT-MS1_Q1-4)
         # Normalize data between 0 and 1
         rt_ms1_q25_temp = np.quantile(ms1_rt, 0.25)
         rt_ms1_q50_temp = np.quantile(ms1_rt, 0.50)
         rt_ms1_q75_temp = np.quantile(ms1_rt, 0.75)
 
+
+        rt_duration = RT_last - RT_first
         rt_ms1_q025 = (rt_ms1_q25_temp - 0)  / rt_duration
         rt_ms1_q050 = (rt_ms1_q50_temp - rt_ms1_q25_temp) / rt_duration
         rt_ms1_q075 = (rt_ms1_q75_temp - rt_ms1_q50_temp) / rt_duration
         rt_ms1_q100 = (rt_duration - rt_ms1_q75_temp) / rt_duration
 
-        for val, desc, key in zip (
-            [rt_ms1_q025 ,rt_ms1_q050 ,rt_ms1_q075 ,rt_ms1_q100],
-            ["first", "second", "third", "last"],
-            ["RT_MS1_Q_000-025" ,"RT_MS1_Q_025-050" ,"RT_MS1_Q_050-075" ,"RT_MS1_Q_075-100"]
-        ):
-            add_entry_to_hdf5(
-                out_h5, key, val, (1,), "float64", "none",
-                "The time interval when the " + desc + " 25 % of the total number of MS1 spectra are measured"
-            )
+        add_entry_to_hdf5(
+            f = out_h5, 
+            qc_acc = "MS:4000055", 
+            qc_short_name = "RT_MS1_Quartiles", 
+            qc_name = "MS1 quarter RT fraction", 
+            qc_description = "The interval used for acquisition of the first, second, third, and fourth quarter of all MS1 events divided by retention time duration.", 
+            value = (rt_ms1_q025,rt_ms1_q050,rt_ms1_q075,rt_ms1_q100), 
+            value_shape = (4,), 
+            value_type = "float64", 
+            unit_accession = "UO:0000191", 
+            unit_name = "fraction"
+        )
         ###
 
-        ### Calculate the diffenrece in RT between 25%, 50%, 75% and 100% of data (relative) (RT-MS2_Q1-4)
+        ### Calculate the difference in RT between 25%, 50%, 75% and 100% of data (relative) (RT-MS2_Q1-4)
         rt_ms2_q25_temp = np.quantile(ms2_rt, 0.25)
         rt_ms2_q50_temp = np.quantile(ms2_rt, 0.50)
         rt_ms2_q75_temp = np.quantile(ms2_rt, 0.75)
@@ -349,18 +408,23 @@ if __name__ == "__main__":
         rt_ms2_q075 = (rt_ms2_q75_temp - rt_ms2_q50_temp) / rt_duration
         rt_ms2_q100 = (rt_duration - rt_ms2_q75_temp) / rt_duration
 
-        for val, desc, key in zip (
-            [rt_ms2_q025 ,rt_ms2_q050 ,rt_ms2_q075 ,rt_ms2_q100],
-            ["first", "second", "third", "last"],
-            ["RT_MS2_Q_000-025" ,"RT_MS2_Q_025-050" ,"RT_MS2_Q_050-075" ,"RT_MS2_Q_075-100"]
-        ):
-            add_entry_to_hdf5(
-                out_h5, key, val, (1,), "float64", "none",
-                "The time interval when the " + desc + " 25 % of the total number of MS2 spectra are measured"
-            )
+        add_entry_to_hdf5(
+            f = out_h5, 
+            qc_acc = "MS:4000056", 
+            qc_short_name = "RT_MS2_Quartiles", 
+            qc_name = "MS2 quarter RT fraction", 
+            qc_description = "The interval used for acquisition of the first, second, third, and fourth quarter of all MS2 events divided by retention time duration.", 
+            value = (rt_ms2_q025,rt_ms2_q050,rt_ms2_q075,rt_ms2_q100), 
+            value_shape = (4,), 
+            value_type = "float64", 
+            unit_accession = "UO:0000191", 
+            unit_name = "fraction"
+        )
+        
+            
         ###
-
-        ### Calculate the diffenrece in RT between 25%, 50%, 75% and 100% of data (relative) (RT-TIC_Q1-4)
+        
+        ### Calculate the difference in RT between 25%, 50%, 75% and 100% of data (relative) (RT-TIC_Q1-4)
         ms1_ms2_rt_tic = sorted(zip(ms1_rt + ms2_rt, ms1_tic + ms2_tic), key=lambda x: x[0] )
         ms1_ms2_rt = [x[0] for x in ms1_ms2_rt_tic]
         ms1_ms2_tic = [x[1] for x in ms1_ms2_rt_tic]
@@ -384,17 +448,24 @@ if __name__ == "__main__":
         rt_ms1_ms2_part_075 = (ms1_ms2_rt[np.where(mask_075 == False)[0][0] - 1] - ms1_ms2_rt[np.where(mask_050 == False)[0][0]]) / rt_duration # Get RT-Difference from first and last entry in 50% - 75%
         rt_ms1_ms2_part_100 = (ms1_ms2_rt[-1] - ms1_ms2_rt[np.where(mask_075 == False)[0][0]]) / rt_duration # Get RT-Difference from first and last entry in 75% - 100%
         
-        for val, desc, key in zip (
-            [rt_ms1_ms2_part_025 ,rt_ms1_ms2_part_050 ,rt_ms1_ms2_part_075 ,rt_ms1_ms2_part_100],
-            ["first", "second", "third", "last"],
-            ["RT_TIC_Q_000-025", "RT_TIC_Q_025-050", "RT_TIC_Q_050-075", "RT_TIC_Q_075-100"]
-        ):
-            add_entry_to_hdf5(
-                out_h5, key, val, (1,), "float64", "none",
-                "The time interval when the " + desc + " 25% of TIC accumulates"
-            )
+        add_entry_to_hdf5(
+            f = out_h5, 
+            qc_acc = "MS:4000054", 
+            qc_short_name = "RT_TIC_Quartiles", 
+            qc_name = "TIC quarters RT fraction", 
+            qc_description = "The interval when the respective quarter of the TIC accumulates divided by retention time duration.", 
+            value = (rt_ms1_ms2_part_025,rt_ms1_ms2_part_050,rt_ms1_ms2_part_075,rt_ms1_ms2_part_100), 
+            value_shape = (4,), 
+            value_type = "float64", 
+            unit_accession = "UO:0000191", 
+            unit_name = "fraction"
+        )
+            
         ###
 
+
+
+        
         # Get MS1-Freq-Max (in Hz)
         np_ms1_rt = np.array(ms1_rt)
         ms1_num_of_elements = []
@@ -407,10 +478,19 @@ if __name__ == "__main__":
         ms1_freq_max = max(ms1_num_of_elements) / 60
 
         add_entry_to_hdf5(
-            out_h5, "MS1_Freq_Max", ms1_freq_max, (1,), "float64", "Hz",
-            "Highest frequency of MS1 spectra in Hertz (iow: the highest number of measured MS1 spectra within a 1 minute window divided by 60)"
+            f = out_h5, 
+            qc_acc = "MS:4000065", 
+            qc_short_name = "MS1_Freq_Max", 
+            qc_name = "fastest frequency for MS level 1 collection", 
+            qc_description = "fastest frequency for MS level 1 collection.", 
+            value = ms1_freq_max, 
+            value_shape = (1,), 
+            value_type = "float64", 
+            unit_accession = "UO:0000106", 
+            unit_name = "hertz"
         )
-
+        
+        
         # Get MS2-Freq-Max (in Hz)
         np_ms2_rt = np.array(ms2_rt)
         ms2_num_of_elements = []
@@ -422,10 +502,20 @@ if __name__ == "__main__":
             )
         ms2_freq_max = max(ms2_num_of_elements) / 60
         add_entry_to_hdf5(
-            out_h5, "MS2_Freq_Max", ms1_freq_max, (1,), "float64", "Hz",
-            "Highest frequency of MS2 spectra in Hertz (iow: the highest number of measured MS1 spectra within a 1 minute window divided by 60)"
+            f = out_h5, 
+            qc_acc = "MS:4000066", 
+            qc_short_name = "MS2_Freq_Max", 
+            qc_name = "fastest frequency for MS level 2 collection", 
+            qc_description = "fastest frequency for MS level 2 collection.", 
+            value = ms2_freq_max, 
+            value_shape = (1,), 
+            value_type = "float64", 
+            unit_accession = "UO:0000106", 
+            unit_name = "hertz"
         )
+        
         ###
+
         
         # MS1-Density-Q1-4 MS2-Density-Q1-4
         ms1_num_peaks = []
@@ -447,17 +537,36 @@ if __name__ == "__main__":
         ms2_density_q50 = np.quantile(ms2_num_peaks, 0.50)
         ms2_density_q75 = np.quantile(ms2_num_peaks, 0.75)
 
-        for val, desc, desc_ms_level, key in zip (
-            [ms1_density_q25 ,ms1_density_q50 ,ms1_density_q75 ,ms2_density_q25 ,ms2_density_q50 ,ms2_density_q75],
-            ["25%", "50%", "75%", "25%", "50%", "75%"],
-            [1,1,1,2,2,2],
-            ["MS1_Density_Q1" ,"MS1_Density_Q2" ,"MS1_Density_Q3" ,"MS2_Density_Q1" ,"MS2_Density_Q2" ,"MS2_Density_Q3"]
-        ):
-            add_entry_to_hdf5(
-                out_h5, key, val, (1,), "float64", "none",
-                desc + "-quantile of the peak counts per spectrum over all MS" + str(desc_ms_level) + " spectra"
-            )
-        ###
+        add_entry_to_hdf5(
+            f = out_h5, 
+            qc_acc = "MS:4000061", 
+            qc_short_name = "MS1_Density_Quartiles", 
+            qc_name = "MS1 density quantiles", 
+            qc_description = ("The first to n-th quantile of MS1 peak density (scan peak counts). " 
+                              "A value triplet represents the original QuaMeter metrics, the quartiles of MS1 density. " 
+                              "The number of values in the tuple implies the quantile mode."), 
+            value = (ms1_density_q25,ms1_density_q50,ms1_density_q75), 
+            value_shape = (3,), 
+            value_type = "int32", 
+            unit_accession = "UO:0000189", 
+            unit_name = "count unit"
+        )
+        
+        add_entry_to_hdf5(
+            f = out_h5, 
+            qc_acc = "MS:4000062", 
+            qc_short_name = "MS2_Density_Quartiles", 
+            qc_name = "MS2 density quantiles", 
+            qc_description = ("The first to n-th quantile of MS2 peak density (scan peak counts). " 
+                              "A value triplet represents the original QuaMeter metrics, the quartiles of MS2 density. " 
+                              "The number of values in the tuple implies the quantile mode."), 
+            value = (ms2_density_q25,ms2_density_q50,ms2_density_q75), 
+            value_shape = (3,), 
+            value_type = "int32", 
+            unit_accession = "UO:0000189", 
+            unit_name = "count unit"
+        )
+
 
         # MS1-TIC-Change-Q1-4, see paper for explanation (https://doi.org/10.1021/acs.jproteome.6b00028)
         ms1_tic_change = []
@@ -478,17 +587,20 @@ if __name__ == "__main__":
         ms1_change_q4 = math.log(ms1_change_max / ms1_change_q75, 2)
 
         add_entry_to_hdf5(
-            out_h5, "MS1-TIC-Change-Q2", ms1_change_q2, (1,), "float64", "none",
-            "log2(50%-quantile / 25%-quantile of the TIC-change) "
+            f = out_h5, 
+            qc_acc = "MS:4000057", 
+            qc_short_name = "MS1-TIC-Change-Quartiles", 
+            qc_name = "MS1 TIC-change quartile ratios", 
+            qc_description = ("The log ratios of successive TIC-change quartiles. " 
+                              "The TIC changes are the list of MS1 total ion current (TIC) value changes from one to the next scan, produced when each MS1 TIC is subtracted from the preceding MS1 TIC. "
+                              "The metric's value triplet represents the log ratio of the TIC-change Q2 to Q1, Q3 to Q2, TIC-change-max to Q3."), 
+            value = (ms1_change_q2,ms1_change_q3,ms1_change_q4), 
+            value_shape = (3,), 
+            value_type = "float64", 
+            unit_accession = "", 
+            unit_name = ""
         )
-        add_entry_to_hdf5(
-            out_h5, "MS1-TIC-Change-Q3", ms1_change_q3, (1,), "float64", "none",
-            "log2(75%-quantile / 50%-quantile of the TIC-change)"
-        )
-        add_entry_to_hdf5(
-            out_h5, "MS1-TIC-Change-Q4", ms1_change_q4, (1,), "float64", "none",
-            "log2(100%-quantile / 75%- quantile of the TIC-change)"
-        )
+        
         ###
 
         # MS1-TIC-Q1-4, see paper for explanation (https://doi.org/10.1021/acs.jproteome.6b00028)
@@ -501,15 +613,16 @@ if __name__ == "__main__":
         ms1_tic_q4 = math.log(max(ms1_tic) / ms1_tic_q75, 2)
 
         add_entry_to_hdf5(
-            out_h5, "MS1-TIC-Q2", ms1_tic_q2, (1,), "float64", "none",
-            "log2(50%-quantile / 25%-quantile of the actual TIC)"
+            f = out_h5, 
+            qc_acc = "MS:4000057", 
+            qc_short_name = "MS1-TIC-Quartiles", 
+            qc_name = "MS1 TIC quartile ratios", 
+            qc_description = ("The log ratios of successive TIC quartiles. " 
+                              "The metric's value triplet represents the log ratios of TIC-Q2 to TIC-Q1, TIC-Q3 to TIC-Q2, TIC-max to TIC-Q3."), 
+            value = (ms1_tic_q2,ms1_tic_q3,ms1_tic_q4), 
+            value_shape = (3,), 
+            value_type = "float64", 
+            unit_accession = "", 
+            unit_name = ""
         )
-        add_entry_to_hdf5(
-            out_h5, "MS1-TIC-Q3", ms1_tic_q3, (1,), "float64", "none",
-            "log2(75%-quantile / 50%-quantile of the actual TIC)"
-        )
-        add_entry_to_hdf5(
-            out_h5, "MS1-TIC-Q4", ms1_tic_q4, (1,), "float64", "none",
-            "log2(100%-quantile / 75%-quantile of the actual TIC)"
-        )
-        '''
+

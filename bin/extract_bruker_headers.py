@@ -72,9 +72,6 @@ def add_table_in_hdf5(
 if __name__ == "__main__":
 
     args = argparse_setup()
-    args.d_folder = "/home/luxii/Desktop/temp_Svitlana/TIM0002625std_RE2_1_2884.d"
-    args.out_hdf5 = "test.h5"
-
     con = sqlite3.connect(args.d_folder + os.sep + "analysis.tdf")
     cur = con.cursor()
 
