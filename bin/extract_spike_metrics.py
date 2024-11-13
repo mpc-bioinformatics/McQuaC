@@ -3,6 +3,7 @@
 import json
 import csv
 import argparse
+from typing import List, Any
 import pandas as pd
 import h5py
 import numpy as np
@@ -122,25 +123,44 @@ if __name__ == "__main__":
             comment_to_data[comment]["rt_at_maximum"] = max_int_rt
             comment_to_data[comment]["maximum_int"] = max_int
             comment_to_data[comment]["delta_rt"] = max_int_rt - comment_to_data[comment]["expected_rt"]
-    
+
     # prepare output
     with h5py.File(args.ohdf5, 'w') as out_h5:
+
+        column_names = [
+            "Spike-in",
+            "Maximum_Intensity",
+            "RT_at_Maximum_Intensity",
+            "PSMs",
+            "Delta_to_expected_RT"
+        ]
+        column_data: List[List[Any]] = [[] for _ in column_names]
+        column_names_types = ["str", "float", "float", "int", "float"]
+
         for comment, data in comment_to_data.items():
             spikeident = f"SPIKE_{comment}_MZ_{data['expected_mz']:.4f}_RT_{data['expected_rt']:.0f}"
 
-            add_entry_to_hdf5(
-                out_h5, f"{spikeident}_Maximum_Intensity", data['maximum_int'], (1,), "float64", "none", 
-                description="The maximum intensity for this specific spikein."
-            )
-            add_entry_to_hdf5(
-                out_h5, f"{spikeident}_RT_at_Maximum_Intensity", data['rt_at_maximum'], (1,), "float64", "seconds", 
-                description="The retention time, where the maximum intensity for this specific spikein was."
-            )
-            add_entry_to_hdf5(
-                out_h5, f"{spikeident}_PSMs", data['identifications'], (1,), "int32", "none", 
-                description="Number of spectra identified with the respective spike-in peptide sequence."
-            )
-            add_entry_to_hdf5(
-                out_h5, f"{spikeident}_Delta_to_expected_RT", data['delta_rt'], (1,), "float64", "seconds", 
-                description="If peptide was identified: difference of expected and measured retention time for the first identified PSM."
-            )
+            column_data[0].append(spikeident)
+
+            column_data[1].append(data['maximum_int'])
+
+            column_data[2].append(data['rt_at_maximum'])
+
+            column_data[3].append(data['identifications'])
+
+            column_data[4].append(data['delta_rt'])
+
+
+        add_table_in_hdf5(
+            out_h5,
+            "LOCAL:30",
+            "Spike_in_metrics",
+            "Spike-in metrics",
+            (
+                "Table of various spike-ins metrics like, "
+                "max. intensity, RT at max. intensity, PSMs, and delta to expected RT."
+            ),
+            column_names,
+            column_data,
+            column_names_types,
+        )
