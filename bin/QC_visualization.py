@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 # %%
+from collections import defaultdict
+from pathlib import Path
 import re
 # std imports
 import argparse
@@ -15,6 +17,7 @@ import os
 #import pickle
 #import zlib
 from datetime import datetime, timezone
+from typing import Dict, Tuple, List, Any
 #import math
 #import pathlib
 
@@ -34,6 +37,121 @@ import matplotlib.pyplot as plt
 
 pio.renderers.default = "png"
 
+
+def get_dataset_types(hdf: h5py.File) -> Tuple[Tuple[str], Tuple[str], Tuple[str]]:
+    """
+    Get the types of the datasets in the hdf5 file
+
+    Parameters
+    ----------
+    hdf : h5py.File
+        The hdf5 file
+
+    Returns
+    -------
+    Tuple[Tuple[str], Tuple[str], Tuple[str]]
+        A tuple of three tuples. The first tuple contains the names of the single value datasets, 
+        the second tuple contains the names of the array datasets 
+        and the third tuple contains the names of the datafram datasets.
+    """
+    single_value_ids = []
+    array_value_ids = []
+    dataframe_ids = []
+
+    for key in hdf.keys():
+        if isinstance(hdf[key], h5py.Dataset):
+            if hdf[key].shape[0] == 1:
+                single_value_ids.append(key)
+            else:
+                array_value_ids.append(key)
+        elif isinstance(hdf[key], h5py.Group):
+            dataframe_ids.append(key)
+
+    return (tuple(single_value_ids), tuple(array_value_ids), tuple(dataframe_ids))
+
+def get_dataframe_of_single_values(
+        hdfs: List[h5py.File], single_value_ids: Tuple[str]
+) -> pd.DataFrame:
+    """
+    Get a dataframe of the single values of the hdf5 files
+
+    Parameters
+    ----------
+    hdfs : List[h5py.File]
+        List of hdf5 files
+    single_value_ids : Tuple[str]
+        Tuple of the ids of the single values
+
+    Returns
+    -------
+    pd.DataFrame
+        The dataframe with the single values
+    """
+    single_value_data: Dict[str, List[Any]] = {"filename": [Path(hdf.filename).stem for hdf in hdfs]}
+    for sv_id in single_value_ids:
+        short_name = sv_id.split("|")[-1]
+        single_value_data[short_name] = [hdf[sv_id][0] for hdf in hdfs]
+    return pd.DataFrame(single_value_data)
+
+def get_array_values(
+        hdfs: List[h5py.File], array_value_ids: Tuple[str]
+) -> Dict[str, Dict[str, List[Any]]]:
+    """
+    Get a dictionary of the arrays of the hdf5 files
+
+    Parameters
+    ----------
+    hdfs : List[h5py.File]
+        List of hdf5 files
+    array_value_ids : Tuple[str]
+        Tuple of the ids of the array values
+
+    Returns
+    -------
+    Dict[str, Dict[str, List[Any]]]
+        The dictionary with the array values, e.g. {filename: {array_name: [array_values]}}
+    """
+    array_value_data: Dict[str, Dict[str, List[Any]]] = defaultdict(dict)
+    for hdf in hdfs:
+        filename = Path(hdf.filename).stem
+        for array_id in array_value_ids:
+            short_name = array_id.split("|")[-1]
+            array_value_data[filename][short_name] = hdf[array_id][:]
+
+    return array_value_data
+
+
+def get_dataframes_values(
+        hdfs: List[h5py.File], dataframe_ids: Tuple[str]
+) -> Dict[str, Dict[str, pd.DataFrame]]:
+    """
+    Get a dictionary of the dataframes (matrices) of the hdf5 files
+
+    Parameters
+    ----------
+    hdfs : List[h5py.File]
+        List of hdf5 files
+    dataframe_ids : Tuple[str]
+
+    Returns
+    -------
+    Dict[str, Dict[str, List[Any]]]
+        The dictionary with the dataframes, e.g. {filename: {dataframe_name: pd.DataFrame}}
+    """
+
+    dataframes: Dict[str, Dict[str, List[Any]]] = defaultdict(dict)
+    for hdf in hdfs:
+        filename = Path(hdf.filename).stem
+        for df_id in dataframe_ids:#
+            short_name = df_id.split("|")[-1]
+            column_order = hdf[df_id].attrs["column_order"].split("|")
+            df = pd.DataFrame(dict(hdf[df_id]))
+            df = df[column_order]
+            dataframes[filename][short_name] = df
+
+    return dataframes
+
+
 def check_if_file_exists(s: str):
     """ checks if a file exists. If not: raise Exception """
     if os.path.isfile(s):
@@ -44,17 +162,42 @@ def check_if_file_exists(s: str):
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
+    # parser.add_argument("-output", help="Output folder for the plots as json files.", default = "graphics")
+    # parser.add_argument("-spikeins", help = "Whether to analyse spike-ins", default = False, action = "store_true")
+    # parser.add_argument("-group", help="List of the experimental group (comma-separated).", default=None)
+    # parser.add_argument("-fig_show", help = "Show figures, e.g. for debugging?", default = False, action = "store_true")
+    parser.add_argument("-output_column_order", help = "Order of columns in the output table", default = "", type = str)
     parser.add_argument("-hdf5_files", type=check_if_file_exists, nargs="+", help = "hdf5 files which are used for visualization as string separated by whitespace", default = None)
-    parser.add_argument("-hdf5_folder", help="Folder containing hdf5 files, one for each processed raw file. Alternative to hdf5_files, easier for debugging", default=None)
-    parser.add_argument("-output", help="Output folder for the plots as json files.", default = "graphics")
-    parser.add_argument("-spikeins", help = "Whether to analyse spike-ins", default = False, action = "store_true")
-    parser.add_argument("-group", help="List of the experimental group (comma-separated).", default=None)
-    parser.add_argument("-fig_show", help = "Show figures, e.g. for debugging?", default = False, action = "store_true")
+    
     
     return parser.parse_args()
 
 if __name__ == "__main__":
     args = argparse_setup()
+
+    hdf5s = [h5py.File(f, "r") for f in args.hdf5_files]
+
+    (single_value_ids, array_value_ids, dataframe_ids) =  get_dataset_types(hdf5s[0])
+
+    # print(single_value_ids, "\n\n")
+    # print(array_value_ids, "\n\n")
+    # print(dataframe_ids, "\n\n")
+
+    single_values = get_dataframe_of_single_values(hdf5s, single_value_ids)
+
+    # print(single_values)
+
+    array_values = get_array_values(hdf5s, array_value_ids)
+
+    # for f, fa in array_values.items():
+    #     for a, v in fa.items():
+    #         print(f, a, v)
+
+    dataframes = get_dataframes_values(hdf5s, dataframe_ids)
+    
+    # for f, fa in dataframes.items():
+    #     for a, v in fa.items():
+    #         print(f, a, v, "\n\n")
 
 ####################################################################################################
     # parameters
