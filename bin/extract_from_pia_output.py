@@ -85,7 +85,7 @@ def parse_peptide_infos(pia_peptide_csv: str, out_hdf5: h5py.File) -> int:
         number_filtered_peptides = 0
     
     add_entry_to_hdf5(out_hdf5,
-                      "MS:1003250", "number_proteins", "count of identified peptidoforms", "The number of peptidoforms that pass the threshold to be considered identified with sufficient confidence.", 
+                      "MS:1003250", "number_peptides", "count of identified peptidoforms", "The number of peptidoforms that pass the threshold to be considered identified with sufficient confidence.", 
                       number_filtered_peptides, (1,), "int32", 
                       "UO:0000189", "count unit")
 
