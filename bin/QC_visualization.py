@@ -162,43 +162,44 @@ def check_if_file_exists(s: str):
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
-    # parser.add_argument("-output", help="Output folder for the plots as json files.", default = "graphics")
-    # parser.add_argument("-spikeins", help = "Whether to analyse spike-ins", default = False, action = "store_true")
-    # parser.add_argument("-group", help="List of the experimental group (comma-separated).", default=None)
-    # parser.add_argument("-fig_show", help = "Show figures, e.g. for debugging?", default = False, action = "store_true")
+    parser.add_argument("-output", help="Output folder for the plots as json files.", default = "graphics")
+    parser.add_argument("-spikeins", help = "Whether to analyse spike-ins", default = False, action = "store_true")
+    parser.add_argument("-group", help="List of the experimental group (comma-separated).", default=None)  ### TODO: input table with group information
+    parser.add_argument("-fig_show", help = "Show figures, e.g. for debugging?", default = False, action = "store_true")
     parser.add_argument("-output_column_order", help = "Order of columns in the output table", default = "", type = str)
     parser.add_argument("-hdf5_files", type=check_if_file_exists, nargs="+", help = "hdf5 files which are used for visualization as string separated by whitespace", default = None)
-    
-    
     return parser.parse_args()
+
+
+
+
+##########################################################################################################################################################
+### main function to visualize QC results
 
 if __name__ == "__main__":
     args = argparse_setup()
 
+    ### read in the hdf5 files
     hdf5s = [h5py.File(f, "r") for f in args.hdf5_files]
 
     (single_value_ids, array_value_ids, dataframe_ids) =  get_dataset_types(hdf5s[0])
 
-    # print(single_value_ids, "\n\n")
-    # print(array_value_ids, "\n\n")
-    # print(dataframe_ids, "\n\n")
-
     single_values = get_dataframe_of_single_values(hdf5s, single_value_ids)
-
-    # print(single_values)
+    #print("single values")
+    #print(single_values)
 
     array_values = get_array_values(hdf5s, array_value_ids)
-
-    # for f, fa in array_values.items():
-    #     for a, v in fa.items():
-    #         print(f, a, v)
+    #print("array values")
+    #for f, fa in array_values.items():
+    #    for a, v in fa.items():
+    #        print(f, a, v)
 
     dataframes = get_dataframes_values(hdf5s, dataframe_ids)
-    
-    # for f, fa in dataframes.items():
-    #     for a, v in fa.items():
-    #         print(f, a, v, "\n\n")
-
+    #print("dataframes")
+    #for f, fa in dataframes.items():
+    #    for a, v in fa.items():
+    #        print(f, a, v, "\n\n")
+            
 ####################################################################################################
     # parameters
 
@@ -206,19 +207,19 @@ if __name__ == "__main__":
     #hdf5_folder = args.hdf5_folder
     
     # [f for f in os.listdir(hdf5_folder) if f.endswith('.hdf5')] 
-    if args.hdf5_files is not None:
-        hdf5_files = args.hdf5_files
-    else: 
-        if args.hdf5_folder is not None:
-            hdf5_files = [args.hdf5_folder + os.sep + f for f in os.listdir(args.hdf5_folder) if f.endswith('.hdf5')]
-        else: 
-            raise Exception("Either hdf5_files or hdf5_folder must be given!")
-    print(hdf5_files)
+    # if args.hdf5_files is not None:
+    #     hdf5_files = args.hdf5_files
+    # else: 
+    #     if args.hdf5_folder is not None:
+    #         hdf5_files = [args.hdf5_folder + os.sep + f for f in os.listdir(args.hdf5_folder) if f.endswith('.hdf5')]
+    #     else: 
+    #         raise Exception("Either hdf5_files or hdf5_folder must be given!")
+    # print(hdf5_files)
     
-    hdf5_file_names = [os.path.basename(f) for f in hdf5_files] # file names without path
-    hdf5_file_names = [re.sub(r'\.hdf5$', '', f) for f in hdf5_file_names] # file names without file ending
-    nr_rawfiles = len(hdf5_files)
-
+    hdf5_file_names = single_values["filename"].values
+    #hdf5_file_names = [re.sub(r'\.hdf5$', '', f) for f in hdf5_file_names] # file names without file ending
+    nr_rawfiles = len(hdf5_file_names)
+    
     ### grouping
     ### If use_groups = False, PCA plots are coloured by timestamp. If True, PCA plots are coloured by group.
     if (args.group is None):
@@ -232,286 +233,341 @@ if __name__ == "__main__":
 
     fig_show = args.fig_show
     analyse_spikeins = args.spikeins
+    
+
+# ############################################################################################
+# # Feature list: features for initial table 0
+#     feature_list = ["filename", # will be filled in later as name of the hdf5 file
+#                     "timestamp", # will be converted later to human-readable format
+#                     "number_ungrouped_proteins",
+#                     "number_proteins",
+#                     "number_filtered_peptides",
+#                     "number_filtered_psms",
+#                     "total_num_ms1",
+#                     "total_num_ms2",
+#                     "Total_Ion_Current_Max",
+#                     "Base_Peak_Intensity_Max",
+#                     "Total_Ion_Current_Max_Up_To_105",
+#                     "Base_Peak_Intensity_Max_Up_To_105", 
+#                     "total_num_ident_features",
+#                     "total_num_features",
+#                     "RT_duration", 
+#                     "accumulated-MS1_TIC",
+#                     "accumulated-MS2_TIC",
+#                     "RT_TIC_Q_000-025",
+#                     "RT_TIC_Q_025-050",
+#                     "RT_TIC_Q_050-075",
+#                     "RT_TIC_Q_075-100",
+#                     "RT_MS1_Q_000-025",
+#                     "RT_MS1_Q_025-050",
+#                     "RT_MS1_Q_050-075",
+#                     "RT_MS1_Q_075-100",
+#                     "RT_MS2_Q_000-025",
+#                     "RT_MS2_Q_025-050", 
+#                     "RT_MS2_Q_050-075",
+#                     "RT_MS2_Q_075-100", 
+#                     "MS1-TIC-Change-Q2",
+#                     "MS1-TIC-Change-Q3", 
+#                     "MS1-TIC-Change-Q4",
+#                     "MS1-TIC-Q2",
+#                     "MS1-TIC-Q3",
+#                     "MS1-TIC-Q4", 
+#                     "MS1_Freq_Max",
+#                     "MS1_Density_Q1",
+#                     "MS1_Density_Q2", 
+#                     "MS1_Density_Q3",
+#                     "MS2_Freq_Max",
+#                     "MS2_Density_Q1",
+#                     "MS2_Density_Q2", 
+#                     "MS2_Density_Q3",
+#                     "MS2_PrecZ_1", 
+#                     "MS2_PrecZ_2", 
+#                     "MS2_PrecZ_3",
+#                     "MS2_PrecZ_4",
+#                     "MS2_PrecZ_5",
+#                     "MS2_PrecZ_more", 
+#                     "MS2_PrecZ_Unknown",
+#                     "num_features_charge_1",
+#                     "num_features_charge_2",
+#                     "num_features_charge_3",
+#                     "num_features_charge_4",
+#                     "num_features_charge_5", 
+#                     "psm_charge1",
+#                     "psm_charge2", 
+#                     "psm_charge3", 
+#                     "psm_charge4", 
+#                     "psm_charge5",
+#                     "psm_charge_more", 
+#                     "psm_missed_0",
+#                     "psm_missed_1",
+#                     "psm_missed_2",
+#                     "psm_missed_3",
+#                     "psm_missed_more"   
+#                     # TODO we should add then dynamically. Iow, we could thest if it contains binary data and if not include it into the list
+#                     # TODO These below are Thermo TUNE Information which is one dimensional
+#                     # "THERMO_TUNE_ '''Ion Transfer Tube Temperature (+ or +-)'''"
+#                     # "THERMO_TUNE_ '''Ion Transfer Tube Temperature (-)'''"
+#                     # "THERMO_TUNE_ '''Vaporizer Temp. (+ or +-)'''"
+#                     # "THERMO_TUNE_ '''Vaporizer Temp. (-)'''"
+#                 ]
 
 
-############################################################################################
-# Feature list: features for initial table 0
-    feature_list = ["filename", # will be filled in later as name of the hdf5 file
-                    "timestamp", # will be converted later to human-readable format
-                    "number_ungrouped_proteins",
-                    "number_proteins",
-                    "number_filtered_peptides",
-                    "number_filtered_psms",
-                    "total_num_ms1",
-                    "total_num_ms2",
-                    "Total_Ion_Current_Max",
-                    "Base_Peak_Intensity_Max",
-                    "Total_Ion_Current_Max_Up_To_105",
-                    "Base_Peak_Intensity_Max_Up_To_105", 
-                    "total_num_ident_features",
-                    "total_num_features",
-                    "RT_duration", 
-                    "accumulated-MS1_TIC",
-                    "accumulated-MS2_TIC",
-                    "RT_TIC_Q_000-025",
-                    "RT_TIC_Q_025-050",
-                    "RT_TIC_Q_050-075",
-                    "RT_TIC_Q_075-100",
-                    "RT_MS1_Q_000-025",
-                    "RT_MS1_Q_025-050",
-                    "RT_MS1_Q_050-075",
-                    "RT_MS1_Q_075-100",
-                    "RT_MS2_Q_000-025",
-                    "RT_MS2_Q_025-050", 
-                    "RT_MS2_Q_050-075",
-                    "RT_MS2_Q_075-100", 
-                    "MS1-TIC-Change-Q2",
-                    "MS1-TIC-Change-Q3", 
-                    "MS1-TIC-Change-Q4",
-                    "MS1-TIC-Q2",
-                    "MS1-TIC-Q3",
-                    "MS1-TIC-Q4", 
-                    "MS1_Freq_Max",
-                    "MS1_Density_Q1",
-                    "MS1_Density_Q2", 
-                    "MS1_Density_Q3",
-                    "MS2_Freq_Max",
-                    "MS2_Density_Q1",
-                    "MS2_Density_Q2", 
-                    "MS2_Density_Q3",
-                    "MS2_PrecZ_1", 
-                    "MS2_PrecZ_2", 
-                    "MS2_PrecZ_3",
-                    "MS2_PrecZ_4",
-                    "MS2_PrecZ_5",
-                    "MS2_PrecZ_more", 
-                    "MS2_PrecZ_Unknown",
-                    "num_features_charge_1",
-                    "num_features_charge_2",
-                    "num_features_charge_3",
-                    "num_features_charge_4",
-                    "num_features_charge_5", 
-                    "psm_charge1",
-                    "psm_charge2", 
-                    "psm_charge3", 
-                    "psm_charge4", 
-                    "psm_charge5",
-                    "psm_charge_more", 
-                    "psm_missed_0",
-                    "psm_missed_1",
-                    "psm_missed_2",
-                    "psm_missed_3",
-                    "psm_missed_more"   
-                    # TODO we should add then dynamically. Iow, we could thest if it contains binary data and if not include it into the list
-                    # TODO These below are Thermo TUNE Information which is one dimensional
-                    # "THERMO_TUNE_ '''Ion Transfer Tube Temperature (+ or +-)'''"
-                    # "THERMO_TUNE_ '''Ion Transfer Tube Temperature (-)'''"
-                    # "THERMO_TUNE_ '''Vaporizer Temp. (+ or +-)'''"
-                    # "THERMO_TUNE_ '''Vaporizer Temp. (-)'''"
-                ]
 
+# ####################################################################################################
+#     # build pandas data frame with all columns for table 0
+#     # for each hdf5 file fill a new row with the corresponding data
+#     df = pd.DataFrame(columns=list(feature_list))
+#     for file in hdf5_files:
+#         hdf5_tmp = h5py.File(file,'r') 
+#         new_row = pd.Series(dtype='float64')
+#         for feature in feature_list:
+#             if feature in hdf5_tmp:
+#                 new_row[feature] = hdf5_tmp[feature][:]
+#                 if len(new_row[feature]) == 1:
+#                     new_row[feature] = new_row[feature][0]
+#             else:
+#                 new_row[feature] = None
+#         df = pd.concat([df, pd.DataFrame([new_row], columns=new_row.index)]).reset_index(drop=True)
 
-
-####################################################################################################
-    # build pandas data frame with all columns for table 0
-    # for each hdf5 file fill a new row with the corresponding data
-    df = pd.DataFrame(columns=list(feature_list))
-    for file in hdf5_files:
-        hdf5_tmp = h5py.File(file,'r') 
-        new_row = pd.Series(dtype='float64')
-        for feature in feature_list:
-            if feature in hdf5_tmp:
-                new_row[feature] = hdf5_tmp[feature][:]
-                if len(new_row[feature]) == 1:
-                    new_row[feature] = new_row[feature][0]
-            else:
-                new_row[feature] = None
-        df = pd.concat([df, pd.DataFrame([new_row], columns=new_row.index)]).reset_index(drop=True)
-
-    ## add file names
-    df["filename"] = hdf5_file_names
-    ## convert timestamp to something human-readable
-    x = [datetime.fromtimestamp(x, timezone.utc) for x in df["timestamp"]]
-    df["timestamp"] = x
+#     ## add file names
+#     df["filename"] = hdf5_file_names
+#     ## convert timestamp to something human-readable
+#     x = [datetime.fromtimestamp(x, timezone.utc) for x in df["timestamp"]]
+#     df["timestamp"] = x
 
     
-    ### get info for each file if it is a Bruker or Thermo file
-    is_bruker = []
-    is_thermo = []
-    add_thermo_headers = []
-    add_bruker_headers = []
+#     ### get info for each file if it is a Bruker or Thermo file
+#     is_bruker = []
+#     is_thermo = []
+#     add_thermo_headers = []
+#     add_bruker_headers = []
 
-    for file in hdf5_files:
-        hdf5_tmp = h5py.File(file,'r') 
-        keys_tmp = list(hdf5_tmp.keys())
+#     for file in hdf5_files:
+#         hdf5_tmp = h5py.File(file,'r') 
+#         keys_tmp = list(hdf5_tmp.keys())
         
-        if any(keys.startswith("THERMO") for keys in hdf5_tmp.keys()):
-            is_thermo.extend([True])
-            is_bruker.extend([False])
-            add_thermo_headers.extend([key for key in keys_tmp if key.startswith("THERMO")])
-        if any(keys.startswith("BRUKER") for keys in hdf5_tmp.keys()):
-            is_thermo.extend([False])
-            is_bruker.extend([True])
-            add_bruker_headers.extend([key for key in keys_tmp if key.startswith("BRUKER")])
+#         if any(keys.startswith("THERMO") for keys in hdf5_tmp.keys()):
+#             is_thermo.extend([True])
+#             is_bruker.extend([False])
+#             add_thermo_headers.extend([key for key in keys_tmp if key.startswith("THERMO")])
+#         if any(keys.startswith("BRUKER") for keys in hdf5_tmp.keys()):
+#             is_thermo.extend([False])
+#             is_bruker.extend([True])
+#             add_bruker_headers.extend([key for key in keys_tmp if key.startswith("BRUKER")])
 
-    ### remove duplicates
-    add_thermo_headers = set(add_thermo_headers)
-    add_bruker_headers = set(add_bruker_headers)
+#     ### remove duplicates
+#     add_thermo_headers = set(add_thermo_headers)
+#     add_bruker_headers = set(add_bruker_headers)
 
-    ############################################################################################
-    # If spike-ins are analyzed, add them to the table
-    if analyse_spikeins:
-        spike_columns = [key for key in hdf5_tmp.keys() if re.match("SPIKE", key)]
-        df_spikes = pd.DataFrame(columns=list(spike_columns))
-        for file in hdf5_files:
-            hdf5_tmp = h5py.File(file,'r')
-            new_row = pd.Series(dtype='float64')
-            for feature in spike_columns:
-                if feature in hdf5_tmp:
-                    new_row[feature] = hdf5_tmp[feature][:]
-                    if len(new_row[feature]) == 1:
-                        new_row[feature] = new_row[feature][0]
-                else:
-                    new_row[feature] = None
-            df_spikes = pd.concat([df_spikes, pd.DataFrame([new_row], columns=new_row.index)]).reset_index(drop=True)
-        df_table0 = pd.concat([df.loc[:,"filename":"Base_Peak_Intensity_Max_Up_To_105"], df_spikes, df.loc[:,"total_num_ident_features":]], axis=1).reindex(df.index)
-    else: 
-        df_table0 = df.copy()
+#     ############################################################################################
+#     # If spike-ins are analyzed, add them to the table
+#     if analyse_spikeins:
+#         spike_columns = [key for key in hdf5_tmp.keys() if re.match("SPIKE", key)]
+#         df_spikes = pd.DataFrame(columns=list(spike_columns))
+#         for file in hdf5_files:
+#             hdf5_tmp = h5py.File(file,'r')
+#             new_row = pd.Series(dtype='float64')
+#             for feature in spike_columns:
+#                 if feature in hdf5_tmp:
+#                     new_row[feature] = hdf5_tmp[feature][:]
+#                     if len(new_row[feature]) == 1:
+#                         new_row[feature] = new_row[feature][0]
+#                 else:
+#                     new_row[feature] = None
+#             df_spikes = pd.concat([df_spikes, pd.DataFrame([new_row], columns=new_row.index)]).reset_index(drop=True)
+#         df_table0 = pd.concat([df.loc[:,"filename":"Base_Peak_Intensity_Max_Up_To_105"], df_spikes, df.loc[:,"total_num_ident_features":]], axis=1).reindex(df.index)
+#     else: 
+#         df_table0 = df.copy()
         
-    df_table0.to_csv(output_path + os.sep + "00_table_summary.csv", index = False)        
+#     df_table0.to_csv(output_path + os.sep + "00_table_summary.csv", index = False)        
+
+
 
 ################################################################################################
     # Figure 1: Barplot for total number of MS1 and MS2 spectra
-    df_pl1 = df[["filename", "total_num_ms1", "total_num_ms2"]]
-    df_pl1_long = df_pl1.melt(id_vars = ["filename"])
-    fig1 = px.bar(df_pl1_long, x="filename", y="value", color="variable", barmode = "group", 
+    df_pl01 = single_values[["filename", "total_num_ms1", "total_num_ms2"]]
+    df_pl01_long = df_pl01.melt(id_vars = ["filename"])
+    fig01 = px.bar(df_pl01_long, x="filename", y="value", color="variable", barmode = "group", 
                 title = "Total number of MS1 and MS2 spectra")
-    fig1.update_yaxes(exponentformat="none") 
-    fig1.update_xaxes(tickangle=-90)
+    fig01.update_yaxes(exponentformat="none") 
+    fig01.update_xaxes(tickangle=-90)
+    fig01.update_layout(height = int(700))
+    
     if fig_show: 
-        fig1.show()
-    with open(output_path + os.sep + "fig1_barplot_MS1_MS2.json", "w") as json_file:
-        json_file.write(plotly.io.to_json(fig1))
-    fig1.write_html(file = output_path + os.sep + "fig1_barplot_MS1_MS2.html", auto_open = False)
+        fig01.show()
+    with open(output_path + os.sep + "fig01_barplot_MS1_MS2.plotly.json", "w") as json_file:
+        json_file.write(plotly.io.to_json(fig01))
+    fig01.write_html(file = output_path + os.sep + "fig01_barplot_MS1_MS2.html", auto_open = False)
+
 
 
 ################################################################################################
     # Figure 2: Barplot for number of PSMs, peptides, proteins
     
-    if ("number_filtered_psms" in df.columns):  # e.g. for DIA, no identification is done so those columns are missing
-        df_pl2 = df[["filename", "number_filtered_psms", "number_filtered_peptides", "number_proteins", "number_ungrouped_proteins"]]
-        df_pl2_long = df_pl2.melt(id_vars = ["filename"])
-        fig2 = px.bar(df_pl2_long, x="filename", y="value", color="variable", barmode = "group", 
-                    title = "Number of filtered PSMs, filtered peptides, filtered protein groups and accessions")
-        fig2.update_yaxes(exponentformat="none") 
-        fig2.update_xaxes(tickangle=-90)
-    else: 
-        fig2 = go.Figure()
-        fig2.add_annotation(
-            x=0.5,
-            y=0.5,
-            text="Columns are missing, no plot created!",
-            showarrow=False,
-            font=dict(size=14)
-        )
-        fig2.update_layout(
-            width=600,
-            height=400,
-            title="Empty Plot"
-        )
-    if fig_show: 
-        fig2.show()
-    with open(output_path + os.sep + "fig2_barplot_PSMs_peptides_proteins.json", "w") as json_file:
-        json_file.write(plotly.io.to_json(fig2))
-    fig2.write_html(file = output_path + os.sep + "fig2_barplot_PSMs_peptides_proteins.html", auto_open = False)
+    # print(single_values.columns)
+    # ### TODO: war im PIA-script falsch
+    
+    # if ("number_filtered_psms" in single_values.columns):  # e.g. for DIA, no identification is done so those columns are missing
+    #     df_pl02 = single_values[["filename", "number_filtered_psms", "number_filtered_peptides", "number_proteins", "number_ungrouped_proteins"]]
+    #     df_pl02_long = df_pl02.melt(id_vars = ["filename"])
+    #     fig02 = px.bar(df_pl02_long, x="filename", y="value", color="variable", barmode = "group", 
+    #                 title = "Number of filtered PSMs, filtered peptides, filtered protein groups and accessions")
+    #     fig02.update_yaxes(exponentformat="none") 
+    #     fig02.update_xaxes(tickangle=-90)
+    #     fig02.update_layout(height = int(700))
+    # else: 
+    #     fig02 = go.Figure()
+    #     fig02.add_annotation(
+    #         x=0.5,
+    #         y=0.5,
+    #         text="Columns are missing, no plot created!",
+    #         showarrow=False,
+    #         font=dict(size=14)
+    #     )
+    #     fig02.update_layout(
+    #         width=600,
+    #         height=400,
+    #         title="Empty Plot"
+    #     )
+    # if fig_show: 
+    #     fig02.show()
+    # with open(output_path + os.sep + "fig02_barplot_PSMs_peptides_proteins.plotly.json", "w") as json_file:
+    #     json_file.write(plotly.io.to_json(fig02))
+    # fig02.write_html(file = output_path + os.sep + "fig02_barplot_PSMs_peptides_proteins.html", auto_open = False)
+    
+
     
 ################################################################################################
     # Figure 3: Barplot for features and identified features
-    df_pl3 = df[["filename", "total_num_features", "total_num_ident_features"]]
-    df_pl3_long = df_pl3.melt(id_vars = ["filename"])
-    fig3 = px.bar(df_pl3_long, x="filename", y="value", color="variable", barmode = "group", 
+    df_pl03 = single_values[["filename", "total_num_features", "total_num_ident_features"]]
+    df_pl03_long = df_pl03.melt(id_vars = ["filename"])
+    fig03 = px.bar(df_pl03_long, x="filename", y="value", color="variable", barmode = "group", 
                 title = "Number of features and identified features")
-    fig3.update_yaxes(exponentformat="none") 
-    fig3.update_xaxes(tickangle=-90)
+    fig03.update_yaxes(exponentformat="none") 
+    fig03.update_xaxes(tickangle=-90)
+    fig03.update_layout(height = int(700))
     if fig_show: 
-        fig3.show()
-    with open(output_path + os.sep + "fig3_barplot_features.json", "w") as json_file:
-        json_file.write(plotly.io.to_json(fig3))
-    fig3.write_html(file = output_path + os.sep + "fig3_barplot_features.html", auto_open = False)
+        fig03.show()
+    with open(output_path + os.sep + "fig03_barplot_features.plotly.json", "w") as json_file:
+        json_file.write(plotly.io.to_json(fig03))
+    fig03.write_html(file = output_path + os.sep + "fig03_barplot_features.html", auto_open = False)
+
+
 
 
 ####################################################################################################
     ## Figure 4: TIC Overlay as Lineplot
     
     tic_df = []
-    i = 0
-    for file in hdf5_files:
-        hdf5_tmp = h5py.File(file,'r')
-        tic = dict(TIC = hdf5_tmp["ms1_tic_array"][:],
-                RT = hdf5_tmp["ms1_rt_array"][:],
-                filename=[hdf5_file_names[i]]*len(hdf5_tmp["ms1_tic_array"][:]))
-        tic = pd.DataFrame(tic)
-        tic_df.append(tic)
-        i += 1
+    for file in hdf5_file_names:
+        tic_tmp = dataframes[file]["MS1_TIC"]
+        tic_tmp["filename"] = [file]*len(tic_tmp)
+        tic_df.append(tic_tmp)
     tic_df2 = pd.concat(tic_df)
-        
-    fig4 = px.line(tic_df2, x="RT", y="TIC", color = "filename", title = "TIC overlay")
-    fig4.update_traces(line=dict(width=0.5))
-    fig4.update_yaxes(exponentformat="E") 
-    if fig_show:
-        fig4.show()
-    with open(output_path + os.sep + "fig4_TIC_overlay.json", "w") as json_file:
-        json_file.write(plotly.io.to_json(fig4))
-    fig4.write_html(file = output_path + os.sep + "fig4_TIC_overlay.html", auto_open = False)
     
+    fig04 = px.line(tic_df2, x="retention_time", y="TIC", color = "filename", title = "TIC overlay")
+    fig04.update_traces(line=dict(width=0.5))
+    fig04.update_yaxes(exponentformat="E") 
+    if fig_show:
+        fig04.show()
+    with open(output_path + os.sep + "fig04_MS1_TIC_overlay.plotly.json", "w") as json_file:
+        json_file.write(plotly.io.to_json(fig04))
+    fig04.write_html(file = output_path + os.sep + "fig04_MS1_TIC_overlay.html", auto_open = False)
+    
+
  
 #################################################################################################
     # Figure 5: Barplot TIC quartiles
-    df_pl5 = df[["filename", 'RT_TIC_Q_000-025', 'RT_TIC_Q_025-050', 'RT_TIC_Q_050-075', 'RT_TIC_Q_075-100']]
-    df_pl5_long = df_pl5.melt(id_vars = ["filename"])
-    fig5 = px.bar(df_pl5_long, x = "filename", y = "value", color = "variable", title = "Quartiles of TIC over retention time")
-    fig5.update_xaxes(tickangle=-90)
+    
+    RT_TIC_Q_df_list = []
+    for file in hdf5_file_names:
+        df_tmp = pd.DataFrame()
+        df_tmp["filename"] = [file]*4
+        df_tmp["variable"] = ["RT_TIC_Q_" + str(i) for i in range(1,5)]
+        df_tmp["value"] = array_values[file]["RT_TIC_Quartiles"]
+        RT_TIC_Q_df_list.append(df_tmp)
+    df_pl05_long = pd.concat(RT_TIC_Q_df_list)
+   
+    fig05 = px.bar(df_pl05_long, x = "filename", y = "value", color = "variable", title = "Quartiles of TIC over retention time")
+    fig05.update_xaxes(tickangle=-90)
+    fig05.update_layout(height = int(700))
     if fig_show:
-        fig5.show()
-    with open(output_path + os.sep + "fig5_barplot_TIC_quartiles.json", "w") as json_file:
-        json_file.write(plotly.io.to_json(fig5))
-    fig5.write_html(file = output_path + os.sep + "fig5_barplot_TIC_quartiles.html", auto_open = False)
+        fig05.show()
+    with open(output_path + os.sep + "fig05_barplot_TIC_quartiles.plotly.json", "w") as json_file:
+        json_file.write(plotly.io.to_json(fig05))
+    fig05.write_html(file = output_path + os.sep + "fig05_barplot_TIC_quartiles.html", auto_open = False)
 
 ################################################################################################
     # Figure 6: Barplot MS1 TIC quartiles
-    df_pl6 = df[["filename", 'RT_MS1_Q_000-025', 'RT_MS1_Q_025-050', 'RT_MS1_Q_050-075', 'RT_MS1_Q_075-100']]
-    df_pl6_long = df_pl6.melt(id_vars = ["filename"])
-    fig6 = px.bar(df_pl6_long, x="filename", y="value", color="variable", title = "Quartiles of MS1 over retention time")
-    fig6.update_xaxes(tickangle=-90)
+    
+    RT_MS1_Q_df_list = []
+    for file in hdf5_file_names:
+        df_tmp = pd.DataFrame()
+        df_tmp["filename"] = [file]*4
+        df_tmp["variable"] = ["RT_MS1_Q_" + str(i) for i in range(1,5)]
+        df_tmp["value"] = array_values[file]["RT_MS1_Quartiles"]
+        RT_MS1_Q_df_list.append(df_tmp)
+    df_pl06_long = pd.concat(RT_MS1_Q_df_list)
+    
+    fig06 = px.bar(df_pl06_long, x="filename", y="value", color="variable", title = "Quartiles of MS1 over retention time")
+    fig06.update_xaxes(tickangle=-90)
+    fig06.update_layout(height = int(700))
     if fig_show: 
-        fig6.show()
-    with open(output_path + os.sep + "fig6_barplot_MS1_TIC_quartiles.json", "w") as json_file:
-        json_file.write(plotly.io.to_json(fig6))
-    fig6.write_html(file = output_path + os.sep + "fig6_barplot_MS1_TIC_quartiles.html", auto_open = False)
+        fig06.show()
+    with open(output_path + os.sep + "fig06_barplot_MS1_TIC_quartiles.plotly.json", "w") as json_file:
+        json_file.write(plotly.io.to_json(fig06))
+    fig06.write_html(file = output_path + os.sep + "fig06_barplot_MS1_TIC_quartiles.html", auto_open = False)
+    
 
 ################################################################################################
     # Figure 7: Barplot MS2 TIC quartiles
-    df_pl7 = df[["filename", 'RT_MS2_Q_000-025', 'RT_MS2_Q_025-050', 'RT_MS2_Q_050-075', 'RT_MS2_Q_075-100']]
-    df_pl7_long = df_pl7.melt(id_vars = ["filename"])
-    fig7 = px.bar(df_pl7_long, x="filename", y="value", color="variable", title = "Quartiles of MS2 over retention time")
-    fig7.update_xaxes(tickangle=-90)
+    
+    RT_MS2_Q_df_list = []
+    for file in hdf5_file_names:
+        df_tmp = pd.DataFrame()
+        df_tmp["filename"] = [file]*4
+        df_tmp["variable"] = ["RT_MS2_Q_" + str(i) for i in range(1,5)]
+        df_tmp["value"] = array_values[file]["RT_MS2_Quartiles"]
+        RT_MS2_Q_df_list.append(df_tmp)
+    df_pl07_long = pd.concat(RT_MS2_Q_df_list)
+    
+    fig07 = px.bar(df_pl07_long, x="filename", y="value", color="variable", title = "Quartiles of MS2 over retention time")
+    fig07.update_xaxes(tickangle=-90)
+    fig07.update_layout(height = int(700))
     if fig_show:
-        fig7.show()
-    with open(output_path + os.sep + "fig7_barplot_MS2_TIC_quartiles.json", "w") as json_file:
-        json_file.write(plotly.io.to_json(fig7))
-    fig7.write_html(file = output_path + os.sep + "fig7_barplot_MS2_TIC_quartiles.html", auto_open = False)
+        fig07.show()
+    with open(output_path + os.sep + "fig07_barplot_MS2_TIC_quartiles.plotly.json", "w") as json_file:
+        json_file.write(plotly.io.to_json(fig07))
+    fig07.write_html(file = output_path + os.sep + "fig07_barplot_MS2_TIC_quartiles.html", auto_open = False)
+    
+ 
 
 ################################################################################################
     # Figure 8: Precursor charge states
-    df_pl8 = df[["filename", 'MS2_PrecZ_1', 'MS2_PrecZ_2', 'MS2_PrecZ_3', 'MS2_PrecZ_4', 'MS2_PrecZ_5', 'MS2_PrecZ_more', 'MS2_PrecZ_Unknown']]
-    df_pl8_long = df_pl8.melt(id_vars = ["filename"])
-    fig8 = px.bar(df_pl8_long, x="filename", y="value", color="variable", title = "Charge states of precursors")
-    fig8.update_xaxes(tickangle=-90)
+    
+    Prec_charge_df_list = []
+    for file in hdf5_file_names:
+        df_tmp = dataframes[file]["MS2_Prec_charge_fraction"]
+        df_tmp.rename(columns = {"0": "unknown", df_tmp.columns[-1]: "more"}, inplace = True)
+        df_tmp_long = df_tmp.melt()
+        df_tmp_long["filename"] = [file]*df_tmp.shape[1]
+        Prec_charge_df_list.append(df_tmp_long)
+    df_pl08_long = pd.concat(Prec_charge_df_list)
+    df_pl08_long.rename(columns = {"variable": "Prec_charge", "value": "fraction"}, inplace = True)
+    
+    fig08 = px.bar(df_pl08_long, x="filename", y="fraction", color="Prec_charge", title = "Charge states of precursors")
+    fig08.update_xaxes(tickangle=-90)
     if fig_show:
-        fig8.show()
-    with open(output_path + os.sep + "fig8_barplot_precursor_chargestate.json", "w") as json_file:
-        json_file.write(plotly.io.to_json(fig8))
-    fig8.write_html(file = output_path + os.sep + "fig8_barplot__precursor_chargestate.html", auto_open = False)
+        fig08.show()
+    with open(output_path + os.sep + "fig08_barplot_precursor_chargestate.plotly.json", "w") as json_file:
+        json_file.write(plotly.io.to_json(fig08))
+    fig08.write_html(file = output_path + os.sep + "fig08_barplot__precursor_chargestate.html", auto_open = False)
+
+
+    exit(1)
+
+
+
 
 ################################################################################################
     # Figure 9: PSM charge states (of identified spectra)
@@ -701,7 +757,7 @@ if __name__ == "__main__":
         loadings.sort_values("length", ascending=False, inplace=True)
         fig11_loadings = px.scatter(loadings, x = "PC1", y = "PC2", title = "PCA loadings (all data)", 
             hover_name="variable", hover_data=["PC1", "PC2"],)
-        fig11_loadings.update_layout(width = int(1500), height = int(1000))
+        fig11_loadings.update_layout(width = int(1000), height = int(700))
     else:
         fig11 = go.Figure()
         fig11.add_annotation(
