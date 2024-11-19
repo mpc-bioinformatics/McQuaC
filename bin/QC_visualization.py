@@ -236,9 +236,15 @@ if __name__ == "__main__":
     
 
 # ############################################################################################
-# # Feature list: features for initial table 0
+# # Feature list: features for initial table 0 (default, can be overwitten by user)
 #     feature_list = ["filename", # will be filled in later as name of the hdf5 file
 #                     "timestamp", # will be converted later to human-readable format
+
+                    # accumulated-MS1_TIC
+                    # accumulated-MS2_TIC
+                    # total_num_ms1
+                    # total_num_ms2
+
 #                     "number_ungrouped_proteins",
 #                     "number_proteins",
 #                     "number_filtered_peptides",
@@ -384,7 +390,7 @@ if __name__ == "__main__":
 
 
 ################################################################################################
-    # Figure 1: Barplot for total number of MS1 and MS2 spectra
+    # Figure 01: Barplot for total number of MS1 and MS2 spectra
     df_pl01 = single_values[["filename", "total_num_ms1", "total_num_ms2"]]
     df_pl01_long = df_pl01.melt(id_vars = ["filename"])
     fig01 = px.bar(df_pl01_long, x="filename", y="value", color="variable", barmode = "group", 
@@ -402,7 +408,7 @@ if __name__ == "__main__":
 
 
 ################################################################################################
-    # Figure 2: Barplot for number of PSMs, peptides, proteins
+    # Figure 02: Barplot for number of PSMs, peptides, proteins
     
     # print(single_values.columns)
     # ### TODO: war im PIA-script falsch
@@ -438,7 +444,7 @@ if __name__ == "__main__":
 
     
 ################################################################################################
-    # Figure 3: Barplot for features and identified features
+    # Figure 03: Barplot for features and identified features
     df_pl03 = single_values[["filename", "total_num_features", "total_num_ident_features"]]
     df_pl03_long = df_pl03.melt(id_vars = ["filename"])
     fig03 = px.bar(df_pl03_long, x="filename", y="value", color="variable", barmode = "group", 
@@ -456,7 +462,7 @@ if __name__ == "__main__":
 
 
 ####################################################################################################
-    ## Figure 4: TIC Overlay as Lineplot
+    ## Figure 04: TIC Overlay as Lineplot
     
     tic_df = []
     for file in hdf5_file_names:
@@ -477,7 +483,7 @@ if __name__ == "__main__":
 
  
 #################################################################################################
-    # Figure 5: Barplot TIC quartiles
+    # Figure 05: Barplot TIC quartiles
     
     RT_TIC_Q_df_list = []
     for file in hdf5_file_names:
@@ -498,7 +504,7 @@ if __name__ == "__main__":
     fig05.write_html(file = output_path + os.sep + "fig05_barplot_TIC_quartiles.html", auto_open = False)
 
 ################################################################################################
-    # Figure 6: Barplot MS1 TIC quartiles
+    # Figure 06: Barplot MS1 TIC quartiles
     
     RT_MS1_Q_df_list = []
     for file in hdf5_file_names:
@@ -520,7 +526,7 @@ if __name__ == "__main__":
     
 
 ################################################################################################
-    # Figure 7: Barplot MS2 TIC quartiles
+    # Figure 07: Barplot MS2 TIC quartiles
     
     RT_MS2_Q_df_list = []
     for file in hdf5_file_names:
@@ -543,7 +549,7 @@ if __name__ == "__main__":
  
 
 ################################################################################################
-    # Figure 8: Precursor charge states
+    # Figure 08: Precursor charge states
     
     Prec_charge_df_list = []
     for file in hdf5_file_names:
@@ -557,6 +563,7 @@ if __name__ == "__main__":
     
     fig08 = px.bar(df_pl08_long, x="filename", y="fraction", color="Prec_charge", title = "Charge states of precursors")
     fig08.update_xaxes(tickangle=-90)
+    fig08.update_layout(height = int(700))
     if fig_show:
         fig08.show()
     with open(output_path + os.sep + "fig08_barplot_precursor_chargestate.plotly.json", "w") as json_file:
@@ -564,47 +571,62 @@ if __name__ == "__main__":
     fig08.write_html(file = output_path + os.sep + "fig08_barplot__precursor_chargestate.html", auto_open = False)
 
 
-    exit(1)
-
-
-
-
 ################################################################################################
-    # Figure 9: PSM charge states (of identified spectra)
+    # Figure 09: PSM charge states (of identified spectra)
     
-    if ("psm_charge1" in df.columns):
-        df_pl9 = df[["filename", 'psm_charge1', 'psm_charge2', 'psm_charge3', 'psm_charge4', 'psm_charge5', 'psm_charge_more']]
-        df_pl9_long = df_pl9.melt(id_vars = ["filename"])
-        fig9 = px.bar(df_pl9_long, x="filename", y="value", color="variable", title = "Charge states of PSMs")
-        fig9.update_xaxes(tickangle=-90)
+    if ("psm_charge_fractions" in dataframes[hdf5_file_names[0]].keys()):
+        PSM_charge_df_list = []
+        for file in hdf5_file_names:
+            df_tmp = dataframes[file]["psm_charge_fractions"]
+            df_tmp.rename(columns = {"0": "unknown", df_tmp.columns[-1]: "more"}, inplace = True)
+            df_tmp_long = df_tmp.melt()
+            df_tmp_long["filename"] = [file]*df_tmp.shape[1]
+            PSM_charge_df_list.append(df_tmp_long)
+        df_pl09_long = pd.concat(PSM_charge_df_list)
+        df_pl09_long.rename(columns = {"variable": "PSM_charge", "value": "fraction"}, inplace = True)
+        
+        fig09 = px.bar(df_pl09_long, x="filename", y="fraction", color="PSM_charge", title = "Charge states of PSMs")
+        fig09.update_xaxes(tickangle=-90)
+        fig09.update_layout(height = int(700))
     else: 
-        fig9 = go.Figure()
-        fig9.add_annotation(
+        fig09 = go.Figure()
+        fig09.add_annotation(
             x=0.5,
             y=0.5,
             text="Columns are missing, no plot created!",
             showarrow=False,
             font=dict(size=14)
         )
-        fig9.update_layout(
+        fig09.update_layout(
             width=1500,
             height=1000,
             title="Empty Plot"
         )
     if fig_show:
-        fig9.show()
-    with open(output_path + os.sep + "fig9_barplot_PSM_chargestate.json", "w") as json_file:
-        json_file.write(plotly.io.to_json(fig9))
-    fig9.write_html(file = output_path + os.sep + "fig9_barplot_PSM_chargestate.html", auto_open = False)
-
+        fig09.show()
+    with open(output_path + os.sep + "fig09_barplot_PSM_chargestate.plotly.json", "w") as json_file:
+        json_file.write(plotly.io.to_json(fig09))
+    fig09.write_html(file = output_path + os.sep + "fig09_barplot_PSM_chargestate.html", auto_open = False)
+    
+    
 ################################################################################################
     # Figure 10: Missed cleavages of PSMs
     
-    if ("psm_missed_0" in df.columns):
-        df_pl10 = df[["filename", 'psm_missed_0', 'psm_missed_1', 'psm_missed_2', 'psm_missed_3', 'psm_missed_more']]
-        df_pl10_long = df_pl10.melt(id_vars = ["filename"])
-        fig10 = px.bar(df_pl10_long, x="filename", y="value", color="variable", title = "Number of missed cleavages for PSMs")
+    
+    if ("psm_missed_counts" in dataframes[hdf5_file_names[0]].keys()):
+        PSM_missed_df_list = []
+        for file in hdf5_file_names:
+            df_tmp = dataframes[file]["psm_missed_counts"]
+            df_tmp.rename(columns = {df_tmp.columns[-1]: "more"}, inplace = True)
+            df_tmp_long = df_tmp.melt()
+            df_tmp_long["filename"] = [file]*df_tmp.shape[1]
+            PSM_missed_df_list.append(df_tmp_long)
+        df_pl10_long = pd.concat(PSM_missed_df_list)
+        df_pl10_long.rename(columns = {"variable": "PSM_missed_cleavages", "value": "count"}, inplace = True)
+        
+        fig10 = px.bar(df_pl10_long, x="filename", y="count", color="PSM_missed_cleavages", title = "Number of missed cleavages for PSMs")
         fig10.update_xaxes(tickangle=-90)
+        fig10.update_layout(height = int(700))
     else: 
         fig10 = go.Figure()
         fig10.add_annotation(
@@ -622,10 +644,10 @@ if __name__ == "__main__":
     
     if fig_show:
         fig10.show()
-    with open(output_path + os.sep + "fig10_barplot_PSM_missedcleavages.json", "w") as json_file:
+    with open(output_path + os.sep + "fig10_barplot_PSM_missedcleavages.plotly.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig10))
     fig10.write_html(file = output_path + os.sep + "fig10_barplot_PSM_missedcleavages.html", auto_open = False)
-
+    
 
 #################################################################################################
     #### Preparations for PCA
@@ -633,368 +655,333 @@ if __name__ == "__main__":
     # The oldest raw file is coloured blue, the newest red.
     # Depending on the timestamp, the other ones are coloured on a gradient in between these two colours.
 
-    timestamps = df[["timestamp"]].values.flatten().tolist()
-    mintime = min(timestamps)
-    maxtime = max(timestamps)
+#     timestamps = df[["timestamp"]].values.flatten().tolist()
+#     mintime = min(timestamps)
+#     maxtime = max(timestamps)
 
-    ## Calculate scaling of timestamps to colour the points in the PCA plot (percentage between min and max time):
-    t_scaled = []
-    for t in timestamps:
-        if (mintime == maxtime):
-            t_scaled_tmp = 1
-        else:
-            t_scaled_tmp = (t - mintime)/(maxtime-mintime)*100 
-        t_scaled.append(t_scaled_tmp)
+#     ## Calculate scaling of timestamps to colour the points in the PCA plot (percentage between min and max time):
+#     t_scaled = []
+#     for t in timestamps:
+#         if (mintime == maxtime):
+#             t_scaled_tmp = 1
+#         else:
+#             t_scaled_tmp = (t - mintime)/(maxtime-mintime)*100 
+#         t_scaled.append(t_scaled_tmp)
 
-    # Fig 11 PCA on all data
-    if nr_rawfiles > 1:
-        feature_list = ["RT_duration", 
-        "total_num_ms1",
-        "total_num_ms2", 
-        "RT_TIC_Q_000-025",
-        "RT_TIC_Q_025-050",
-        "RT_TIC_Q_050-075",
-        "RT_TIC_Q_075-100",
-        "RT_MS1_Q_000-025",
-        "RT_MS1_Q_025-050",
-        "RT_MS1_Q_050-075",
-        "RT_MS1_Q_075-100",
-        "RT_MS2_Q_000-025",
-        "RT_MS2_Q_025-050", 
-        "RT_MS2_Q_050-075",
-        "RT_MS2_Q_075-100", 
-        "MS1-TIC-Change-Q2",
-        "MS1-TIC-Change-Q3", 
-        "MS1-TIC-Change-Q4",
-        "MS1-TIC-Q2",
-        "MS1-TIC-Q3",
-        "MS1-TIC-Q4", 
-        "MS1_Freq_Max",
-        "MS1_Density_Q1",
-        "MS1_Density_Q2", 
-        "MS1_Density_Q3",
-        "MS2_Freq_Max",
-        "MS2_Density_Q1",
-        "MS2_Density_Q2", 
-        "MS2_Density_Q3",
-        "MS2_PrecZ_1", 
-        "MS2_PrecZ_2", 
-        "MS2_PrecZ_3",
-        "MS2_PrecZ_4",
-        "MS2_PrecZ_5",
-        "MS2_PrecZ_more", 
-        "accumulated-MS1_TIC", 
-        "accumulated-MS2_TIC",
-        "total_num_ident_features",
-        "num_features_charge_1",
-        "num_features_charge_2",
-        "num_features_charge_3",
-        "num_features_charge_4",
-        "num_features_charge_5", 
-        "psm_charge1",
-        "psm_charge2", 
-        "psm_charge3", 
-        "psm_charge4", 
-        "psm_charge5",
-        "psm_charge_more"
-        ]
+#     # Fig 11 PCA on all data
+#     if nr_rawfiles > 1:
+#         feature_list = ["RT_duration", 
+#         "total_num_ms1",
+#         "total_num_ms2", 
+#         "RT_TIC_Q_000-025",
+#         "RT_TIC_Q_025-050",
+#         "RT_TIC_Q_050-075",
+#         "RT_TIC_Q_075-100",
+#         "RT_MS1_Q_000-025",
+#         "RT_MS1_Q_025-050",
+#         "RT_MS1_Q_050-075",
+#         "RT_MS1_Q_075-100",
+#         "RT_MS2_Q_000-025",
+#         "RT_MS2_Q_025-050", 
+#         "RT_MS2_Q_050-075",
+#         "RT_MS2_Q_075-100", 
+#         "MS1-TIC-Change-Q2",
+#         "MS1-TIC-Change-Q3", 
+#         "MS1-TIC-Change-Q4",
+#         "MS1-TIC-Q2",
+#         "MS1-TIC-Q3",
+#         "MS1-TIC-Q4", 
+#         "MS1_Freq_Max",
+#         "MS1_Density_Q1",
+#         "MS1_Density_Q2", 
+#         "MS1_Density_Q3",
+#         "MS2_Freq_Max",
+#         "MS2_Density_Q1",
+#         "MS2_Density_Q2", 
+#         "MS2_Density_Q3",
+#         "MS2_PrecZ_1", 
+#         "MS2_PrecZ_2", 
+#         "MS2_PrecZ_3",
+#         "MS2_PrecZ_4",
+#         "MS2_PrecZ_5",
+#         "MS2_PrecZ_more", 
+#         "accumulated-MS1_TIC", 
+#         "accumulated-MS2_TIC",
+#         "total_num_ident_features",
+#         "num_features_charge_1",
+#         "num_features_charge_2",
+#         "num_features_charge_3",
+#         "num_features_charge_4",
+#         "num_features_charge_5", 
+#         "psm_charge1",
+#         "psm_charge2", 
+#         "psm_charge3", 
+#         "psm_charge4", 
+#         "psm_charge5",
+#         "psm_charge_more"
+#         ]
 
-        ### for now, just check if the items in featurelist are really in the data frame and if not, skip them
-        valid_features = [feature for feature in feature_list if feature in df.columns]
+#         ### for now, just check if the items in featurelist are really in the data frame and if not, skip them
+#         valid_features = [feature for feature in feature_list if feature in df.columns]
         
-        df_pl11 = df[valid_features]
-        df_pl11 = df_pl11.fillna(value = 0) # impute missig values by 0
+#         df_pl11 = df[valid_features]
+#         df_pl11 = df_pl11.fillna(value = 0) # impute missig values by 0
 
-        df_pl11_norm = pd.DataFrame(StandardScaler().fit_transform(df_pl11)) 
+#         df_pl11_norm = pd.DataFrame(StandardScaler().fit_transform(df_pl11)) 
 
-        #perform PCA
-        pca = PCA(n_components=2)
+#         #perform PCA
+#         pca = PCA(n_components=2)
 
-        principalComponents = pca.fit_transform(df_pl11_norm)
+#         principalComponents = pca.fit_transform(df_pl11_norm)
 
-        col = range(1,(principalComponents.shape[1]+1))
-        col = ['pca'+ str(y) for y in col]
-        principalDf = pd.DataFrame(data = principalComponents, columns = col)
+#         col = range(1,(principalComponents.shape[1]+1))
+#         col = ['pca'+ str(y) for y in col]
+#         principalDf = pd.DataFrame(data = principalComponents, columns = col)
 
-        principalDf["t_scaled"] = t_scaled
-        principalDf["raw_file"] = df["filename"]
+#         principalDf["t_scaled"] = t_scaled
+#         principalDf["raw_file"] = df["filename"]
 
-        # Explained variance in axis labels
-        pca_var = pca.explained_variance_ratio_
-        pca_var1 = round(pca_var[0]*100, 1)
-        pca_var2 = round(pca_var[1]*100, 1)
+#         # Explained variance in axis labels
+#         pca_var = pca.explained_variance_ratio_
+#         pca_var1 = round(pca_var[0]*100, 1)
+#         pca_var2 = round(pca_var[1]*100, 1)
 
-        label_x = "PC1 (" + str(pca_var1) + "%)"
-        label_y = "PC2 (" + str(pca_var2) + "%)"
+#         label_x = "PC1 (" + str(pca_var1) + "%)"
+#         label_y = "PC2 (" + str(pca_var2) + "%)"
 
-        if use_group:
-            principalDf["group"] = group
-            fig11 = px.scatter(principalDf, x = "pca1", y = "pca2", color = "group",
-                        color_continuous_scale="bluered", title = "PCA on raw data",
-                        hover_name="raw_file", hover_data=["pca1", "pca2"],
-                            labels={
-                            "pca1": label_x,
-                            "pca2": label_y,
-                            "group": "Group"
-                        })
-        else:
-            principalDf["t_scaled"] = t_scaled
-            fig11 = px.scatter(principalDf, x = "pca1", y = "pca2", color = "t_scaled",
-                        color_continuous_scale="bluered", title = "PCA on all data",
-                        hover_name="raw_file", hover_data=["pca1", "pca2"],
-                            labels={
-                            "pca1": label_x,
-                            "pca2": label_y,
-                            "t_scaled": "timestamp"
-                        })
+#         if use_group:
+#             principalDf["group"] = group
+#             fig11 = px.scatter(principalDf, x = "pca1", y = "pca2", color = "group",
+#                         color_continuous_scale="bluered", title = "PCA on raw data",
+#                         hover_name="raw_file", hover_data=["pca1", "pca2"],
+#                             labels={
+#                             "pca1": label_x,
+#                             "pca2": label_y,
+#                             "group": "Group"
+#                         })
+#         else:
+#             principalDf["t_scaled"] = t_scaled
+#             fig11 = px.scatter(principalDf, x = "pca1", y = "pca2", color = "t_scaled",
+#                         color_continuous_scale="bluered", title = "PCA on all data",
+#                         hover_name="raw_file", hover_data=["pca1", "pca2"],
+#                             labels={
+#                             "pca1": label_x,
+#                             "pca2": label_y,
+#                             "t_scaled": "timestamp"
+#                         })
             
-        fig11.update_layout(width = int(1500), height = int(1000))
+#         fig11.update_layout(width = int(1500), height = int(1000))
             
-        # Table and plot with feature loadings (weights of the variables in the PCA)
-        loadings = pd.DataFrame(pca.components_.T, columns=['PC1', 'PC2'], index=valid_features)
-        loadings.insert(0, "length", np.sqrt(loadings["PC1"]**2+ loadings["PC2"]**2))
-        loadings.insert(0, "variable", loadings.index)
-        loadings.sort_values("length", ascending=False, inplace=True)
-        fig11_loadings = px.scatter(loadings, x = "PC1", y = "PC2", title = "PCA loadings (all data)", 
-            hover_name="variable", hover_data=["PC1", "PC2"],)
-        fig11_loadings.update_layout(width = int(1000), height = int(700))
-    else:
-        fig11 = go.Figure()
-        fig11.add_annotation(
-            x=0.5,
-            y=0.5,
-            text="PCA cannot be computed using only one sample!",
-            showarrow=False,
-            font=dict(size=14)
-        )
-        fig11.update_layout(
-            width=1500,
-            height=1000,
-            title="Empty Plot"
-        )
-        fig11_loadings = fig11
-        loadings = pd.DataFrame(columns = ["variable", "length", "PC1", "PC2"])
-    if fig_show:
-        fig11.show()
-    with open(output_path + os.sep + "fig11a_PCA_all.json", "w") as json_file:
-        json_file.write(plotly.io.to_json(fig11))
-    fig11.write_html(file = output_path + os.sep + "fig11a_PCA_all.html", auto_open = False)
-    if fig_show: 
-        fig11_loadings.show()
-    with open(output_path + os.sep + "fig11b_Loadings_all.json", "w") as json_file:
-        json_file.write(plotly.io.to_json(fig11_loadings))
-    fig11_loadings.write_html(file = output_path + os.sep + "fig11b_Loadings_all.html", auto_open = False)
-    loadings.to_csv(output_path + os.sep + "table_loadings_all.csv", index = False) 
+#         # Table and plot with feature loadings (weights of the variables in the PCA)
+#         loadings = pd.DataFrame(pca.components_.T, columns=['PC1', 'PC2'], index=valid_features)
+#         loadings.insert(0, "length", np.sqrt(loadings["PC1"]**2+ loadings["PC2"]**2))
+#         loadings.insert(0, "variable", loadings.index)
+#         loadings.sort_values("length", ascending=False, inplace=True)
+#         fig11_loadings = px.scatter(loadings, x = "PC1", y = "PC2", title = "PCA loadings (all data)", 
+#             hover_name="variable", hover_data=["PC1", "PC2"],)
+#         fig11_loadings.update_layout(width = int(1000), height = int(700))
+#     else:
+#         fig11 = go.Figure()
+#         fig11.add_annotation(
+#             x=0.5,
+#             y=0.5,
+#             text="PCA cannot be computed using only one sample!",
+#             showarrow=False,
+#             font=dict(size=14)
+#         )
+#         fig11.update_layout(
+#             width=1500,
+#             height=1000,
+#             title="Empty Plot"
+#         )
+#         fig11_loadings = fig11
+#         loadings = pd.DataFrame(columns = ["variable", "length", "PC1", "PC2"])
+#     if fig_show:
+#         fig11.show()
+#     with open(output_path + os.sep + "fig11a_PCA_all.json", "w") as json_file:
+#         json_file.write(plotly.io.to_json(fig11))
+#     fig11.write_html(file = output_path + os.sep + "fig11a_PCA_all.html", auto_open = False)
+#     if fig_show: 
+#         fig11_loadings.show()
+#     with open(output_path + os.sep + "fig11b_Loadings_all.json", "w") as json_file:
+#         json_file.write(plotly.io.to_json(fig11_loadings))
+#     fig11_loadings.write_html(file = output_path + os.sep + "fig11b_Loadings_all.html", auto_open = False)
+#     loadings.to_csv(output_path + os.sep + "table_loadings_all.csv", index = False) 
 
-################################################################################################
-    # Fig 12 PCA on raw data (only plotted if we have more than one raw file)
+# ################################################################################################
+#     # Fig 12 PCA on raw data (only plotted if we have more than one raw file)
 
     
-    if nr_rawfiles > 1:
-        feature_list = ["RT_duration", 
-        "total_num_ms1",
-        "total_num_ms2", 
-        "RT_TIC_Q_000-025",
-        "RT_TIC_Q_025-050",
-        "RT_TIC_Q_050-075",
-        "RT_TIC_Q_075-100",
-        "RT_MS1_Q_000-025",
-        "RT_MS1_Q_025-050",
-        "RT_MS1_Q_050-075",
-        "RT_MS1_Q_075-100",
-        "RT_MS2_Q_000-025",
-        "RT_MS2_Q_025-050", 
-        "RT_MS2_Q_050-075",
-        "RT_MS2_Q_075-100", 
-        "MS1-TIC-Change-Q2",
-        "MS1-TIC-Change-Q3", 
-        "MS1-TIC-Change-Q4",
-        "MS1-TIC-Q2",
-        "MS1-TIC-Q3",
-        "MS1-TIC-Q4", 
-        "MS1_Freq_Max",
-        "MS1_Density_Q1",
-        "MS1_Density_Q2", 
-        "MS1_Density_Q3",
-        "MS2_Freq_Max",
-        "MS2_Density_Q1",
-        "MS2_Density_Q2", 
-        "MS2_Density_Q3",
-        "MS2_PrecZ_1", 
-        "MS2_PrecZ_2", 
-        "MS2_PrecZ_3",
-        "MS2_PrecZ_4",
-        "MS2_PrecZ_5",
-        "MS2_PrecZ_more", 
-        "accumulated-MS1_TIC", 
-        "accumulated-MS2_TIC"]
+#     if nr_rawfiles > 1:
+#         feature_list = ["RT_duration", 
+#         "total_num_ms1",
+#         "total_num_ms2", 
+#         "RT_TIC_Q_000-025",
+#         "RT_TIC_Q_025-050",
+#         "RT_TIC_Q_050-075",
+#         "RT_TIC_Q_075-100",
+#         "RT_MS1_Q_000-025",
+#         "RT_MS1_Q_025-050",
+#         "RT_MS1_Q_050-075",
+#         "RT_MS1_Q_075-100",
+#         "RT_MS2_Q_000-025",
+#         "RT_MS2_Q_025-050", 
+#         "RT_MS2_Q_050-075",
+#         "RT_MS2_Q_075-100", 
+#         "MS1-TIC-Change-Q2",
+#         "MS1-TIC-Change-Q3", 
+#         "MS1-TIC-Change-Q4",
+#         "MS1-TIC-Q2",
+#         "MS1-TIC-Q3",
+#         "MS1-TIC-Q4", 
+#         "MS1_Freq_Max",
+#         "MS1_Density_Q1",
+#         "MS1_Density_Q2", 
+#         "MS1_Density_Q3",
+#         "MS2_Freq_Max",
+#         "MS2_Density_Q1",
+#         "MS2_Density_Q2", 
+#         "MS2_Density_Q3",
+#         "MS2_PrecZ_1", 
+#         "MS2_PrecZ_2", 
+#         "MS2_PrecZ_3",
+#         "MS2_PrecZ_4",
+#         "MS2_PrecZ_5",
+#         "MS2_PrecZ_more", 
+#         "accumulated-MS1_TIC", 
+#         "accumulated-MS2_TIC"]
 
 
-        ### for now, just check if the items in featurelist are really in the data frame and if not, skip them
-        valid_features = [feature for feature in feature_list if feature in df.columns]
+#         ### for now, just check if the items in featurelist are really in the data frame and if not, skip them
+#         valid_features = [feature for feature in feature_list if feature in df.columns]
         
-        df_pl12 = df[valid_features]
+#         df_pl12 = df[valid_features]
 
-        df_pl12_norm = pd.DataFrame(StandardScaler().fit_transform(df_pl12)) 
+#         df_pl12_norm = pd.DataFrame(StandardScaler().fit_transform(df_pl12)) 
 
-        #perform PCA
-        pca = PCA(n_components=2)
+#         #perform PCA
+#         pca = PCA(n_components=2)
 
-        principalComponents = pca.fit_transform(df_pl12_norm)
+#         principalComponents = pca.fit_transform(df_pl12_norm)
 
-        col = range(1,(principalComponents.shape[1]+1))
-        col = ['pca'+ str(y) for y in col]
-        principalDf = pd.DataFrame(data = principalComponents, columns = col)
+#         col = range(1,(principalComponents.shape[1]+1))
+#         col = ['pca'+ str(y) for y in col]
+#         principalDf = pd.DataFrame(data = principalComponents, columns = col)
 
-        principalDf["t_scaled"] = t_scaled
-        principalDf["raw_file"] = df["filename"]
+#         principalDf["t_scaled"] = t_scaled
+#         principalDf["raw_file"] = df["filename"]
 
-        # Explained variance in axis labels
-        pca_var = pca.explained_variance_ratio_
-        pca_var1 = round(pca_var[0]*100, 1)
-        pca_var2 = round(pca_var[1]*100, 1)
+#         # Explained variance in axis labels
+#         pca_var = pca.explained_variance_ratio_
+#         pca_var1 = round(pca_var[0]*100, 1)
+#         pca_var2 = round(pca_var[1]*100, 1)
 
-        label_x = "PC1 (" + str(pca_var1) + "%)"
-        label_y = "PC2 (" + str(pca_var2) + "%)"
+#         label_x = "PC1 (" + str(pca_var1) + "%)"
+#         label_y = "PC2 (" + str(pca_var2) + "%)"
 
-        if use_group:
-            principalDf["group"] = group
-            fig12 = px.scatter(principalDf, x = "pca1", y = "pca2", color = "group",
-                        color_continuous_scale="bluered", title = "PCA on raw data",
-                        hover_name="raw_file", hover_data=["pca1", "pca2"],
-                            labels={
-                            "pca1": label_x,
-                            "pca2": label_y,
-                            "group": "Group"
-                        })
-        else:
-            principalDf["t_scaled"] = t_scaled
-            fig12 = px.scatter(principalDf, x = "pca1", y = "pca2", color = "t_scaled",
-                        color_continuous_scale="bluered", title = "PCA on raw data",
-                        hover_name="raw_file", hover_data=["pca1", "pca2"],
-                            labels={
-                            "pca1": label_x,
-                            "pca2": label_y,
-                            "t_scaled": "timestamp"
-                        })
-        fig12.update_layout(width = int(1500), height = int(1000))
+#         if use_group:
+#             principalDf["group"] = group
+#             fig12 = px.scatter(principalDf, x = "pca1", y = "pca2", color = "group",
+#                         color_continuous_scale="bluered", title = "PCA on raw data",
+#                         hover_name="raw_file", hover_data=["pca1", "pca2"],
+#                             labels={
+#                             "pca1": label_x,
+#                             "pca2": label_y,
+#                             "group": "Group"
+#                         })
+#         else:
+#             principalDf["t_scaled"] = t_scaled
+#             fig12 = px.scatter(principalDf, x = "pca1", y = "pca2", color = "t_scaled",
+#                         color_continuous_scale="bluered", title = "PCA on raw data",
+#                         hover_name="raw_file", hover_data=["pca1", "pca2"],
+#                             labels={
+#                             "pca1": label_x,
+#                             "pca2": label_y,
+#                             "t_scaled": "timestamp"
+#                         })
+#         fig12.update_layout(width = int(1500), height = int(1000))
             
             
-        # Table and plot with feature loadings (weights of the variables in the PCA)
-        loadings = pd.DataFrame(pca.components_.T, columns=['PC1', 'PC2'], index=valid_features)
-        loadings.insert(0, "length", np.sqrt(loadings["PC1"]**2+ loadings["PC2"]**2))
-        loadings.insert(0, "variable", loadings.index)
-        loadings.sort_values("length", ascending=False, inplace=True)
-        fig12_loadings = px.scatter(loadings, x = "PC1", y = "PC2", title = "PCA loadings (raw data)", 
-            hover_name="variable", hover_data=["PC1", "PC2"],)
-        fig12_loadings.update_layout(width = int(1500), height = int(1000))
-    else:
-        fig12 = go.Figure()
-        fig12.add_annotation(
-            x=0.5,
-            y=0.5,
-            text="PCA cannot be computed using only one sample!",
-            showarrow=False,
-            font=dict(size=14)
-        )
-        fig12.update_layout(
-            width=1500,
-            height=1000,
-            title="Empty Plot"
-        )
-        fig12_loadings = fig12
-        loadings = pd.DataFrame(columns = ["variable", "length", "PC1", "PC2"])
-    if fig_show:
-        fig12.show()
-    with open(output_path + os.sep + "fig12a_PCA_raw.json", "w") as json_file:
-        json_file.write(plotly.io.to_json(fig12)) 
-    fig12.write_html(file = output_path + os.sep + "fig12_PCA_raw.html", auto_open = False)
-    if fig_show: 
-        fig12_loadings.show()
-    with open(output_path + os.sep + "fig12b_Loadings_raw.json", "w") as json_file:
-        json_file.write(plotly.io.to_json(fig12_loadings))
-    fig12_loadings.write_html(file = output_path + os.sep + "fig12b_Loadings_raw.html", auto_open = False)
-    loadings.to_csv(output_path + os.sep + "table_loadings_raw.csv", index = False) 
+#         # Table and plot with feature loadings (weights of the variables in the PCA)
+#         loadings = pd.DataFrame(pca.components_.T, columns=['PC1', 'PC2'], index=valid_features)
+#         loadings.insert(0, "length", np.sqrt(loadings["PC1"]**2+ loadings["PC2"]**2))
+#         loadings.insert(0, "variable", loadings.index)
+#         loadings.sort_values("length", ascending=False, inplace=True)
+#         fig12_loadings = px.scatter(loadings, x = "PC1", y = "PC2", title = "PCA loadings (raw data)", 
+#             hover_name="variable", hover_data=["PC1", "PC2"],)
+#         fig12_loadings.update_layout(width = int(1500), height = int(1000))
+#     else:
+#         fig12 = go.Figure()
+#         fig12.add_annotation(
+#             x=0.5,
+#             y=0.5,
+#             text="PCA cannot be computed using only one sample!",
+#             showarrow=False,
+#             font=dict(size=14)
+#         )
+#         fig12.update_layout(
+#             width=1500,
+#             height=1000,
+#             title="Empty Plot"
+#         )
+#         fig12_loadings = fig12
+#         loadings = pd.DataFrame(columns = ["variable", "length", "PC1", "PC2"])
+#     if fig_show:
+#         fig12.show()
+#     with open(output_path + os.sep + "fig12a_PCA_raw.json", "w") as json_file:
+#         json_file.write(plotly.io.to_json(fig12)) 
+#     fig12.write_html(file = output_path + os.sep + "fig12_PCA_raw.html", auto_open = False)
+#     if fig_show: 
+#         fig12_loadings.show()
+#     with open(output_path + os.sep + "fig12b_Loadings_raw.json", "w") as json_file:
+#         json_file.write(plotly.io.to_json(fig12_loadings))
+#     fig12_loadings.write_html(file = output_path + os.sep + "fig12b_Loadings_raw.html", auto_open = False)
+#     loadings.to_csv(output_path + os.sep + "table_loadings_raw.csv", index = False) 
         
 
 #################################################################################################
     ### Fig 13: Ion Maps (one for each raw file)
 
-    if not os.path.exists(output_path + os.sep + "fig13_ionmaps"):
-        os.makedirs(output_path + os.sep + "fig13_ionmaps")
+    if not os.path.exists(output_path + os.sep + "fig13_MS1_map"):
+        os.makedirs(output_path + os.sep + "fig13_MS1_map")
+
+    # MS1_map
+    # retention_time           mz  intensity
 
     i = 0
-    for file in hdf5_files:
+    for file in hdf5_file_names:
     #file = hdf5_files[0]
-        hdf5_tmp = h5py.File(file,'r')
-
-        data = {"RT": hdf5_tmp["ms1_map_rt_array"][:], 
-                "MZ": hdf5_tmp["ms1_map_mz_array"][:],
-                "intensity": hdf5_tmp["ms1_map_intens_array"][:]}
-        df_ionmap = pd.DataFrame(data)
+        df_MS1_map = dataframes[file]["MS1_map"]
 
         ### reduce the number of points to roughly 1 million
-        if (len(df_ionmap) > 1000000):
-                print(len(df_ionmap))
-                samples = int(len(df_ionmap) / 1000000)
-                print(samples)
-                df_ionmap2 = df_ionmap.loc[range(0, len(df_ionmap), samples),:]
+        if (len(df_MS1_map) > 1000000):
+                samples = int(len(df_MS1_map) / 1000000)
+                df_MS1_map2 = df_MS1_map.loc[range(0, len(df_MS1_map), samples),:]
         else: 
-                df_ionmap2 = df_ionmap
+                df_MS1_map2 = df_MS1_map
 
-        print(len(df_ionmap2))
-        df_ionmap2["log_intensity"] = np.log10(df_ionmap2["intensity"])
+        df_MS1_map2["log_intensity"] = np.log10(df_MS1_map2["intensity"])
 
         fig,ax = plt.subplots(figsize=(15,6)) # = plt.scatter(df_ionmap2["RT"], df_ionmap2["MZ"], c=df_ionmap2["log_intensity"], s = 1)
-        points = ax.scatter(df_ionmap2["RT"], df_ionmap2["MZ"], c=df_ionmap2["log_intensity"], s=1, cmap="Blues")
+        points = ax.scatter(df_MS1_map2["retention_time"], df_MS1_map2["mz"], c=df_MS1_map2["log_intensity"], s=1, cmap="Blues")
         fig.colorbar(points, label = "log10_intensity")
         ax.set_xlabel("retention time")
         ax.set_ylabel("m/z")
         ax.set_title(hdf5_file_names[i])
         if fig_show:
             fig.show()
-        fig.savefig(output_path + os.sep + "fig13_ionmaps" + os.sep + "fig13_ionmap_" + hdf5_file_names[i] + ".png")
+        fig.savefig(output_path + os.sep + "fig13_MS1_map" + os.sep + "fig13_MS1_map_" + hdf5_file_names[i] + ".png")
         i += 1
         
         
+
         
-    '''
-    #### old version   
-    ionmap_df = []
-    i = 0
-    for file in hdf5_files:
-        hdf5_tmp = h5py.File(file,'r')
-        tmp = dict(RT = hdf5_tmp["ms2_rt_array"][:],
-                MZ = hdf5_tmp["ms2_mz_array"][:],
-                filename=[hdf5_file_names[i]]*len(hdf5_tmp["ms2_rt_array"][:]))
-        tmp = pd.DataFrame(tmp)
-        ionmap_df.append(tmp)
-        i += 1
-    ionmap_df2 = pd.concat(ionmap_df)
-
-    # create folder to store ion maps
-    if not os.path.exists(output_path + os.sep + "fig13_ionmaps"):
-        os.makedirs(output_path + os.sep + "fig13_ionmaps")
-
-    for file in df["filename"]:
-        ionmap_df2_tmp = ionmap_df2[ionmap_df2["filename"] == file]
-        fig13_tmp = px.density_contour(ionmap_df2_tmp, x="RT", y="MZ", title = file, nbinsx = 50, nbinsy = 50)
-        fig13_tmp.update_traces(contours_coloring="fill", contours_showlabels = True)
-        fig13_tmp.update_layout(width = 1500, height = 1000, 
-                    xaxis_title = "Retention Time (seconds)", 
-                    yaxis_title = "m/z")
-        with open(output_path + os.sep + "fig13_ionmaps" + os.sep + "fig13_ionmap_" + file + ".json", "w") as json_file:
-            json_file.write(plotly.io.to_json(fig13_tmp))
-        fig13_tmp.write_html(file = output_path + os.sep + "fig13_ionmaps" + os.sep + "fig13_ionmap_" + file + ".html", auto_open = False)
-
-    if fig_show:
-        fig13_tmp.show()
-    '''
 
 ################################################################################################
     ### Figure 14: Pump Pressure
-
-    ### only for Thermo, Bruker pump pressure is plotted as one of the extra plots in figure 15
+    
+    
+    # Pump_Pressure         pump_pressure_x_axis  pump_pressure_y_axis
     
     ### start with empty plot, that is overwritten if pump pressure data is available
     fig14 = go.Figure()
@@ -1011,56 +998,139 @@ if __name__ == "__main__":
         title="Empty Plot"
     )
     
-    if any(is_thermo):
-        pump_df = []
-        i = 0
-        for file in hdf5_files:
-            #file = hdf5_files[i]
-            hdf5_tmp = h5py.File(file,'r')
-            if "THERMO_pump_pressure_bar_x_axis" in hdf5_tmp.keys() and "THERMO_pump_pressure_bar_y_axis" in hdf5_tmp.keys():
-                x = hdf5_tmp["THERMO_pump_pressure_bar_x_axis"][:]
-                y = hdf5_tmp["THERMO_pump_pressure_bar_y_axis"][:]
-                
-                # use not more than 10000 data points. If data has more than 10000 data points, take every nth data point        
-                if len(x) > 10000: 
-                    samples = int(len(x) / 10000)
-                    x = [x[i] for i in range(0, len(x), samples)] 
-                    y = [y[i] for i in range(0, len(y), samples)] 
-                    
-                pump_df_tmp = dict(filename = hdf5_file_names[i],
-                                    x = x,
-                                    y = y)
-                pump_df_tmp = pd.DataFrame(pump_df_tmp)
-                
-                pump_df.append(pump_df_tmp)
+    pump_df = []
+    i = 0
+    for file in hdf5_file_names:
+        if ("Pump_Pressure" not in dataframes[file].keys()):
+            # Skip, there is no data available for this hdf5 file
             i += 1
+            continue
+        
+        df_tmp_long = dataframes[file]["Pump_Pressure"]
+
+        # use not more than roughly 10000 data points. If data has more than 10000 data points, take every nth data point        
+        if df_tmp_long.shape[0] > 10000: 
+            samples = int(df_tmp_long.shape[0] / 10000)
+            df_tmp_long = df_tmp_long.iloc[range(0, df_tmp_long.shape[0], samples)]
             
+        df_tmp_long.loc[:, "filename"] = [file]*df_tmp_long.shape[0]
+        pump_df.append(df_tmp_long)        
+        i += 1
 
-        pump_df2 = pd.DataFrame()
-        if type(x) == list:
-            pump_df2 = pd.concat(pump_df)
-        elif type(x) == pd.DataFrame:  # if only one raw file has pump pressure data available
-            pump_df2 = pump_df
-
-        if (not pump_df2.empty):
-            fig14 = px.line(pump_df2, x="x", y="y", color = "filename", title = "Pump Pressure")
-            fig14.update_traces(line=dict(width=0.5))
-            fig14.update_yaxes(exponentformat="E") 
-            fig14.update_layout(width = 1500, height = 1000, 
-                                xaxis_title = "Time (min)", 
-                                yaxis_title = "Pump pressure")
-            fig14.write_html(file = output_path + os.sep + "fig14_Pump_pressure.html", auto_open = False)
+        
+    if (not pump_df == []):
+        df_fig14_long = pd.concat(pump_df)
+        fig14 = px.line(df_fig14_long, x="pump_pressure_x_axis", y="pump_pressure_y_axis", color = "filename", title = "Pump Pressure")
+        fig14.update_traces(line=dict(width=0.5))
+        fig14.update_yaxes(exponentformat="E") 
+        fig14.update_layout(width = 1500, height = 1000, 
+                            xaxis_title = "Time (min)", 
+                            yaxis_title = "Pump pressure")
+        fig14.write_html(file = output_path + os.sep + "fig14_Pump_pressure.html", auto_open = False)
 
     if fig_show:
         fig14.show()
-    with open(output_path + os.sep + "fig14_Pump_pressure.json", "w") as json_file:
+    with open(output_path + os.sep + "fig14_Pump_pressure.plotly.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig14))
     fig14.write_html(file = output_path + os.sep + "fig14_Pump_pressure.html", auto_open = False)
 
 
 
 
+################################################################################################
+## Fig 15: all other headers by Thermo or Bruker
 
+    if not os.path.exists(output_path + os.sep + "fig16_additional_headers"):
+        os.makedirs(output_path + os.sep + "fig16_additional_headers")
+
+    add_headers = []
+    for file in hdf5_file_names:
+        add_headers.extend(dataframes[file]["Extracted_Headers"].columns)
+    ### remove duplicates
+    add_headers = set(add_headers)
+    add_headers = list(add_headers)# .sort()  
+    print(add_headers)
+    add_headers.sort() ## sort alphabetically
+    print(add_headers)
+        
+    ### headers that define the time (x-axis)
+    if "Time" in add_headers:
+        time_header = "Time" # Bruker: Time 
+    if "Scan_StartTime" in add_headers:
+        time_header = "Scan_StartTime" # Thermo: Scan_StartTime
+   
+    for header in add_headers:
+           
+        if header == time_header: # Time, will be needed as x-axis in all plots
+            continue
+        if header == "MsMsType":  # MsMsType codes for DIA/DDA for example. Doesn't need to be plotted.
+            continue
+        if header == "Scan_msLevel":  # MsMsType codes for DIA/DDA for example. Doesn't need to be plotted.
+            continue
+        
+        ### extract data from compressed columns and put them into long format
+        x = [] # x-axis time_header
+        y = [] # y-axis additional header
+        fn = [] # filename
+        
+        i = 0
+        for file in hdf5_file_names:
+            #hdf5_tmp = h5py.File(file,'r')
+
+            if header not in dataframes[file]["Extracted_Headers"].columns:
+                # Skip, there is no data available for this hdf5 file
+                i += 1
+                continue
+            
+            y_tmp = dataframes[file]["Extracted_Headers"][header].values
+            x_tmp = dataframes[file]["Extracted_Headers"][time_header].values
+            
+            display_header = header
+
+            x += [float(_x) for _x in x_tmp]
+            y += [float(_y) for _y in y_tmp]
+            fn += [hdf5_file_names[i]] * len(x_tmp)
+            i += 1
+
+
+        df_tmp = pd.DataFrame({
+            "filename": fn,
+            "x": x,
+            "y": y
+        })
+    
+        if not df_tmp.empty:
+            fig16 = px.line(df_tmp, x="x", y="y", color = "filename", title = display_header)
+            fig16.update_traces(line=dict(width=0.5))
+            fig16.update_yaxes(exponentformat="E") 
+            fig16.update_layout(width = int(1500), height = int(1000), 
+                                xaxis_title = "Time (min)", 
+                                yaxis_title = display_header)
+        else: 
+            fig16 = go.Figure()
+            fig16.add_annotation(
+                x=0.5,
+                y=0.5,
+                text="No '{}' available!".format(display_header),
+                showarrow=False,
+                font=dict(size=14)
+            )
+            fig16.update_layout(
+                width=1500,
+                height=1000,
+                title="Empty Plot"
+            )
+
+        if fig_show:
+            fig16.show()
+        with open(output_path + os.sep + "fig16_additional_headers" + os.sep + "{}.plotly.json".format(re.sub('\W+','', display_header)), "w") as json_file:
+            json_file.write(plotly.io.to_json(fig16))
+        fig16.write_html(file = output_path + os.sep + "fig16_additional_headers" + os.sep + "{}.html".format(re.sub('\W+','', display_header)), auto_open = False)
+
+   
+
+
+'''
 ################################################################################################
     # Figure 15_XXX: visualize all THERMO_LOG and THERMO_EXTRA data
 
@@ -1220,6 +1290,6 @@ if __name__ == "__main__":
             fig16.write_html(file = output_path + os.sep + "BRUKER_PLOTS_FIG16" + os.sep + "{}.html".format(re.sub('\W+','', display_header)), auto_open = False)
 
         
-      
+'''
 
 # %%
