@@ -99,7 +99,7 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             out_h5,
             "MS:4000102",
-            "total_num_features",
+            "nr_features",
             "number of detected quantification data points",
             (
                 "The number of data points detected for quantification purposes within the run. "
@@ -116,7 +116,7 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             out_h5,
             "MS:4000103",
-            "total_num_ident_features",
+            "nr_ident_features",
             "number of identified quantification data points",
             (
                 "The number of identified data points for quantification purposes within the run after user defined acceptance criteria are applied. "
@@ -134,7 +134,7 @@ if __name__ == "__main__":
         add_table_in_hdf5(
             out_h5,
             "LOCAL:06",
-            "num_features_charge",
+            "features_charge",
             "Number of features with charge",
             "Number of features with charge",
             [str(i) for i in range(1, int(args.report_up_to_charge) + 1)],
@@ -145,7 +145,7 @@ if __name__ == "__main__":
         add_table_in_hdf5(
             out_h5,
             "LOCAL:07",
-            "num_ident_features_charge",
+            "ident_features_charge",
             "Number of identified features with charge",
             "Number of identified features with charge",
             [str(i) for i in range(1, int(args.report_up_to_charge) + 1)],
