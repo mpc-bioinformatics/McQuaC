@@ -125,7 +125,7 @@ if __name__ == "__main__":
         # Get accumulated TICs for ms1 and ms2 (accumulated-MS1_TIC)
         add_entry_to_hdf5(
             f = out_h5, qc_acc = "MS:4000029", 
-            qc_short_name = "accumulated-MS1_TIC", 
+            qc_short_name = "accumulated_MS1_TIC", 
             qc_name = "area under TIC in MS1", 
             qc_description = "The area under the total ion current chromatogram (MS:1000235) of all MS1 spectra.", 
             value = get_accumulated_TIC(exp, 1), 
@@ -136,7 +136,7 @@ if __name__ == "__main__":
         )
         add_entry_to_hdf5(
             f = out_h5, qc_acc = "MS:4000030", 
-            qc_short_name = "accumulated-MS2_TIC", 
+            qc_short_name = "accumulated_MS2_TIC", 
             qc_name = "area under TIC in MS2", 
             qc_description = "The area under the total ion current chromatogram (MS:1000235) of all MS2 spectra.", 
             value = get_accumulated_TIC(exp, 2), 
@@ -162,7 +162,7 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             f = out_h5, 
             qc_acc = "MS:4000059", 
-            qc_short_name = "total_num_ms1", 
+            qc_short_name = "nr_MS1", 
             qc_name = "number of MS1 spectra", 
             qc_description = "The number of MS1 events in the run.", 
             value = num_ms1_spectra, 
@@ -175,7 +175,7 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             f = out_h5, 
             qc_acc = "MS:4000060", 
-            qc_short_name = "total_num_ms2", 
+            qc_short_name = "nr_MS2", 
             qc_name = "number of MS2 spectra", 
             qc_description = "The number of MS2 events in the run.", 
             value = num_ms2_spectra, 
@@ -192,11 +192,12 @@ if __name__ == "__main__":
             if key > int(args.report_up_to_charge):
                 precz_more += num_ms2_prec_charges[key]
         prec_charge_list = [[num_ms2_prec_charges[i] / num_ms2_spectra] for i in range(1, int(args.report_up_to_charge) + 1)]
+        ### for now, unknown charge states are reported as 0 (altough it is not mentioned in the ontology)
         prec_charge_list = [[prec_unknown]] + prec_charge_list + [[precz_more / num_ms2_spectra]]
         add_table_in_hdf5(
             f = out_h5, 
             qc_acc = "MS:4000063", 
-            qc_short_name = "MS2_Prec_charge_fraction", 
+            qc_short_name = "MS2_prec_charge_fraction", 
             qc_name = "MS2 known precursor charges fractions", 
             qc_description = ("The fraction of MS/MS precursors of the corresponding charge. " 
                               "The fractions [0,1] are given in the 'Fraction' column, corresponding charges in the 'Charge state' column. "
@@ -243,7 +244,7 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             f = out_h5, 
             qc_acc = "LOCAL:01", 
-            qc_short_name = "Base_Peak_Intensity_Max", 
+            qc_short_name = "base_peak_intensity_max", 
             qc_name = "base peak intensity max", 
             qc_description = "The maximum base peak (highest peak in spectrum) across all MS1 and MS2 spectra.", 
             value = num_ms2_spectra, 
@@ -254,7 +255,7 @@ if __name__ == "__main__":
         )
         add_entry_to_hdf5(
             f = out_h5, qc_acc = "LOCAL:03", 
-            qc_short_name = "Total_Ion_Current_Max", 
+            qc_short_name = "total_ion_current_max", 
             qc_name = "total ion current max", 
             qc_description = "The maximum of all TICs across MS1 and MS2 spectra.", 
             value = total_ion_current_max, 
@@ -277,7 +278,7 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             f = out_h5, 
             qc_acc = "LOCAL:02", 
-            qc_short_name = "Base_Peak_Intensity_Max_Up_To_" + str(args.base_peak_tic_up_to), 
+            qc_short_name = "base_peak_intensity_max_up_to_" + str(args.base_peak_tic_up_to), 
             qc_name = "base peak intensity max", 
             qc_description = "The maximum base peak (highest peak in spectrum) across all MS1 and MS2 spectra up to " + str(args.base_peak_tic_up_to) + " minutes.", 
             value = num_ms2_spectra, 
@@ -288,7 +289,7 @@ if __name__ == "__main__":
         )
         add_entry_to_hdf5(
             f = out_h5, qc_acc = "LOCAL:04", 
-            qc_short_name = "Total_Ion_Current_Max_Up_To_" + str(args.base_peak_tic_up_to), 
+            qc_short_name = "total_ion_current_max_up_to_" + str(args.base_peak_tic_up_to), 
             qc_name = "total ion current max", 
             qc_description = "The maximum of all TICs across MS1 and MS2 spectra up to " + str(args.base_peak_tic_up_to) + " minutes.", 
             value = total_ion_current_max, 
@@ -387,7 +388,7 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             f = out_h5, 
             qc_acc = "MS:4000055", 
-            qc_short_name = "RT_MS1_Quartiles", 
+            qc_short_name = "RT_MS1_quartiles", 
             qc_name = "MS1 quarter RT fraction", 
             qc_description = "The interval used for acquisition of the first, second, third, and fourth quarter of all MS1 events divided by retention time duration.", 
             value = (rt_ms1_q025,rt_ms1_q050,rt_ms1_q075,rt_ms1_q100), 
@@ -411,7 +412,7 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             f = out_h5, 
             qc_acc = "MS:4000056", 
-            qc_short_name = "RT_MS2_Quartiles", 
+            qc_short_name = "RT_MS2_quartiles", 
             qc_name = "MS2 quarter RT fraction", 
             qc_description = "The interval used for acquisition of the first, second, third, and fourth quarter of all MS2 events divided by retention time duration.", 
             value = (rt_ms2_q025,rt_ms2_q050,rt_ms2_q075,rt_ms2_q100), 
@@ -451,7 +452,7 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             f = out_h5, 
             qc_acc = "MS:4000054", 
-            qc_short_name = "RT_TIC_Quartiles", 
+            qc_short_name = "RT_TIC_quartiles", 
             qc_name = "TIC quarters RT fraction", 
             qc_description = "The interval when the respective quarter of the TIC accumulates divided by retention time duration.", 
             value = (rt_ms1_ms2_part_025,rt_ms1_ms2_part_050,rt_ms1_ms2_part_075,rt_ms1_ms2_part_100), 
@@ -480,7 +481,7 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             f = out_h5, 
             qc_acc = "MS:4000065", 
-            qc_short_name = "MS1_Freq_Max", 
+            qc_short_name = "MS1_freq_max", 
             qc_name = "fastest frequency for MS level 1 collection", 
             qc_description = "fastest frequency for MS level 1 collection.", 
             value = ms1_freq_max, 
@@ -504,7 +505,7 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             f = out_h5, 
             qc_acc = "MS:4000066", 
-            qc_short_name = "MS2_Freq_Max", 
+            qc_short_name = "MS2_freq_max", 
             qc_name = "fastest frequency for MS level 2 collection", 
             qc_description = "fastest frequency for MS level 2 collection.", 
             value = ms2_freq_max, 
@@ -540,7 +541,7 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             f = out_h5, 
             qc_acc = "MS:4000061", 
-            qc_short_name = "MS1_Density_Quartiles", 
+            qc_short_name = "MS1_density_quartiles", 
             qc_name = "MS1 density quantiles", 
             qc_description = ("The first to n-th quantile of MS1 peak density (scan peak counts). " 
                               "A value triplet represents the original QuaMeter metrics, the quartiles of MS1 density. " 
@@ -555,7 +556,7 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             f = out_h5, 
             qc_acc = "MS:4000062", 
-            qc_short_name = "MS2_Density_Quartiles", 
+            qc_short_name = "MS2_density_quartiles", 
             qc_name = "MS2 density quantiles", 
             qc_description = ("The first to n-th quantile of MS2 peak density (scan peak counts). " 
                               "A value triplet represents the original QuaMeter metrics, the quartiles of MS2 density. " 
@@ -589,7 +590,7 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             f = out_h5, 
             qc_acc = "MS:4000057", 
-            qc_short_name = "MS1-TIC-Change-Quartiles", 
+            qc_short_name = "MS1_TIC_change_quartiles", 
             qc_name = "MS1 TIC-change quartile ratios", 
             qc_description = ("The log ratios of successive TIC-change quartiles. " 
                               "The TIC changes are the list of MS1 total ion current (TIC) value changes from one to the next scan, produced when each MS1 TIC is subtracted from the preceding MS1 TIC. "
@@ -615,7 +616,7 @@ if __name__ == "__main__":
         add_entry_to_hdf5(
             f = out_h5, 
             qc_acc = "MS:4000057", 
-            qc_short_name = "MS1-TIC-Quartiles", 
+            qc_short_name = "MS1_TIC_quartiles", 
             qc_name = "MS1 TIC quartile ratios", 
             qc_description = ("The log ratios of successive TIC quartiles. " 
                               "The metric's value triplet represents the log ratios of TIC-Q2 to TIC-Q1, TIC-Q3 to TIC-Q2, TIC-max to TIC-Q3."), 

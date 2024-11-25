@@ -154,7 +154,7 @@ if __name__ == "__main__":
         add_table_in_hdf5(
             out_h5,
             "LOCAL:30",
-            "Spike_in_metrics",
+            "spike_in_metrics",
             "Spike-in metrics",
             (
                 "Table of various spike-ins metrics like, "

@@ -85,7 +85,7 @@ def parse_peptide_infos(pia_peptide_csv: str, out_hdf5: h5py.File) -> int:
         number_filtered_peptides = 0
     
     add_entry_to_hdf5(out_hdf5,
-                      "MS:1003250", "number_peptides", "count of identified peptidoforms", "The number of peptidoforms that pass the threshold to be considered identified with sufficient confidence.", 
+                      "MS:1003250", "nr_peptides", "count of identified peptidoforms", "The number of peptidoforms that pass the threshold to be considered identified with sufficient confidence.", 
                       number_filtered_peptides, (1,), "int32", 
                       "UO:0000189", "count unit")
 
@@ -110,12 +110,12 @@ def parse_protein_infos(pia_proteins_mztab: str, out_hdf5: h5py.File):
         number_ungrouped_proteins = 0
     
     add_entry_to_hdf5(out_hdf5,
-                      "MS:1003327", "number_proteins", "number of identified protein groups", "The number of protein groups that pass the threshold to be considered identified with sufficient confidence.", 
+                      "MS:1003327", "nr_protein_groups", "number of identified protein groups", "The number of protein groups that pass the threshold to be considered identified with sufficient confidence.", 
                       number_proteins, (1,), "int32", 
                       "UO:0000189", "count unit")
     
     add_entry_to_hdf5(out_hdf5,
-                      "Local:08", "number_ungrouped_proteins", "number of ungrouped identified protein groups", "TODO", 
+                      "Local:08", "nr_accessions", "number of identified protein accessions", "All protein accessions within the protein groups are counted (ungreouped protein groups).", 
                       number_ungrouped_proteins, (1,), "int32", 
                       "UO:0000189", "count unit")
 
@@ -183,17 +183,17 @@ def parse_psm_infos(pia_psm_mztab: str, out_hdf5: h5py.File, store_all_infos: bo
         ppm_error = [np.nan]
 
     add_entry_to_hdf5(out_hdf5,
-                      "MS:1003251", "number_of_filtered_psms", "count of identified spectra", "The number of spectra that pass the threshold to be considered identified with sufficient confidence.", 
+                      "MS:1003251", "nr_PSMs", "count of identified spectra", "The number of spectra that pass the threshold to be considered identified with sufficient confidence.", 
                       PSM_count, (1,), "int32", 
                       "UO:0000189", "count unit")
     
     add_table_to_hdf5(out_hdf5,
-                      "Local:09", "psm_charge_fractions", "TODO", "TODO", 
+                      "Local:09", "PSM_charge_fractions", "TODO", "TODO", 
                       ["1", "2", "3", "4", "5", "6 or more"], charge_fractions, ["float64", "float64", "float64", "float64", "float64", "float64"]
     )
 
     add_table_to_hdf5(out_hdf5,
-                      "MS:4000180", "psm_missed_counts", "table of missed cleavage counts", "The number of identified peptides with corresponding number of missed cleavages after user-defined acceptance criteria are applied. The number of missed cleavages per peptide is given in the 'number of missed cleavages' column, the respective count of such peptides identified in the 'Number of Occurrences' column. The highest 'missed cleavages' row is to be interpreted as that number of missed cleavages or higher.", 
+                      "MS:4000180", "PSM_missed_cleavage_counts", "table of missed cleavage counts", "The number of identified peptides with corresponding number of missed cleavages after user-defined acceptance criteria are applied. The number of missed cleavages per peptide is given in the 'number of missed cleavages' column, the respective count of such peptides identified in the 'Number of Occurrences' column. The highest 'missed cleavages' row is to be interpreted as that number of missed cleavages or higher.", 
                       ["0", "1", "2", "3", "4 or more"], miss_counts, ["uint32", "uint32", "uint32", "uint32", "uint32"]
     )
 
