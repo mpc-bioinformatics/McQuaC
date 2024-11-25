@@ -152,6 +152,124 @@ def get_dataframes_values(
     return dataframes
 
 
+def assemble_result_table(
+    metric_list: List[str],
+    hdf5_file_names: List[str],
+    single_values: pd.DataFrame,
+    single_value_ids_short: List[str],
+    array_values: Dict[str, Dict[str, List[Any]]],
+    array_value_ids_short: List[str],
+    dataframes: Dict[str, Dict[str, pd.DataFrame]],
+    dataframe_ids_short: List[str],
+    spikein_columns: List[str] = ["Maximum_Intensity", "RT_at_Maximum_Intensity", "PSMs", "Delta_to_expected_RT"]
+    ) -> pd.DataFrame:
+    """
+    Assemble the result table
+    
+    Parameters
+    ----------
+    
+    metric_list : List[str]
+        List of metrics to be included in the table
+    hdf5_file_names : List[str]
+        List of hdf5 file names
+    single_values : pd.DataFrame
+        DataFrame with the single values
+    single_value_ids_short : List[str]
+        List of the short names of the single values
+    array_values : Dict[str, Dict[str, List[Any]]]
+        Dictionary with the array values
+    array_value_ids_short : List[str]
+        List of the short names of the array values
+    dataframes : Dict[str, Dict[str, pd.DataFrame]]
+        Dictionary with the dataframes
+    dataframe_ids_short : List[str]
+        List of the short names of the dataframes
+        
+    Returns
+    -------
+    pd.DataFrame
+        The result table
+    """
+
+    df_table0 = pd.DataFrame()
+    for metric in metric_list:
+        if metric == "filename":
+            df_table0["filename"] = hdf5_file_names
+       
+        elif metric in single_value_ids_short:
+            if metric == "timestamp":
+                ## convert timestamp to something human-readable
+                x = [datetime.fromtimestamp(x, timezone.utc) for x in single_values["timestamp"]]
+                df_table0[metric] = x
+                df_table0['timestamp'] = df_table0['timestamp'].dt.tz_localize(None)
+            else:
+                df_table0[metric] = single_values[metric]
+        
+        ### match base peak intensity and total ion current with upper time limit
+        elif metric in ["base_peak_intensity_max_up_to_", "total_ion_current_max_up_to_"]:
+                matching_metrics = [element for element in single_value_ids_short if metric in element]
+                df_table0[matching_metrics] = single_values[matching_metrics]
+        
+        elif metric in array_value_ids_short:
+            df_tmp = pd.DataFrame()
+            for file in hdf5_file_names:
+                values = array_values[file][metric]
+                if metric == "RT_range":
+                    columns = [metric + "_" + suffix for suffix in ["min", "max"]]
+                else: 
+                    columns = [metric + "_" + str(i) for i in range(1, len(values)+1)]
+                df_tmp_tmp = pd.DataFrame(columns = columns)
+                df_tmp_tmp.loc[0] = values
+                df_tmp = pd.concat([df_tmp, df_tmp_tmp], axis = 0)
+            df_tmp.reset_index(drop=True, inplace=True)
+            df_table0 = pd.concat([df_table0, df_tmp], axis = 1)
+        
+        elif metric in dataframe_ids_short:
+            if metric == "spike_in_metrics":
+                df_table_spike = pd.DataFrame()
+                for file in hdf5_file_names:
+                    spike_data = dataframes[file][metric]
+                    spike_in_list = spike_data['Spike-in'].astype(str).tolist()
+                    spike_name = [s.split("_")[1] for s in spike_in_list]
+                    mz = [s.split("_")[3] for s in spike_in_list]
+                    spike_data["mz"] = ["MZ_" + x for x in mz]
+                    column_names_spike = ["SPIKE_" + x for x in spike_data["mz"].astype(str).tolist()]
+                    
+                    ## for each spike-in, extract the data
+                    df_tmp = pd.DataFrame()  ## data frame for each spike-in and each file
+                    for index, row in spike_data.iterrows():
+                        column_names = [column_names_spike[index] + "_" + x for x in spikein_columns]    
+                        df_tmp_tmp = pd.DataFrame(columns = column_names)
+                        df_tmp_tmp.loc[0] = spike_data.loc[index, spikein_columns].values
+                        df_tmp = pd.concat([df_tmp, df_tmp_tmp], axis = 1) ## add columns
+                        
+                    df_table_spike = pd.concat([df_table_spike, df_tmp], axis = 0)
+                    df_table_spike.reset_index(drop=True, inplace=True)
+                    
+                df_table0 = pd.concat([df_table0, df_table_spike], axis = 1)
+
+                    
+            else:
+                df_tmp = pd.DataFrame()
+                for file in hdf5_file_names:
+                    df_tmp_tmp = dataframes[file][metric]
+                    df_tmp = pd.concat([df_tmp, df_tmp_tmp], axis = 0)
+                columns = [metric + "_" + str(col) for col in df_tmp.columns]
+                df_tmp.reset_index(drop=True, inplace=True)
+                df_tmp.columns = columns
+                df_table0 = pd.concat([df_table0, df_tmp], axis = 1)
+     
+        else:  
+            df_table0[metric] = np.nan ### fill column with NaNs if metric is not in the hdf5 files
+            
+    return df_table0
+
+
+
+
+
+
 def check_if_file_exists(s: str):
     """ checks if a file exists. If not: raise Exception """
     if os.path.isfile(s):
@@ -162,12 +280,13 @@ def check_if_file_exists(s: str):
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
+    parser.add_argument("-hdf5_files", type=check_if_file_exists, nargs="+", help = "hdf5 files which are used for visualization as string separated by whitespace", default = None)
     parser.add_argument("-output", help="Output folder for the plots as json files.", default = "graphics")
+    parser.add_argument("-output_table_type", help="Type of output table (one of csv, tsv or xlsx)", default = "csv")
     parser.add_argument("-spikeins", help = "Whether to analyse spike-ins", default = False, action = "store_true")
     parser.add_argument("-group", help="List of the experimental group (comma-separated).", default=None)  ### TODO: input table with group information
     parser.add_argument("-fig_show", help = "Show figures, e.g. for debugging?", default = False, action = "store_true")
     parser.add_argument("-output_column_order", help = "Order of columns in the output table", default = "", type = str)
-    parser.add_argument("-hdf5_files", type=check_if_file_exists, nargs="+", help = "hdf5 files which are used for visualization as string separated by whitespace", default = None)
     return parser.parse_args()
 
 
@@ -186,20 +305,31 @@ if __name__ == "__main__":
 
     single_values = get_dataframe_of_single_values(hdf5s, single_value_ids)
     #print("single values")
+    #print(single_value_ids)
+    single_value_ids_short = [s.split("|")[-1] for s in single_value_ids]
+    #print(single_value_ids_short)
     #print(single_values)
 
     array_values = get_array_values(hdf5s, array_value_ids)
+    array_value_ids_short = [s.split("|")[-1] for s in array_value_ids]
     #print("array values")
+    #print(array_value_ids)
+    #print(array_value_ids_short)
     #for f, fa in array_values.items():
     #    for a, v in fa.items():
     #        print(f, a, v)
 
     dataframes = get_dataframes_values(hdf5s, dataframe_ids)
+    dataframe_ids_short = [s.split("|")[-1] for s in dataframe_ids]
     #print("dataframes")
+    #print(dataframe_ids)
+    #print(dataframe_ids_short)
     #for f, fa in dataframes.items():
     #    for a, v in fa.items():
     #        print(f, a, v, "\n\n")
             
+            
+
 ####################################################################################################
     # parameters
 
@@ -234,160 +364,70 @@ if __name__ == "__main__":
     fig_show = args.fig_show
     analyse_spikeins = args.spikeins
     
-
-# ############################################################################################
-# # Feature list: features for initial table 0 (default, can be overwitten by user)
-#     feature_list = ["filename", # will be filled in later as name of the hdf5 file
-#                     "timestamp", # will be converted later to human-readable format
-
-                    # accumulated-MS1_TIC
-                    # accumulated-MS2_TIC
-                    # total_num_ms1
-                    # total_num_ms2
-
-#                     "number_ungrouped_proteins",
-#                     "number_proteins",
-#                     "number_filtered_peptides",
-#                     "number_filtered_psms",
-#                     "total_num_ms1",
-#                     "total_num_ms2",
-#                     "Total_Ion_Current_Max",
-#                     "Base_Peak_Intensity_Max",
-#                     "Total_Ion_Current_Max_Up_To_105",
-#                     "Base_Peak_Intensity_Max_Up_To_105", 
-#                     "total_num_ident_features",
-#                     "total_num_features",
-#                     "RT_duration", 
-#                     "accumulated-MS1_TIC",
-#                     "accumulated-MS2_TIC",
-#                     "RT_TIC_Q_000-025",
-#                     "RT_TIC_Q_025-050",
-#                     "RT_TIC_Q_050-075",
-#                     "RT_TIC_Q_075-100",
-#                     "RT_MS1_Q_000-025",
-#                     "RT_MS1_Q_025-050",
-#                     "RT_MS1_Q_050-075",
-#                     "RT_MS1_Q_075-100",
-#                     "RT_MS2_Q_000-025",
-#                     "RT_MS2_Q_025-050", 
-#                     "RT_MS2_Q_050-075",
-#                     "RT_MS2_Q_075-100", 
-#                     "MS1-TIC-Change-Q2",
-#                     "MS1-TIC-Change-Q3", 
-#                     "MS1-TIC-Change-Q4",
-#                     "MS1-TIC-Q2",
-#                     "MS1-TIC-Q3",
-#                     "MS1-TIC-Q4", 
-#                     "MS1_Freq_Max",
-#                     "MS1_Density_Q1",
-#                     "MS1_Density_Q2", 
-#                     "MS1_Density_Q3",
-#                     "MS2_Freq_Max",
-#                     "MS2_Density_Q1",
-#                     "MS2_Density_Q2", 
-#                     "MS2_Density_Q3",
-#                     "MS2_PrecZ_1", 
-#                     "MS2_PrecZ_2", 
-#                     "MS2_PrecZ_3",
-#                     "MS2_PrecZ_4",
-#                     "MS2_PrecZ_5",
-#                     "MS2_PrecZ_more", 
-#                     "MS2_PrecZ_Unknown",
-#                     "num_features_charge_1",
-#                     "num_features_charge_2",
-#                     "num_features_charge_3",
-#                     "num_features_charge_4",
-#                     "num_features_charge_5", 
-#                     "psm_charge1",
-#                     "psm_charge2", 
-#                     "psm_charge3", 
-#                     "psm_charge4", 
-#                     "psm_charge5",
-#                     "psm_charge_more", 
-#                     "psm_missed_0",
-#                     "psm_missed_1",
-#                     "psm_missed_2",
-#                     "psm_missed_3",
-#                     "psm_missed_more"   
-#                     # TODO we should add then dynamically. Iow, we could thest if it contains binary data and if not include it into the list
-#                     # TODO These below are Thermo TUNE Information which is one dimensional
-#                     # "THERMO_TUNE_ '''Ion Transfer Tube Temperature (+ or +-)'''"
-#                     # "THERMO_TUNE_ '''Ion Transfer Tube Temperature (-)'''"
-#                     # "THERMO_TUNE_ '''Vaporizer Temp. (+ or +-)'''"
-#                     # "THERMO_TUNE_ '''Vaporizer Temp. (-)'''"
-#                 ]
-
-
-
-# ####################################################################################################
-#     # build pandas data frame with all columns for table 0
-#     # for each hdf5 file fill a new row with the corresponding data
-#     df = pd.DataFrame(columns=list(feature_list))
-#     for file in hdf5_files:
-#         hdf5_tmp = h5py.File(file,'r') 
-#         new_row = pd.Series(dtype='float64')
-#         for feature in feature_list:
-#             if feature in hdf5_tmp:
-#                 new_row[feature] = hdf5_tmp[feature][:]
-#                 if len(new_row[feature]) == 1:
-#                     new_row[feature] = new_row[feature][0]
-#             else:
-#                 new_row[feature] = None
-#         df = pd.concat([df, pd.DataFrame([new_row], columns=new_row.index)]).reset_index(drop=True)
-
-#     ## add file names
-#     df["filename"] = hdf5_file_names
-#     ## convert timestamp to something human-readable
-#     x = [datetime.fromtimestamp(x, timezone.utc) for x in df["timestamp"]]
-#     df["timestamp"] = x
-
+    ##########################################################################################
+    ### order of columns for output table
     
-#     ### get info for each file if it is a Bruker or Thermo file
-#     is_bruker = []
-#     is_thermo = []
-#     add_thermo_headers = []
-#     add_bruker_headers = []
-
-#     for file in hdf5_files:
-#         hdf5_tmp = h5py.File(file,'r') 
-#         keys_tmp = list(hdf5_tmp.keys())
+    if args.output_column_order == "":  ### take default column order
+        metric_list = [
+            "filename",
+            "timestamp",
+            "RT_range",
+            "nr_MS1",
+            "nr_MS2",
+            "accumulated_MS1_TIC",
+            "accumulated_MS2_TIC",
+            "base_peak_intensity_max",
+            "total_ion_current_max",
+            "base_peak_intensity_max_up_to_",
+            "total_ion_current_max_up_to_",
+            "MS2_prec_charge_fraction",
+            "RT_MS1_quartiles",
+            "RT_MS2_quartiles",
+            "RT_TIC_quartiles",
+            "MS1_freq_max",
+            "MS2_freq_max",
+            "MS1_density_quartiles",
+            "MS2_density_quartiles",
+            "MS1_TIC_change_quartiles",
+            "MS1_TIC_quartiles",
+            "nr_PSMs",
+            "nr_peptides",
+            "nr_protein_groups",
+            "nr_accessions",
+            "PSM_charge_fractions",
+            "PSM_missed_cleavage_counts",
+            "nr_features",
+            "nr_ident_features",
+            "features_charge",
+            "ident_features_charge",
+            "spike_in_metrics"
+        ]
+    else:  ### take user-defined column order
+        metric_list = args.output_column_order.split(",")
         
-#         if any(keys.startswith("THERMO") for keys in hdf5_tmp.keys()):
-#             is_thermo.extend([True])
-#             is_bruker.extend([False])
-#             add_thermo_headers.extend([key for key in keys_tmp if key.startswith("THERMO")])
-#         if any(keys.startswith("BRUKER") for keys in hdf5_tmp.keys()):
-#             is_thermo.extend([False])
-#             is_bruker.extend([True])
-#             add_bruker_headers.extend([key for key in keys_tmp if key.startswith("BRUKER")])
-
-#     ### remove duplicates
-#     add_thermo_headers = set(add_thermo_headers)
-#     add_bruker_headers = set(add_bruker_headers)
-
-#     ############################################################################################
-#     # If spike-ins are analyzed, add them to the table
-#     if analyse_spikeins:
-#         spike_columns = [key for key in hdf5_tmp.keys() if re.match("SPIKE", key)]
-#         df_spikes = pd.DataFrame(columns=list(spike_columns))
-#         for file in hdf5_files:
-#             hdf5_tmp = h5py.File(file,'r')
-#             new_row = pd.Series(dtype='float64')
-#             for feature in spike_columns:
-#                 if feature in hdf5_tmp:
-#                     new_row[feature] = hdf5_tmp[feature][:]
-#                     if len(new_row[feature]) == 1:
-#                         new_row[feature] = new_row[feature][0]
-#                 else:
-#                     new_row[feature] = None
-#             df_spikes = pd.concat([df_spikes, pd.DataFrame([new_row], columns=new_row.index)]).reset_index(drop=True)
-#         df_table0 = pd.concat([df.loc[:,"filename":"Base_Peak_Intensity_Max_Up_To_105"], df_spikes, df.loc[:,"total_num_ident_features":]], axis=1).reindex(df.index)
-#     else: 
-#         df_table0 = df.copy()
-        
-#     df_table0.to_csv(output_path + os.sep + "00_table_summary.csv", index = False)        
+       
+    print(single_value_ids_short)
+    
+    df_table0 = assemble_result_table(
+        metric_list = metric_list, 
+        hdf5_file_names = hdf5_file_names,
+        single_values = single_values,
+        single_value_ids_short = single_value_ids_short,
+        array_values = array_values,
+        array_value_ids_short = array_value_ids_short,
+        dataframes = dataframes,
+        dataframe_ids_short = dataframe_ids_short,
+        spikein_columns = ["Maximum_Intensity", "RT_at_Maximum_Intensity"]
+    )
 
 
+    if args.output_table_type == "csv":
+        df_table0.to_csv(output_path + os.sep + "00_table_summary.csv", index = False)
+    if args.output_table_type == "tsv":   
+        df_table0.to_csv(output_path + os.sep + "00_table_summary.csv", index = False, sep = "\t")
+    if args.output_table_type == "xlsx":
+        df_table0.to_excel(output_path + os.sep + "00_table_summary.xlsx", index = False)   
+    
 
 ################################################################################################
     # Figure 01: Barplot for total number of MS1 and MS2 spectra
@@ -441,6 +481,10 @@ if __name__ == "__main__":
     #     json_file.write(plotly.io.to_json(fig02))
     # fig02.write_html(file = output_path + os.sep + "fig02_barplot_PSMs_peptides_proteins.html", auto_open = False)
     
+    
+    
+    
+    exit(1)
 
     
 ################################################################################################

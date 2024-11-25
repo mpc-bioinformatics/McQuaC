@@ -7,3 +7,4 @@ scikit-learn
 alphatims
 h5py
 matplotlib
+openpyxl
