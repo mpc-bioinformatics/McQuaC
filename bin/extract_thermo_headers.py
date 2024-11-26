@@ -128,6 +128,9 @@ def get_headers_to_parse(headers, headers_from_raw):
 if __name__ == "__main__":
     args = argparse_setup()
 
+    args.raw = "/home/luxii/Desktop/mcquac_bug_thermo/EXII02162std.raw"
+    args.out_hdf5 = "/home/luxii/Desktop/mcquac_bug_thermo/EXII02162std.hdf5"
+
     data_dict = defaultdict(lambda: list())
     raw_file = RawFileReaderAdapter.file_factory(args.raw)
     raw_file.select_instrument(Device.MS, 1)  # Selecting the MS
@@ -186,7 +189,7 @@ if __name__ == "__main__":
         if len(tune_statistics_to_retrieve) != 0:
             tune_dict = dict()
             for idx, hp in tune_statistics_to_retrieve:
-                tune_dict["TUNE_" + hp], tune_scan_values[idx]
+                tune_dict["TUNE_" + hp] = tune_scan_values[idx]
             column_name = list(tune_dict.keys())
             column_data = [tune_dict[x] for x in column_name]
             column_type = ["float64"]*len(column_name)
