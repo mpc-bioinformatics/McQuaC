@@ -132,8 +132,8 @@ process visualize_results {
 	input:
 	path(combined_metrics)
 
-    output:
-    path("*.json")
+  output:
+  path("*.json")
 	path("*.html")
 	path("*.csv")
 	path(combined_metrics)
