@@ -6,20 +6,9 @@ from pathlib import Path
 import re
 # std imports
 import argparse
-#from typing import Optional
-#import math
-#from io import BytesIO
-#from pathlib import Path
-#import zipfile
-#import ast
 import os
-#import base64
-#import pickle
-#import zlib
 from datetime import datetime, timezone
 from typing import Dict, Tuple, List, Any
-#import math
-#import pathlib
 
 # 3rd party imports
 import pandas as pd
@@ -306,33 +295,17 @@ if __name__ == "__main__":
     (single_value_ids, array_value_ids, dataframe_ids) =  get_dataset_types(hdf5s[0])
 
     single_values = get_dataframe_of_single_values(hdf5s, single_value_ids)
-    #print("single values")
-    #print(single_value_ids)
     single_value_ids_short = [s.split("|")[-1] for s in single_value_ids]
-    #print(single_value_ids_short)
-    #print(single_values)
 
     array_values = get_array_values(hdf5s, array_value_ids)
     array_value_ids_short = [s.split("|")[-1] for s in array_value_ids]
-    #print("array values")
-    #print(array_value_ids)
-    #print(array_value_ids_short)
-    #for f, fa in array_values.items():
-    #    for a, v in fa.items():
-    #        print(f, a, v)
-
 
     ### remove Thermo TUNE headers for now (TODO)
     dataframe_ids = [x for x in dataframe_ids if x != "THERMO_LOG|Extracted_Log_Headers"]
 
     dataframes = get_dataframes_values(hdf5s, dataframe_ids)
     dataframe_ids_short = [s.split("|")[-1] for s in dataframe_ids]
-    #print("dataframes")
-    #print(dataframe_ids)
-    #print(dataframe_ids_short)
-    #for f, fa in dataframes.items():
-    #    for a, v in fa.items():
-    #        print(f, a, v, "\n\n")
+
             
             
 
@@ -340,7 +313,6 @@ if __name__ == "__main__":
     # parameters
 
     hdf5_file_names = single_values["filename"].values
-    #hdf5_file_names = [re.sub(r'\.hdf5$', '', f) for f in hdf5_file_names] # file names without file ending
     nr_rawfiles = len(hdf5_file_names)
     
     ### grouping
@@ -439,7 +411,6 @@ if __name__ == "__main__":
 ################################################################################################
     # Figure 02: Barplot for number of PSMs, peptides, proteins
     
-    #if ("number_filtered_psms" in single_values.columns):  # e.g. for DIA, no identification is done so those columns are missing
     df_pl02 = single_values[["filename", "nr_PSMs", "nr_peptides", "nr_protein_groups", "nr_accessions"]]
     df_pl02_long = df_pl02.melt(id_vars = ["filename"])
     fig02 = px.bar(df_pl02_long, x="filename", y="value", color="variable", barmode = "group", 
@@ -666,8 +637,6 @@ if __name__ == "__main__":
     # Fig 11 PCA on raw data (before identification)
     # (only plotted if we have more than one raw file)
 
-
-
     ## Calculate scaling of timestamps to colour the points in the PCA plot (percentage between min and max time):
     timestamps = single_values["timestamp"].values.flatten().tolist()
     mintime = min(timestamps)
@@ -726,7 +695,7 @@ if __name__ == "__main__":
         principalDf = pd.DataFrame(data = principalComponents, columns = col)
 
         principalDf["t_scaled"] = t_scaled
-        principalDf["raw_file"] = hdf5_file_names # df["filename"]
+        principalDf["raw_file"] = hdf5_file_names
 
         # Explained variance in axis labels
         pca_var = pca.explained_variance_ratio_
@@ -935,7 +904,6 @@ if __name__ == "__main__":
         os.makedirs(output_path + os.sep + "fig13_MS1_map")
 
     for file in hdf5_file_names:
-    #file = hdf5_files[0]
         df_MS1_map = dataframes[file]["MS1_map"]
 
         ### reduce the number of points to roughly 1 million
@@ -947,7 +915,7 @@ if __name__ == "__main__":
 
         df_MS1_map2["log_intensity"] = np.log10(df_MS1_map2["intensity"])
 
-        fig,ax = plt.subplots(figsize=(15,6)) # = plt.scatter(df_ionmap2["RT"], df_ionmap2["MZ"], c=df_ionmap2["log_intensity"], s = 1)
+        fig,ax = plt.subplots(figsize=(15,6)) 
         points = ax.scatter(df_MS1_map2["retention_time"], df_MS1_map2["mz"], c=df_MS1_map2["log_intensity"], s=1, cmap="Blues")
         fig.colorbar(points, label = "log10_intensity")
         ax.set_xlabel("retention time")
@@ -1053,7 +1021,6 @@ if __name__ == "__main__":
         fn = [] # filename
         
         for file in hdf5_file_names:
-            #hdf5_tmp = h5py.File(file,'r')
 
             if header not in dataframes[file]["Extracted_Headers"].columns:
                 # Skip, there is no data available for this hdf5 file

@@ -113,7 +113,7 @@ workflow {
 	combined_metrics = combine_metric_hdf5(hdf5s_per_run)
 
 	// Visualize the results (and move them to the results folder)
-	visualize_results(combined_metrics)
+	//visualize_results(combined_metrics)
 
 	output_processing_success(raw_files, hdf5s_per_run.toList().transpose().first().flatten())
 }
@@ -144,8 +144,6 @@ process visualize_results {
 	"""
 	if ${params.search_spike_ins}
 	then 
-		# TODO KS: The combined metrics hdf5s are collected single hdf files for each input file.
-		# TODO KS: The script needs to allow variable length number of hdf5s
 		QC_visualization.py -hdf5_files ${combined_metrics} -output "." -spikeins
 	else
 		QC_visualization.py -hdf5_files ${combined_metrics} -output "."
