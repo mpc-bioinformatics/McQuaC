@@ -999,6 +999,7 @@ if __name__ == "__main__":
     add_headers = list(add_headers)# .sort()  
     add_headers.sort() ## sort alphabetically
 
+    print(add_headers)
         
     ### headers that define the time (x-axis)
     if "Time" in add_headers:
@@ -1012,7 +1013,8 @@ if __name__ == "__main__":
             continue
         if header == "MsMsType":  # MsMsType codes for DIA/DDA for example. Doesn't need to be plotted.
             continue
-        if header == "Scan_msLevel":  # MsMsType codes for DIA/DDA for example. Doesn't need to be plotted.
+        if header == "Scan_msLevel":  # MsMsType codes for MS1 or MS2 level. Doesn't need to be plotted.
+            print(dataframes[hdf5_file_names[0]]["Extracted_Headers"][header])
             continue
         
         ### extract data from compressed columns and put them into long format
@@ -1030,7 +1032,13 @@ if __name__ == "__main__":
             x_tmp = dataframes[file]["Extracted_Headers"][time_header].values
             
             display_header = header
-
+            # Ion injection time and lock mass correction should be filtered to only contain values for MS1 spectra
+            if header in ["EXTRA_Ion Injection Time (ms)", "EXTRA_LM mz-Correction (ppm),LM Correction"]:
+                msmsLevel = dataframes[file]["Extracted_Headers"]["Scan_msLevel"].values
+                y_tmp = y_tmp[msmsLevel == 1]
+                x_tmp = x_tmp[msmsLevel == 1]    
+                display_header = header + " (MS1 filtered)"
+            
             x += [float(_x) for _x in x_tmp]
             y += [float(_y) for _y in y_tmp]
             fn += [file] * len(x_tmp)
