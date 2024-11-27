@@ -134,8 +134,6 @@ def get_dataframes_values(
         for df_id in dataframe_ids:#
             short_name = df_id.split("|")[-1]
             column_order = hdf[df_id].attrs["column_order"].split("|")
-            print(df_id)
-            print(hdf[df_id])
             df = pd.DataFrame(dict(hdf[df_id]))
             df = df[column_order]
             dataframes[filename][short_name] = df
@@ -152,7 +150,8 @@ def assemble_result_table(
     array_value_ids_short: List[str],
     dataframes: Dict[str, Dict[str, pd.DataFrame]],
     dataframe_ids_short: List[str],
-    spikein_columns: List[str] = ["Maximum_Intensity", "RT_at_Maximum_Intensity", "PSMs", "Delta_to_expected_RT"]
+    spikein_columns: List[str] = ["Maximum_Intensity", "RT_at_Maximum_Intensity", "PSMs", "Delta_to_expected_RT"], 
+    RT_unit: str = "sec"
     ) -> pd.DataFrame:
     """
     Assemble the result table
@@ -176,6 +175,11 @@ def assemble_result_table(
         Dictionary with the dataframes
     dataframe_ids_short : List[str]
         List of the short names of the dataframes
+    spikein_columns : List[str]
+        List of the columns of the spike-in dataframes that should end up in the result table.
+        Must be a subset of ["Maximum_Intensity", "RT_at_Maximum_Intensity", "PSMs", "Delta_to_expected_RT"].
+    RT_unit : str
+        Unit of the retention time, either sec for seconds or min for minutes.
         
     Returns
     -------
@@ -213,7 +217,16 @@ def assemble_result_table(
                 df_tmp_tmp = pd.DataFrame(columns = columns)
                 df_tmp_tmp.loc[0] = values
                 df_tmp = pd.concat([df_tmp, df_tmp_tmp], axis = 0)
+                
+      
+                
             df_tmp.reset_index(drop=True, inplace=True)
+            ### transform time to minutes if necessary
+            if metric == "RT_range":
+                if RT_unit == "min":
+                    df_tmp["RT_range_min"] = df_tmp["RT_range_min"]/60
+                    df_tmp["RT_range_max"] = df_tmp["RT_range_max"]/60
+            
             df_table = pd.concat([df_table, df_tmp], axis = 1)
         
         elif metric in dataframe_ids_short:
@@ -221,8 +234,13 @@ def assemble_result_table(
                 df_table_spike = pd.DataFrame()
                 for file in hdf5_file_names:
                     spike_data = dataframes[file][metric]
+                    
+                    if RT_unit == "min":
+                        spike_data["RT_at_Maximum_Intensity"] = spike_data["RT_at_Maximum_Intensity"]/60
+                        spike_data["Delta_to_expected_RT"] = spike_data["Delta_to_expected_RT"]/60
+                    
                     spike_in_list = spike_data['Spike-in'].astype(str).tolist()
-                    spike_name = [s.split("_")[1] for s in spike_in_list]
+                    #spike_name = [s.split("_")[1] for s in spike_in_list]
                     mz = [s.split("_")[3] for s in spike_in_list]
                     spike_data["mz"] = ["MZ_" + x for x in mz]
                     column_names_spike = ["SPIKE_" + x for x in spike_data["mz"].astype(str).tolist()]
@@ -276,11 +294,11 @@ def argparse_setup():
     parser.add_argument("-output_table_type", help="Type of output table (one of csv, tsv or xlsx)", default = "csv")
     parser.add_argument("-spikeins", help = "Whether to analyse spike-ins", default = False, action = "store_true")
     parser.add_argument("-group", help="List of the experimental group (comma-separated).", default=None)  ### TODO: input table with group information
+    parser.add_argument("-RT_unit", help="Unit of the retention time, either sec for seconds or min for minutes.", default = "sec")
     parser.add_argument("-fig_show", help = "Show figures, e.g. for debugging?", default = False, action = "store_true")
     parser.add_argument("-output_column_order", help = "Order of columns in the output table", default = "", type = str)
+    parser.add_argument("-spikein_columns", help = "Columns of the spike-in dataframes that should end up in the result table", default = "Maximum_Intensity,RT_at_Maximum_Intensity,PSMs,Delta_to_expected_RT", type = str)
     return parser.parse_args()
-
-
 
 
 ##########################################################################################################################################################
@@ -379,7 +397,8 @@ if __name__ == "__main__":
         array_value_ids_short = array_value_ids_short,
         dataframes = dataframes,
         dataframe_ids_short = dataframe_ids_short,
-        spikein_columns = ["Maximum_Intensity", "RT_at_Maximum_Intensity"] ### TODO: als Argument übergeben
+        RT_unit = args.RT_unit, 
+        spikein_columns = args.spikein_columns.split(",")
     )
 
     if args.output_table_type == "csv":
@@ -452,9 +471,17 @@ if __name__ == "__main__":
         tic_df.append(tic_tmp)
     tic_df2 = pd.concat(tic_df)
     
+    if args.RT_unit == "min":
+        tic_df2["retention_time"] = tic_df2["retention_time"]/60
+    
     fig04 = px.line(tic_df2, x="retention_time", y="TIC", color = "filename", title = "TIC overlay")
     fig04.update_traces(line=dict(width=0.5))
     fig04.update_yaxes(exponentformat="E") 
+    if args.RT_unit == "sec":
+        fig04.update_layout(xaxis_title = "Retention Time (sec)")
+    elif args.RT_unit == "min":
+        fig04.update_layout(xaxis_title = "Retention Time (min)")
+
     if fig_show:
         fig04.show()
     with open(output_path + os.sep + "fig04_MS1_TIC_overlay.plotly.json", "w") as json_file:
@@ -878,7 +905,7 @@ if __name__ == "__main__":
         loadings = pd.DataFrame(columns = ["variable", "length", "PC1", "PC2"])
     if fig_show:
         fig12.show()
-    with open(output_path + os.sep + "fig12a_PCA_all.json", "w") as json_file:
+    with open(output_path + os.sep + "fig12a_PCA_all.plotly.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig12))
     fig12.write_html(file = output_path + os.sep + "fig12a_PCA_all.html", auto_open = False)
     if fig_show: 
@@ -915,10 +942,17 @@ if __name__ == "__main__":
 
         df_MS1_map2["log_intensity"] = np.log10(df_MS1_map2["intensity"])
 
+        if args.RT_unit == "min":
+            df_MS1_map2["retention_time"] = df_MS1_map2["retention_time"]/60
+
         fig,ax = plt.subplots(figsize=(15,6)) 
         points = ax.scatter(df_MS1_map2["retention_time"], df_MS1_map2["mz"], c=df_MS1_map2["log_intensity"], s=1, cmap="Blues")
         fig.colorbar(points, label = "log10_intensity")
-        ax.set_xlabel("retention time")
+        
+        if args.RT_unit == "sec":
+            ax.set_xlabel("retention time (sec)")
+        elif args.RT_unit == "min":
+            ax.set_xlabel("retention time (min)")
         ax.set_ylabel("m/z")
         ax.set_title(file)
         if fig_show:
@@ -956,7 +990,6 @@ if __name__ == "__main__":
             continue
         
         df_tmp_long = dataframes[file]["Pump_Pressure"]
-
         # use not more than roughly 10000 data points. If data has more than 10000 data points, take every nth data point        
         if df_tmp_long.shape[0] > 10000: 
             samples = int(df_tmp_long.shape[0] / 10000)
@@ -968,12 +1001,23 @@ if __name__ == "__main__":
         
     if (not pump_df == []):
         df_fig14_long = pd.concat(pump_df)
+        ### x Axis data for pump pressure are in minutes, convert to seconds if necessary
+        ### (this only holds for Thermo, for Bruker something is strange -> TODO)
+        if args.RT_unit == "sec":
+            df_fig14_long["pump_pressure_x_axis"] = df_fig14_long["pump_pressure_x_axis"]*60
+        
         fig14 = px.line(df_fig14_long, x="pump_pressure_x_axis", y="pump_pressure_y_axis", color = "filename", title = "Pump Pressure")
         fig14.update_traces(line=dict(width=0.5))
         fig14.update_yaxes(exponentformat="E") 
         fig14.update_layout(width = 1500, height = 1000, 
-                            xaxis_title = "Time (min)", 
                             yaxis_title = "Pump pressure")
+        
+        if args.RT_unit == "sec":
+            fig14.update_layout(xaxis_title = "Time (sec)")
+        elif args.RT_unit == "min":
+            fig14.update_layout(xaxis_title = "Time (min)")
+        
+        
         fig14.write_html(file = output_path + os.sep + "fig14_Pump_pressure.html", auto_open = False)
 
     if fig_show:
@@ -998,9 +1042,7 @@ if __name__ == "__main__":
     add_headers = set(add_headers)
     add_headers = list(add_headers)# .sort()  
     add_headers.sort() ## sort alphabetically
-
-    print(add_headers)
-        
+     
     ### headers that define the time (x-axis)
     if "Time" in add_headers:
         time_header = "Time" # Bruker: Time 
@@ -1014,7 +1056,6 @@ if __name__ == "__main__":
         if header == "MsMsType":  # MsMsType codes for DIA/DDA for example. Doesn't need to be plotted.
             continue
         if header == "Scan_msLevel":  # MsMsType codes for MS1 or MS2 level. Doesn't need to be plotted.
-            print(dataframes[hdf5_file_names[0]]["Extracted_Headers"][header])
             continue
         
         ### extract data from compressed columns and put them into long format
@@ -1048,14 +1089,23 @@ if __name__ == "__main__":
             "x": x,
             "y": y
         })
+        
+        ### transform time to minutes if necessary
+        if args.RT_unit == "min":
+            df_tmp["x"] = df_tmp["x"]/60
+        
     
         if not df_tmp.empty:
             fig16 = px.line(df_tmp, x="x", y="y", color = "filename", title = display_header)
             fig16.update_traces(line=dict(width=0.5))
             fig16.update_yaxes(exponentformat="E") 
             fig16.update_layout(width = int(1500), height = int(1000), 
-                                xaxis_title = "Time (min)", 
-                                yaxis_title = display_header)
+                                 yaxis_title = display_header)
+            if args.RT_unit == "sec":
+                fig16.update_layout(xaxis_title = "Time (sec)")
+            elif args.RT_unit == "min":
+                fig16.update_layout(xaxis_title = "Time (min)")
+            
         else: 
             fig16 = go.Figure()
             fig16.add_annotation(
