@@ -10,5 +10,6 @@ dependencies:
   - openms  = 2.8.0
   - pyopenms = 2.8.0  # needs to be installed by conda to link the correct OpenMS binaries
   - mono >= 6
+  - conda-forge::compilers = 1.8.0 
   - pip:
     - -r ./requirements.txt
