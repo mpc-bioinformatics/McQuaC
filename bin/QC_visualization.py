@@ -50,6 +50,9 @@ def get_dataset_types(hdf: h5py.File) -> Tuple[Tuple[str], Tuple[str], Tuple[str
     for key in hdf.keys():
         if isinstance(hdf[key], h5py.Dataset):
             if hdf[key].shape[0] == 1:
+                ### TODO!: bug if first file has only a single PSM, then psm-error is put in the false category
+                if key == "LOCAL:05|filtered_psms_ppm_error":
+                    continue
                 single_value_ids.append(key)
             else:
                 array_value_ids.append(key)
@@ -251,6 +254,7 @@ def assemble_result_table(
                         column_names = [column_names_spike[index] + "_" + x for x in spikein_columns]    
                         df_tmp_tmp = pd.DataFrame(columns = column_names)
                         df_tmp_tmp.loc[0] = spike_data.loc[index, spikein_columns].values
+
                         df_tmp = pd.concat([df_tmp, df_tmp_tmp], axis = 1) ## add columns
                         
                     df_table_spike = pd.concat([df_table_spike, df_tmp], axis = 0)
@@ -311,7 +315,7 @@ if __name__ == "__main__":
     hdf5s = [h5py.File(f, "r") for f in args.hdf5_files]
 
     (single_value_ids, array_value_ids, dataframe_ids) =  get_dataset_types(hdf5s[0])
-
+    
     single_values = get_dataframe_of_single_values(hdf5s, single_value_ids)
     single_value_ids_short = [s.split("|")[-1] for s in single_value_ids]
 
@@ -910,7 +914,7 @@ if __name__ == "__main__":
     fig12.write_html(file = output_path + os.sep + "fig12a_PCA_all.html", auto_open = False)
     if fig_show: 
         fig12_loadings.show()
-    with open(output_path + os.sep + "fig12b_Loadings_all.json", "w") as json_file:
+    with open(output_path + os.sep + "fig12b_Loadings_all.plotly.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig11_loadings))
     fig12_loadings.write_html(file = output_path + os.sep + "fig12b_Loadings_all.html", auto_open = False)
    
