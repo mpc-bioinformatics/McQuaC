@@ -36,7 +36,7 @@ params.main_outdir = "$PWD/results"  // Output-Directory of the Identification R
 
 // Parameters for visualization script
 params.RT_unit = "sec" // Unit of the retention time, either sec for seconds or min for minutes.
-params.output_column_order = "" // Order of columns in the output table
+params.output_column_order = "''" // Order of columns in the output table
 params.spikein_columns = "Maximum_Intensity,RT_at_Maximum_Intensity,PSMs,Delta_to_expected_RT" // Columns of the spike-in dataframes that should end up in the result table
 params.output_table_type = "csv" // Type of the output table, either csv or xlsx
 
