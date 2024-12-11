@@ -34,6 +34,12 @@ params.main_comet_params = "${baseDir}/example_configurations/high-high.comet.pa
 params.spike_ins_table = "${baseDir}/example_configurations/spike_ins.csv" // The information about spike-ins 
 params.main_outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
 
+// Parameters for visualization script
+params.RT_unit = "sec" // Unit of the retention time, either sec for seconds or min for minutes.
+params.output_column_order = "" // Order of columns in the output table
+params.spikein_columns = "Maximum_Intensity,RT_at_Maximum_Intensity,PSMs,Delta_to_expected_RT" // Columns of the spike-in dataframes that should end up in the result table
+
+
 // Here are some optional Parameters which can be set if needed
 params.search_spike_ins = true // Parameter to check if we execute a isa specific xic extraction (NOTE: FASTA has to contain the SpikeIns too!)
 params.search_labelled_spikeins = true // Perform a special ID and look for labelled peptides
@@ -144,9 +150,9 @@ process visualize_results {
 	"""
 	if ${params.search_spike_ins}
 	then 
-		QC_visualization.py -hdf5_files ${combined_metrics} -output "." -spikeins
+		QC_visualization.py -hdf5_files ${combined_metrics} -output "." -spikeins -RT_unit ${params.RT_unit} -output_column_order ${params.output_column_order} -spikein_columns ${params.spikein_columns}
 	else
-		QC_visualization.py -hdf5_files ${combined_metrics} -output "."
+		QC_visualization.py -hdf5_files ${combined_metrics} -output "." -RT_unit ${params.RT_unit} -output_column_order ${params.output_column_order} -spikein_columns ${params.spikein_columns}
 	fi
     """
 }
