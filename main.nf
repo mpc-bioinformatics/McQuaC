@@ -139,13 +139,12 @@ process visualize_results {
 	path(combined_metrics)
 
   output:
-  path("*.json")
+  	path("*.json")
 	path("*.html")
-	path("*.csv")
+	path("*.${params.output_table_type}")
 	path(combined_metrics)
-	path("fig13_ionmaps")
-	path("THERMO_PLOTS_FIG15")
-	path("BRUKER_PLOTS_FIG16")
+	path("fig13_MS1_map")
+	path("fig16_additional_headers")
 
 	"""
 	if ${params.search_spike_ins}
