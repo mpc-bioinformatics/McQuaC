@@ -119,7 +119,7 @@ workflow {
 	combined_metrics = combine_metric_hdf5(hdf5s_per_run)
 
 	// Visualize the results (and move them to the results folder)
-	//visualize_results(combined_metrics)
+	visualize_results(combined_metrics)
 
 	output_processing_success(raw_files, hdf5s_per_run.toList().transpose().first().flatten())
 }
