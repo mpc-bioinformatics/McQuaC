@@ -281,7 +281,7 @@ if __name__ == "__main__":
             qc_short_name = "base_peak_intensity_max_up_to_" + str(args.base_peak_tic_up_to), 
             qc_name = "base peak intensity max", 
             qc_description = "The maximum base peak (highest peak in spectrum) across all MS1 and MS2 spectra up to " + str(args.base_peak_tic_up_to) + " minutes.", 
-            value = num_ms2_spectra, 
+            value = base_peak_intensity_max, 
             value_shape = (1,), 
             value_type = "float64", 
             unit_accession = "", 
