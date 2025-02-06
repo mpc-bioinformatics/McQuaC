@@ -781,7 +781,7 @@ if __name__ == "__main__":
             height=1000,
             title="Empty Plot"
         )
-        fig12_loadings = fig11
+        fig11_loadings = fig11
         loadings = pd.DataFrame(columns = ["variable", "length", "PC1", "PC2"])
     if fig_show:
         fig11.show()
@@ -802,9 +802,7 @@ if __name__ == "__main__":
         loadings.to_csv(output_path + os.sep + "fig11c_table_loadings_raw.tsv", index = False, sep = "\t")
     if args.output_table_type == "xlsx":
         loadings.to_excel(output_path + os.sep + "fig11c_table_loadings_raw.xlsx", index = False)   
-    
-    #loadings.to_csv(output_path + os.sep + "table_loadings_raw.csv", index = False) 
-        
+       
 
 #################################################################################################
     # Fig 12 PCA on all data (after identification)
