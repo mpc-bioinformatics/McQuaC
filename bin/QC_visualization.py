@@ -317,6 +317,7 @@ if __name__ == "__main__":
     (single_value_ids, array_value_ids, dataframe_ids) =  get_dataset_types(hdf5s[0])
     
     single_values = get_dataframe_of_single_values(hdf5s, single_value_ids)
+    single_values = single_values.sort_values("filename", ascending=True)  # Sort values by filename
     single_value_ids_short = [s.split("|")[-1] for s in single_value_ids]
 
     array_values = get_array_values(hdf5s, array_value_ids)
