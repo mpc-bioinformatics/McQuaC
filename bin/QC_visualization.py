@@ -622,12 +622,11 @@ if __name__ == "__main__":
     with open(output_path + os.sep + "fig09_barplot_PSM_charge.plotly.json", "w") as json_file:
         json_file.write(plotly.io.to_json(fig09))
     fig09.write_html(file = output_path + os.sep + "fig09_barplot_PSM_charge.html", auto_open = False)
-    
-    
+
+
 ################################################################################################
-    # Figure 10: Missed cleavages of PSMs
-    
-    
+    # Figure 10a: Missed cleavages of PSMs (total number)
+
     if ("PSM_missed_cleavage_counts" in dataframes[hdf5_file_names[0]].keys()):
         PSM_missed_df_list = []
         for file in hdf5_file_names:
@@ -638,32 +637,70 @@ if __name__ == "__main__":
             PSM_missed_df_list.append(df_tmp_long)
         df_pl10_long = pd.concat(PSM_missed_df_list)
         df_pl10_long.rename(columns = {"variable": "PSM_missed_cleavages", "value": "count"}, inplace = True)
-        
-        fig10 = px.bar(df_pl10_long, x="filename", y="count", color="PSM_missed_cleavages", title = "Number of missed cleavages for PSMs")
-        fig10.update_xaxes(tickangle=-90)
-        fig10.update_layout(height = int(700))
+
+        fig10a = px.bar(df_pl10_long, x="filename", y="count", color="PSM_missed_cleavages", title = "Number of missed cleavages for PSMs")
+        fig10a.update_xaxes(tickangle=-90)
+        fig10a.update_layout(height = int(700))
     else: 
-        fig10 = go.Figure()
-        fig10.add_annotation(
+        fig10a = go.Figure()
+        fig10a.add_annotation(
             x=0.5,
             y=0.5,
             text="Columns are missing, no plot created!",
             showarrow=False,
             font=dict(size=14)
         )
-        fig10.update_layout(
+        fig10a.update_layout(
             width=1500,
             height=1000,
             title="Empty Plot"
         )  
     
     if fig_show:
-        fig10.show()
-    with open(output_path + os.sep + "fig10_barplot_PSM_missedcleavages.plotly.json", "w") as json_file:
-        json_file.write(plotly.io.to_json(fig10))
-    fig10.write_html(file = output_path + os.sep + "fig10_barplot_PSM_missedcleavages.html", auto_open = False)
+        fig10a.show()
+    with open(output_path + os.sep + "fig10a_barplot_PSM_missedcleavages.plotly.json", "w") as json_file:
+        json_file.write(plotly.io.to_json(fig10a))
+    fig10a.write_html(file = output_path + os.sep + "fig10a_barplot_PSM_missedcleavages.html", auto_open = False)
+
+################################################################################################
+    # Figure 10b: Missed cleavages of PSMs (normalized between 0 and 1 in "fractions")
+
+    if ("PSM_missed_cleavage_counts" in dataframes[hdf5_file_names[0]].keys()):
+        PSM_missed_df_list = []
+        for file in hdf5_file_names:
+            df_tmp = dataframes[file]["PSM_missed_cleavage_counts"]
+            df_tmp.rename(columns = {df_tmp.columns[-1]: "more"}, inplace = True)
+            df_tmp_long = df_tmp.melt()
+            df_tmp_long["filename"] = [file]*df_tmp.shape[1]
+            PSM_missed_df_list.append(df_tmp_long)
+        df_pl10_long = pd.concat(PSM_missed_df_list)
+        df_pl10_long_perc = df_pl10_long.copy()
+        df_pl10_long_perc["value"] = df_pl10_long["value"]/df_pl10_long.groupby("filename")["value"].transform("sum")
+        df_pl10_long_perc.rename(columns = {"variable": "PSM_missed_cleavages", "value": "Fraction"}, inplace = True)
+        
+        fig10b = px.bar(df_pl10_long_perc, x="filename", y="Fraction", color="PSM_missed_cleavages", title = "Fraction of missed cleavages for PSMs")
+        fig10b.update_xaxes(tickangle=-90)
+        fig10b.update_layout(height = int(700))
+    else: 
+        fig10b = go.Figure()
+        fig10b.add_annotation(
+            x=0.5,
+            y=0.5,
+            text="Columns are missing, no plot created!",
+            showarrow=False,
+            font=dict(size=14)
+        )
+        fig10b.update_layout(
+            width=1500,
+            height=1000,
+            title="Empty Plot"
+        )  
     
-    
+    if fig_show:
+        fig10b.show()
+    with open(output_path + os.sep + "fig10b_barplot_PSM_missedcleavages.plotly.json", "w") as json_file:
+        json_file.write(plotly.io.to_json(fig10b))
+    fig10b.write_html(file = output_path + os.sep + "fig10b_barplot_PSM_missedcleavages.html", auto_open = False)
     
 ################################################################################################
     # Fig 11 PCA on raw data (before identification)
