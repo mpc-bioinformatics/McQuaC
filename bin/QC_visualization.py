@@ -311,8 +311,12 @@ def argparse_setup():
 if __name__ == "__main__":
     args = argparse_setup()
 
+    args.hdf5_files = sorted(args.hdf5_files) # sorts the file names alphabetically (assumes that they are all in the same folder)
+
     ### read in the hdf5 files
     hdf5s = [h5py.File(f, "r") for f in args.hdf5_files]
+    #hdf5s = sorted(hdf5s)
+    #print(hdf5s)
 
     (single_value_ids, array_value_ids, dataframe_ids) =  get_dataset_types(hdf5s[0])
     
@@ -407,7 +411,7 @@ if __name__ == "__main__":
     )
 
     # Sort values by filename
-    df_table0 = df_table0.sort_values(by = "filename", ascending=True)  
+    #df_table0 = df_table0.sort_values(by = "filename", ascending=True)  
     single_values = single_values.sort_values(by = "filename", ascending=True)
 
 
@@ -484,7 +488,7 @@ if __name__ == "__main__":
     if args.RT_unit == "min":
         tic_df2["retention_time"] = tic_df2["retention_time"]/60
     
-    tic_df2 = tic_df2.sort_values(by = ["filename", "retention_time"], ascending=True)  
+    #tic_df2 = tic_df2.sort_values(by = ["filename", "retention_time"], ascending=True)  
     
     fig04 = px.line(tic_df2, x="retention_time", y="TIC", color = "filename", title = "TIC overlay")
     fig04.update_traces(line=dict(width=0.5))
@@ -513,7 +517,7 @@ if __name__ == "__main__":
         df_tmp["value"] = array_values[file]["RT_TIC_quartiles"]
         RT_TIC_Q_df_list.append(df_tmp)
     df_pl05_long = pd.concat(RT_TIC_Q_df_list)
-    df_pl05_long = df_pl05_long.sort_values(by = "filename", ascending=True)  
+    #df_pl05_long = df_pl05_long.sort_values(by = "filename", ascending=True)  
    
     fig05 = px.bar(df_pl05_long, x = "filename", y = "value", color = "variable", title = "Quartiles of TIC over retention time")
     fig05.update_xaxes(tickangle=-90)
@@ -538,7 +542,7 @@ if __name__ == "__main__":
         df_tmp["value"] = array_values[file]["RT_MS1_quartiles"]
         RT_MS1_Q_df_list.append(df_tmp)
     df_pl06_long = pd.concat(RT_MS1_Q_df_list)
-    df_pl06_long = df_pl06_long.sort_values(by = "filename", ascending=True)  
+    #df_pl06_long = df_pl06_long.sort_values(by = "filename", ascending=True)  
     
     fig06 = px.bar(df_pl06_long, x="filename", y="value", color="variable", title = "Quartiles of MS1 over retention time")
     fig06.update_xaxes(tickangle=-90)
@@ -561,7 +565,7 @@ if __name__ == "__main__":
         df_tmp["value"] = array_values[file]["RT_MS2_quartiles"]
         RT_MS2_Q_df_list.append(df_tmp)
     df_pl07_long = pd.concat(RT_MS2_Q_df_list)
-    df_pl07_long = df_pl07_long.sort_values(by = "filename", ascending=True)  
+    #df_pl07_long = df_pl07_long.sort_values(by = "filename", ascending=True)  
     
     fig07 = px.bar(df_pl07_long, x="filename", y="value", color="variable", title = "Quartiles of MS2 over retention time")
     fig07.update_xaxes(tickangle=-90)
@@ -585,7 +589,7 @@ if __name__ == "__main__":
         Prec_charge_df_list.append(df_tmp_long)
     df_pl08_long = pd.concat(Prec_charge_df_list)
     df_pl08_long.rename(columns = {"variable": "Prec_charge", "value": "fraction"}, inplace = True)
-    df_pl08_long = df_pl08_long.sort_values(by = "filename", ascending=True)  
+    #df_pl08_long = df_pl08_long.sort_values(by = "filename", ascending=True)  
     
     fig08 = px.bar(df_pl08_long, x="filename", y="fraction", color="Prec_charge", title = "Charge states of precursors")
     fig08.update_xaxes(tickangle=-90)
@@ -610,7 +614,7 @@ if __name__ == "__main__":
             PSM_charge_df_list.append(df_tmp_long)
         df_pl09_long = pd.concat(PSM_charge_df_list)
         df_pl09_long.rename(columns = {"variable": "PSM_charge", "value": "fraction"}, inplace = True)
-        df_pl09_long = df_pl09_long.sort_values(by = "filename", ascending=True)  
+        #df_pl09_long = df_pl09_long.sort_values(by = "filename", ascending=True)  
         
         fig09 = px.bar(df_pl09_long, x="filename", y="fraction", color="PSM_charge", title = "Charge states of PSMs")
         fig09.update_xaxes(tickangle=-90)
@@ -649,7 +653,7 @@ if __name__ == "__main__":
             PSM_missed_df_list.append(df_tmp_long)
         df_pl10_long = pd.concat(PSM_missed_df_list)
         df_pl10_long.rename(columns = {"variable": "PSM_missed_cleavages", "value": "count"}, inplace = True)
-        df_pl10_long = df_pl10_long.sort_values(by = "filename", ascending=True)  
+        #df_pl10_long = df_pl10_long.sort_values(by = "filename", ascending=True)  
 
         fig10a = px.bar(df_pl10_long, x="filename", y="count", color="PSM_missed_cleavages", title = "Number of missed cleavages for PSMs")
         fig10a.update_xaxes(tickangle=-90)
@@ -690,7 +694,7 @@ if __name__ == "__main__":
         df_pl10_long_perc = df_pl10_long.copy()
         df_pl10_long_perc["value"] = df_pl10_long["value"]/df_pl10_long.groupby("filename")["value"].transform("sum")
         df_pl10_long_perc.rename(columns = {"variable": "PSM_missed_cleavages", "value": "Fraction"}, inplace = True)
-        df_pl10_long_perc = df_pl10_long_perc.sort_values(by = "filename", ascending=True)  
+        #df_pl10_long_perc = df_pl10_long_perc.sort_values(by = "filename", ascending=True)  
         
         fig10b = px.bar(df_pl10_long_perc, x="filename", y="Fraction", color="PSM_missed_cleavages", title = "Fraction of missed cleavages for PSMs")
         fig10b.update_xaxes(tickangle=-90)
@@ -1057,7 +1061,7 @@ if __name__ == "__main__":
     if (not pump_df == []):
 
         df_fig14_long = pd.concat(pump_df)
-        df_fig14_long = df_fig14_long.sort_values(by = ["filename", "pump_pressure_x_axis"], ascending=True)  
+        #df_fig14_long = df_fig14_long.sort_values(by = ["filename", "pump_pressure_x_axis"], ascending=True)  
         ### x Axis data for pump pressure are in minutes, convert to seconds if necessary
         ### (this only holds for Thermo, for Bruker something is strange -> TODO)
         if args.RT_unit == "sec":
@@ -1153,7 +1157,7 @@ if __name__ == "__main__":
         
     
         if not df_tmp.empty:
-            df_tmp = df_tmp.sort_values(by = ["filename", "x"], ascending=True)  
+            #df_tmp = df_tmp.sort_values(by = ["filename", "x"], ascending=True)  
             fig16 = px.line(df_tmp, x="x", y="y", color = "filename", title = display_header)
             fig16.update_traces(line=dict(width=0.5))
             fig16.update_yaxes(exponentformat="E") 
