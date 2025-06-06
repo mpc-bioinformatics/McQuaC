@@ -813,6 +813,7 @@ if __name__ == "__main__":
                             "t_scaled": "timestamp"
                         })
         fig11.update_layout(width = int(1500), height = int(1000))
+        fig11.update_traces(marker=dict(size=20))
             
             
         # Table and plot with feature loadings (weights of the variables in the PCA)
@@ -936,6 +937,7 @@ if __name__ == "__main__":
                         })
             
         fig12.update_layout(width = int(1500), height = int(1000))
+        fig12.update_traces(marker=dict(size=20))
             
         # Table and plot with feature loadings (weights of the variables in the PCA)
         loadings = pd.DataFrame(pca.components_.T, columns=['PC1', 'PC2'], index = df_pl12.columns)
