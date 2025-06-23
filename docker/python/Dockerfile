@@ -8,7 +8,7 @@ COPY --chown=mambauser:mambauser requirements.txt .
 
 USER mambauser
 ENV HOME /home/mambauser
-ENV ENV_NAME=nextqcflow
+ENV ENV_NAME=mcquac
 
 RUN echo 'show_banner: false' > ~/.mambarc
 

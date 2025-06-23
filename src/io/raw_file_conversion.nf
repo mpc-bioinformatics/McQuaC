@@ -14,6 +14,8 @@ params.file_conversion__thermo_raw_conversion_mem = "10 GB"
 // and 0.14GB for a Raw file with 35023 MS scans (measured with `/usr/bin/time -v ...`). 5 GB seems more then enough.
 // Based on max virtual memory 
 params.file_conversion__bruker_raw_conversion_mem = "5 GB"
+// Number of threads for the bruker raw file conversion
+params.file_conversion__bruker_raw_conversion_cpu = 4
 
 /**
  * Convert raw files (Thermo Fisher .raw-files and Bruker tdf-files) to mzML files
@@ -68,8 +70,8 @@ process convert_bruker_raw_folders {
     container 'mfreitas/tdf2mzml'
     containerOptions { "-v ${raw_folder.getParent()}:/data" }
     errorStrategy 'ignore'
-    // Uses all cores
-    cpus Runtime.runtime.availableProcessors()
+    
+    cpus params.file_conversion__bruker_raw_conversion_cpu
     memory params.file_conversion__bruker_raw_conversion_mem
 
     input:
@@ -79,6 +81,9 @@ process convert_bruker_raw_folders {
     path "${raw_folder.baseName}.mzML"
 
     """
+    export MKL_NUM_THREADS=${params.file_conversion__bruker_raw_conversion_cpu}
+    export NUMEXPR_NUM_THREADS=${params.file_conversion__bruker_raw_conversion_cpu}
+    export OMP_NUM_THREADS=${params.file_conversion__bruker_raw_conversion_cpu}
     tdf2mzml.py -i ${raw_folder} -o ${raw_folder.baseName}.mzML --ms1_type centroid
     """
 }
