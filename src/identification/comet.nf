@@ -78,6 +78,10 @@ process adjust_comet_params {
     sed -i 's/^output_mzidentmlfile.*/output_mzidentmlfile = 1/' adjusted.comet.params
     sed -i 's/^output_percolatorfile.*/output_percolatorfile = 0/' adjusted.comet.params
 
+    if [ ${params.identification__decoy_method} = true ];       # hardcoded for now
+    then
+        sed -i 's/^decoy_search.*/decoy_search  = 0/' adjusted.comet.params
+    fi
     if [ ${search_labelled} = true ];       # hardcoded for now
     then
         sed -i 's/^add_K_lysine.*/add_K_lysine  = 8.014199/' adjusted.comet.params
