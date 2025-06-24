@@ -36,7 +36,7 @@ workflow combine_metric_hdf5 {
  */
 
 process merge_metrics {
-	container {python_image}
+	label 'mcquac_image'
 
 	publishDir "${output_folder}/qc_hdf5_data", mode:'copy'		// TODO: this should probably rather use the new reporting facilities
 

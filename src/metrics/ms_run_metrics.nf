@@ -68,7 +68,8 @@ workflow get_mzml_infos {
  * @return HDF5 with extracted headers
  */
 process extract_headers_from_thermo_raw_files {
-    container { python_image}
+    label 'mcquac_image'
+
     errorStrategy 'ignore'
 
     memory params.ms_run_metrics__thermo_raw_mem
@@ -99,7 +100,8 @@ process extract_headers_from_thermo_raw_files {
  * @return HDF5 with extracted headers
  */
 process extract_headers_from_bruker_raw_files {
-    container { python_image}
+    label 'mcquac_image'
+
     errorStrategy 'ignore'
 
     memory params.ms_run_metrics__bruker_raw_mem
@@ -122,7 +124,8 @@ process extract_headers_from_bruker_raw_files {
  * @return HDF5 file with the extracted data
  */
 process extract_data_from_mzml {
-    container { python_image}
+    label 'mcquac_image'
+
 
     cpus 1
     memory params.ms_run_metrics__mzml_mem

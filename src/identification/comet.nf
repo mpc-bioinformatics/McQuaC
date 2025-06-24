@@ -7,9 +7,6 @@
 
 nextflow.enable.dsl=2
 
-params.comet_image = 'quay.io/medbioinf/comet-ms:v2024.01.0'
-params.python_image = 'mpc/nextqcflow-python:latest'
-
 params.identification__comet_threads = 8
 // Memory per comet search
 // ~6 GB for 35000 MS and 35 MB of FASTA
@@ -54,7 +51,7 @@ workflow identification_with_comet {
  * Creates a fresh comet params file
  */
 process create_fresh_comet_params {
-    container { params.comet_image }
+    label 'comet_image'
 
     output:
     path "comet.params"
@@ -75,7 +72,7 @@ process create_fresh_comet_params {
  * @return adjusted comet parameter file
  */
 process adjust_comet_params {
-    container { params.python_image }
+    label 'comet_image'
 
     input:
     path comet_params_file
@@ -103,7 +100,7 @@ process adjust_comet_params {
  * @return pepxml Path to pepXML file
  */
 process generate_decoy_database {
-    container { params.python_image }
+    label 'mcquac_image'
 
     input:
     path fasta
@@ -127,7 +124,7 @@ process generate_decoy_database {
  * @return mzid Path to mzid file
  */
 process comet_search {
-    container { params.comet_image }
+    label 'comet_image'
     
     cpus { params.identification__comet_threads }
     memory { params.identification__comet_mem }

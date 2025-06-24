@@ -7,8 +7,6 @@
 
 nextflow.enable.dsl=2
 
-thermorawfileparser_image = 'quay.io/biocontainers/thermorawfileparser:1.4.3--ha8f3691_0'
-
 params.max_parallel_xic_extractors = Runtime.runtime.availableProcessors() / 2
 
 /*
@@ -107,7 +105,7 @@ process generate_json_and_identifications {
  * @return baseName.json the extracted XICs in JSON format
  */ 
 process retrieve_xics_from_thermo_raw_spectra {
-    container { thermorawfileparser_image }
+    label 'thermorawfileparser_image'
 
     maxForks params.max_parallel_xic_extractors
 
