@@ -36,7 +36,7 @@ params.main_outdir = "$PWD/results"  // Output-Directory of the Identification R
 
 // Parameters for visualization script
 params.RT_unit = "sec" // Unit of the retention time, either sec for seconds or min for minutes.
-params.output_column_order = "''" // Order of columns in the output table
+params.output_column_order = "''" // Ordparams.main_outdirer of columns in the output table
 params.spikein_columns = "Maximum_Intensity,RT_at_Maximum_Intensity,PSMs,Delta_to_expected_RT" // Columns of the spike-in dataframes that should end up in the result table
 params.output_table_type = "csv" // Type of the output table, either csv or xlsx
 
@@ -51,6 +51,8 @@ workflow {
 	thermo_raw_files = Channel.fromPath(params.main_raw_spectra_folder + "/*.raw")
 	bruker_raw_folders = Channel.fromPath(params.main_raw_spectra_folder + "/*.d", type: 'dir')
 
+	main_outdir = Channel.fromPath(params.main_outdir).first()
+
 	// .first() convert the queue channel with only one file to a value channel, making it possible to use multiple time
 	// e.g. to automatically start multiple concurrent identifications (no need for map each raw file with the fasta and config file)
 	fasta_file = Channel.fromPath(params.main_fasta_file).first()
@@ -64,7 +66,7 @@ workflow {
 	mzml_metrics = get_mzml_infos(mzmls)
 
 	// Identify spectra using Comet
-	comet_ids = identification_with_comet(mzmls, fasta_file, comet_params, false)
+	comet_ids = identification_with_comet(mzmls, fasta_file, comet_params, false, main_outdir)
 
 	// Execute protein inference and filter by FDR
 	pia_report_files = pia_analysis_full(comet_ids.mzids)
@@ -77,7 +79,7 @@ workflow {
 
 	// search additionally for labelled PSMs
 	if (params.search_labelled_spikeins) {
-		comet_labelled_ids = identification_labelled_with_comet(mzmls, fasta_file, comet_params, true)
+		comet_labelled_ids = identification_labelled_with_comet(mzmls, fasta_file, comet_params, true, main_outdir)
 
 		// set the filter to true to count only FDR filtered labelled PSMs - but the FDR is skewed anyways, as the labelling is set to "static"!
 		labelled_pia_report_files = pia_analysis_psm_only(comet_labelled_ids.mzids, false)
@@ -116,7 +118,7 @@ workflow {
 		.groupTuple()
 
 	
-	combined_metrics = combine_metric_hdf5(hdf5s_per_run)
+	combined_metrics = combine_metric_hdf5(hdf5s_per_run, main_outdir)
 
 	// Visualize the results (and move them to the results folder)
 	visualize_results(combined_metrics)
