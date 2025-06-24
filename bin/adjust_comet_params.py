@@ -9,7 +9,7 @@ def argparse_setup():
     parser.add_argument("-json_in", required=True)
     parser.add_argument("-comet_params", required=True)
     parser.add_argument("-params_out", required=True)
-    parser.add_argument("-search_labelled", required=False, default=False, type=bool)
+    parser.add_argument("-search_labelled", required=False, default="false")
     return parser.parse_args()
 
 
@@ -18,6 +18,11 @@ if __name__ == "__main__":
 
     with open(args.json_in, 'r') as f:
         set_params = json.load(f)
+    
+    if args.search_labelled.lower() == "true":
+        search_labelled = True
+    else:
+        search_labelled = False
     
     if "comet" not in set_params.keys():
         set_params["comet"] = {}
@@ -47,7 +52,7 @@ if __name__ == "__main__":
                     line = key + " = " + str(value)
             
             # set label parameters (which are set separately, not in comet)
-            if args.search_labelled:
+            if search_labelled:
                 for key, value in set_params["labelled_mods"].items():
                     if line.startswith(key):
                         line = key + " = " + str(value)
