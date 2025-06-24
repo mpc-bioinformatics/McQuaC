@@ -9,7 +9,6 @@
 nextflow.enable.dsl=2
 
 pia_image = 'quay.io/biocontainers/pia:1.5.5--hdfd78af_0'
-python_image = 'mpc/nextqcflow-python:latest'
 
 params.pia_gb_ram = 16
 params.pia_threads = 8
@@ -260,7 +259,7 @@ process pia_run_analysis {
 
 
 process pia_extract_csv {
-    container { python_image }
+    label 'mcquac_image'
 
     input:
     tuple path(psm_results), path(peptide_results), path(protein_results)

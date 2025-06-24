@@ -7,8 +7,6 @@
 
 nextflow.enable.dsl=2
 
-python_image = 'mpc/nextqcflow-python:latest'
-
 /*
  * Writes out processing information
  * 
@@ -43,7 +41,7 @@ workflow output_processing_success {
  * @return a file containing human readable info about the processing state
  */
 process write_processing_information {
-    container { python_image }
+    label 'mcquac_image'
 
 	input:
 	tuple val(file_base), path(raw_file), val(information)
