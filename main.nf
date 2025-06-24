@@ -53,7 +53,6 @@ params.search_labelled_spikeins = true // Perform a special ID and look for labe
 workflow {
 	
 	if (params.visualize_only) { 		 // only visualization
-
 		list_hdf5_files = file(params.main_input_folder + '/*.hdf5')
 		visualization(list_hdf5_files, params.main_outdir, params.rt_unit, params.output_column_order, params.spikein_columns, params.output_table_type, params.search_spike_ins)
 	}
