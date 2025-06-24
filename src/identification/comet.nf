@@ -16,7 +16,7 @@ params.identification__comet_threads = 8
 // Virtual and real memory were roughly equal
 params.identification__comet_mem = "10 GB"
 // If true, decoys are generated and searched against
-params.identification__generate_decoys = false
+params.identification__generate_decoys = true
 // Method to generate decoys. OpenMS allows either: 'reverse' or 'shuffle'
 params.identification__decoy_method = 'shuffle'
 
