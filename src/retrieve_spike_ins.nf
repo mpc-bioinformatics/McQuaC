@@ -7,6 +7,8 @@
 
 nextflow.enable.dsl=2
 
+thermorawfileparser_image = 'quay.io/biocontainers/thermorawfileparser:1.4.3--ha8f3691_0'
+
 params.max_parallel_xic_extractors = Runtime.runtime.availableProcessors() / 2
 
 /*
