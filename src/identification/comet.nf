@@ -137,7 +137,7 @@ process comet_search {
     input:
     path mzml
     path input_fasta
-    path config_file
+    path comet_params_file
     path fasta_output_folder
 
     output:
@@ -146,6 +146,6 @@ process comet_search {
 
     script:
     """
-    comet -P${config_file} -D${input_fasta} ${mzml}
+    comet -P${comet_params_file} -D${input_fasta} ${mzml}
     """
 }
