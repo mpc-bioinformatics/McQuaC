@@ -7,7 +7,8 @@
 
 nextflow.enable.dsl=2
 
-comet_image = 'quay.io/medbioinf/comet-ms:v2024.01.0'
+params.comet_image = 'quay.io/medbioinf/comet-ms:v2024.01.0'
+params.python_image = 'mpc/nextqcflow-python:latest'
 
 params.identification__comet_threads = 8
 // Memory per comet search
@@ -29,18 +30,18 @@ params.identification__decoy_method = 'shuffle'
  */
 workflow identification_with_comet {
     take:
-        mzmls  // Channel of mzML files, which are used for searching
-        fasta_file  // A FASTA file, depending 
-        comet_params  // Path to the comete parameter file
-        search_labelled  // true if the search is labelled, false otherwise
-        fasta_output_folder  // Folder where the FASTA file should be written. The one which is used for the search
+        mzmls
+        fasta_file
+        mcquac_params_file
+        search_labelled
+        fasta_output_folder
 
     main:
-        adj_comet_params = adjust_comet_params(comet_params, search_labelled)
+        comet_params_file = create_fresh_comet_params()
+        adj_comet_params = adjust_comet_params(comet_params_file, mcquac_params_file, search_labelled)
 
         if (params.identification__generate_decoys) {
-            generate_decoy_database(fasta_file)
-            fasta_file = generate_decoy_database.out
+            fasta_file = generate_decoy_database(fasta_file)
         }
 
         id_results = comet_search(mzmls, fasta_file, adj_comet_params, fasta_output_folder)
@@ -49,6 +50,22 @@ workflow identification_with_comet {
         mzids = id_results.mzids
 }
 
+/**
+ * Creates a fresh comet params file
+ */
+process create_fresh_comet_params {
+    container { params.comet_image }
+
+    output:
+    path "comet.params"
+
+    script:
+    """
+    # create a new comet params file
+    comet -p
+    mv comet.params.new comet.params
+    """
+}
 
 /**
  * Adjust comet.params to have the correct output files and threads are limited
@@ -58,35 +75,22 @@ workflow identification_with_comet {
  * @return adjusted comet parameter file
  */
 process adjust_comet_params {
-    container { comet_image }
+    container { params.python_image }
 
     input:
-    path comet_params
+    path comet_params_file
+    path mcquac_params_file
     val search_labelled
 
     output:
     path "adjusted.comet.params"
 
+    script:
     """
-    cp ${comet_params} adjusted.comet.params
+    # set the number of threads
+    sed -i 's/^num_threads.*/num_threads = ${params.identification__comet_threads} /' ${comet_params_file}
 
-    sed -i 's/^num_threads.*/num_threads = ${params.identification__comet_threads} /' adjusted.comet.params
-
-    sed -i 's/^output_sqtfile.*/output_sqtfile = 0/' adjusted.comet.params
-    sed -i 's/^output_txtfile.*/output_txtfile = 0/' adjusted.comet.params
-    sed -i 's/^output_pepxmlfile.*/output_pepxmlfile = 0/' adjusted.comet.params
-    sed -i 's/^output_mzidentmlfile.*/output_mzidentmlfile = 1/' adjusted.comet.params
-    sed -i 's/^output_percolatorfile.*/output_percolatorfile = 0/' adjusted.comet.params
-
-    if [ ${params.identification__decoy_method} = true ];       # hardcoded for now
-    then
-        sed -i 's/^decoy_search.*/decoy_search  = 0/' adjusted.comet.params
-    fi
-    if [ ${search_labelled} = true ];       # hardcoded for now
-    then
-        sed -i 's/^add_K_lysine.*/add_K_lysine  = 8.014199/' adjusted.comet.params
-        sed -i 's/^add_R_arginine.*/add_R_arginine  = 10.008269/' adjusted.comet.params
-    fi
+    adjust_comet_params.py -json_in ${mcquac_params_file} -comet_params ${comet_params_file} -params_out adjusted.comet.params -search_labelled ${search_labelled}
     """
 }
 
@@ -99,7 +103,7 @@ process adjust_comet_params {
  * @return pepxml Path to pepXML file
  */
 process generate_decoy_database {
-    container { python_image }
+    container { params.python_image }
 
     input:
     path fasta
@@ -107,6 +111,7 @@ process generate_decoy_database {
     output:
     path "${fasta.baseName}_with_decoys.fasta"
 
+    script:
     """
     DecoyDatabase -in ${fasta} -out ${fasta.baseName}_with_decoys.fasta -method ${params.identification__decoy_method} -decoy_string DECOY_
     """
@@ -122,9 +127,11 @@ process generate_decoy_database {
  * @return mzid Path to mzid file
  */
 process comet_search {
-    container { comet_image }
-    cpus { identification__comet_threads }
-    memory { identification__comet_mem }
+    container { params.comet_image }
+    
+    cpus { params.identification__comet_threads }
+    memory { params.identification__comet_mem }
+
     publishDir "${fasta_output_folder}/", mode: 'copy', pattern: "*.fasta"  // Publish the FASTA file, which was used for the search
 
     input:
@@ -137,6 +144,7 @@ process comet_search {
     path "${mzml.baseName}.mzid", emit: mzids
     path input_fasta, emit: fasta_file
 
+    script:
     """
     comet -P${config_file} -D${input_fasta} ${mzml}
     """

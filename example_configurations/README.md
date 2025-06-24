@@ -1,10 +1,11 @@
 # Files in this folder
 
-## Comet Configuration
+## mcquac_params.json
 
-This is the actual Comet-Parameter file (search parameters are set here for the workflow)
+Central configuration file for McQuaC.
 
-## Spike-Ins.csv
+
+## spike-ins.csv
 
 This is a custom format for this QC-Workflow. Which gives us the information which PSMs in the identification have/can be found to also extract the XICs from.
 
