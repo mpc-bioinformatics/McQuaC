@@ -62,7 +62,7 @@ def add_table_in_hdf5(
     f, qc_acc: str, qc_short_name: str, qc_name: str, qc_description: str, 
     column_names: List[str], column_data: List[List[Any]], column_types: List[str]
     ): 
-    """Adds a table in gppmroups"""
+    """Adds a table in groups"""
 
     key = "|".join([qc_acc, qc_short_name])  # ACCESSION|SHORT_DESC
     table_group = f.create_group(key)
