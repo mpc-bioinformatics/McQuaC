@@ -29,6 +29,8 @@ def argparse_setup():
         "922.009798:1.1895",
         "1221.990637:1.3820"
     ])
+    parser.add_argument("-calibrants_mz_tolerance", "-cal_mz_tol", help="The MZ Tolerance for the calibrants in Th (m/z). Default: 10", type=float, default=10)
+    parser.add_argument("-calibrants_mobility_tolerance", "-cal_mob_tol", help="The Mobility Tolerance for the calibrants in 1/K0 (1/K0). Default: 0.1", type=float, default=0.1)
 
     return parser.parse_args()
 
@@ -60,7 +62,7 @@ def add_table_in_hdf5(
     f, qc_acc: str, qc_short_name: str, qc_name: str, qc_description: str, 
     column_names: List[str], column_data: List[List[Any]], column_types: List[str]
     ): 
-    """Adds a table in groups"""
+    """Adds a table in gppmroups"""
 
     key = "|".join([qc_acc, qc_short_name])  # ACCESSION|SHORT_DESC
     table_group = f.create_group(key)
@@ -100,7 +102,7 @@ def get_calibrant_info(calibrant_mz, calibrant_mobility, mz_tolerance=10, mobili
     ]
 
     # Get the rows, which have the higest intensity for each retention time for the calibrant within a specific mz and mobility tolerance.
-    calibrant_values = calibrant_values.loc[calibrant_values.groupby("rt_values").idxmax()["mz_values"]]
+    calibrant_values = calibrant_values.loc[calibrant_values[["rt_values", "intensity_values"]].groupby("rt_values").idxmax()["intensity_values"]]
 
     calibrant_values_rts = np.array(calibrant_values.index)
     calibrant_values_mzs = np.array(calibrant_values["mz_values"])
@@ -227,7 +229,11 @@ if __name__ == "__main__":
                     mz = float(mz)
                     mobility = float(mobility)
 
-                    calibrant_rts, calibrant_mzs, calibrant_mobilities = get_calibrant_info(mz, mobility)
+                    calibrant_rts, calibrant_mzs, calibrant_mobilities = get_calibrant_info(
+                        mz, mobility,
+                        mz_tolerance=args.calibrants_mz_tolerance,
+                        mobility_tolerance=args.calibrants_mobility_tolerance
+                        )
 
                     column_data[0] = np.append(column_data[0], [[mz]*len(calibrant_rts)])
                     column_data[1] = np.append(column_data[1], [[mobility]*len(calibrant_rts)])
