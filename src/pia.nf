@@ -8,8 +8,6 @@
 
 nextflow.enable.dsl=2
 
-pia_image = 'quay.io/biocontainers/pia:1.5.5--hdfd78af_0'
-
 params.pia_gb_ram = 16
 params.pia_threads = 8
 
@@ -123,7 +121,7 @@ workflow pia_extract_metrics {
  * @return pia.xml the compilation as pia.xml
  */
 process compile_pia_xmls {
-    container { pia_image }
+    label 'pia_image'
     
     cpus {params.pia_threads}
     memory {params.pia_gb_ram + " GB"}
@@ -149,7 +147,7 @@ process compile_pia_xmls {
  * @return an pia_analysis.json with defined parameters for the QC
  */
 process prepare_analysis_json {
-    container { pia_image }
+    label 'pia_image'
 
     input:
     val psm_export
@@ -225,7 +223,7 @@ process prepare_analysis_json {
  *
  */
 process pia_run_analysis {
-    container { pia_image }
+    label 'pia_image'
 
     cpus {params.pia_threads}
     memory {params.pia_gb_ram + " GB"}
