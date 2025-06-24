@@ -31,7 +31,9 @@ def add_entry_to_hdf5(
         ds[:] = value
     else:
         f.create_dataset(key, value_shape, dtype=value_type, compression="gzip")
-        f[key].write_direct(np.array(value, dtype=value_type))
+        if not any([x == 0 for x in value_shape]):
+            # Check if any dimension is 0. If so, we do not write data in it (zero lengthed result).
+            f[key].write_direct(np.array(value, dtype=value_type))
     
     f[key].attrs["qc_short_name"] = qc_short_name
     f[key].attrs["qc_name"] = qc_name

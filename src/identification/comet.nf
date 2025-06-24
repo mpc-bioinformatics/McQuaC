@@ -14,6 +14,10 @@ params.identification__comet_threads = 8
 // ~6 GB for 35000 MS and 35 MB of FASTA
 // Virtual and real memory were roughly equal
 params.identification__comet_mem = "10 GB"
+// If true, decoys are generated and searched against
+params.identification__generate_decoys = false
+// Method to generate decoys. OpenMS allows either: 'reverse' or 'shuffle'
+params.identification__decoy_method = 'shuffle'
 
 /*
  * Identifies peptides in MS/MS spectra using Comet
@@ -25,14 +29,21 @@ params.identification__comet_mem = "10 GB"
  */
 workflow identification_with_comet {
     take:
-        mzmls
-        fasta_file
-        comet_params
-        search_labelled
+        mzmls  // Channel of mzML files, which are used for searching
+        fasta_file  // A FASTA file, depending 
+        comet_params  // Path to the comete parameter file
+        search_labelled  // true if the search is labelled, false otherwise
+        fasta_output_folder  // Folder where the FASTA file should be written. The one which is used for the search
 
     main:
         adj_comet_params = adjust_comet_params(comet_params, search_labelled)
-        id_results = comet_search(mzmls, fasta_file, adj_comet_params)
+
+        if (params.identification__generate_decoys) {
+            generate_decoy_database(fasta_file)
+            fasta_file = generate_decoy_database.out
+        }
+
+        id_results = comet_search(mzmls, fasta_file, adj_comet_params, fasta_output_folder)
     
     emit:
         mzids = id_results.mzids
@@ -76,25 +87,51 @@ process adjust_comet_params {
 }
 
 /*
- * Identifies peptides in MS/MS spectra using Comet
- * @param mzml Path to mzML file
+ * Generates a decoy database from the given FASTA file
+ * @param fasta Path to fasta file
  * @param fasta_file Path to mzML file
  * @param config_file Path to comet params file
  *
  * @return pepxml Path to pepXML file
  */
+process generate_decoy_database {
+    container { python_image }
+
+    input:
+    path fasta
+
+    output:
+    path "${fasta.baseName}_with_decoys.fasta"
+
+    """
+    DecoyDatabase -in ${fasta} -out ${fasta.baseName}_with_decoys.fasta -method ${params.identification__decoy_method} -decoy_string DECOY_
+    """
+}
+
+
+/*
+ * Identifies peptides in MS/MS spectra using Comet
+ * @param mzml Path to mzML file
+ * @param fasta_file Path to mzML file
+ * @param config_file Path to comet params file
+ *
+ * @return mzid Path to mzid file
+ */
 process comet_search {
     container { comet_image }
     cpus { identification__comet_threads }
     memory { identification__comet_mem }
+    publishDir "${fasta_output_folder}/", mode: 'copy', pattern: "*.fasta"  // Publish the FASTA file, which was used for the search
 
     input:
     path mzml
     path input_fasta
     path config_file
+    path fasta_output_folder
 
     output:
     path "${mzml.baseName}.mzid", emit: mzids
+    path input_fasta, emit: fasta_file
 
     """
     comet -P${config_file} -D${input_fasta} ${mzml}
