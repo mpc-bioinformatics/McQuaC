@@ -51,12 +51,6 @@ workflow get_feature_metrics {
          feature_metrics
 }
 
-/**
- * This process is used to convert the comet parameters into the parameters needed for the feature finder.
- * 
- * @param comet_params The comet parameters file
- * @return The feature finder parameters (value channel)
- */
 process get_feature_finder_params_from_mcquac_params {
 	label 'mcquac_image'
 
