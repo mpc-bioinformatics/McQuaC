@@ -7,8 +7,6 @@
 
 nextflow.enable.dsl=2
 
-python_image = 'mpc/nextqcflow-python:latest'
-
 /*
  * Combines the metrics into one big HDF5 file
  * 
