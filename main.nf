@@ -50,6 +50,7 @@ workflow {
 	// Retrieve input files
 	thermo_raw_files = Channel.fromPath(params.main_raw_spectra_folder + "/*.raw")
 	bruker_raw_folders = Channel.fromPath(params.main_raw_spectra_folder + "/*.d", type: 'dir')
+	input_mzml_files = Channel.fromPath(params.main_raw_spectra_folder + "/*.mzML")
 
 	main_outdir = Channel.fromPath(params.main_outdir).first()
 
@@ -60,7 +61,10 @@ workflow {
 
 	raw_files = thermo_raw_files.concat(bruker_raw_folders)
 	// File conversion into open formats
-	mzmls = convert_raws_to_mzml(thermo_raw_files, bruker_raw_folders)
+	coverted_mzmls = convert_raws_to_mzml(thermo_raw_files, bruker_raw_folders)
+
+	// Add already existing mzML files to the converted mzML files
+	mzmls = coverted_mzmls.concat(input_mzml_files)
 	
 	// Retreive MZML Metrics
 	mzml_metrics = get_mzml_infos(mzmls)
@@ -117,13 +121,12 @@ workflow {
 		.concat(custom_header_infos.map{file -> tuple(file.name.take(file.name.lastIndexOf('-custom_headers.hdf5')), file)})
 		.groupTuple()
 
-	
 	combined_metrics = combine_metric_hdf5(hdf5s_per_run, main_outdir)
 
 	// Visualize the results (and move them to the results folder)
 	visualize_results(combined_metrics)
 
-	output_processing_success(raw_files, hdf5s_per_run.toList().transpose().first().flatten())
+	output_processing_success(raw_files.concat(input_mzml_files), hdf5s_per_run.toList().transpose().first().flatten())
 }
 
 /**
