@@ -11,9 +11,13 @@ python_image = 'mpc/nextqcflow-python:latest'
 // Set if you want to extract specific headers from Thermo raw measurements, otherwise the default is used.
 // Have a look into the corresponding python script for the headers.
 params.ms_run_metrics__thermo_headers = ""
- // Set if you want to extract specific headers from Bruker raw measurements, otherwise the default is used.
- // Have a look into the corresponding python script for the headers.
+// Set if you want to extract specific headers from Bruker raw measurements, otherwise the default is used.
+// Have a look into the corresponding python script for the headers.
 params.ms_run_metrics__bruker_headers = ""
+// Set if you want to extract specific calibrants in Bruker raw measurements, otherwise the default is used 
+// (622.0290 m/z, 922.009798 m/z and 1221.990637 m/z with a 10 m/z and 0.1 1/k0 tolerance).
+// Have a look into the corresponding python script for the headers.
+params.ms_run_metrics__bruker_calibrants = ""
 // Set additional parameters for the mzml-statistics geeneration.
 // Have a look into the corresponding python script possible parameters.
 params.ms_run_metrics__mzml_statistics = ""
@@ -22,7 +26,7 @@ params.ms_run_metrics__mzml_statistics = ""
 params.ms_run_metrics__thermo_raw_mem = "10 GB"
 // Memory for the tdf2mzml, used 0.39 GB for a Raw file with 298748 MS scans 
 /// and 0.14GB for a Raw file with 35023 MS scans (measured with `/usr/bin/time -v ...`). 5 GB seems more then enough.
-params.ms_run_metrics__bruker_raw_mem = "1 GB"
+params.ms_run_metrics__bruker_raw_mem = "10 GB"
 /// Tracing showed up to 4.7 GB virtual memory for 30000 MS scans
 params.ms_run_metrics__mzml_mem = "10 GB"
 
@@ -113,7 +117,9 @@ process extract_headers_from_bruker_raw_files {
     path "${raw.baseName}-custom_headers.hdf5"
 
     """
-    extract_bruker_headers.py -d_folder ${raw} -out_hdf5 ${raw.baseName}-custom_headers.hdf5 ${params.ms_run_metrics__bruker_headers}
+    extract_bruker_headers.py -d_folder ${raw} -out_hdf5 ${raw.baseName}-custom_headers.hdf5 ${params.ms_run_metrics__bruker_headers} ${params.ms_run_metrics__bruker_calibrants}
+
+    
     """
 }
 
