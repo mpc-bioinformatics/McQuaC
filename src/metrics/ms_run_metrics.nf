@@ -6,8 +6,6 @@
 
 nextflow.enable.dsl=2
 
-python_image = 'mpc/nextqcflow-python:latest'
-
 // Set if you want to extract specific headers from Thermo raw measurements, otherwise the default is used.
 // Have a look into the corresponding python script for the headers.
 params.ms_run_metrics__thermo_headers = ""
