@@ -1,5 +1,5 @@
-# AMD64 needed explicitly on ARM as some sofwtare is only available in AMD64
-FROM --platform=amd64 mambaorg/micromamba:1.5.1-jammy
+# AMD64 needed explicitly on ARM as some software is only available in AMD64
+FROM --platform=amd64 mambaorg/micromamba:2-ubuntu24.04
 
 WORKDIR /home/mambauser
 # Copy backend and environment.yml
@@ -7,7 +7,7 @@ COPY --chown=mambauser:mambauser environment.yml .
 COPY --chown=mambauser:mambauser requirements.txt .
 
 USER mambauser
-ENV HOME /home/mambauser
+ENV HOME=/home/mambauser
 ENV ENV_NAME=mcquac
 
 RUN echo 'show_banner: false' > ~/.mambarc
