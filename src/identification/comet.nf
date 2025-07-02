@@ -7,8 +7,6 @@
 
 nextflow.enable.dsl=2
 
-comet_image = 'quay.io/medbioinf/comet-ms:v2024.01.0'
-
 params.identification__comet_threads = 8
 // Memory per comet search
 // ~6 GB for 35000 MS and 35 MB of FASTA
@@ -58,7 +56,7 @@ workflow identification_with_comet {
  * @return adjusted comet parameter file
  */
 process adjust_comet_params {
-    container { comet_image }
+    label 'comet_image'
 
     input:
     path comet_params
@@ -122,7 +120,7 @@ process generate_decoy_database {
  * @return mzid Path to mzid file
  */
 process comet_search {
-    container { comet_image }
+    label 'comet_image'
     cpus { identification__comet_threads }
     memory { identification__comet_mem }
     publishDir "${fasta_output_folder}/", mode: 'copy', pattern: "*.fasta"  // Publish the FASTA file, which was used for the search

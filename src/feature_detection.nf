@@ -7,8 +7,6 @@
 
 nextflow.enable.dsl=2
 
-python_image = 'mpc/nextqcflow-python:latest'
-
 params.openms_threads = 8   // hardcoded for now, number of threads used by OpenMS
 params.min_charge = 2       // hardcoded for now
 params.max_charge = 5       // hardcoded for now
@@ -60,7 +58,7 @@ workflow get_feature_metrics {
  * @return The feature finder parameters (value channel)
  */
 process get_feature_finder_params_from_comet_params {
-	container { python_image }
+	label 'mcquac_image'
 
 	input:
 	path comet_params
@@ -74,7 +72,7 @@ process get_feature_finder_params_from_comet_params {
 }
 
 process run_feature_finder {
-    container { python_image }
+    label 'mcquac_image'
 
     cpus { params.openms_threads }
 
@@ -95,7 +93,7 @@ process run_feature_finder {
 }
 
 process map_features_to_idents {
-    container { python_image }
+    label 'mcquac_image'
 
     cpus { params.openms_threads }
 
@@ -113,7 +111,7 @@ process map_features_to_idents {
 }
 
 process get_metrics_from_featurexml {
-    container { python_image }
+    label 'mcquac_image'
 
     input:
     path featurexml
@@ -133,7 +131,7 @@ process get_metrics_from_featurexml {
  * Necessary to prevent memory issues with FeatureFinder
  */
 process filter_mzml {
-    container { python_image }
+    label 'mcquac_image'
 
     cpus { params.openms_threads }
 

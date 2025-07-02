@@ -6,8 +6,6 @@
 
 nextflow.enable.dsl=2
 
-python_image = 'mpc/nextqcflow-python:latest'
-
 // Set if you want to extract specific headers from Thermo raw measurements, otherwise the default is used.
 // Have a look into the corresponding python script for the headers.
 params.ms_run_metrics__thermo_headers = ""
@@ -70,7 +68,8 @@ workflow get_mzml_infos {
  * @return HDF5 with extracted headers
  */
 process extract_headers_from_thermo_raw_files {
-    container { python_image}
+    label 'mcquac_image'
+
     errorStrategy 'ignore'
 
     memory params.ms_run_metrics__thermo_raw_mem
@@ -101,7 +100,8 @@ process extract_headers_from_thermo_raw_files {
  * @return HDF5 with extracted headers
  */
 process extract_headers_from_bruker_raw_files {
-    container { python_image}
+    label 'mcquac_image'
+
     errorStrategy 'ignore'
 
     memory params.ms_run_metrics__bruker_raw_mem
@@ -124,7 +124,8 @@ process extract_headers_from_bruker_raw_files {
  * @return HDF5 file with the extracted data
  */
 process extract_data_from_mzml {
-    container { python_image}
+    label 'mcquac_image'
+
 
     cpus 1
     memory params.ms_run_metrics__mzml_mem

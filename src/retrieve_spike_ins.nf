@@ -7,9 +7,6 @@
 
 nextflow.enable.dsl=2
 
-python_image = 'mpc/nextqcflow-python:latest'
-thermorawfileparser_image = 'quay.io/biocontainers/thermorawfileparser:1.4.3--ha8f3691_0'
-
 params.max_parallel_xic_extractors = Runtime.runtime.availableProcessors() / 2
 
 /*
@@ -83,7 +80,7 @@ workflow retrieve_spike_ins_information {
  * @return *-identifications.csv a file mapping from the sequences to found identifications
  */
 process generate_json_and_identifications {
-    container { python_image }
+    label 'mcquac_image'
 
     input:
     path psm_mztab_files
@@ -108,7 +105,7 @@ process generate_json_and_identifications {
  * @return baseName.json the extracted XICs in JSON format
  */ 
 process retrieve_xics_from_thermo_raw_spectra {
-    container { thermorawfileparser_image }
+    label 'thermorawfileparser_image'
 
     maxForks params.max_parallel_xic_extractors
 
@@ -133,7 +130,7 @@ process retrieve_xics_from_thermo_raw_spectra {
  * @return baseName.json the extracted XICs in JSON format
  */ 
 process retrieve_xics_from_bruker_raw_spectra {
-    container { python_image }
+    label 'mcquac_image'
 
     maxForks params.max_parallel_xic_extractors
 
@@ -158,7 +155,7 @@ process retrieve_xics_from_bruker_raw_spectra {
  * @return baseName-spikeins.csv the metrics of the spike-ins extraction, in CSV
  */ 
 process get_spike_in_metrics {
-    container { python_image }
+    label 'mcquac_image'
 
     input:
     tuple val(run_basename), path(xic_json), path(identifications)
