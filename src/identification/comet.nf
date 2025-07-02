@@ -128,7 +128,7 @@ process comet_search {
     
     cpus { params.identification__comet_threads }
     memory { params.identification__comet_mem }
-
+    
     publishDir "${fasta_output_folder}/", mode: 'copy', pattern: "*.fasta"  // Publish the FASTA file, which was used for the search
 
     input:
