@@ -72,7 +72,7 @@ process create_fresh_comet_params {
  * @return adjusted comet parameter file
  */
 process adjust_comet_params {
-    label 'comet_image'
+    label 'mcquac_image'
 
     input:
     path comet_params_file
