@@ -4,6 +4,14 @@
 
 Central configuration file for McQuaC.
 
+This json dictionary holds central settings for the pipeline, which will be parsed for the spectrum identification as well as for the quantification.
+
+The following parameters are supported:
+
+
+| comet | the value is a dict, all key-value pairs of the dict are passed to the comet parameters in the `comet.params`, like `"fragment_bin_tol": 0.02`|
+|-----|------|
+|labelled_mods | value is a dict, interpreted as the (fixed) modifications (comet.params style) which are added to the identification for the "labelled search", if this is activated. |
 
 ## spike-ins.csv
 
