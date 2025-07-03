@@ -1,15 +1,15 @@
 name: mcquac
 channels:
-  - defaults
   - conda-forge
   - bioconda
+  - defaults
 dependencies:
-  - python=3.8
+  - python=3.11
   - pip
   - setuptools
-  - openms  = 2.8.0
-  - pyopenms = 2.8.0  # needs to be installed by conda to link the correct OpenMS binaries
-  - mono >= 6
-  - conda-forge::compilers = 1.8.0 
+  - bioconda::openms = 3.1.0
+  - bioconda::pyopenms = 3.1.0
+  - conda-forge::mono ~= 6.12
+  - conda-forge::compilers = 1.8.0
   - pip:
     - -r ./requirements.txt
