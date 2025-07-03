@@ -5,14 +5,14 @@ import json
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-json_in", required=True)
+    parser.add_argument("-params", required=True)
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = argparse_setup()
 
-    with open(args.json_in, 'r') as f:
+    with open(args.params, 'r') as f:
         set_params = json.load(f)
 
     # Extract mass tolerance and unit

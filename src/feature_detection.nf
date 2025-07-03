@@ -62,7 +62,7 @@ process get_feature_finder_params_from_mcquac_params {
 
     script:
 	"""
-    feature_finder_params_from_mcquac_params.py -json_in ${mcquac_params}
+    feature_finder_params_from_mcquac_params.py -params ${mcquac_params}
 	"""
 }
 
