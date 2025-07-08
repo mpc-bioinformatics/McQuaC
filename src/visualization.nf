@@ -53,7 +53,7 @@ process visualize_results {
 	path("*.${output_table_type}")
 	path(combined_metrics)
 	path("fig13_MS1_map")
-	path("fig16_additional_headers")
+	path("fig15_additional_headers")
 
 	"""
 	if ${search_spike_ins}

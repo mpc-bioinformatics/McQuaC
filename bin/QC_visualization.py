@@ -945,8 +945,8 @@ if __name__ == "__main__":
             font=dict(size=14)
         )
         fig12.update_layout(
-            width=width_pca,
-            height=height_pca,
+            width=args.width_pca,
+            height=args.height_pca,
             title="Empty Plot"
         )
         fig12_loadings = fig12
@@ -1086,103 +1086,119 @@ if __name__ == "__main__":
 ################################################################################################
 ## Fig 15: all other headers by Thermo or Bruker
 
-    if not os.path.exists(output_path + os.sep + "fig16_additional_headers"):
-        os.makedirs(output_path + os.sep + "fig16_additional_headers")
+    if not os.path.exists(output_path + os.sep + "fig15_additional_headers"):
+        os.makedirs(output_path + os.sep + "fig15_additional_headers")
 
     add_headers = []
     for file in hdf5_file_names:
-        add_headers.extend(dataframes[file]["Extracted_Headers"].columns)
-    ### remove duplicates
-    add_headers = set(add_headers)
-    add_headers = list(add_headers)# .sort()  
-    add_headers.sort() ## sort alphabetically
-     
-    ### headers that define the time (x-axis)
-    if "Time" in add_headers:
-        time_header = "Time" # Bruker: Time 
-    if "Scan_StartTime" in add_headers:
-        time_header = "Scan_StartTime" # Thermo: Scan_StartTime
-   
-    for header in add_headers:
-           
-        if header == time_header: # Time, will be needed as x-axis in all plots
+        if ("Extracted_Headers" not in dataframes[file].keys()):
             continue
-        if header == "MsMsType":  # MsMsType codes for DIA/DDA for example. Doesn't need to be plotted.
-            continue
-        if header == "Scan_msLevel":  # MsMsType codes for MS1 or MS2 level. Doesn't need to be plotted.
-            continue
+        else: 
+            add_headers.extend(dataframes[file]["Extracted_Headers"].columns)
+            
+    if add_headers != []:
+        ### remove duplicates
+        add_headers = set(add_headers)
+        add_headers = list(add_headers)# .sort()  
+        add_headers.sort() ## sort alphabetically
         
-        ### extract data from compressed columns and put them into long format
-        x = [] # x-axis time_header
-        y = [] # y-axis additional header
-        fn = [] # filename
-        
-        for file in hdf5_file_names:
+        ### headers that define the time (x-axis)
+        time_header = ""
+        if "Time" in add_headers:
+            time_header = "Time" # Bruker: Time 
+        if "Scan_StartTime" in add_headers:
+            time_header = "Scan_StartTime" # Thermo: Scan_StartTime
 
-            if header not in dataframes[file]["Extracted_Headers"].columns:
-                # Skip, there is no data available for this hdf5 file
-                continue
-            
-            y_tmp = dataframes[file]["Extracted_Headers"][header].values
-            x_tmp = dataframes[file]["Extracted_Headers"][time_header].values
-            
-            display_header = header
-            # Ion injection time and lock mass correction should be filtered to only contain values for MS1 spectra
-            if header in ["EXTRA_Ion Injection Time (ms)", "EXTRA_LM mz-Correction (ppm),LM Correction"]:
-                msmsLevel = dataframes[file]["Extracted_Headers"]["Scan_msLevel"].values
-                y_tmp = y_tmp[msmsLevel == 1]
-                x_tmp = x_tmp[msmsLevel == 1]    
-                display_header = header + " (MS1 filtered)"
-            
-            x += [float(_x) for _x in x_tmp]
-            y += [float(_y) for _y in y_tmp]
-            fn += [file] * len(x_tmp)
+        if time_header == "":
+            print("No time header found in the extracted headers, cannot plot additional headers!")
+        else: 
+    
+            for header in add_headers:
+                
+                if header == time_header: # Time, will be needed as x-axis in all plots
+                    continue
+                if header == "MsMsType":  # MsMsType codes for DIA/DDA for example. Doesn't need to be plotted.
+                    continue
+                if header == "Scan_msLevel":  # MsMsType codes for MS1 or MS2 level. Doesn't need to be plotted.
+                    continue
+                
+                ### extract data from compressed columns and put them into long format
+                x = [] # x-axis time_header
+                y = [] # y-axis additional header
+                fn = [] # filename
+                
+                for file in hdf5_file_names:
 
-        df_tmp = pd.DataFrame({
-            "filename": fn,
-            "x": x,
-            "y": y
-        })
-        
-        ### transform time to minutes if necessary
-        if args.RT_unit == "min":
-            df_tmp["x"] = df_tmp["x"]/60
+                    if header not in dataframes[file]["Extracted_Headers"].columns:
+                        # Skip, there is no data available for this hdf5 file
+                        continue
+                    
+                    y_tmp = dataframes[file]["Extracted_Headers"][header].values
+                    x_tmp = dataframes[file]["Extracted_Headers"][time_header].values
+                    
+                    display_header = header
+                    # Ion injection time and lock mass correction should be filtered to only contain values for MS1 spectra
+                    if header in ["EXTRA_Ion Injection Time (ms)", "EXTRA_LM mz-Correction (ppm),LM Correction"]:
+                        msmsLevel = dataframes[file]["Extracted_Headers"]["Scan_msLevel"].values
+                        y_tmp = y_tmp[msmsLevel == 1]
+                        x_tmp = x_tmp[msmsLevel == 1]    
+                        display_header = header + " (MS1 filtered)"
+                    
+                    x += [float(_x) for _x in x_tmp]
+                    y += [float(_y) for _y in y_tmp]
+                    fn += [file] * len(x_tmp)
+
+                df_tmp = pd.DataFrame({
+                    "filename": fn,
+                    "x": x,
+                    "y": y
+                })
+                
+                ### transform time to minutes if necessary
+                if args.RT_unit == "min":
+                    df_tmp["x"] = df_tmp["x"]/60
+                
+            
+                if not df_tmp.empty:
+                    #df_tmp = df_tmp.sort_values(by = ["filename", "x"], ascending=True)  
+                    fig15 = px.line(df_tmp, x="x", y="y", color = "filename", title = display_header)
+                    fig15.update_traces(line=dict(width=0.5))
+                    fig15.update_yaxes(exponentformat="E") 
+                    fig15.update_layout(height = int(args.height_barplots))
+                    if args.width_barplots > 0:
+                        fig15.update_layout(width = int(args.width_barplots))
+                    fig15.update_layout(yaxis_title = display_header)
+                    if args.RT_unit == "sec":
+                        fig15.update_layout(xaxis_title = "Time (sec)")
+                    elif args.RT_unit == "min":
+                        fig15.update_layout(xaxis_title = "Time (min)")
+                    
+                else: 
+                    fig15 = go.Figure()
+                    fig15.add_annotation(
+                        x=0.5,
+                        y=0.5,
+                        text="No '{}' available!".format(display_header),
+                        showarrow=False,
+                        font=dict(size=14)
+                    )
+                    fig15.update_layout(
+                        width=1500,
+                        height=1000,
+                        title="Empty Plot"
+                    )
+
+                if fig_show:
+                    fig15.show()
+                with open(output_path + os.sep + "fig15_additional_headers" + os.sep + "{}.plotly.json".format(re.sub('\W+','', display_header)), "w") as json_file:
+                    json_file.write(plotly.io.to_json(fig15))
+                fig15.write_html(file = output_path + os.sep + "fig15_additional_headers" + os.sep + "{}.html".format(re.sub('\W+','', display_header)), auto_open = False)
+
+
+            
         
     
-        if not df_tmp.empty:
-            #df_tmp = df_tmp.sort_values(by = ["filename", "x"], ascending=True)  
-            fig16 = px.line(df_tmp, x="x", y="y", color = "filename", title = display_header)
-            fig16.update_traces(line=dict(width=0.5))
-            fig16.update_yaxes(exponentformat="E") 
-            fig16.update_layout(height = int(args.height_barplots))
-            if args.width_barplots > 0:
-                fig16.update_layout(width = int(args.width_barplots))
-            fig16.update_layout(yaxis_title = display_header)
-            if args.RT_unit == "sec":
-                fig16.update_layout(xaxis_title = "Time (sec)")
-            elif args.RT_unit == "min":
-                fig16.update_layout(xaxis_title = "Time (min)")
-            
-        else: 
-            fig16 = go.Figure()
-            fig16.add_annotation(
-                x=0.5,
-                y=0.5,
-                text="No '{}' available!".format(display_header),
-                showarrow=False,
-                font=dict(size=14)
-            )
-            fig16.update_layout(
-                width=1500,
-                height=1000,
-                title="Empty Plot"
-            )
 
-        if fig_show:
-            fig16.show()
-        with open(output_path + os.sep + "fig16_additional_headers" + os.sep + "{}.plotly.json".format(re.sub('\W+','', display_header)), "w") as json_file:
-            json_file.write(plotly.io.to_json(fig16))
-        fig16.write_html(file = output_path + os.sep + "fig16_additional_headers" + os.sep + "{}.html".format(re.sub('\W+','', display_header)), auto_open = False)
 
    
 # %%

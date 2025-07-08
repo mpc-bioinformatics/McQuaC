@@ -36,7 +36,7 @@ params.spike_ins_table = "${baseDir}/example_configurations/spike_ins.csv" // Th
 params.main_outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
 
 // Parameter to only visualize the results (as hdf5 files) without running the whole workflow
-params.visualize_only = false // If a path is set here, the workflow will only visualize the results (hdf5 files) in this path and not run the whole workflow.
+params.visualize_only = false // If true, the workflow will only visualize the results (hdf5 files) in main_input_folder and not run the whole workflow.
 
 // Parameters for visualization script
 params.rt_unit = "sec" // Unit of the retention time, either sec for seconds or min for minutes.
