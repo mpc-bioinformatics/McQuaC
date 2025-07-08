@@ -13,5 +13,11 @@
     "labelled_mods": {
         "add_K_lysine": 8.014199,
         "add_R_arginine": 10.008269
+    },
+
+    "ms_run_metrics": {
+        "base_peak_tic_up_to": 105,
+        "filter_threshold": 0.00001,
+        "report_up_to_charge": 5
     }
 }

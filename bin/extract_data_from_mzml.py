@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import sys
 import argparse
 import pyopenms
 import numpy as np
@@ -10,18 +9,14 @@ import datetime
 import time
 import h5py
 from typing import List, Any
+import parse_central_json as pcj
 
 
 def argparse_setup():
     parser = argparse.ArgumentParser()
     parser.add_argument("-mzml", help="mzML file to extract data from")
     parser.add_argument("-out_hdf5", help="The Output HDF5 file")
-    parser.add_argument("-base_peak_tic_up_to", default=105, type=float, help="Retrieve the Base peak Intensity Max and the Total Ion "
-        "Current from minute 0 up to minute X. Defaults to 105 minutes")
-    parser.add_argument("-filter_threshold", default=0.00001, type=float, help="Threshold for the MS1 peaks, to be"
-        " included in the output file. Defaults to 0.00001 (0.001%) of the highest overall MS1 peak. Values lower"
-        " will be disregarded.")
-    parser.add_argument("-report_up_to_charge", default=5, help="Upper limit of range to be reported in a csv table for the charge")
+    parser.add_argument("-mcquac_params", required=True, type=argparse.FileType('r'), help="JSON file with central McQuaC parameters.")
     return parser.parse_args()
 
 
@@ -86,6 +81,13 @@ def get_accumulated_TIC(exp, mslevel):
 
 if __name__ == "__main__":
     args = argparse_setup()
+
+    # parse parameters from central json file
+    mcquac_params = pcj.parse_json(args.mcquac_params.name)
+    
+    base_peak_tic_up_to = int(pcj.get_central_param(mcquac_params, ["ms_run_metrics", "base_peak_tic_up_to"], default_value=105))
+    filter_threshold = float(pcj.get_central_param(mcquac_params, ["ms_run_metrics", "filter_threshold"], default_value=0.00001))
+    report_up_to_charge = int(pcj.get_central_param(mcquac_params, ["ms_run_metrics", "report_up_to_charge"], default_value=5))
 
     # # Load MZML
     exp = pyopenms.MSExperiment()
@@ -191,9 +193,9 @@ if __name__ == "__main__":
         prec_unknown = 0 if 0 not in num_ms2_prec_charges else num_ms2_prec_charges[0] / num_ms2_spectra 
         precz_more = 0
         for key in num_ms2_prec_charges.keys():
-            if key > int(args.report_up_to_charge):
+            if key > report_up_to_charge:
                 precz_more += num_ms2_prec_charges[key]
-        prec_charge_list = [[num_ms2_prec_charges[i] / num_ms2_spectra] for i in range(1, int(args.report_up_to_charge) + 1)]
+        prec_charge_list = [[num_ms2_prec_charges[i] / num_ms2_spectra] for i in range(1, report_up_to_charge + 1)]
         ### for now, unknown charge states are reported as 0 (altough it is not mentioned in the ontology)
         prec_charge_list = [[prec_unknown]] + prec_charge_list + [[precz_more / num_ms2_spectra]]
         add_table_in_hdf5(
@@ -205,9 +207,9 @@ if __name__ == "__main__":
                               "The fractions [0,1] are given in the 'Fraction' column, corresponding charges in the 'Charge state' column. "
                               "The highest charge state is to be interpreted as that charge state or higher."
                               ), 
-            column_names = [str(i) for i in range(0, int(args.report_up_to_charge) + 2)],
+            column_names = [str(i) for i in range(0, report_up_to_charge + 2)],
             column_data = prec_charge_list, 
-            column_types = ["float64" for i in range(0, int(args.report_up_to_charge) + 2)]
+            column_types = ["float64" for i in range(0, report_up_to_charge + 2)]
         )
         
         
@@ -270,19 +272,23 @@ if __name__ == "__main__":
 
 
         # and up to 105 minutes
-        break_on = args.base_peak_tic_up_to*60
-        for i in range(len(ms1_ms2_rt)):
-            if break_on < ms1_ms2_rt[i]:
-                break
+        break_on = base_peak_tic_up_to*60
+        if break_on > 0:
+            for i in range(len(ms1_ms2_rt)):
+                if break_on < ms1_ms2_rt[i]:
+                    break
+        else:
+            i = len(ms1_ms2_rt)-1
+
         base_peak_intensity_max_up_to_xm = max(ms1_ms2_basepeaks[:i-1])
         total_ion_current_max_up_to_xm = max(ms1_ms2_tic[:i-1])
 
         add_entry_to_hdf5(
             f = out_h5, 
             qc_acc = "LOCAL:02", 
-            qc_short_name = "base_peak_intensity_max_up_to_" + str(args.base_peak_tic_up_to), 
+            qc_short_name = "base_peak_intensity_max_up_to_" + str(base_peak_tic_up_to), 
             qc_name = "base peak intensity max", 
-            qc_description = "The maximum base peak (highest peak in spectrum) across all MS1 and MS2 spectra up to " + str(args.base_peak_tic_up_to) + " minutes.", 
+            qc_description = "The maximum base peak (highest peak in spectrum) across all MS1 and MS2 spectra up to " + str(base_peak_tic_up_to) + " minutes.", 
             value = base_peak_intensity_max, 
             value_shape = (1,), 
             value_type = "float64", 
@@ -291,9 +297,9 @@ if __name__ == "__main__":
         )
         add_entry_to_hdf5(
             f = out_h5, qc_acc = "LOCAL:04", 
-            qc_short_name = "total_ion_current_max_up_to_" + str(args.base_peak_tic_up_to), 
+            qc_short_name = "total_ion_current_max_up_to_" + str(base_peak_tic_up_to), 
             qc_name = "total ion current max", 
-            qc_description = "The maximum of all TICs across MS1 and MS2 spectra up to " + str(args.base_peak_tic_up_to) + " minutes.", 
+            qc_description = "The maximum of all TICs across MS1 and MS2 spectra up to " + str(base_peak_tic_up_to) + " minutes.", 
             value = total_ion_current_max, 
             value_shape = (1,), 
             value_type = "float64", 
@@ -311,7 +317,7 @@ if __name__ == "__main__":
         ms2_tic = [] # This is the MS2-TIC-BLOB
         ms2_rt = []  # This is the MS2-RT-BLOB
         ms2_mz = []  # This is the MS2-MZ-BLOB (needed or the Ion-Map)
-        BASE_PEAK_NOISE_THRESHOLD = base_peak_intensity_max*args.filter_threshold  
+        BASE_PEAK_NOISE_THRESHOLD = base_peak_intensity_max*filter_threshold  
         for spectrum in exp.getSpectra():
             if spectrum.getMSLevel() == 1:
                 rt = spectrum.getRT()
