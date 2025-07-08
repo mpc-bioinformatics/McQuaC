@@ -30,7 +30,8 @@ include {output_processing_success} from workflow.projectDir + '/src/io/output_p
 // Parameters required for the standalone execution of this main-nextflow script
 params.main_raw_spectra_folder = "" // The folder containing the raw spectra
 params.main_fasta_file = "" // A SINGLE-Fasta-file of the species to be searched (should also contain the SpikeIns if needed)
-params.main_comet_params = "${baseDir}/example_configurations/high-high.comet.params" // Main-Search-Parameters for the comet search engine
+params.mcquac_params_file = "${baseDir}/example_configurations/mcquac_params.json" // the main parameters file for McQuaC
+
 params.spike_ins_table = "${baseDir}/example_configurations/spike_ins.csv" // The information about spike-ins 
 params.main_outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
 
@@ -56,7 +57,7 @@ workflow {
 	// .first() convert the queue channel with only one file to a value channel, making it possible to use multiple time
 	// e.g. to automatically start multiple concurrent identifications (no need for map each raw file with the fasta and config file)
 	fasta_file = Channel.fromPath(params.main_fasta_file).first()
-	comet_params = Channel.fromPath(params.main_comet_params).first()
+	mcquac_params_file = Channel.fromPath(params.mcquac_params_file).first()
 
 	raw_files = thermo_raw_files.concat(bruker_raw_folders)
 	// File conversion into open formats
@@ -66,7 +67,7 @@ workflow {
 	mzml_metrics = get_mzml_infos(mzmls)
 
 	// Identify spectra using Comet
-	comet_ids = identification_with_comet(mzmls, fasta_file, comet_params, false, main_outdir)
+	comet_ids = identification_with_comet(mzmls, fasta_file, mcquac_params_file, false, main_outdir)
 
 	// Execute protein inference and filter by FDR
 	pia_report_files = pia_analysis_full(comet_ids.mzids)
@@ -79,7 +80,7 @@ workflow {
 
 	// search additionally for labelled PSMs
 	if (params.search_labelled_spikeins) {
-		comet_labelled_ids = identification_labelled_with_comet(mzmls, fasta_file, comet_params, true, main_outdir)
+		comet_labelled_ids = identification_labelled_with_comet(mzmls, fasta_file, mcquac_params_file, true, main_outdir)
 
 		// set the filter to true to count only FDR filtered labelled PSMs - but the FDR is skewed anyways, as the labelling is set to "static"!
 		labelled_pia_report_files = pia_analysis_psm_only(comet_labelled_ids.mzids, false)
@@ -99,7 +100,7 @@ workflow {
 	}
 	 
 	// Run Feature Finding
-	feature_metrics = get_feature_metrics(mzmls, pia_report_psm_mztabs, comet_params)
+	feature_metrics = get_feature_metrics(mzmls, pia_report_psm_mztabs, mcquac_params_file)
 
 	// Get Thermo/Bruker specific information from raw_spectra
 	custom_header_infos = get_headers(thermo_raw_files, bruker_raw_folders)
