@@ -54,6 +54,7 @@ process visualize_results {
 	path(combined_metrics)
 	path("fig13_MS1_map")
 	path("fig15_additional_headers")
+  path("fig16_BRUKER_calibrants")
 
 	"""
 	if ${search_spike_ins}

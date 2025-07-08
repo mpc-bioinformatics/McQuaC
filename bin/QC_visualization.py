@@ -1194,9 +1194,80 @@ if __name__ == "__main__":
                     json_file.write(plotly.io.to_json(fig15))
                 fig15.write_html(file = output_path + os.sep + "fig15_additional_headers" + os.sep + "{}.html".format(re.sub('\W+','', display_header)), auto_open = False)
 
+################################################################################################
+## Fig 16: all other headers by Thermo or Bruker      
+        
+    if not os.path.exists(output_path + os.sep + "fig16_BRUKER_calibrants"):
+        os.makedirs(output_path + os.sep + "fig16_BRUKER_calibrants")
+        
+    df_calibrants = pd.DataFrame()
+    for file in hdf5_file_names:
+        if ("Calibrants" not in dataframes[file].keys()):
+            continue
+        else: 
+            df_calibrants_tmp = dataframes[file]["Calibrants"]
+            df_calibrants_tmp["filename"] = file
+            df_calibrants = pd.concat([df_calibrants, df_calibrants_tmp])
+       
+    if not df_calibrants.empty:     
+        calibrants = df_calibrants[["calibrant_mz", "calibrant_mobility"]]
+        calibrants = calibrants.drop_duplicates()
+        
+        ## loop over calibrants and plot them
+        i = 0
+        for index, row in calibrants.iterrows():    
+            i = i + 1
+            
+            df_tmp = df_calibrants[df_calibrants["calibrant_mz"] == row["calibrant_mz"]]
+            df_tmp = df_tmp[df_tmp["calibrant_mobility"] == row["calibrant_mobility"]]
+            print(df_tmp)
+            
+            mz_tmp = row["calibrant_mz"]
+            mobility_tmp = row["calibrant_mobility"]
+            
+            ### rt is given in milliseconds here, convert to seconds or minutes
+            if args.RT_unit == "sec":
+                df_tmp["observed_calibrant_rt"] = df_tmp["observed_calibrant_rt"]/1000
+            elif args.RT_unit == "min":
+                df_tmp["observed_calibrant_rt"] = df_tmp["observed_calibrant_rt"]/60000
+
+
+            title_tmp = "Calibrant " + str(i) + " m/z: " + str(mz_tmp) + ", ion mobility: " + str(mobility_tmp)
+
+            fig16a = px.line(df_tmp, x="observed_calibrant_rt", y="observed_calibrant_mz", color = "filename", title = title_tmp)
+            fig16a.update_traces(line=dict(width=0.5))
+            fig16a.add_hline(y=mz_tmp)
+            fig16a.update_layout(height = int(args.height_barplots))
+            if args.width_barplots > 0:
+                fig16a.update_layout(width = int(args.width_barplots))
+            if args.RT_unit == "sec":
+                fig16a.update_layout(xaxis_title = "Time (sec)")
+            elif args.RT_unit == "min":
+                fig16a.update_layout(xaxis_title = "Time (min)")
+            with open(output_path + os.sep + "fig16_BRUKER_calibrants" + os.sep + "fig16a_Calibrant_mz_" + str(i) + ".plotly.json", "w") as json_file:
+                json_file.write(plotly.io.to_json(fig16a))
+            fig16a.write_html(file = output_path + os.sep + "fig16_BRUKER_calibrants" + os.sep + "fig16a_Calibrant_mz_" + str(i) + ".html", auto_open = False)
 
             
-        
+            fig16b = px.line(df_tmp, x="observed_calibrant_rt", y="observed_calibrant_mobility", color = "filename", title = title_tmp)
+            fig16b.update_traces(line=dict(width=0.5))
+            fig16b.add_hline(y=mobility_tmp)
+            fig16b.update_layout(height = int(args.height_barplots))
+            if args.width_barplots > 0:
+                fig16b.update_layout(width = int(args.width_barplots))
+            if args.RT_unit == "sec":
+                fig16b.update_layout(xaxis_title = "Time (sec)")
+            elif args.RT_unit == "min":
+                fig16b.update_layout(xaxis_title = "Time (min)")
+            with open(output_path + os.sep + "fig16_BRUKER_calibrants" + os.sep + "fig16b_Calibrant_ionmobility" + str(i) + ".plotly.json", "w") as json_file:
+                json_file.write(plotly.io.to_json(fig16b))
+            fig16b.write_html(file = output_path + os.sep + "fig16_BRUKER_calibrants" + os.sep + "fig16b_Calibrant_ionmobility" + str(i) + ".html", auto_open = False)
+
+                
+                
+
+            
+            
     
 
 
