@@ -1,9 +1,9 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-/* MPC-Nextflow-Quality-Control-Workflow --> MPC-QuaC-Workflow
+/* Mass centric Quality Control Workflow --> McQuaC
 
-This is the QC-Workflow which generates various statistics from measured ThermoFischer-data ("RAW-files"). 
+This is the QC-Workflow which generates various metrics from measured ThermoFischer-data ("RAW-files"). 
 Here we extract XICs, Identifications and other various information and save them to a database.
 
 The <TODO_VIS>.nf-Script then can be used to genereate various plots from the extracted data for inspection.
@@ -18,14 +18,14 @@ nextflow run \
 
 // Include all the needed workflows from the sub-workflows
 // Extend this to also extend the QC-Workflow 
-include {convert_raws_to_mzml} from workflow.projectDir + '/src/io/raw_file_conversion.nf'
-include {identification_with_comet; identification_with_comet as identification_labelled_with_comet} from workflow.projectDir + '/src/identification/comet.nf'
-include {pia_analysis_full; pia_analysis_psm_only; pia_extract_metrics} from workflow.projectDir + '/src/pia.nf'
-include {retrieve_spike_ins_information} from workflow.projectDir + '/src/retrieve_spike_ins.nf'
-include {get_feature_metrics} from workflow.projectDir + '/src/feature_detection.nf'
-include {get_headers; get_mzml_infos} from workflow.projectDir + '/src/metrics/ms_run_metrics.nf'
-include {combine_metric_hdf5} from workflow.projectDir + '/src/io/combine_metric_hdf5.nf'
-include {output_processing_success} from workflow.projectDir + '/src/io/output_processing_success.nf'
+include {convert_raws_to_mzml} from './src/io/raw_file_conversion.nf'
+include {identification_with_comet; identification_with_comet as identification_labelled_with_comet} from './src/identification/comet.nf'
+include {pia_analysis_full; pia_analysis_psm_only; pia_extract_metrics} from './src/pia.nf'
+include {retrieve_spike_ins_information} from './src/retrieve_spike_ins.nf'
+include {get_feature_metrics} from './src/feature_detection.nf'
+include {get_headers; get_mzml_infos} from './src/metrics/ms_run_metrics.nf'
+include {combine_metric_hdf5} from './src/io/combine_metric_hdf5.nf'
+include {output_processing_success} from './src/io/output_processing_success.nf'
 
 // Parameters required for the standalone execution of this main-nextflow script
 params.main_raw_spectra_folder = "" // The folder containing the raw spectra
@@ -33,7 +33,7 @@ params.main_fasta_file = "" // A SINGLE-Fasta-file of the species to be searched
 params.mcquac_params_file = "${baseDir}/example_configurations/mcquac_params.json" // the main parameters file for McQuaC
 
 params.spike_ins_table = "${baseDir}/example_configurations/spike_ins.csv" // The information about spike-ins 
-params.main_outdir = "$PWD/results"  // Output-Directory of the Identification Results. Here it is <Input_File>.mzid
+params.main_outdir = "./results"  // Output-Directory of the result files
 
 // Parameters for visualization script
 params.RT_unit = "sec" // Unit of the retention time, either sec for seconds or min for minutes.
@@ -44,6 +44,23 @@ params.output_table_type = "csv" // Type of the output table, either csv or xlsx
 // Here are some optional Parameters which can be set if needed
 params.search_spike_ins = true // Parameter to check if we execute a isa specific xic extraction (NOTE: FASTA has to contain the SpikeIns too!)
 params.search_labelled_spikeins = true // Perform a special ID and look for labelled peptides
+
+// Following are parameters to be passed to the sub-workflows
+
+// Memory for the Thermo Raw File Parser, used 24 GB for a Raw file with 257409 MS scans 
+/// and 4GB for a Raw file with 11352 MS scans (measured with `/usr/bin/time -v ...`). 10 GB seems legit for most cases.
+params.ms_run_metrics__thermo_raw_mem = "10.GB"
+// Memory for the tdf2mzml, used 0.39 GB for a Raw file with 298748 MS scans 
+/// and 0.14GB for a Raw file with 35023 MS scans (measured with `/usr/bin/time -v ...`). 5 GB seems more then enough.
+params.ms_run_metrics__bruker_raw_mem = "1.GB"
+/// Tracing showed up to 4.7 GB virtual memory for 30000 MS scans
+params.ms_run_metrics__mzml_mem = "10.GB"
+// Set if you want to extract specific headers from Thermo raw measurements, otherwise the default is used.
+// Have a look into the corresponding python script for the headers.
+params.ms_run_metrics__thermo_headers = ""
+ // Set if you want to extract specific headers from Bruker raw measurements, otherwise the default is used.
+ // Have a look into the corresponding python script for the headers.
+params.ms_run_metrics__bruker_headers = ""
 
 
 // MAIN WORKFLOW
@@ -64,7 +81,7 @@ workflow {
 	mzmls = convert_raws_to_mzml(thermo_raw_files, bruker_raw_folders)
 	
 	// Retreive MZML Metrics
-	mzml_metrics = get_mzml_infos(mzmls)
+	mzml_metrics = get_mzml_infos(mzmls, mcquac_params_file, params.ms_run_metrics__mzml_mem)
 
 	// Identify spectra using Comet
 	comet_ids = identification_with_comet(mzmls, fasta_file, mcquac_params_file, false, main_outdir)
@@ -103,7 +120,8 @@ workflow {
 	feature_metrics = get_feature_metrics(mzmls, pia_report_psm_mztabs, mcquac_params_file)
 
 	// Get Thermo/Bruker specific information from raw_spectra
-	custom_header_infos = get_headers(thermo_raw_files, bruker_raw_folders)
+	custom_header_infos = get_headers(thermo_raw_files, params.ms_run_metrics__thermo_raw_mem, params.ms_run_metrics__thermo_headers,
+			bruker_raw_folders, params.ms_run_metrics__bruker_raw_mem, params.ms_run_metrics__bruker_headers)
 
 	// Concatenate to one merged metric CSV
 	hdf5s_per_run = mzml_metrics.map{file -> tuple(file.name.take(file.name.lastIndexOf('-mzml_info.hdf5')), file)}
@@ -149,6 +167,7 @@ process visualize_results {
 	path("fig13_MS1_map")
 	path("fig16_additional_headers")
 
+	script:
 	"""
 	if ${params.search_spike_ins}
 	then 
