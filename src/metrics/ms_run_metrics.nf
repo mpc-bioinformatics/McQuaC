@@ -110,15 +110,15 @@ process extract_headers_from_bruker_raw_files {
 
     input:
     path raw
-    val headers_to_parse
     val memory_limit
+    val bruker_headers_to_parse
 
     output:
     path "${raw.baseName}-custom_headers.hdf5"
 
     script:
     """
-    extract_bruker_headers.py -d_folder ${raw} -out_hdf5 ${raw.baseName}-custom_headers.hdf5 ${headers_to_parse}
+    extract_bruker_headers.py -d_folder ${raw} -out_hdf5 ${raw.baseName}-custom_headers.hdf5 ${bruker_headers_to_parse}
     """
 }
 
@@ -132,7 +132,7 @@ process extract_data_from_mzml {
     label 'mcquac_image'
 
     cpus 1
-    memory params.ms_run_metrics__mzml_mem
+    memory "${memory_limit}"
 
     input:
     path mzml

@@ -15,7 +15,7 @@ Some of these parameters (like `peptide_mass_tolerance_upper`) are also used for
 ### labelled_mods
 The value is a dict, interpreted as the (fixed) modifications (`comet.params` style) which are added to the identification for the "labelled search", if this is activated.
 
-### ms_run_metrics"
+### ms_run_metrics
 These parameters, ordered in a dict, are used for the extraction of metrics from the MS runs directly.
 
 The following key-value pairs are used:
