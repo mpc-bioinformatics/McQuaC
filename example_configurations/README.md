@@ -8,10 +8,21 @@ This json dictionary holds central settings for the pipeline, which will be pars
 
 The following parameters are supported:
 
+### comet
+The value is a dict, all key-value pairs of the dict are passed to the comet parameters in the `comet.params`, like `"fragment_bin_tol": 0.02`.
+Some of these parameters (like `peptide_mass_tolerance_upper`) are also used for the feature detection.
 
-| comet | the value is a dict, all key-value pairs of the dict are passed to the comet parameters in the `comet.params`, like `"fragment_bin_tol": 0.02`. Some of these parameters (like `peptide_mass_tolerance_upper`) are also used for the feature detection. |
-|-----|------|
-|labelled_mods | value is a dict, interpreted as the (fixed) modifications (comet.params style) which are added to the identification for the "labelled search", if this is activated. |
+### labelled_mods
+The value is a dict, interpreted as the (fixed) modifications (`comet.params` style) which are added to the identification for the "labelled search", if this is activated.
+
+### ms_run_metrics"
+These parameters, ordered in a dict, are used for the extraction of metrics from the MS runs directly.
+
+The following key-value pairs are used:
+- `base_peak_tic_up_to`: Retrieve the Basepeak Intensity Max and the Total Ion Current from minute 0 up to the given number in minutes. Defaults to 105 (minutes).
+- `filter_threshold`: Threshold for the MS1 peaks, to be included in the output file. Defaults to 0.00001 (0.001%) of the highest overall MS1 peak. Values lower will be disregarded.
+- `report_up_to_charge`: Upper limit of range to be reported in a csv table for the charge, defaults to 5.
+
 
 ## spike-ins.csv
 
