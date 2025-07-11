@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-import json
+import parse_central_json as pcj
 
 
 def argparse_setup():
@@ -16,8 +16,7 @@ def argparse_setup():
 if __name__ == "__main__":
     args = argparse_setup()
 
-    with open(args.json_in, 'r') as f:
-        set_params = json.load(f)
+    set_params = pcj.parse_json(args.json_in)
     
     if args.search_labelled.lower() == "true":
         search_labelled = True
