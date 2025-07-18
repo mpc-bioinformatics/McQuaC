@@ -272,6 +272,13 @@ List of plots (ISA QC, TODO!):
 - Figure 3: Barplot with number of PSMs (absolute numbers)
 
 
+## Development
+In case you change the McQuaC Docker image, by adding a new script in the bin folder or add new Python or Conda dependencies, and want to test it, exec `make docker-imgs` and run Nextflow with the `-profile docker,dev` (do not change the order).
+
+### Release
+For a new release change the version in `nextflow.config` (`manifest.version`), add and commit it and use the  same version as new tag. Than push the changes and tag. The GitHub action will create the new image.
+
+
 ## TODO
 1. Cleanup all commented code
 2. Modularize properly e.g. 

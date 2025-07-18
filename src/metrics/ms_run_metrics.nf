@@ -6,25 +6,12 @@
 
 nextflow.enable.dsl=2
 
-python_image = 'mpc/nextqcflow-python:latest'
-
 // Set if you want to extract specific headers from Thermo raw measurements, otherwise the default is used.
 // Have a look into the corresponding python script for the headers.
 params.ms_run_metrics__thermo_headers = ""
  // Set if you want to extract specific headers from Bruker raw measurements, otherwise the default is used.
  // Have a look into the corresponding python script for the headers.
 params.ms_run_metrics__bruker_headers = ""
-// Set additional parameters for the mzml-statistics geeneration.
-// Have a look into the corresponding python script possible parameters.
-params.ms_run_metrics__mzml_statistics = ""
-// Memory for the Thermo Raw File Parser, used 24 GB for a Raw file with 257409 MS scans 
-/// and 4GB for a Raw file with 11352 MS scans (measured with `/usr/bin/time -v ...`). 10 GB seems legit for most cases.
-params.ms_run_metrics__thermo_raw_mem = "10 GB"
-// Memory for the tdf2mzml, used 0.39 GB for a Raw file with 298748 MS scans 
-/// and 0.14GB for a Raw file with 35023 MS scans (measured with `/usr/bin/time -v ...`). 5 GB seems more then enough.
-params.ms_run_metrics__bruker_raw_mem = "1 GB"
-/// Tracing showed up to 4.7 GB virtual memory for 30000 MS scans
-params.ms_run_metrics__mzml_mem = "10 GB"
 
 /**
  * Get metadata headers from Thermo and Bruker raw files, like 
@@ -38,12 +25,18 @@ params.ms_run_metrics__mzml_mem = "10 GB"
 workflow get_headers {
     take:
         thermo_raw_files
+        thermo_memory_limit
+        thermo_headers
         bruker_raw_files
+        bruker_memory_limit
+        bruker_headers_to_parse
+
     main:
         // Extract Information directly from the RAW-file using fisher-py
-        thermo_headers = extract_headers_from_thermo_raw_files(thermo_raw_files)
-        bruker_headers = extract_headers_from_bruker_raw_files(bruker_raw_files)
+        thermo_headers = extract_headers_from_thermo_raw_files(thermo_raw_files, thermo_memory_limit, thermo_headers)
+        bruker_headers = extract_headers_from_bruker_raw_files(bruker_raw_files, bruker_memory_limit, bruker_headers_to_parse)
         headers = thermo_headers.concat(bruker_headers)
+
     emit:
         headers
 }
@@ -57,8 +50,12 @@ workflow get_headers {
 workflow get_mzml_infos {
     take:
         mzmlfiles
+        central_params
+        memory_limit
+
     main:
-        informations = extract_data_from_mzml(mzmlfiles)
+        informations = extract_data_from_mzml(mzmlfiles, central_params, memory_limit)
+
     emit:
         informations
 }
@@ -70,22 +67,25 @@ workflow get_mzml_infos {
  * @return HDF5 with extracted headers
  */
 process extract_headers_from_thermo_raw_files {
-    container { python_image}
+    label 'mcquac_image'
+    cpus 1
+    memory "${memory_limit}"
+
     errorStrategy 'ignore'
-
-    memory params.ms_run_metrics__thermo_raw_mem
-
     stageInMode 'copy'
 
     input:
     path raw
+    val memory_limit
+    val thermo_headers
 
     output:
     path "${raw.baseName}-custom_headers.hdf5"
 
+    script:
     """
     # Pythonnet sometimes fails to exit and throws a mono error
-    extract_thermo_headers.py -raw ${raw} ${params.ms_run_metrics__thermo_headers} -out_hdf5 ${raw.baseName}-custom_headers.hdf5 || true
+    extract_thermo_headers.py -raw ${raw} -out_hdf5 ${raw.baseName}-custom_headers.hdf5 ${thermo_headers} || true
 
     # Fail Check if no content was written
     if ! [ -s "${raw.baseName}-custom_headers.hdf5" ];then
@@ -101,19 +101,24 @@ process extract_headers_from_thermo_raw_files {
  * @return HDF5 with extracted headers
  */
 process extract_headers_from_bruker_raw_files {
-    container { python_image}
-    errorStrategy 'ignore'
+    label 'mcquac_image'
 
-    memory params.ms_run_metrics__bruker_raw_mem
+    cpus 1
+    memory "${memory_limit}"
+
+    errorStrategy 'ignore'
 
     input:
     path raw
+    val memory_limit
+    val bruker_headers_to_parse
 
     output:
     path "${raw.baseName}-custom_headers.hdf5"
 
+    script:
     """
-    extract_bruker_headers.py -d_folder ${raw} -out_hdf5 ${raw.baseName}-custom_headers.hdf5 ${params.ms_run_metrics__bruker_headers}
+    extract_bruker_headers.py -d_folder ${raw} -out_hdf5 ${raw.baseName}-custom_headers.hdf5 ${bruker_headers_to_parse}
     """
 }
 
@@ -124,18 +129,21 @@ process extract_headers_from_bruker_raw_files {
  * @return HDF5 file with the extracted data
  */
 process extract_data_from_mzml {
-    container { python_image}
+    label 'mcquac_image'
 
     cpus 1
-    memory params.ms_run_metrics__mzml_mem
+    memory "${memory_limit}"
 
     input:
-    path(mzml)
+    path mzml
+    path central_params    // JSON file with central McQuaC parameters
+    val memory_limit
 
     output:
-    path("${mzml.baseName}-mzml_info.hdf5")
+    path "${mzml.baseName}-mzml_info.hdf5"
 
+    script:
     """
-    extract_data_from_mzml.py -mzml ${mzml} -out_hdf5 ${mzml.baseName}-mzml_info.hdf5 ${params.ms_run_metrics__mzml_statistics}
+    extract_data_from_mzml.py -mzml ${mzml} -out_hdf5 ${mzml.baseName}-mzml_info.hdf5 -mcquac_params ${central_params}
     """
 }

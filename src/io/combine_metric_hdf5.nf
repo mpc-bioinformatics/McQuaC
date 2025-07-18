@@ -7,8 +7,6 @@
 
 nextflow.enable.dsl=2
 
-python_image = 'mpc/nextqcflow-python:latest'
-
 /*
  * Combines the metrics into one big HDF5 file
  * 
@@ -19,9 +17,10 @@ python_image = 'mpc/nextqcflow-python:latest'
 workflow combine_metric_hdf5 {
 	take:
 		runbase_to_hdf5
+		output_folder
 	
 	main:
-	 	merged_files = merge_metrics(runbase_to_hdf5)
+	 	merged_files = merge_metrics(runbase_to_hdf5, output_folder)
 		complete_hdf_files = merged_files.collect()
 	
 	emit:
@@ -37,12 +36,13 @@ workflow combine_metric_hdf5 {
  */
 
 process merge_metrics {
-	container {python_image}
+	label 'mcquac_image'
 
-	publishDir "${params.main_outdir}/qc_hdf5_data", mode:'copy'		// TODO: this should probably rather use the new reporting facilities
+	publishDir "${output_folder}/qc_hdf5_data", mode:'copy'		// TODO: this should probably rather use the new reporting facilities
 
 	input:
 	tuple val(runBaseName), path(metrics)
+	path output_folder
 
 	output:
 	path "${runBaseName}.hdf5"

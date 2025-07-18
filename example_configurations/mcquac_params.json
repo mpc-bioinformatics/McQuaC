@@ -1,0 +1,23 @@
+{
+    "comet": {
+        "peptide_mass_tolerance_upper": 5.0,
+        "peptide_mass_tolerance_lower": -5.0,
+        "peptide_mass_units": 2,
+        "isotope_error": 2,
+
+        "fragment_bin_tol": 0.02,
+        "fragment_bin_offset": 0.0,
+        "theoretical_fragment_ions": 0
+    },
+
+    "labelled_mods": {
+        "add_K_lysine": 8.014199,
+        "add_R_arginine": 10.008269
+    },
+
+    "ms_run_metrics": {
+        "base_peak_tic_up_to": 105,
+        "filter_threshold": 0.00001,
+        "report_up_to_charge": 5
+    }
+}
