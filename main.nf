@@ -26,6 +26,7 @@ include {get_feature_metrics} from './src/feature_detection.nf'
 include {get_headers; get_mzml_infos} from './src/metrics/ms_run_metrics.nf'
 include {combine_metric_hdf5} from './src/io/combine_metric_hdf5.nf'
 include {output_processing_success} from './src/io/output_processing_success.nf'
+include {visualization} from './src/visualization.nf'
 
 // Parameters required for the standalone execution of this main-nextflow script
 params.main_input_folder = "" // The folder containing the raw/.d files or hdf5 files (if visualize_only is true)
