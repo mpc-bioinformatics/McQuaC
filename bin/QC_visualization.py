@@ -306,8 +306,8 @@ def argparse_setup():
     parser.add_argument("-width_barplots", help = "Width of the barplots in pixels", default = 0, type = int) # default 0: flexible width, in pixels
     parser.add_argument("-height_pca", help = "Height of the PCA plots in pixels", default = 1000, type = int) # in pixels
     parser.add_argument("-width_pca", help = "Width of the PCA plots in pixels", default = 1000, type = int) # in pixels
-    parser.add_argument("-height_ionmaps", help = "Height of the ionmaps in pixels", default = 10, type = int)
-    parser.add_argument("-width_ionmaps", help = "Width of the ionmaps in pixels", default = 10, type = int)
+    parser.add_argument("-height_ionmaps", help = "Height of the ionmaps in inches", default = 10, type = int)
+    parser.add_argument("-width_ionmaps", help = "Width of the ionmaps in inches", default = 10, type = int)
     return parser.parse_args()
 
 
