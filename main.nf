@@ -44,12 +44,14 @@ params.rt_unit = "sec" // Unit of the retention time, either sec for seconds or 
 params.output_column_order = "''" // Order of columns in the output table
 params.spikein_columns = "Maximum_Intensity,RT_at_Maximum_Intensity,PSMs,Delta_to_expected_RT" // Columns of the spike-in dataframes that should end up in the result table
 params.output_table_type = "csv" // Type of the output table, either csv or xlsx
+
 params.height_barplots = 700 // Height of the barplots in pixels
 params.width_barplots = 0 // Width of the barplots in pixels, 0 = flexible width
 params.height_pca = 1000 // Height of the PCA plot in pixels
 params.width_pca = 1000 // Width of the PCA plot in pixels
 params.height_ionmaps = 10 // Height of the ion maps in inches
 params.width_ionmaps = 10 // Width of the ion maps in inches
+
 
 // Here are some optional Parameters which can be set if needed
 params.search_spike_ins = true // Parameter to check if we execute a isa specific xic extraction (NOTE: FASTA has to contain the SpikeIns too!)
@@ -77,13 +79,13 @@ params.ms_run_metrics__bruker_headers = ""
 workflow {
 	if (params.visualize_only) { 		 // only visualization
 		list_hdf5_files = file(params.main_input_folder + '/*.hdf5')
-		visualization(list_hdf5_files, params.main_outdir, params.rt_unit, params.output_column_order, params.spikein_columns, params.output_table_type, params.search_spike_ins)
+		visualization(list_hdf5_files, params.main_outdir, params.rt_unit, params.output_column_order, params.spikein_columns, params.output_table_type, params.search_spike_ins, params.height_barplots, params.width_barplots, params.height_pca, params.width_pca, params.height_ionmaps, params.width_ionmaps)
 	}
 	else { // whole workflow execution
 		// Retrieve input files
-		thermo_raw_files = Channel.fromPath(params.main_raw_spectra_folder + "/*.raw")
-		bruker_raw_folders = Channel.fromPath(params.main_raw_spectra_folder + "/*.d", type: 'dir')
-		input_mzml_files = Channel.fromPath(params.main_raw_spectra_folder + "/*.mzML")
+		thermo_raw_files = Channel.fromPath(params.main_input_folder + "/*.raw")
+		bruker_raw_folders = Channel.fromPath(params.main_input_folder + "/*.d", type: 'dir')
+		input_mzml_files = Channel.fromPath(params.main_input_folder + "/*.mzML")
 
 		main_outdir = Channel.fromPath(params.main_outdir).first()
 
@@ -92,7 +94,7 @@ workflow {
 		fasta_file = Channel.fromPath(params.main_fasta_file).first()
 		mcquac_params_file = Channel.fromPath(params.mcquac_params_file).first()
 
-		raw_files = thermo_raw_files.concat(bruker_raw_folders)
+		spectra_files = thermo_raw_files.concat(bruker_raw_folders)
 
 		// File conversion into open formats
 		coverted_mzmls = convert_raws_to_mzml(thermo_raw_files, bruker_raw_folders)
@@ -133,7 +135,7 @@ workflow {
 				psm_results = pia_report_psm_mztabs
 			}
 
-			spike_in_metrics = retrieve_spike_ins_information(raw_files, psm_results, spike_ins_table)
+			spike_in_metrics = retrieve_spike_ins_information(spectra_files, psm_results, spike_ins_table)
 		}
 			
 		// Run Feature Finding
@@ -159,11 +161,9 @@ workflow {
 		combined_metrics = combine_metric_hdf5(hdf5s_per_run, main_outdir)
 
 		// Visualize the results (and move them to the results folder)
-		visualization(combined_metrics, params.main_outdir, params.rt_unit, params.output_column_order, params.spikein_columns, params.output_table_type, params.search_spike_ins, 
-			params.height_barplots, params.width_barplots, params.height_pca, params.width_pca, params.height_ionmaps, params.width_ionmaps)
+		visualization(combined_metrics, params.main_outdir, params.rt_unit, params.output_column_order, params.spikein_columns, params.output_table_type, params.search_spike_ins, params.height_barplots, params.width_barplots, params.height_pca, params.width_pca, params.height_ionmaps, params.width_ionmaps)
 
-		output_processing_success(raw_files.concat(input_mzml_files), hdf5s_per_run.toList().transpose().first().flatten())
+		output_processing_success(spectra_files.concat(input_mzml_files), hdf5s_per_run.toList().transpose().first().flatten())
 
 	}
 }
-
