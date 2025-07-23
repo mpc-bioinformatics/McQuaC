@@ -17,9 +17,15 @@ workflow visualization {
         spikein_columns
         output_table_type
         search_spike_ins
+        height_barplots
+        width_barplots
+        height_pca
+        width_pca
+        height_ionmaps
+        width_ionmaps
 
     main:
-        visualize_results(combined_metrics, main_outdir, rt_unit, output_column_order, spikein_columns, output_table_type, search_spike_ins)
+        visualize_results(combined_metrics, main_outdir, rt_unit, output_column_order, spikein_columns, output_table_type, search_spike_ins, height_barplots, width_barplots, height_pca, width_pca, height_ionmaps, width_ionmaps)
 
     emit:
         visualize_results.out[0]
@@ -43,8 +49,12 @@ process visualize_results {
     val spikein_columns
     val output_table_type
     val search_spike_ins
-
-
+    val height_barplots
+    val width_barplots
+    val height_pca
+    val width_pca
+    val height_ionmaps
+    val width_ionmaps
 
     output:
     path("*.json")
@@ -58,9 +68,9 @@ process visualize_results {
     """
     if ${search_spike_ins}
     then 
-    QC_visualization.py -hdf5_files ${combined_metrics} -output "." -spikeins -RT_unit ${rt_unit} -output_column_order ${output_column_order} -spikein_columns ${spikein_columns} -output_table_type ${output_table_type}
+    QC_visualization.py -hdf5_files ${combined_metrics} -output "." -spikeins -RT_unit ${rt_unit} -output_column_order ${output_column_order} -spikein_columns ${spikein_columns} -output_table_type ${output_table_type} -height_barplots ${height_barplots} -width_barplots ${width_barplots} -height_pca ${height_pca} -width_pca ${width_pca} -height_ionmaps ${height_ionmaps} -width_ionmaps ${width_ionmaps}
     else
-    QC_visualization.py -hdf5_files ${combined_metrics} -output "." -RT_unit ${rt_unit} -output_column_order ${output_column_order} -spikein_columns ${spikein_columns} -output_table_type ${output_table_type}
+    QC_visualization.py -hdf5_files ${combined_metrics} -output "." -RT_unit ${rt_unit} -output_column_order ${output_column_order} -spikein_columns ${spikein_columns} -output_table_type ${output_table_type} -height_barplots ${height_barplots} -width_barplots ${width_barplots} -height_pca ${height_pca} -width_pca ${width_pca} -height_ionmaps ${height_ionmaps} -width_ionmaps ${width_ionmaps}
     fi
     """
 }
