@@ -161,6 +161,7 @@ if __name__ == "__main__":
             (
                 "Table of various spike-ins metrics like, "
                 "max. intensity, RT at max. intensity, PSMs, and delta to expected RT."
+                " RT_at_Maximum_Intensity defaults to -1 if the spike-in was not found."
             ),
             column_names,
             column_data,
