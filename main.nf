@@ -64,7 +64,7 @@ params.search_labelled_spikeins = true // Perform a special ID and look for labe
 params.ms_run_metrics__thermo_raw_mem = "10.GB"
 // Memory for the tdf2mzml, used 0.39 GB for a Raw file with 298748 MS scans 
 /// and 0.14GB for a Raw file with 35023 MS scans (measured with `/usr/bin/time -v ...`). 5 GB seems more then enough.
-params.ms_run_metrics__bruker_raw_mem = "1.GB"
+params.ms_run_metrics__bruker_raw_mem = "10.GB"
 /// Tracing showed up to 4.7 GB virtual memory for 30000 MS scans
 params.ms_run_metrics__mzml_mem = "10.GB"
 // Set if you want to extract specific headers from Thermo raw measurements, otherwise the default is used.

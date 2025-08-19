@@ -5,8 +5,10 @@ import os
 import sqlite3
 from typing import Any, List
 
+
 import h5py
 import numpy as np
+from alphatims.bruker import TimsTOF
 
 
 def argparse_setup():
@@ -22,6 +24,13 @@ def argparse_setup():
         "TOF_DeviceTempCurrentValue1",
         "TOF_DeviceTempCurrentValue2"
     ])
+    parser.add_argument("-calibrants_to_retrieve", "-calibrants", help="Calibrants which should be retrieved. In the format MZ:Mobility. E.G.: 922.00978:1.1895", action="append", default=[
+        "622.0290:0.9913",
+        "922.009798:1.1895",
+        "1221.990637:1.3820"
+    ])
+    parser.add_argument("-calibrants_mz_tolerance", "-cal_mz_tol", help="The MZ Tolerance for the calibrants in Th (m/z). Default: 10", type=float, default=10)
+    parser.add_argument("-calibrants_mobility_tolerance", "-cal_mob_tol", help="The Mobility Tolerance for the calibrants in 1/K0 (1/K0). Default: 0.1", type=float, default=0.1)
 
     return parser.parse_args()
 
@@ -69,6 +78,37 @@ def add_table_in_hdf5(
         else:
             table_group.create_dataset(n, (len(d),), dtype=t, compression="gzip")
             table_group[n].write_direct(np.array(d, dtype=t))
+
+
+def get_calibrant_info(calibrant_mz, calibrant_mobility, mz_tolerance=10, mobility_tolerance=0.1):
+    """
+    Gets the calibrants and returns, three arrays: RT, MZ and Mobility values.
+
+    This code was inspired by the AlphaTIMS implementation in the following link:
+
+    https://github.com/MannLabs/alphatims/blob/9fad486536a87c1add095fd4bcf03caca479cc13/alphatims/bruker.py#L2179
+    """
+
+    calibrant_lower_mz = calibrant_mz - mz_tolerance
+    calibrant_upper_mz = calibrant_mz + mz_tolerance
+    calibrant_lower_mobility = calibrant_mobility - mobility_tolerance
+    calibrant_upper_mobility = calibrant_mobility + mobility_tolerance
+
+    calibrant_values = br_d[
+        :,
+        calibrant_lower_mobility: calibrant_upper_mobility,
+        slice(0,1),
+        calibrant_lower_mz: calibrant_upper_mz,
+    ]
+
+    # Get the rows, which have the higest intensity for each retention time for the calibrant within a specific mz and mobility tolerance.
+    calibrant_values = calibrant_values.loc[calibrant_values[["rt_values", "intensity_values"]].groupby("rt_values").idxmax()["intensity_values"]]
+
+    calibrant_values_rts = np.array(calibrant_values.index)
+    calibrant_values_mzs = np.array(calibrant_values["mz_values"])
+    calibrant_values_mobilities = np.array(calibrant_values["mobility_values"])
+
+    return calibrant_values_rts, calibrant_values_mzs, calibrant_values_mobilities
 
 
 if __name__ == "__main__":
@@ -174,3 +214,39 @@ if __name__ == "__main__":
             "The pump pressure as a table, containing the coordinates.",
             column_name, column_data, column_type
         )
+
+        # Add Calibrants Info:
+        br_d = TimsTOF(args.d_folder)
+
+        try:
+            column_name = ["calibrant_mz", "calibrant_mobility", "observed_calibrant_rt", "observed_calibrant_mz", "observed_calibrant_mobility"]
+            column_data = [[],[], [], [], []]
+            column_type = ["float64", "float64", "float64", "float64", "float64"]
+
+            for calibrant in args.calibrants_to_retrieve:
+
+                    mz, mobility = calibrant.split(":", 1)
+                    mz = float(mz)
+                    mobility = float(mobility)
+
+                    calibrant_rts, calibrant_mzs, calibrant_mobilities = get_calibrant_info(
+                        mz, mobility,
+                        mz_tolerance=args.calibrants_mz_tolerance,
+                        mobility_tolerance=args.calibrants_mobility_tolerance
+                        )
+
+                    column_data[0] = np.append(column_data[0], [[mz]*len(calibrant_rts)])
+                    column_data[1] = np.append(column_data[1], [[mobility]*len(calibrant_rts)])
+                    column_data[2] = np.append(column_data[2], [calibrant_rts])
+                    column_data[3] = np.append(column_data[3], [calibrant_mzs])
+                    column_data[4] = np.append(column_data[4], [calibrant_mobilities])
+
+
+
+            add_table_in_hdf5(
+                out_h5, "BRUKER", "Calibrants", "Calibrants",
+                "Extracted Calibrants from the Bruker measurement, which have been specified prior. This table contains, the following columns: calibrant_mz, calibrant_mobility --> The observed calibrant mz and mobility AND observed_calibrant_rt, observed_calibrant_mz, observed_calibrant_mobility --> The observed calibrant retention time, mz and mobility.",
+                column_name, column_data, column_type
+            )
+        except:
+            raise ValueError("The calibrant '{}'could not be retrieved. Is it in the correct format?  ('MZ:Mobility')".format(args.calibrants_to_retrieve))

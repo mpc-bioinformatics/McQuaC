@@ -6,12 +6,10 @@
 
 nextflow.enable.dsl=2
 
-// Set if you want to extract specific headers from Thermo raw measurements, otherwise the default is used.
+// Set if you want to extract specific calibrants in Bruker raw measurements, otherwise the default is used 
+// (622.0290 m/z, 922.009798 m/z and 1221.990637 m/z with a 10 m/z and 0.1 1/k0 tolerance).
 // Have a look into the corresponding python script for the headers.
-params.ms_run_metrics__thermo_headers = ""
- // Set if you want to extract specific headers from Bruker raw measurements, otherwise the default is used.
- // Have a look into the corresponding python script for the headers.
-params.ms_run_metrics__bruker_headers = ""
+params.ms_run_metrics__bruker_calibrants = ""
 
 /**
  * Get metadata headers from Thermo and Bruker raw files, like 
@@ -118,7 +116,8 @@ process extract_headers_from_bruker_raw_files {
 
     script:
     """
-    extract_bruker_headers.py -d_folder ${raw} -out_hdf5 ${raw.baseName}-custom_headers.hdf5 ${bruker_headers_to_parse}
+    extract_bruker_headers.py -d_folder ${raw} -out_hdf5 ${raw.baseName}-custom_headers.hdf5 ${bruker_headers_to_parse} ${params.ms_run_metrics__bruker_calibrants}
+
     """
 }
 
