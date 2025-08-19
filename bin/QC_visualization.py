@@ -316,7 +316,6 @@ def argparse_setup():
 
 if __name__ == "__main__":
     args = argparse_setup()
-    print(args)
 
     args.hdf5_files = sorted(args.hdf5_files) # sorts the file names alphabetically (assumes that they are all in the same folder)
 
@@ -424,10 +423,45 @@ if __name__ == "__main__":
     if args.output_table_type == "csv":
         df_table0.to_csv(output_path + os.sep + "00_table_summary.csv", index = False)
     if args.output_table_type == "tsv":   
-        df_table0.to_csv(output_path + os.sep + "00_table_summary.csv", index = False, sep = "\t")
+        df_table0.to_csv(output_path + os.sep + "00_table_summary.tsv", index = False, sep = "\t")
     if args.output_table_type == "xlsx":
         df_table0.to_excel(output_path + os.sep + "00_table_summary.xlsx", index = False)   
     
+################################################################################################
+    # hdf5 feature list: table containing all features of the hdf5 files and their descriptions
+    
+    key_list = []
+    hdf5_feature_list = []
+    for hdf in hdf5s:
+        key_list_tmp = list(hdf.keys())
+        ## check if there are additional keys in the hdf5 file that are not in the previous files:
+        key_list_diff = set(key_list_tmp).difference(set(key_list))
+        key_list = set(key_list).union(set(key_list_tmp))
+        if not len(key_list_diff) == 0:
+            hdf5_feature_list_tmp = []
+            for key in key_list_diff:
+                D = hdf[key]
+                hdf5_feature_list_tmp.append({
+                    'key': key,
+                    'qc_description': D.attrs.get('qc_description', ''),
+                    'qc_name': D.attrs.get('qc_name', ''),
+                    'qc_short_name': D.attrs.get('qc_short_name', ''),
+                    'unit_accession': D.attrs.get('unit_accession', ''),
+                    'unit_name': D.attrs.get('unit_name', '')
+                })
+            hdf5_feature_list.append(pd.DataFrame(hdf5_feature_list_tmp))
+
+    hdf5_feature_table = pd.concat(hdf5_feature_list, ignore_index=True)
+    ## sort by key alphabetically
+    hdf5_feature_table = hdf5_feature_table.sort_values(by = "key", ascending=True)
+
+    if args.output_table_type == "csv":
+        hdf5_feature_table.to_csv(output_path + os.sep + "99_hdf5_feature_table.csv", index = False)
+    if args.output_table_type == "tsv":   
+        hdf5_feature_table.to_csv(output_path + os.sep + "99_hdf5_feature_table.tsv", index = False, sep = "\t")
+    if args.output_table_type == "xlsx":
+        hdf5_feature_table.to_excel(output_path + os.sep + "99_hdf5_feature_table.xlsx", index = False)   
+
 
 ################################################################################################
     # Figure 01: Barplot for total number of MS1 and MS2 spectra
@@ -1220,7 +1254,6 @@ if __name__ == "__main__":
             
             df_tmp = df_calibrants[df_calibrants["calibrant_mz"] == row["calibrant_mz"]]
             df_tmp = df_tmp[df_tmp["calibrant_mobility"] == row["calibrant_mobility"]]
-            print(df_tmp)
             
             mz_tmp = row["calibrant_mz"]
             mobility_tmp = row["calibrant_mobility"]
