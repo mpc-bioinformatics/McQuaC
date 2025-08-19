@@ -117,7 +117,7 @@ def parse_protein_infos(pia_proteins_mztab: str, out_hdf5: h5py.File):
                       "UO:0000189", "count unit")
     
     add_entry_to_hdf5(out_hdf5,
-                      "Local:08", "nr_accessions", "number of identified protein accessions", "All protein accessions within the protein groups are counted (ungreouped protein groups).", 
+                      "LOCAL:08", "nr_accessions", "number of identified protein accessions", "All protein accessions within the protein groups are counted (ungreouped protein groups).", 
                       number_ungrouped_proteins, (1,), "int32", 
                       "UO:0000189", "count unit")
 
@@ -190,7 +190,7 @@ def parse_psm_infos(pia_psm_mztab: str, out_hdf5: h5py.File, store_all_infos: bo
                       "UO:0000189", "count unit")
     
     add_table_to_hdf5(out_hdf5,
-                      "Local:09", "PSM_charge_fractions", 
+                      "LOCAL:09", "PSM_charge_fractions", 
                       "fractions of precursor charge states of the PSMs", 
                       "Precursor charge states of the PSMs as fractions (only identifications are counted, not all precursors).", 
                       ["1", "2", "3", "4", "5", "6 or more"], charge_fractions, ["float64", "float64", "float64", "float64", "float64", "float64"]
