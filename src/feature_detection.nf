@@ -7,8 +7,6 @@
 
 nextflow.enable.dsl=2
 
-python_image = 'mpc/nextqcflow-python:latest'
-
 params.openms_threads = 8   // hardcoded for now, number of threads used by OpenMS
 params.min_charge = 2       // hardcoded for now
 params.max_charge = 5       // hardcoded for now
@@ -24,14 +22,14 @@ workflow get_feature_metrics {
     take:
         mzmls  // MS1 should be peak picked for feature-finding
         mztabfiles
-        comet_params
+        mcquac_params
     
     main:
         // filter out empty spectra and chromatograms
         filtered_mzml = filter_mzml(mzmls)
 
         // Get features with OpenMS feature finder
-        feature_finder_params = get_feature_finder_params_from_comet_params(comet_params)
+        feature_finder_params = get_feature_finder_params_from_mcquac_params(mcquac_params)
         feature_xml = run_feature_finder(filtered_mzml, feature_finder_params)
 
         // map identification to features (using mzTab and featureXML)
@@ -53,28 +51,23 @@ workflow get_feature_metrics {
          feature_metrics
 }
 
-/**
- * This process is used to convert the comet parameters into the parameters needed for the feature finder.
- * 
- * @param comet_params The comet parameters file
- * @return The feature finder parameters (value channel)
- */
-process get_feature_finder_params_from_comet_params {
-	container { python_image }
+process get_feature_finder_params_from_mcquac_params {
+	label 'mcquac_image'
 
 	input:
-	path comet_params
+	path mcquac_params
 
 	output:
 	stdout
 
+    script:
 	"""
-	comet_params_to_feature_finder_params.py -c ${comet_params}
+    feature_finder_params_from_mcquac_params.py -params ${mcquac_params}
 	"""
 }
 
 process run_feature_finder {
-    container { python_image }
+    label 'mcquac_image'
 
     cpus { params.openms_threads }
 
@@ -95,7 +88,7 @@ process run_feature_finder {
 }
 
 process map_features_to_idents {
-    container { python_image }
+    label 'mcquac_image'
 
     cpus { params.openms_threads }
 
@@ -113,7 +106,7 @@ process map_features_to_idents {
 }
 
 process get_metrics_from_featurexml {
-    container { python_image }
+    label 'mcquac_image'
 
     input:
     path featurexml
@@ -133,7 +126,7 @@ process get_metrics_from_featurexml {
  * Necessary to prevent memory issues with FeatureFinder
  */
 process filter_mzml {
-    container { python_image }
+    label 'mcquac_image'
 
     cpus { params.openms_threads }
 
