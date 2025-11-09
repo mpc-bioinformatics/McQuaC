@@ -316,6 +316,12 @@
           "default": 16,
           "description": "Allowed RAM to be used by PIA, in GB",
           "minimum": 4
+        },
+        "identification__pia_prefilter": {
+          "type": "number",
+          "default": 0.05,
+          "description": "Perform pre-filtering on PSM level before protein and peptide inference in PIA, use this threshold for pre-filtering.",
+          "minimum": 0.03
         }
       }
     }

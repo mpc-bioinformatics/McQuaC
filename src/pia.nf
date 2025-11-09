@@ -22,11 +22,18 @@ workflow pia_analysis {
         fdr_filter
         pia_threads
         pia_gb_ram
+        pia_prefilter_threshold
 
     main:
         pia_xmls = compile_pia_xmls(identifications, pia_threads, pia_gb_ram)
-        analysis_json = prepare_analysis_json(do_psm_export, do_peptide_export, do_protein_export, fdr_filter)
-        pia_all_report_files = pia_run_analysis(pia_xmls, analysis_json, pia_threads, pia_gb_ram)
+
+        if (pia_prefilter_threshold > 0) {
+            // perform the pre-filtering
+            pia_xmls = perform_pia_prefiltering(pia_xmls, pia_prefilter_threshold, pia_threads, pia_gb_ram)
+        }
+
+        analysis_json = prepare_analysis_json(do_psm_export, do_peptide_export, do_protein_export, fdr_filter, true, 0.01)
+        pia_all_report_files = pia_run_analysis(pia_xmls, analysis_json, pia_threads, pia_gb_ram, "mzTab")
 
         return_files = pia_all_report_files.psms.collect()
             .concat(pia_all_report_files.peptides.collect())
@@ -49,6 +56,7 @@ workflow pia_analysis_full {
         identifications
         pia_threads
         pia_gb_ram
+        pia_prefilter_threshold
 
     main:
         pia_report_files = pia_analysis(
@@ -58,7 +66,8 @@ workflow pia_analysis_full {
             true,
             true,
             pia_threads,
-            pia_gb_ram
+            pia_gb_ram,
+            pia_prefilter_threshold
         )
     
     emit:
@@ -85,7 +94,8 @@ workflow pia_analysis_psm_only {
             false,
             fdr_filter,
             pia_threads,
-            pia_gb_ram
+            pia_gb_ram,
+            -1
         )
 
     emit:
@@ -110,6 +120,24 @@ workflow pia_extract_metrics {
     
     emit:
         extract_csv
+}
+
+
+workflow perform_pia_prefiltering {
+    take:
+        pia_xmls
+        pia_prefilter_threshold
+        pia_threads
+        pia_gb_ram
+
+    main:
+        // perform the pre-filtering
+        prefilter_analysis_json = prepare_analysis_json(true, false, false, true, false, pia_prefilter_threshold)
+        pia_prefiltered = pia_run_analysis(pia_xmls, prefilter_analysis_json, pia_threads, pia_gb_ram, "mzid")
+        prefiltered_pia_xmls = compile_pia_xmls(pia_prefiltered.psms, pia_threads, pia_gb_ram)
+
+    emit:
+    prefiltered_pia_xmls
 }
 
 
@@ -154,6 +182,8 @@ process prepare_analysis_json {
     val peptide_export
     val protein_export
     val fdr_filter
+    val remove_decoys       // remove decoys works only together with fdr_filer == true
+    val fdr_threshold
 
     output:
     path "pia_analysis.json"
@@ -162,6 +192,7 @@ process prepare_analysis_json {
     """
     pia --example > pia_analysis.json
     
+    # delete the first row of the file
     sed -i 1d pia_analysis.json
 
     sed -i 's;"createPSMsets": .*,;"createPSMsets": false,;g' pia_analysis.json
@@ -200,9 +231,16 @@ process prepare_analysis_json {
 
     if [ ${fdr_filter} = true ];
     then
-      sed -i '/psmFilters/{n;s/.*/    "psm_score_filter_psm_fdr_score <= 0.01",\\n    "psm_accessions_filter !regex_only DECOY_.*"/g;}' pia_analysis.json
-      sed -i '/peptideFilters/{n;s/.*/    "psm_score_filter_psm_fdr_score <= 0.01",\\n    "peptide_accessions_filter !regex_only DECOY_.*"/g;}' pia_analysis.json
-      sed -i '/proteinFilters/{n;s/.*/    "protein_q_value_filter <= 0.01",\\n    "protein_accessions_filter !regex_only DECOY_.*"/g;}' pia_analysis.json
+      if [ ${remove_decoys} = true ];
+      then
+        sed -i '/psmFilters/{n;s/.*/    "psm_score_filter_psm_fdr_score <= ${fdr_threshold}",\\n    "psm_accessions_filter !regex_only DECOY_.*"/g;}' pia_analysis.json
+        sed -i '/peptideFilters/{n;s/.*/    "psm_score_filter_psm_fdr_score <= ${fdr_threshold}",\\n    "peptide_accessions_filter !regex_only DECOY_.*"/g;}' pia_analysis.json
+        sed -i '/proteinFilters/{n;s/.*/    "protein_q_value_filter <= ${fdr_threshold}",\\n    "protein_accessions_filter !regex_only DECOY_.*"/g;}' pia_analysis.json
+      else
+        sed -i '/psmFilters/{n;s/.*/    "psm_score_filter_psm_fdr_score <= ${fdr_threshold}"/g;}' pia_analysis.json
+        sed -i '/peptideFilters/{n;s/.*/    "psm_score_filter_psm_fdr_score <= ${fdr_threshold}"/g;}' pia_analysis.json
+        sed -i '/proteinFilters/{n;s/.*/    "protein_q_value_filter <= ${fdr_threshold}"/g;}' pia_analysis.json
+      fi
     else
       sed -i '/psmFilters/{n;s/.*//g;}' pia_analysis.json
       sed -i '/peptideFilters/{n;s/.*//g;}' pia_analysis.json
@@ -231,9 +269,10 @@ process pia_run_analysis {
     path pia_analysis_file
     val pia_threads
     val pia_gb_ram
+    val PSMformat           // needs to be changed between pre-processing (mzid9) and final (mzTab) 
 
     output:
-    path "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-PSM.mzTab", emit: psms
+    path "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-PSM.${PSMformat}", emit: psms
     path "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-peptides.csv", emit: peptides
     path "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-proteins.mzTab", emit: proteins
 
@@ -244,11 +283,11 @@ process pia_run_analysis {
 
     cp ${pia_analysis_file} \${jsonfile}
 
-    touch \${filebase}-piaExport-PSM.mzTab
+    touch \${filebase}-piaExport-PSM.${PSMformat}
     touch \${filebase}-piaExport-peptides.csv
     touch \${filebase}-piaExport-proteins.mzTab
 
-    sed -i 's;"psmExportFile": .*;"psmExportFile": "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-PSM.mzTab",;g' \${jsonfile}
+    sed -i 's;"psmExportFile": .*;"psmExportFile": "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-PSM.${PSMformat}",;g' \${jsonfile}
     sed -i 's;"peptideExportFile": .*;"peptideExportFile": "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-peptides.csv",;g' \${jsonfile}
     sed -i 's;"proteinExportFile": .*;"proteinExportFile": "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-proteins.mzTab",;g' \${jsonfile}
 

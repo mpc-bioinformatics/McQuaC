@@ -97,7 +97,8 @@ workflow {
 		pia_report_files = pia_analysis_full(
 			comet_ids.mzids,
 			params.identification__pia_threads,
-			params.identification__pia_gb_ram
+			params.identification__pia_gb_ram,
+			params.identification__pia_prefilter
 		)
 		pia_report_psm_mztabs = pia_report_files
 				.toList()
