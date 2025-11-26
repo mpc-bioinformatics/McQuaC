@@ -25,15 +25,27 @@ workflow pia_analysis {
         pia_prefilter_threshold
 
     main:
-        pia_xmls = compile_pia_xmls(identifications, pia_threads, pia_gb_ram)
+        basename_to_ids = identifications.map { it -> 
+            tuple(
+                it.baseName,
+                it
+            )
+        }
+        basename_to_pia_xmls = compile_pia_xmls(basename_to_ids, pia_threads, pia_gb_ram)
 
         if (pia_prefilter_threshold > 0) {
             // perform the pre-filtering
-            pia_xmls = perform_pia_prefiltering(pia_xmls, pia_prefilter_threshold, pia_threads, pia_gb_ram)
+            basename_to_pia_xmls = perform_pia_prefiltering(basename_to_pia_xmls, pia_prefilter_threshold, pia_threads, pia_gb_ram)
         }
 
-        analysis_json = prepare_analysis_json(do_psm_export, do_peptide_export, do_protein_export, fdr_filter, true, 0.01)
-        pia_all_report_files = pia_run_analysis(pia_xmls, analysis_json, pia_threads, pia_gb_ram, "mzTab")
+        analysis_json = prepare_analysis_json(do_psm_export, do_peptide_export, do_protein_export, fdr_filter,
+                true,      // remove_decoys
+                0.01       // fdr_threshold, hardcoded to 1% for now
+        )
+        pia_all_report_files = pia_run_analysis(basename_to_pia_xmls, analysis_json, pia_threads, pia_gb_ram, "mzTab")
+
+        // TODO: remove this ugly hack! implement basenames and results further downstream correctly!
+        pia_all_report_files = pia_rename_files_HOTFIX_CHANGE(pia_all_report_files)
 
         return_files = pia_all_report_files.psms.collect()
             .concat(pia_all_report_files.peptides.collect())
@@ -95,7 +107,7 @@ workflow pia_analysis_psm_only {
             fdr_filter,
             pia_threads,
             pia_gb_ram,
-            -1
+            -1                  // <0 -> no pre-filtering here
         )
 
     emit:
@@ -125,15 +137,22 @@ workflow pia_extract_metrics {
 
 workflow perform_pia_prefiltering {
     take:
-        pia_xmls
+        basename_to_pia_xmls
         pia_prefilter_threshold
         pia_threads
         pia_gb_ram
 
     main:
         // perform the pre-filtering
-        prefilter_analysis_json = prepare_analysis_json(true, false, false, true, false, pia_prefilter_threshold)
-        pia_prefiltered = pia_run_analysis(pia_xmls, prefilter_analysis_json, pia_threads, pia_gb_ram, "mzid")
+        prefilter_analysis_json = prepare_analysis_json(
+            true,  // psm_export
+            false, // peptide_export
+            false, // protein_export
+            true,  // fdr_filter
+            false, // remove_decoys
+            pia_prefilter_threshold
+        )
+        pia_prefiltered = pia_run_analysis(basename_to_pia_xmls, prefilter_analysis_json, pia_threads, pia_gb_ram, "mzid")
         prefiltered_pia_xmls = compile_pia_xmls(pia_prefiltered.psms, pia_threads, pia_gb_ram)
 
     emit:
@@ -153,16 +172,16 @@ process compile_pia_xmls {
     memory "${pia_gb_ram}.GB"
 
     input:
-    path identifications
+    tuple val(id_basename), path(identifications)      // mapping from the basename to the identifications
     val pia_threads
     val pia_gb_ram
 
     output:
-    path "${identifications.baseName}.pia.xml"
+    tuple val(id_basename), path("${id_basename}.pia.xml")
 
     script:
     """
-    pia -Xms2g -Xmx${pia_gb_ram}g --threads ${pia_threads} --compile -o ${identifications.baseName}.pia.xml ${identifications}
+    pia -Xms2g -Xmx${pia_gb_ram}g --threads ${pia_threads} --compile -o ${id_basename}.pia.xml ${identifications}
     """
 }
 
@@ -182,7 +201,7 @@ process prepare_analysis_json {
     val peptide_export
     val protein_export
     val fdr_filter
-    val remove_decoys       // remove decoys works only together with fdr_filer == true
+    val remove_decoys       // remove decoys works only together with fdr_filter == true
     val fdr_threshold
 
     output:
@@ -192,7 +211,7 @@ process prepare_analysis_json {
     """
     pia --example > pia_analysis.json
     
-    # delete the first row of the file
+    # delete the first row of the file, which contains en explanatory comment and does not start with the json
     sed -i 1d pia_analysis.json
 
     sed -i 's;"createPSMsets": .*,;"createPSMsets": false,;g' pia_analysis.json
@@ -265,31 +284,30 @@ process pia_run_analysis {
     memory "${pia_gb_ram}.GB"
 
     input:
-    path pia_xml
+    tuple val(search_basename), path(pia_xml)
     path pia_analysis_file
     val pia_threads
     val pia_gb_ram
-    val PSMformat           // needs to be changed between pre-processing (mzid9) and final (mzTab) 
+    val psm_export_format               // needs to be set correctly for pre-processing (mzid) and final (mzTab) 
 
     output:
-    path "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-PSM.${PSMformat}", emit: psms
-    path "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-peptides.csv", emit: peptides
-    path "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-proteins.mzTab", emit: proteins
+    tuple val({search_basename}), path("psms.${psm_export_format}"), emit: psms
+    tuple val({search_basename}), path("peptides.csv"), emit: peptides
+    tuple val({search_basename}), path("proteins.mzTab"), emit: proteins
 
     script:
     """
-    filebase="${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}"
-    jsonfile="\${filebase}-analysis.json"
+    jsonfile="${search_basename}-analysis.json"
 
     cp ${pia_analysis_file} \${jsonfile}
 
-    touch \${filebase}-piaExport-PSM.${PSMformat}
-    touch \${filebase}-piaExport-peptides.csv
-    touch \${filebase}-piaExport-proteins.mzTab
+    touch psms.${psm_export_format}
+    touch peptides.csv
+    touch proteins.mzTab
 
-    sed -i 's;"psmExportFile": .*;"psmExportFile": "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-PSM.${PSMformat}",;g' \${jsonfile}
-    sed -i 's;"peptideExportFile": .*;"peptideExportFile": "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-peptides.csv",;g' \${jsonfile}
-    sed -i 's;"proteinExportFile": .*;"proteinExportFile": "${pia_xml.name.take(pia_xml.name.lastIndexOf('.pia.xml'))}-piaExport-proteins.mzTab",;g' \${jsonfile}
+    sed -i 's;"psmExportFile": .*;"psmExportFile": "psms.${psm_export_format}",;g' \${jsonfile}
+    sed -i 's;"peptideExportFile": .*;"peptideExportFile": "peptides.csv",;g' \${jsonfile}
+    sed -i 's;"proteinExportFile": .*;"proteinExportFile": "proteins.mzTab",;g' \${jsonfile}
 
     pia -Xms2g -Xmx${pia_gb_ram}g --threads ${pia_threads} \${jsonfile} ${pia_xml}
     """
@@ -312,5 +330,33 @@ process pia_extract_csv {
     """
     outfile="${psm_results.name.take(psm_results.name.lastIndexOf('-piaExport-PSM.mzTab'))}-pia_extraction.hdf5"
     extract_from_pia_output.py --pia_PSMs ${psm_results} --pia_peptides ${peptide_results} --pia_proteins ${protein_results} --out_hdf5 \${outfile}
+    """
+}
+
+
+//
+// TODO: GET RID OF THIS PROCESS and implement the file and basenames correctly further downstream
+//
+process pia_rename_files_HOTFIX_CHANGE {
+    label 'mcquac_image'
+
+    cpus 1
+    memory "4.GB"
+
+    input:
+    tuple val(psms_basename), path(psms_result)
+    tuple val(peptides_basename), path(peptides_result)
+    tuple val(proteins_basename), path(proteins_result)
+
+    output:
+    path "${psms_basename}-piaExport-PSM.mzTab", emit: psms
+    path "${peptides_basename}-piaExport-peptides.csv", emit: peptides
+    path "${proteins_basename}-piaExport-proteins.mzTab", emit: proteins
+
+    script:
+    """
+    cp ${psms_result} ${psms_basename}-piaExport-PSM.mzTab
+    cp ${peptides_result} ${peptides_basename}-piaExport-peptides.csv
+    cp ${proteins_result} ${proteins_basename}-piaExport-proteins.mzTab
     """
 }

@@ -320,8 +320,8 @@
         "identification__pia_prefilter": {
           "type": "number",
           "default": 0.05,
-          "description": "Perform pre-filtering on PSM level before protein and peptide inference in PIA, use this threshold for pre-filtering.",
-          "minimum": 0.03
+          "description": "Perform pre-filtering on PSM level before protein and peptide inference in PIA, use this threshold for pre-filtering. Set negative to disable pre-filtering.",
+          "maximum": 1
         }
       }
     }
