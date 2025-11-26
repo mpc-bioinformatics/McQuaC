@@ -45,7 +45,7 @@ workflow pia_analysis {
         pia_all_report_files = pia_run_analysis(basename_to_pia_xmls, analysis_json, pia_threads, pia_gb_ram, "mzTab")
 
         // TODO: remove this ugly hack! implement basenames and results further downstream correctly!
-        pia_all_report_files = pia_rename_files_HOTFIX_CHANGE(pia_all_report_files)
+        pia_all_report_files = pia_rename_files_HOTFIX_CHANGE(pia_all_report_files.psms, pia_all_report_files.peptides, pia_all_report_files.proteins)
 
         return_files = pia_all_report_files.psms.collect()
             .concat(pia_all_report_files.peptides.collect())
@@ -156,7 +156,7 @@ workflow perform_pia_prefiltering {
         prefiltered_pia_xmls = compile_pia_xmls(pia_prefiltered.psms, pia_threads, pia_gb_ram)
 
     emit:
-    prefiltered_pia_xmls
+        prefiltered_pia_xmls
 }
 
 
@@ -211,7 +211,7 @@ process prepare_analysis_json {
     """
     pia --example > pia_analysis.json
     
-    # delete the first row of the file, which contains en explanatory comment and does not start with the json
+    # delete the first row of the file, which contains an explanatory comment and does not start with the json
     sed -i 1d pia_analysis.json
 
     sed -i 's;"createPSMsets": .*,;"createPSMsets": false,;g' pia_analysis.json
@@ -291,9 +291,9 @@ process pia_run_analysis {
     val psm_export_format               // needs to be set correctly for pre-processing (mzid) and final (mzTab) 
 
     output:
-    tuple val({search_basename}), path("psms.${psm_export_format}"), emit: psms
-    tuple val({search_basename}), path("peptides.csv"), emit: peptides
-    tuple val({search_basename}), path("proteins.mzTab"), emit: proteins
+    tuple val(search_basename), path("psms.${psm_export_format}"), emit: psms
+    tuple val(search_basename), path("peptides.csv"), emit: peptides
+    tuple val(search_basename), path("proteins.mzTab"), emit: proteins
 
     script:
     """
