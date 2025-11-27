@@ -8,6 +8,10 @@
 // On the memory-side, it uses a lot the more PSMs are found...
 // Use this information to adjust number of parallel threads.
 
+// Constant used to disable pre-filtering on PSM level.
+// Any negative value passed as pia_prefilter_threshold will disable the pre-filtering step.
+def PREFILTER_DISABLED = -1
+
 /*
  * Performs PIA's FDR and protein iference on the given files and levels.
  *
@@ -34,7 +38,7 @@ workflow pia_analysis {
         basename_to_pia_xmls = compile_pia_xmls(basename_to_ids, pia_threads, pia_gb_ram)
 
         if (pia_prefilter_threshold > 0) {
-            // perform the pre-filtering
+            // perform the pre-filtering (values <= 0, including PREFILTER_DISABLED, skip this step)
             basename_to_pia_xmls = perform_pia_prefiltering(basename_to_pia_xmls, pia_prefilter_threshold, pia_threads, pia_gb_ram)
         }
 
@@ -107,7 +111,7 @@ workflow pia_analysis_psm_only {
             fdr_filter,
             pia_threads,
             pia_gb_ram,
-            -1                  // <0 -> no pre-filtering here
+            PREFILTER_DISABLED  // disable pre-filtering for PSM-only analysis
         )
 
     emit:
