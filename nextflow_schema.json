@@ -322,6 +322,13 @@
           "default": 0.05,
           "description": "Perform pre-filtering on PSM level before protein and peptide inference in PIA, use this threshold for pre-filtering. Set negative to disable pre-filtering.",
           "maximum": 1
+        },
+        "identification__pia_fdr_threshold": {
+          "type": "number",
+          "default": 0.01,
+          "description": "FDR threshold for the final PIA analysis. Typically set to 0.01 (1%) for stringent filtering of PSMs, peptides, and proteins.",
+          "minimum": 0,
+          "maximum": 1
         }
       }
     }

@@ -23,6 +23,7 @@ workflow pia_analysis {
         pia_threads
         pia_gb_ram
         pia_prefilter_threshold
+        pia_fdr_threshold
 
     main:
         basename_to_ids = identifications.map { it -> 
@@ -40,7 +41,7 @@ workflow pia_analysis {
 
         analysis_json = prepare_analysis_json(do_psm_export, do_peptide_export, do_protein_export, fdr_filter,
                 true,      // remove_decoys
-                0.01       // fdr_threshold, hardcoded to 1% for now
+                pia_fdr_threshold
         )
         pia_all_report_files = pia_run_analysis(basename_to_pia_xmls, analysis_json, pia_threads, pia_gb_ram, "mzTab")
 
@@ -69,6 +70,7 @@ workflow pia_analysis_full {
         pia_threads
         pia_gb_ram
         pia_prefilter_threshold
+        pia_fdr_threshold
 
     main:
         pia_report_files = pia_analysis(
@@ -79,7 +81,8 @@ workflow pia_analysis_full {
             true,
             pia_threads,
             pia_gb_ram,
-            pia_prefilter_threshold
+            pia_prefilter_threshold,
+            pia_fdr_threshold
         )
     
     emit:
@@ -97,6 +100,7 @@ workflow pia_analysis_psm_only {
         fdr_filter
         pia_threads
         pia_gb_ram
+        pia_fdr_threshold
     
     main:
         pia_report_files = pia_analysis(
@@ -107,7 +111,8 @@ workflow pia_analysis_psm_only {
             fdr_filter,
             pia_threads,
             pia_gb_ram,
-            -1                  // <0 -> no pre-filtering here
+            -1,                  // <0 -> no pre-filtering here
+            pia_fdr_threshold
         )
 
     emit:
