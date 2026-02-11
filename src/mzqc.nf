@@ -10,7 +10,9 @@ workflow hdf5_to_mzqc {
         output_folder
     
     main:
-       mzqc_file = hdf5_to_mzqc_export(hdf5_files, output_folder)
+       // Flatten to process each HDF5 file individually
+       individual_hdf5_files = hdf5_files.flatten()
+       mzqc_file = hdf5_to_mzqc_export(individual_hdf5_files, output_folder)
 
     emit:
         mzqc_file.mzqc
@@ -26,7 +28,7 @@ process hdf5_to_mzqc_export {
     publishDir path: { "${output_folder}/mzQC" }, mode: 'copy', pattern: "*.mzqc"
 
     input:
-    path hdf5_files
+    path hdf5_file
     val output_folder
 
     output:
@@ -34,6 +36,6 @@ process hdf5_to_mzqc_export {
 
     script:
     """
-    hdf5_to_mzqc.py -hdf5 "${hdf5_files}" -mzqc_out "${hdf5_files.baseName}.mzqc"
+    hdf5_to_mzqc.py -hdf5 "${hdf5_file}" -mzqc_out "${hdf5_file.baseName}.mzqc"
     """
 }

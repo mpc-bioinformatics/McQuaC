@@ -8,3 +8,4 @@ alphatims==1.0.9
 h5py==3.11.0
 matplotlib==3.7.5
 openpyxl==3.1.5
+pymzqc==1.0.0
