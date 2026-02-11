@@ -54,6 +54,9 @@ workflow {
 		
 		raw_files = thermo_raw_files.concat(bruker_raw_folders)
 
+		// Colelct all output hdf5 metrics 
+		hdf5s_per_run = Channel.empty()
+
 		// conversion into mzML files
 		converted_mzmls = convert_raws_to_mzml(
 			thermo_raw_files, 
@@ -72,42 +75,50 @@ workflow {
 			params.filter_threshold,
 			params.report_up_to_charge
 		)
-
-		// Identify spectra using Comet
-		comet_ids = identification_with_comet(
-			mzmls,
-			fasta_file,
-			params.identification__generate_decoys,
-			params.identification__decoy_method,
-			params.main_outdir,
-			params.identification__store_decoy_fasta,
-			params.identification__comet_threads,
-			params.identification__comet_mem,
-			params.identification__peptide_mass_tolerance_upper,
-			params.identification__peptide_mass_tolerance_lower,
-			params.identification__peptide_mass_units,
-			params.identification__isotope_error,
-			params.identification__fragment_bin_tol,
-			params.identification__fragment_bin_offset,
-			params.identification__theoretical_fragment_ions,
-			""	// no labelling searched here
+		hdf5s_per_run = hdf5s_per_run.concat(
+			mzml_metrics.map{file -> tuple(file.name.take(file.name.lastIndexOf('-mzml_info.hdf5')), file)}
 		)
 
-		// Execute protein inference and filter by FDR
-		pia_report_files = pia_analysis_full(
-			comet_ids.mzids,
-			params.identification__pia_threads,
-			params.identification__pia_gb_ram
-		)
-		pia_report_psm_mztabs = pia_report_files
-				.toList()
-					.transpose()
-					.first()
-					.flatten()
-		pia_extract_csv = pia_extract_metrics(pia_report_files)
+		if (!(params.skip_search_engine_identification)) {
+			// Identify spectra using Comet
+			comet_ids = identification_with_comet(
+				mzmls,
+				fasta_file,
+				params.identification__generate_decoys,
+				params.identification__decoy_method,
+				params.main_outdir,
+				params.identification__store_decoy_fasta,
+				params.identification__comet_threads,
+				params.identification__comet_mem,
+				params.identification__peptide_mass_tolerance_upper,
+				params.identification__peptide_mass_tolerance_lower,
+				params.identification__peptide_mass_units,
+				params.identification__isotope_error,
+				params.identification__fragment_bin_tol,
+				params.identification__fragment_bin_offset,
+				params.identification__theoretical_fragment_ions,
+				""	// no labelling searched here
+			)
+
+			// Execute protein inference and filter by FDR
+			pia_report_files = pia_analysis_full(
+				comet_ids.mzids,
+				params.identification__pia_threads,
+				params.identification__pia_gb_ram
+			)
+			pia_report_psm_mztabs = pia_report_files
+					.toList()
+						.transpose()
+						.first()
+						.flatten()
+			pia_extract_csv = pia_extract_metrics(pia_report_files)
+			hdf5s_per_run = hdf5s_per_run.concat(
+				pia_extract_csv.map{file -> tuple(file.name.take(file.name.lastIndexOf('-pia_extraction.hdf5')), file)}
+			)
+		}
 
 		// search additionally for labelled PSMs
-		if (params.search_labelled_spikeins) {
+		if (params.search_labelled_spikeins && !(params.skip_search_engine_identification)) {
 			comet_labelled_ids = identification_labelled_with_comet(
 				mzmls,
 				fasta_file,
@@ -137,7 +148,7 @@ workflow {
 	}
 
 		// extract spike-ins information
-		if (params.search_spike_ins) {
+		if (params.search_spike_ins && !(params.skip_search_engine_identification)) {
 			spike_ins_table = Channel.fromPath(params.spike_ins_table).first()
 
 			if (params.search_labelled_spikeins) {
@@ -152,19 +163,28 @@ workflow {
 				spike_ins_table,
 				params.max_parallel_xic_extractors_factor
 			)
+			hdf5s_per_run = hdf5s_per_run.concat(
+				spike_in_metrics.map{file -> tuple(file.name.take(file.name.lastIndexOf('-spikeins.hdf5')), file)}
+			)
 		}
 	 
-		// Run Feature Finding
-		feature_metrics = get_feature_metrics(
-			mzmls,
-			pia_report_psm_mztabs, 
-			params.identification__peptide_mass_tolerance_upper,
-			params.identification__peptide_mass_units,
-			params.feature_detection__min_charge,
-			params.feature_detection__max_charge,
-			params.feature_detection__openms_threads,
-			params.feature_detection__openms_memory
-		)
+	 	if (!(params.skip_search_engine_identification)) {
+			// TODO DL add option of feature finder which also works with no identifications?
+			// Run Feature Finding
+			feature_metrics = get_feature_metrics(
+				mzmls,
+				pia_report_psm_mztabs, 
+				params.identification__peptide_mass_tolerance_upper,
+				params.identification__peptide_mass_units,
+				params.feature_detection__min_charge,
+				params.feature_detection__max_charge,
+				params.feature_detection__openms_threads,
+				params.feature_detection__openms_memory
+			)
+			hdf5s_per_run = hdf5s_per_run.concat(
+				feature_metrics.map{file -> tuple(file.name.take(file.name.lastIndexOf('-features.hdf5')), file)}
+			)
+		}
 
 		// Get Thermo/Bruker specific information from raw_spectra
 		custom_header_infos = get_headers(
@@ -176,20 +196,11 @@ workflow {
 			params.ms_run_metrics__bruker_headers,
 			params.ms_run_metrics__bruker_calibrants
 		)
+		hdf5s_per_run = hdf5s_per_run.concat(
+			custom_header_infos.map{file -> tuple(file.name.take(file.name.lastIndexOf('-custom_headers.hdf5')), file)}
+		)
 
-		// Concatenate to one merged metric CSV
-		hdf5s_per_run = mzml_metrics.map{file -> tuple(file.name.take(file.name.lastIndexOf('-mzml_info.hdf5')), file)}
-		if (params.search_spike_ins) {
-			hdf5s_per_run = hdf5s_per_run.concat(
-				spike_in_metrics.map{file -> tuple(file.name.take(file.name.lastIndexOf('-spikeins.hdf5')), file)}
-			)
-		}
-		hdf5s_per_run = hdf5s_per_run
-			.concat(feature_metrics.map{file -> tuple(file.name.take(file.name.lastIndexOf('-features.hdf5')), file)})
-			.concat(pia_extract_csv.map{file -> tuple(file.name.take(file.name.lastIndexOf('-pia_extraction.hdf5')), file)})
-			.concat(custom_header_infos.map{file -> tuple(file.name.take(file.name.lastIndexOf('-custom_headers.hdf5')), file)})
-			.groupTuple()
-
+		// Concatenate to one merged metric HDF5 per run
 		combined_metrics = combine_metric_hdf5(hdf5s_per_run, params.main_outdir)
 
 		// Visualize the results (and move them to the results folder)
