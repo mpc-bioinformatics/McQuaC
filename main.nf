@@ -201,6 +201,7 @@ workflow {
 		)
 
 		// Concatenate to one merged metric HDF5 per run
+		hdf5s_per_run = hdf5s_per_run.groupTuple()
 		combined_metrics = combine_metric_hdf5(hdf5s_per_run, params.main_outdir)
 
 		// Visualize the results (and move them to the results folder)
@@ -211,7 +212,7 @@ workflow {
 			params.output_column_order,
 			params.spikein_columns,
 			params.output_table_type,
-			params.search_spike_ins,
+			params.search_spike_ins && !(params.skip_search_engine_identification),
 			params.height_barplots,
 			params.width_barplots,
 			params.height_pca,
