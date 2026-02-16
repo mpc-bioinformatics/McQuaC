@@ -106,8 +106,9 @@ workflow pia_extract_metrics {
         pia_results
 
     main:
-        extract_csv = pia_extract_csv(pia_results)
-    
+        // Filter, in case of empty lists (we have e.g. Channel.of([]), so that this step skips such entries)
+        extract_csv = pia_extract_csv(pia_results.filter {v -> v[0] != null } )
+
     emit:
         extract_csv
 }
