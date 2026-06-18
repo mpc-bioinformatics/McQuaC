@@ -67,21 +67,24 @@ def argparse_setup():
     arguments = parser.parse_args()
 
     ### NF-Core Replacements if executed as a module
-    arguments.raw = "${raw_thermo_file}".startswith("$") if "${raw_thermo_file}" else arguments.raw
-    arguments.out_hdf5 = "${prefix}.hdf5".startswith("$") if "${prefix}" else arguments.out_hdf5
-    if "${thermo_extraction_headers}".startswith("$"):  
+    arguments.raw = "${raw_thermo_file}" if not "${raw_thermo_file}".endswith("{raw_thermo_file}") else arguments.raw
+    arguments.out_hdf5 = "${outfile_basename}.hdf5" if not "${outfile_basename}.hdf5".endswith("{outfile_basename}.hdf5") else arguments.out_hdf5
+    if not "${thermo_extraction_headers}".endswith("{thermo_extraction_headers}"):  
         # This is parses, as thermo_extraction_headers is a string of the list 
         # which is a mix of 3 different parameters. 
         nf_core_arguments = parser.parse_args(shlex.split("${thermo_extraction_headers}"))
         arguments.extra_headers_to_parse = nf_core_arguments.extra_headers_to_parse
         arguments.tune_headers_to_parse = nf_core_arguments.tune_headers_to_parse
         arguments.log_headers_to_parse = nf_core_arguments.log_headers_to_parse
+    
     ### NF-Core versions.yml output (required) if executed as a module
-    if "${raw_thermo_file}".startswith("$"):
+    if not "${raw_thermo_file}".endswith("{raw_thermo_file}"):  # raw_thermo_file is required, hence we can check for it
         with open("versions.yml", "w") as f:
-            f.write('"${task.process}":\n')
-            f.write('    python: ' + str(arguments.python_version) + '\n')
-            f.write('    thermo_header_extraction: ' + "0.0.1" + '\n')
+            f.writelines([
+                '"${task.process}":',
+                '    python: ' + str(arguments.python_version),
+                '    thermo_header_extraction: ' + "0.0.1"
+            ])
     return arguments 
 
 
