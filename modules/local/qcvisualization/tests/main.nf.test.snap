@@ -1,0 +1,74 @@
+{
+    "qcvisualization - hdf5 - testdata": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        [
+                            "fig01_barplot_MS1_MS2.plotly.json:md5,2922898978041e464c9a9b0afd05ac0f",
+                            "fig02_barplot_PSMs_peptides_proteins.plotly.json:md5,33665eb6af3964e57d1caa08296b3ce3",
+                            "fig03_barplot_features.plotly.json:md5,8c4967f64543b7c364bb78c1bba7b305",
+                            "fig04_MS1_TIC_overlay.plotly.json:md5,b49760785adf5d9375f2807f1d78f7ee",
+                            "fig05_barplot_TIC_quartiles.plotly.json:md5,e365623fb1545e2eca77a0bc5bd1ab9d",
+                            "fig06_barplot_MS1_TIC_quartiles.plotly.json:md5,4c2a1ab462cfd89e51d11dbee8ec6f9b",
+                            "fig07_barplot_MS2_TIC_quartiles.plotly.json:md5,e9ea2af46b13cb8b841f91c0003bcf17",
+                            "fig08_barplot_precursor_charge.plotly.json:md5,629a4bd294a49df826f95a76f9344fc6",
+                            "fig09_barplot_PSM_charge.plotly.json:md5,1e1617c888e706ae7e013a1e92ae583c",
+                            "fig10_barplot_PSM_missedcleavages.plotly.json:md5,6fef43cd47a4330c11619117670f6140",
+                            "fig11a_PCA_raw.plotly.json:md5,8b97a40b308d22797d32b5c506b15599",
+                            "fig11b_Loadings_raw.plotly.json:md5,8b97a40b308d22797d32b5c506b15599",
+                            "fig12a_PCA_all.plotly.json:md5,b2e2f4a20d5b3c6ef7e5f637057baa64",
+                            "fig12b_Loadings_all.plotly.json:md5,8b97a40b308d22797d32b5c506b15599",
+                            "fig14_Pump_pressure.plotly.json:md5,31a4f9d13b2f4a3ca928de2b1d61dcbe",
+                            "fig15_PSM_error_boxplots.plotly.json:md5,944bea03ad31a174fc724aeecb121f4e"
+                        ]
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,201de376e3f0b483574bf9555f829881"
+                ],
+                "jsons": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        [
+                            "fig01_barplot_MS1_MS2.plotly.json:md5,2922898978041e464c9a9b0afd05ac0f",
+                            "fig02_barplot_PSMs_peptides_proteins.plotly.json:md5,33665eb6af3964e57d1caa08296b3ce3",
+                            "fig03_barplot_features.plotly.json:md5,8c4967f64543b7c364bb78c1bba7b305",
+                            "fig04_MS1_TIC_overlay.plotly.json:md5,b49760785adf5d9375f2807f1d78f7ee",
+                            "fig05_barplot_TIC_quartiles.plotly.json:md5,e365623fb1545e2eca77a0bc5bd1ab9d",
+                            "fig06_barplot_MS1_TIC_quartiles.plotly.json:md5,4c2a1ab462cfd89e51d11dbee8ec6f9b",
+                            "fig07_barplot_MS2_TIC_quartiles.plotly.json:md5,e9ea2af46b13cb8b841f91c0003bcf17",
+                            "fig08_barplot_precursor_charge.plotly.json:md5,629a4bd294a49df826f95a76f9344fc6",
+                            "fig09_barplot_PSM_charge.plotly.json:md5,1e1617c888e706ae7e013a1e92ae583c",
+                            "fig10_barplot_PSM_missedcleavages.plotly.json:md5,6fef43cd47a4330c11619117670f6140",
+                            "fig11a_PCA_raw.plotly.json:md5,8b97a40b308d22797d32b5c506b15599",
+                            "fig11b_Loadings_raw.plotly.json:md5,8b97a40b308d22797d32b5c506b15599",
+                            "fig12a_PCA_all.plotly.json:md5,b2e2f4a20d5b3c6ef7e5f637057baa64",
+                            "fig12b_Loadings_all.plotly.json:md5,8b97a40b308d22797d32b5c506b15599",
+                            "fig14_Pump_pressure.plotly.json:md5,31a4f9d13b2f4a3ca928de2b1d61dcbe",
+                            "fig15_PSM_error_boxplots.plotly.json:md5,944bea03ad31a174fc724aeecb121f4e"
+                        ]
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,201de376e3f0b483574bf9555f829881"
+                ]
+            },
+            {
+                "versions": [
+                    "versions.yml:md5,201de376e3f0b483574bf9555f829881"
+                ]
+            }
+        ],
+        "timestamp": "2026-06-18T14:28:50.26231643",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.3"
+        }
+    }
+}
