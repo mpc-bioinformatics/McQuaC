@@ -1,28 +1,25 @@
-repository_type: pipeline
-
-nf_core_version: 4.0.2
-
 lint:
-  files_unchanged:
-    - assets/sendmail_template.txt
-  multiqc_config: false
   files_exist:
     - assets/multiqc_config.yml
     - conf/igenomes.config
     - conf/igenomes_ignored.config
-
+  files_unchanged:
+    - assets/sendmail_template.txt
+  multiqc_config: false
+nf_core_version: 4.0.2
+repository_type: pipeline
 template:
-  org: nf-core
-  name: macproqc
+  author: Julian Uszkoreit, Dirk Winkelhardt, Karin Schork, Maike Weber, Dominik Lux
   description: A workflow for the quality control of mass spectrometry-based proteomics
     analyses
-  author: Julian Uszkoreit, Dirk Winkelhardt, Karin Schork, Maike Weber, Dominik Lux
-  version: 1.0.0dev
-  force: true
+  force: false
+  is_nfcore: true
+  name: macproqc
+  org: nf-core
   outdir: .
   skip_features:
     - igenomes
     - multiqc
     - fastqc
     - gpu
-  is_nfcore: true
+  version: 1.0.0dev
