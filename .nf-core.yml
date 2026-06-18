@@ -5,6 +5,9 @@ lint:
     - conf/igenomes_ignored.config
   files_unchanged:
     - assets/sendmail_template.txt
+    - assets/nf-core-macproqc_logo_light.png
+    - docs/images/nf-core-macproqc_logo_dark.png
+    - docs/images/nf-core-macproqc_logo_light.png
   multiqc_config: false
 nf_core_version: 4.0.2
 repository_type: pipeline
