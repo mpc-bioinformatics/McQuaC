@@ -28,9 +28,7 @@ jobs:
   nf-test-changes:
     name: nf-test-changes
     runs-on: # use self-hosted CUBiMed.RUB runners
-      - self-hosted
-      - Linux
-      - X64
+      - cubimed-github-runner
     outputs:
       shard: ${{ steps.set-shards.outputs.shard }}
       total_shards: ${{ steps.set-shards.outputs.total_shards }}
@@ -63,9 +61,7 @@ jobs:
     needs: [nf-test-changes]
     if: ${{ needs.nf-test-changes.outputs.total_shards != '0' }}
     runs-on: # use self-hosted CUBiMed.RUB runners
-      - self-hosted
-      - Linux
-      - X64
+      - cubimed-github-runner
     strategy:
       fail-fast: false
       matrix:
@@ -122,9 +118,7 @@ jobs:
     needs: [nf-test]
     if: always()
     runs-on: # use self-hosted CUBiMed.RUB runners
-      - self-hosted
-      - Linux
-      - X64
+      - cubimed-github-runner
     steps:
       - name: One or more tests failed (excluding latest-everything)
         if: ${{ contains(needs.*.result, 'failure') }}
