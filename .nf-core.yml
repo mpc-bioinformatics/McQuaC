@@ -19,7 +19,7 @@ template:
   author: Julian Uszkoreit, Dirk Winkelhardt, Karin Schork, Maike Weber, Dominik Lux
   version: 1.0.0dev
   force: true
-  outdir: ./macproqc
+  outdir: .
   skip_features:
     - igenomes
     - multiqc
