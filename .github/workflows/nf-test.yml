@@ -10,6 +10,12 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      num_shards:
+        description: "Number of nf-test shards to run"
+        required: false
+        default: "3"
+        type: string
 
 # Cancel if a newer run is started
 concurrency:
@@ -19,10 +25,11 @@ concurrency:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   NFT_VER: "0.9.4"
-  NFT_WORKDIR: ${{ runner.temp }}/nft-${{ github.run_id }}-${{ github.run_attempt }}
+  NFT_WORKDIR: "~"
   NXF_ANSI_LOG: false
   NXF_SINGULARITY_CACHEDIR: ${{ github.workspace }}/.singularity
   NXF_SINGULARITY_LIBRARYDIR: ${{ github.workspace }}/.singularity
+  DEFAULT_SHARDS: "3"
 
 jobs:
   nf-test-changes:
@@ -49,13 +56,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: get number of shards
+      - name: Set number of shards (manual override)
         id: set-shards
-        uses: ./.github/actions/get-shards
-        env:
-          NFT_VER: ${{ env.NFT_VER }}
-        with:
-          max_shards: 7
+        shell: bash
+        run: |
+          N="${{ github.event.inputs.num_shards || env.DEFAULT_SHARDS }}"
+          shard=$(seq 1 "$N" | jq -R . | jq -c -s .)
+          echo "shard=$shard"    >> "$GITHUB_OUTPUT"
+          echo "total_shards=$N" >> "$GITHUB_OUTPUT"
+          echo "Manual shards: $N -> $shard"
 
       - name: debug
         run: |
@@ -89,7 +98,6 @@ jobs:
     env:
       NXF_ANSI_LOG: false
       TOTAL_SHARDS: ${{ needs.nf-test-changes.outputs.total_shards }}
-      NFT_WORKDIR: ${{ env.NFT_WORKDIR }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
