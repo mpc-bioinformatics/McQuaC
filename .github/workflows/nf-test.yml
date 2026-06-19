@@ -97,7 +97,6 @@ jobs:
     env:
       NXF_ANSI_LOG: false
       TOTAL_SHARDS: ${{ needs.nf-test-changes.outputs.total_shards }}
-      NFT_WORKDIR: ${{ runner.temp }}/nft-${{ github.run_id }}-${{ github.run_attempt }}
 
     steps:
       - name: Clear stale nf-test from tool cache (self-hosted)
@@ -114,7 +113,7 @@ jobs:
         uses: ./.github/actions/nf-test
         continue-on-error: ${{ matrix.NXF_VER == 'latest-everything' }}
         env:
-          NFT_WORKDIR: ${{ env.NFT_WORKDIR }}
+          NFT_WORKDIR: ${{ runner.temp }}/nft-${{ github.run_id }}-${{ github.run_attempt }}
           NXF_VERSION: ${{ matrix.NXF_VER }}
         with:
           profile: ${{ matrix.profile }}
