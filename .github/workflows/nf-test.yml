@@ -41,11 +41,10 @@ jobs:
       shard: ${{ steps.set-shards.outputs.shard }}
       total_shards: ${{ steps.set-shards.outputs.total_shards }}
     steps:
-      - name: Clean runner temp + workspace (self-hosted)
+      - name: Clean Workspace and nf-test (self-hosted)
         shell: bash
         run: |
-          echo "Runner temp: ${{ runner.temp }}"
-          rm -rf "${{ runner.temp }}"/* || true
+          rm -rf "$HOME/.nf-test" || true
           ls -la ./
           rm -rf ./* || true
           rm -rf ./.??* || true
@@ -55,15 +54,24 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set number of shards (manual override)
+      - name: get number of shards
         id: set-shards
-        shell: bash
-        run: |
-          N="${{ github.event.inputs.num_shards || env.DEFAULT_SHARDS }}"
-          shard=$(seq 1 "$N" | jq -R . | jq -c -s .)
-          echo "shard=$shard"    >> "$GITHUB_OUTPUT"
-          echo "total_shards=$N" >> "$GITHUB_OUTPUT"
-          echo "Manual shards: $N -> $shard"
+        uses: ./.github/actions/get-shards
+        env:
+          NFT_WORKDIR: ${{ runner.temp }}/nft-${{ github.run_id }}-${{ github.run_attempt }}
+          NFT_VER: ${{ env.NFT_VER }}
+        with:
+          max_shards: 7
+
+      # - name: Set number of shards (manual override)
+      #   id: set-shards
+      #   shell: bash
+      #   run: |
+      #     N="${{ github.event.inputs.num_shards || env.DEFAULT_SHARDS }}"
+      #     shard=$(seq 1 "$N" | jq -R . | jq -c -s .)
+      #     echo "shard=$shard"    >> "$GITHUB_OUTPUT"
+      #     echo "total_shards=$N" >> "$GITHUB_OUTPUT"
+      #     echo "Manual shards: $N -> $shard"
 
       - name: debug
         run: |
