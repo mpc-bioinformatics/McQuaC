@@ -14,7 +14,7 @@ on:
       num_shards:
         description: "Number of nf-test shards to run"
         required: false
-        default: "3"
+        default: "1"
         type: string
 
 # Cancel if a newer run is started
