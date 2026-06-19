@@ -35,12 +35,16 @@ jobs:
       shard: ${{ steps.set-shards.outputs.shard }}
       total_shards: ${{ steps.set-shards.outputs.total_shards }}
     steps:
-      - name: Clean Workspace # Purge the workspace in case it's running on a self-hosted runner
+      - name: Clean runner temp + workspace (self-hosted)
+        shell: bash
         run: |
+          echo "Runner temp: ${{ runner.temp }}"
+          rm -rf "${{ runner.temp }}"/* || true
           ls -la ./
           rm -rf ./* || true
           rm -rf ./.??* || true
           ls -la ./
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
