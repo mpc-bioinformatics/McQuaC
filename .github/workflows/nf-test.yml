@@ -25,7 +25,6 @@ concurrency:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   NFT_VER: "0.9.4"
-  NFT_WORKDIR: "~"
   NXF_ANSI_LOG: false
   NXF_SINGULARITY_CACHEDIR: ${{ github.workspace }}/.singularity
   NXF_SINGULARITY_LIBRARYDIR: ${{ github.workspace }}/.singularity
@@ -98,8 +97,14 @@ jobs:
     env:
       NXF_ANSI_LOG: false
       TOTAL_SHARDS: ${{ needs.nf-test-changes.outputs.total_shards }}
+      NFT_WORKDIR: ${{ runner.temp }}/nft-${{ github.run_id }}-${{ github.run_attempt }}
 
     steps:
+      - name: Clear stale nf-test from tool cache (self-hosted)
+        shell: bash
+        run: |
+          rm -rf "${RUNNER_TOOL_CACHE}/nf-test" || true
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
