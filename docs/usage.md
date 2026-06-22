@@ -1,6 +1,6 @@
 # nf-core/macproqc: Usage
 
-## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/macproqc/usage](https://nf-co.re/macproqc/usage)
+## :warning: Please read this documentation on the nf-core website: [https://mpc-bioinformatics.github.io/McQuaC/usage/](https://mpc-bioinformatics.github.io/McQuaC/usage/)
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
@@ -97,7 +97,7 @@ nextflow pull nf-core/macproqc
 
 It is a good idea to specify the pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline.
 
-First, go to the [nf-core/macproqc releases page](https://github.com/nf-core/macproqc/releases) and find the latest pipeline version — numeric only (e.g. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) — e.g. `-r 1.3.1`.
+First, go to the [nf-core/macproqc releases page](https://github.com/mpc-bioinformatics/McQuaC/releases) and find the latest pipeline version — numeric only (e.g. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) — e.g. `-r 1.3.1`.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. To further assist in reproducibility, you can use share and reuse [parameter files](#running-the-pipeline) to repeat pipeline runs with the same settings without having to write out a command with every single parameter.
 

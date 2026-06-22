@@ -3,9 +3,8 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     nf-core/macproqc
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/nf-core/macproqc
-    Website: https://nf-co.re/macproqc
-    Slack  : https://nfcore.slack.com/channels/macproqc
+    Github : https://github.com/mpc-bioinformatics/McQuaC
+    Website: https://mpc-bioinformatics.github.io/McQuaC/
 ----------------------------------------------------------------------------------------
 */
 
