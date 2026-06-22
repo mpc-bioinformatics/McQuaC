@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev
+      - main
   workflow_dispatch:
 
 permissions:
@@ -20,8 +21,11 @@ jobs:
           python-version: "3.x"
           cache: "pip"
 
-      - name: Install MkDocs Material
-        run: pip install mkdocs-material
+      - name: Install dependencies
+        run: pip install mkdocs-material nf-core
+
+      - name: Generate parameters page from schema
+        run: nf-core pipelines schema docs --output docs/parameters.md nextflow_schema.json
 
       - name: Deploy documentation to GitHub Pages
         run: mkdocs gh-deploy --force
