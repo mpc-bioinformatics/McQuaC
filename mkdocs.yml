@@ -36,7 +36,7 @@ extra_css:
   - stylesheets/extra.css
 
 nav:
-  - Home: README.md
+  - Home: index.md
   - Usage: usage.md
   - Parameters: parameters.md
   - Output: output.md
