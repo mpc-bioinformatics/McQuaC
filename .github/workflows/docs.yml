@@ -1,0 +1,27 @@
+name: Build and Deploy Documentation
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+          cache: "pip"
+
+      - name: Install MkDocs Material
+        run: pip install mkdocs-material
+
+      - name: Deploy documentation to GitHub Pages
+        run: mkdocs gh-deploy --force
