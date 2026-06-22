@@ -21,48 +21,43 @@
 
 ## Introduction
 
-**nf-core/macproqc** is a bioinformatics pipeline that ...
+**nf-core/macproqc** (**Ma**ss **C**entric **Pro**teomics **Q**uality **C**ontrol) is a bioinformatics pipeline for comprehensive quality control of mass spectrometry-based proteomics experiments. It accepts raw instrument files from Thermo Fisher (`.raw`) and Bruker (`.d`) instruments as well as pre-converted mzML files and produces a rich set of QC metrics, interactive visualisations, and standardised [mzQC](https://hupo-psi.github.io/mzQC/) output.
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+The pipeline performs the following main steps:
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/community/brand/workflow-schematics#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
+- **Spectra preparation** - raw vendor files are decompressed and converted to the open mzML format using ThermoRawFileParser (Thermo) or tdf2mzml (Bruker).
+- **Raw-data QC metrics extraction** _(migrating)_ - MS1/MS2 spectrum counts, TIC quartiles, precursor charge distributions, retention-time coverage and more are extracted from the mzML files using pyOpenMS.
+- **Peptide identification** _(migrating)_ - MS2 spectra are searched against a user-supplied FASTA database, without and if necessary with label information.
+- **FDR filtering and protein inference** _(migrating)_ - PSM-level results are filtered at 1 % FDR and protein groups are inferred with PIA - Protein Inference Algorithms.
+- **QC metrics for peptide features** _(migrating)_ - OpenMS identifies isotope features; found features are mapped to identifications to yield identification rates and QC metrics are extracted.
+- **mzQC output** _(migrating)_ - all QC metrics are exported in the standardised [mzQC](https://hupo-psi.github.io/mzQC/) format for interoperability.
+- **Visualisation** _(migrating)_ - an interactive report with barplots, TIC overlays, ion maps and PCA plots is generated using Plotly.
 
 ## Usage
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/get_started/environment_setup/overview) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/get_started/run-your-first-pipeline) with `-profile test` before running the workflow on actual data.
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
-
-First, prepare a samplesheet with your input data that looks as follows:
+First, prepare a samplesheet with your input data:
 
 `samplesheet.csv`:
 
 ```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+sample,spectrum_file
+msrunone,/path/to/data/CONTROL_REP1.raw
+msruntwo,/path/to/data/CONTROL_REP2.d.tar.gz
+msrunthree,/path/to/data/CONTROL_REP3.mzML.gz
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
-
--->
+Each row represents one MS run. The `spectrum_file` column accepts Thermo `.raw`, Bruker `.d` directory archives (optionally compressed), and mzML files - all supporting `.gz`, `.zip`, or `.tar.gz` compression.
 
 Now, you can run the pipeline using:
 
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
-
 ```bash
 nextflow run nf-core/macproqc \
-   -profile <docker/singularity/.../institute> \
+   -profile docker \
    --input samplesheet.csv \
-   --outdir <OUTDIR>
+   --outdir ./results
 ```
 
 > [!WARNING]
@@ -72,17 +67,15 @@ For more details and further functionality, please refer to the [usage documenta
 
 ## Pipeline output
 
-To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/macproqc/results) tab on the nf-core website pipeline page.
-For more details about the output files and reports, please refer to the
-[output documentation](https://nf-co.re/macproqc/output).
+For more details about the output files and reports, please refer to the [output documentation](https://nf-co.re/macproqc/output).
 
 ## Credits
 
-nf-core/macproqc was originally written by Julian Uszkoreit, Dirk Winkelhardt, Karin Schork, Maike Weber, Dominik Lux.
+nf-core/macproqc was originally written by Julian Uszkoreit, Dirk Winkelhardt, Karin Schork, Maike Weber, and Dominik Lux at the Ruhr University Bochum.
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+<!-- TODO nf-core: If applicable, add a list of additional contributors here -->
 
 ## Contributions and Support
 
@@ -95,9 +88,15 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 <!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
 <!-- If you use nf-core/macproqc for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
 
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
-
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
+
+The pipeline is based on the KNIME workflow published in:
+
+> Rozanova S, Uszkoreit J, Schork K, Serschnitzki B, Eisenacher M, Tönges L, Barkovits-Boeddinghaus K, Marcus K. **Quality Control-A Stepchild in Quantitative Proteomics: A Case Study for the Human CSF Proteome.** _Biomolecules._ 2023 Mar 7;13(3):491. doi: [10.3390/biom13030491](https://doi.org/10.3390/biom13030491). PMID: 36979426; PMCID: PMC10046854.
+
+Some of the QC metrics implemented in this pipeline are based on:
+
+> Bittremieux W, Meysman P, Martens L, Valkenborg D, Laukens K. **Unsupervised Quality Assessment of Mass Spectrometry Proteomics Experiments by Multivariate Quality Control Metrics.** _J Proteome Res._ 2016 Apr 1;15(4):1300-7. doi: [10.1021/acs.jproteome.6b00028](https://doi.org/10.1021/acs.jproteome.6b00028). PMID: 26974716.
 
 You can cite the `nf-core` publication as follows:
 
