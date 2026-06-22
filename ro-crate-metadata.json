@@ -93,7 +93,7 @@
             },
             "mentions": [
                 {
-                    "@id": "#e17f71b6-4056-424e-b323-be8ce6526e9f"
+                    "@id": "#a1d991fb-3ad8-49bb-bd31-b83c72ae1b37"
                 }
             ],
             "name": "nf-core/macproqc"
@@ -138,7 +138,7 @@
                 }
             ],
             "dateCreated": "",
-            "dateModified": "2026-06-22T14:55:27Z",
+            "dateModified": "2026-06-18T09:16:04Z",
             "dct:conformsTo": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE/",
             "keywords": [
                 "nf-core",
@@ -177,11 +177,11 @@
             "version": "!>=25.10.4"
         },
         {
-            "@id": "#e17f71b6-4056-424e-b323-be8ce6526e9f",
+            "@id": "#a1d991fb-3ad8-49bb-bd31-b83c72ae1b37",
             "@type": "TestSuite",
             "instance": [
                 {
-                    "@id": "#04b65a5a-1308-4541-86ae-f0395694d819"
+                    "@id": "#cd8e9484-bbdb-41f7-b314-c35236ff1fba"
                 }
             ],
             "mainEntity": {
@@ -190,7 +190,7 @@
             "name": "Test suite for nf-core/macproqc"
         },
         {
-            "@id": "#04b65a5a-1308-4541-86ae-f0395694d819",
+            "@id": "#cd8e9484-bbdb-41f7-b314-c35236ff1fba",
             "@type": "TestInstance",
             "name": "GitHub Actions workflow for testing nf-core/macproqc",
             "resource": "repos/nf-core/macproqc/actions/workflows/nf-test.yml",
