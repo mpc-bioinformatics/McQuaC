@@ -38,6 +38,7 @@ extra_css:
 nav:
   - Home: README.md
   - Usage: usage.md
+  - Parameters: parameters.md
   - Output: output.md
   - Contributing: CONTRIBUTING.md
 
