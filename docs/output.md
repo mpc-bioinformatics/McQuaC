@@ -24,7 +24,7 @@ Raw vendor files are decompressed (if necessary) and converted to the open mzML 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `spectra/`
+- `mzmls/`
   - `*.mzML` — converted mzML files. These are intermediate files used by downstream steps and are not published by default
 
 </details>
