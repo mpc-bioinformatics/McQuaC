@@ -3,15 +3,14 @@
         "content": [
             null,
             [
+                "mzmls",
+                "mzmls/sample_one_raw.mzML",
+                "mzmls/sample_two_d.mzML",
                 "pipeline_info",
-                "pipeline_info/nf_core_macproqc_software_versions.yml",
-                "tdf2mzml",
-                "tdf2mzml/sample_two_d.mzML",
-                "thermorawfileparser",
-                "thermorawfileparser/sample_one_raw.mzML"
+                "pipeline_info/nf_core_macproqc_software_versions.yml"
             ]
         ],
-        "timestamp": "2026-06-19T14:46:23.805728194",
+        "timestamp": "2026-06-23T07:24:17.05879469",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.3"
