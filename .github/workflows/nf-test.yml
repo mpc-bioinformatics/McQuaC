@@ -25,46 +25,26 @@ env:
 
 jobs:
   # -----------------------------------------------------------------------
-  # Gate: passes immediately for pushes, releases, dispatches, and PRs from
-  # org members / collaborators / owners.
+  # Gate: single job that always runs. For PRs from org members/owners/
+  # collaborators and for non-PR events, no environment is applied and the
+  # job passes immediately. For PRs from external contributors the job is
+  # held at the 'ci-approval' environment until a team member approves.
   # -----------------------------------------------------------------------
-  ci-gate-auto:
-    name: CI gate (team / non-PR)
+  ci-gate:
+    name: CI gate
     runs-on: ubuntu-latest
-    if: |
-      github.event_name != 'pull_request' ||
-      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'),
-               github.event.pull_request.author_association)
+    environment: >-
+      ${{ github.event_name == 'pull_request' &&
+          !contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'),
+                    github.event.pull_request.author_association)
+          && 'ci-approval' || '' }}
     steps:
-      - run: echo "Triggered by team member or non-PR event — CI approved automatically."
+      - name: Gate passed
+        run: echo "CI gate passed."
 
-  # -----------------------------------------------------------------------
-  # Gate: holds at the 'ci-approval' environment for PRs from contributors
-  # without org membership. A team member must approve in the GitHub UI
-  # before the runner jobs below start.
-  # -----------------------------------------------------------------------
-  ci-gate-external:
-    name: CI gate (external PR — awaiting team approval)
-    runs-on: ubuntu-latest
-    environment: ci-approval
-    if: |
-      github.event_name == 'pull_request' &&
-      !contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'),
-                github.event.pull_request.author_association)
-    steps:
-      - run: echo "External PR approved by team — CI starting."
-
-  # -----------------------------------------------------------------------
-  # All jobs below require exactly one gate to have succeeded (the other
-  # will be skipped, which is treated as non-blocking).
-  # -----------------------------------------------------------------------
   nf-test-changes:
     name: nf-test-changes
-    needs: [ci-gate-auto, ci-gate-external]
-    if: |
-      always() &&
-      (needs.ci-gate-auto.result == 'success' || needs.ci-gate-auto.result == 'skipped') &&
-      (needs.ci-gate-external.result == 'success' || needs.ci-gate-external.result == 'skipped')
+    needs: [ci-gate]
     runs-on: # use self-hosted CUBiMed.RUB runners
       - self-hosted
       - Linux
