@@ -7,6 +7,8 @@ include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_macproqc_pipeline'
 
+include { PREPARE_SPECTRA } from '../subworkflows/local/prepare_spectra'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -21,7 +23,14 @@ workflow MACPROQC {
 
     main:
 
-    def ch_versions = channel.empty()
+    def ch_versions = channel.empty()   // this channel needs to be filled, if the module/subworkflow return any versions NOT in the topic channel, but in the versions.yml file
+
+    // prepare the spectra files (strip the fasta_file before passing to PREPARE_SPECTRA)
+    PREPARE_SPECTRA(
+        ch_samplesheet.map { meta, spectrum_file -> [meta, spectrum_file] }
+    )
+    ch_prepared_spectra = PREPARE_SPECTRA.out.mzmls.join(PREPARE_SPECTRA.out.uncompressed, by: 0)
+
 
     //
     // Collate and save software versions

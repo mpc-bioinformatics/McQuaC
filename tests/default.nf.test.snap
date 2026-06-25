@@ -1,0 +1,19 @@
+{
+    "-profile test": {
+        "content": [
+            null,
+            [
+                "mzmls",
+                "mzmls/sample_one_raw.mzML",
+                "mzmls/sample_two_d.mzML",
+                "pipeline_info",
+                "pipeline_info/nf_core_macproqc_software_versions.yml"
+            ]
+        ],
+        "timestamp": "2026-06-23T07:24:17.05879469",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.3"
+        }
+    }
+}
