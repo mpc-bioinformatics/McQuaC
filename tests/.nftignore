@@ -1,2 +1,5 @@
 .DS_Store
 pipeline_info/*.{html,json,txt,yml}
+
+# mzML files are tested separately via the spectrum_counts snapshot assertion
+mzmls/*.mzML

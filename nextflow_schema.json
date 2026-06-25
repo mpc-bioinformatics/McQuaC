@@ -38,6 +38,35 @@
                 }
             }
         },
+        "fasta_parameters": {
+            "title": "FASTA parameters",
+            "type": "object",
+            "fa_icon": "fas fa-database",
+            "description": "Database settings, to specify the FASTA, create decoys, ...",
+            "properties": {
+                "fasta": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "fa_icon": "fas fa-file",
+                    "pattern": "^\\S+\\.(fasta|fa|fas|faa)(.gz)?$",
+                    "description": "Global input FASTA protein database",
+                    "help_text": "Path to a single protein database file applied to all MS runs. Whether the file already contains decoys is controlled by --skip_decoy_generation."
+                },
+                "skip_decoy_generation": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Add this parameter when you want to skip the generation of the decoy database.",
+                    "help_text": "If you want to use your own decoys, you can specify a dataset that includes decoy sequences."
+                },
+                "save_decoy_database": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-save",
+                    "description": "Set this parameter to true to save the generated decoy database (for later usage)."
+                }
+            },
+            "required": ["fasta"]
+        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",
@@ -173,6 +202,9 @@
     "allOf": [
         {
             "$ref": "#/$defs/input_output_options"
+        },
+        {
+            "$ref": "#/$defs/fasta_parameters"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

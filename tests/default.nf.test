@@ -14,23 +14,27 @@ nextflow_pipeline {
 
         then {
             // stable_path: All files + folders in ${params.outdir}/ with a stable path (including file name)
-            def stable_path = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}', 'untar', 'untar/**'])
+            def stable_path = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
             // stable_content: All files in ${params.outdir}/ with stable content
-            // TODO: add some stable files in future releases
-            //def stable_content = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
-
-            // TODO: add some useful result tests, not only "file existance checks"
+            def stable_content = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
 
             assertAll(
                 { assert workflow.success },
                 { assert snapshot(
                     // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
-                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_mspepid_software_versions.yml"),
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_macproqc_software_versions.yml"),
                     // All stable path name, with a relative path
                     stable_path,
                     // All files with stable contents
-                    //stable_content
-                ).match() }
+                    stable_content
+                ).match() },
+
+                // testing the created mzML files (counting their spectra)
+                { assert snapshot(
+                    path("$outputDir/mzmls/").list().sort { it.getFileName().toString() }.collect { mzml ->
+                        mzml.readLines().count { it.stripLeading().startsWith("<spectrum ") }
+                    }
+                ).match("spectrum_counts") }
             )
         }
     }
