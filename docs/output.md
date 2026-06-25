@@ -8,7 +8,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes m
 
 - [Spectra preparation](#spectra-preparation) — decompression and conversion to mzML
 - [Raw-data metrics](#raw-data-metrics) — spectrum-level QC metrics from mzML _(migrating)_
-- [Peptide identification](#peptide-identification) — database search with Comet _(migrating)_
+- [Peptide identification](#peptide-identification) — decoy database generation and database search with Comet
 - [FDR filtering and protein inference](#fdr-filtering-and-protein-inference) — 1 % FDR filter and PIA protein groups _(migrating)_
 - [Feature finding](#feature-finding) — isotope feature detection with IDMapper _(migrating)_
 - [mzQC output](#mzqc-output) — standardised QC metric export _(migrating)_
@@ -32,6 +32,30 @@ Raw vendor files are decompressed (if necessary) and converted to the open mzML 
 ---
 
 ## Raw-data metrics
+
+TODO
+
+---
+
+## Peptide identification
+
+Peptide spectrum matches (PSMs) are produced by searching the converted mzML files against a protein sequence database using the [Comet](https://uwpr.github.io/Comet/) search engine _(STILL TODO)_.
+
+### Decoy database
+
+Before the database search, the pipeline generates a target-decoy FASTA by appending reversed sequences to the input database using the OpenMS `DecoyDatabase` tool. This step can be skipped with `--skip_decoy_generation` if the supplied FASTA already contains decoys.
+
+The decoy database file is an intermediate used downstream for FDR estimation. It is only written to the output directory when `--save_decoy_database true` is set.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `decoy_database/`
+  - `*_decoy.fasta` — combined target-decoy protein sequence database. Only present when `--save_decoy_database true` is set.
+
+</details>
+
+### Comet PSMs _(migrating)_
 
 TODO
 
