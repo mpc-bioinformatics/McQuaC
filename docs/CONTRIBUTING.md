@@ -49,7 +49,7 @@ For more detail, see the the [blog post](https://nf-co.re/blog/2026/statement-on
 
 ### Getting help
 
-For further information and help, see the [nf-core/macproqc documentation](https://mpc-bioinformatics.github.io/McQuaC/usage/) or write an issue on teh GitHub page.
+For further information and help, see the [nf-core/macproqc documentation](https://mpc-bioinformatics.github.io/McQuaC/usage/) or write an issue on the GitHub page.
 
 ### GitHub Codespaces
 
