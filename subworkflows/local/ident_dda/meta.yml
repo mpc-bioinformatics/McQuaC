@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "ident_dda"
+description: |
+  Performs peptide and protein identification for data-dependent acquisition (DDA)
+  mass spectrometry data. Optionally generates a decoy database by appending reversed
+  or shuffled sequences to the target FASTA, then runs the Comet database search engine
+  against the resulting (decoy-)FASTA to produce peptide spectrum matches (PSMs).
+keywords:
+  - proteomics
+  - mass spectrometry
+  - DDA
+  - peptide identification
+  - database search
+  - decoy database
+  - Comet
+  - PSM
+components:
+  - openms/decoydatabase
+  - comet
+input:
+  - fasta:
+      type: value
+      description: |
+        Path to the target protein sequence database in FASTA format.
+  - skip_decoy_generation:
+      type: value
+      description: |
+        Boolean flag. When true the decoy database generation step is skipped and
+        the input FASTA is used directly for the search.
+  - ch_mzml:
+      type: channel
+      description: |
+        Channel of mzML spectrum files to search.
+        Structure: [ val(meta), path(mzml) ]
+      pattern: "*.mzML"
+output:
+
+authors:
+  - "@julianu"
+maintainers:
+  - "@julianu"
