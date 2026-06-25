@@ -1,7 +1,9 @@
 name: Build and Deploy Documentation
 
 on:
-  push:
+  pull_request:
+    types:
+      - closed
     branches:
       - dev
       - main
@@ -11,11 +13,15 @@ permissions:
   contents: write
 
 jobs:
-  deploy:
+  deploy-docs:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
+      - name: Setup Nextflow
+        uses: nf-core/setup-nextflow@b4ec1bc7c16a94435159de94a05253542fddf6ef # v3
+          
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
