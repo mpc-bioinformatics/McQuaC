@@ -175,7 +175,7 @@
                     "type": "string",
                     "fa_icon": "far fa-check-circle",
                     "description": "Base URL or local path to location of specific macproqc test dataset files",
-                    "default": "https://raw.githubusercontent.com//mpc-bioinformatics/macproqc-test-data/main/testdata/",
+                    "default": "https://raw.githubusercontent.com/mpc-bioinformatics/macproqc-test-data/main/testdata/",
                     "hidden": true
                 },
                 "trace_report_suffix": {
