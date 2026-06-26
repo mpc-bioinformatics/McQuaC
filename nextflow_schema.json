@@ -59,6 +59,21 @@
                     "description": "Add this parameter when you want to skip the generation of the decoy database.",
                     "help_text": "If you want to use your own decoys, you can specify a dataset that includes decoy sequences."
                 },
+                "decoy_string": {
+                    "type": "string",
+                    "default": "DECOY_",
+                    "fa_icon": "fas fa-text-width",
+                    "description": "String that is combined with the accession of the protein identifier to indicate a decoy protein.",
+                    "help_text": "This is passed to the decoy generation as well as to tools using this. Usually, this is a prefix of the protein accession."
+                },
+                "decoy_method": {
+                    "type": "string",
+                    "default": "reverse",
+                    "fa_icon": "fas fa-random",
+                    "description": "Method used to generate decoy sequences.",
+                    "help_text": "Passed directly to OpenMS DecoyDatabase. Valid values are 'reverse' (default) and 'shuffle'. Has no effect when --skip_decoy_generation is set.",
+                    "enum": ["reverse", "shuffle"]
+                },
                 "save_decoy_database": {
                     "type": "boolean",
                     "fa_icon": "fas fa-save",
