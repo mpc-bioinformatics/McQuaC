@@ -1,0 +1,79 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "xicextractionconfig"
+description: Creates a thermorawfileparser configuration file for XIC extraction (also compatible for alphatims) based on the provided mzTab file and spike-ins CSV.
+keywords:
+  - proteomics
+  - xic
+  - thermorawfileparser
+tools:
+
+  - "xicextractionconfig":
+      description: "Tool for creating thermorawfileparser configuration files for XIC extraction."
+      homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers/"
+      documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers/"
+      tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers/"
+      doi: "no DOI available"
+      licence: ["BSD 3-Clause License"]
+      identifier: ""
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1' ]`
+    - bam:
+        type: file
+        description: mzTab file containing peptide-spectrum matches (PSMs)
+        pattern: "*.{mzTab}"
+        ontologies:
+          - edam: "http://edamontology.org/format_3681" # mzTab
+  - - spike_ins:
+        type: file
+        description: CSV file containing spike-in information
+        pattern: "*.{csv}"
+        ontologies:
+          - edam: "http://edamontology.org/format_3752" # CSV
+
+output:
+  ### TODO nf-core: Add a description of all of the variables used as output
+  bam:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - "*.bam":
+          type: file
+          description: Sorted BAM/CRAM/SAM file
+          pattern: "*.{bam,cram,sam}"
+          ontologies:
+            - edam: "http://edamontology.org/format_2572" # BAM
+            - edam: "http://edamontology.org/format_2573" # CRAM
+            - edam: "http://edamontology.org/format_3462" # SAM
+  versions_xicextractionconfig:
+    - - "${task.process}":
+          type: string
+          description: The name of the process
+      - "xicextractionconfig":
+          type: string
+          description: The name of the tool
+      - "xicextractionconfig --version":
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - xicextractionconfig:
+          type: string
+          description: The name of the tool
+      - xicextractionconfig --version:
+          type: eval
+          description: The expression to obtain the version of the tool
+authors:
+  - "@di-hardt"
+maintainers:
+  - "@di-hardt"
