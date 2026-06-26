@@ -43,7 +43,7 @@ Peptide spectrum matches (PSMs) are produced by searching the converted mzML fil
 
 ### Decoy database
 
-Before the database search, the pipeline generates a target-decoy FASTA by appending reversed sequences to the input database using the OpenMS `DecoyDatabase` tool. This step can be skipped with `--skip_decoy_generation` if the supplied FASTA already contains decoys.
+Before the database search, the pipeline generates a target-decoy FASTA by appending decoy sequences (reversed by default) to the input database using the OpenMS `DecoyDatabase` tool. This step can be skipped with `--skip_decoy_generation` if the supplied FASTA already contains decoys.
 
 The decoy database file is an intermediate used downstream for FDR estimation. It is only written to the output directory when `--save_decoy_database true` is set.
 

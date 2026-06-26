@@ -57,10 +57,12 @@ Accepted file extensions: `.fasta`, `.fa`, `.fas`, `.faa` — optionally gzip-co
 
 By default, the pipeline appends reversed decoy sequences to the target database using the OpenMS `DecoyDatabase` tool, producing a combined target-decoy FASTA. This is required for FDR estimation during peptide identification.
 
-| Parameter                 | Default | Description                                                                                                                                                                                  |
-| ------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--skip_decoy_generation` | `false` | Skip decoy generation. Use this when your FASTA already contains decoy sequences (conventionally prefixed with `DECOY_`).                                                                    |
-| `--save_decoy_database`   | `false` | Write the generated target-decoy FASTA to `<outdir>/decoy_database/`. Useful for archiving the exact database used in a run or for reuse in a subsequent run with `--skip_decoy_generation`. |
+| Parameter                 | Default   | Description                                                                                                                                                                                  |
+| ------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--skip_decoy_generation` | `false`   | Skip decoy generation. Use this when your FASTA already contains decoy sequences (labelled with the string defined by `--decoy_string`).                                                     |
+| `--decoy_string`          | `DECOY_`  | String that is combined with the accession of the protein identifier to indicate a decoy protein. Used also later by tools to estimate the FDR.                                              |
+| `--decoy_method`          | `reverse` | Method by which decoy sequences are generated from target sequences. Valid parameters are 'reverse' and 'shuffle'.                                                                           |
+| `--save_decoy_database`   | `false`   | Write the generated target-decoy FASTA to `<outdir>/decoy_database/`. Useful for archiving the exact database used in a run or for reuse in a subsequent run with `--skip_decoy_generation`. |
 
 > [!TIP]
 > If you run the pipeline repeatedly on the same dataset, generate the decoy database once with `--save_decoy_database`, then pass that file via `--fasta` and set `--skip_decoy_generation` in subsequent runs to avoid redundant processing.
