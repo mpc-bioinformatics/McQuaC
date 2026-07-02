@@ -41,6 +41,7 @@ workflow NFCORE_MACPROQC {
         params.outdir,
         params.fasta,
         params.skip_decoy_generation,
+        params.comet_config_template,
     )
 }
 /*
