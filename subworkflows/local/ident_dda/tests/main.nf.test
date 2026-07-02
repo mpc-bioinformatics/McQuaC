@@ -1,5 +1,3 @@
-// TODO nf-core: Once you have added the required tests, please run the following command to build this file:
-// nf-core subworkflows test ident_dda
 nextflow_workflow {
 
     name "Test Subworkflow IDENT_DDA"
@@ -11,16 +9,20 @@ nextflow_workflow {
     tag "subworkflows/ident_dda"
 
     tag "openms/decoydatabase"
+    tag "cometconfig"
 
 
     test("small ident") {
+
+        config "./nextflow.config"
 
         when {
             workflow {
                 """
                 input[0] = file(params.modules_testdata_base_path + 'proteomics/database/yeast_UPS.fasta', checkIfExists: true)
                 input[1] = false
-                input[2] = channel.of([
+                input[2] = file("${projectDir}/assets/default_configs/comet.params", checkIfExists: true)
+                input[3] = channel.of([
                     [ id:'test-mzmlraw' ],
                     file(params.modules_testdata_base_path + 'proteomics/msspectra/OVEMB150205_12.mzML', checkIfExists: true)
                 ])
@@ -31,7 +33,8 @@ nextflow_workflow {
         then {
             assertAll(
                 { assert workflow.success}
-                // TODO: add something useful, as soon as emitted (like ID files)
+                // TODO: add some useful tests, as soon as some files are emitted (like ID files)
+                // { assert snapshot(workflow.out).match() }
             )
         }
     }
