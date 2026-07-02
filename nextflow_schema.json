@@ -82,6 +82,87 @@
             },
             "required": ["fasta"]
         },
+        "identification_parameters": {
+            "title": "Identification parameters",
+            "type": "object",
+            "description": "Search engine specific settings and general settings for the identification of peptides and proteins in MS data. Additional untypical parameters can be adjucted by the modules.config, see there for reference.",
+            "properties": {
+                "comet_config_template": {
+                    "type": "string",
+                    "description": "This is the default comet parameters file. In this file, parameters can be set, which are neither passed by common runtime (threads, fasta, ...) or by common search engine parameters. If not set or null, the provided default in assets is used.",
+                    "format": "file-path",
+                    "fa_icon": "fas fa-cogs"
+                },
+                "peptide_mass_tolerance_upper": {
+                    "type": "number",
+                    "default": 5,
+                    "fa_icon": "fas fa-arrows-alt-h",
+                    "description": "Comet parameter: peptide_mass_tolerance_upper, upper bound of the precursor mass tolerance"
+                },
+                "peptide_mass_tolerance_lower": {
+                    "type": "number",
+                    "default": -5,
+                    "fa_icon": "fas fa-arrows-alt-h",
+                    "description": "Comet parameter: peptide_mass_tolerance_lower, lower bound of the precursor mass tolerance; USUALLY NEGATIVE TO BE LOWER THAN 0"
+                },
+                "peptide_mass_units": {
+                    "type": "integer",
+                    "default": 2,
+                    "fa_icon": "fas fa-tachometer-alt",
+                    "minimum": 0,
+                    "maximum": 2,
+                    "description": "Comet parameter: peptide_mass_units, 0=amu, 1=mmu, 2=ppm"
+                },
+                "isotope_error": {
+                    "type": "integer",
+                    "default": 2,
+                    "fa_icon": "fas fa-arrows-alt-h",
+                    "minimum": 0,
+                    "maximum": 5,
+                    "description": "Comet parameter: isotope_error, 0=off, 1=0/1 (C13 error), 2=0/1/2, 3=0/1/2/3, 4=-1/0/1/2/3, 5=-1/0/1"
+                },
+                "fragment_bin_tol": {
+                    "type": "number",
+                    "default": 0.02,
+                    "fa_icon": "fas fa-arrows-alt-h",
+                    "description": "Comet parameter: fragment_bin_tol, binning to use on fragment ions"
+                },
+                "fragment_bin_offset": {
+                    "type": "number",
+                    "default": 0,
+                    "fa_icon": "fas fa-sort-amount-down",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Comet parameter: fragment_bin_offset, offset position to start the binning (0.0 to 1.0)"
+                },
+                "theoretical_fragment_ions": {
+                    "type": "integer",
+                    "default": 0,
+                    "fa_icon": "fas fa-clipboard",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Comet parameter: theoretical_fragment_ions, 0=use flanking peaks, 1=M peak only"
+                },
+                "psms_per_spectrum": {
+                    "type": "integer",
+                    "default": 5,
+                    "fa_icon": "fas fa-list-ol",
+                    "minimum": 1,
+                    "description": "Comet parameter: num_output_lines: num peptide results to show"
+                },
+                "variable_modifications": {
+                    "type": "string",
+                    "description": "Comet parameter: adjust or add the variable modifications to overwrite in the template. The actual string MUST be in single quotes inside a string, like \"'variable_mod01 = 15.9949 M 0 3 -1 0 0 0.0'\". Variables are defined like in the comet params file (with 'variable_modXX = ...'). Multiple modifications can be defined by separating them with a semicolon.",
+                    "fa_icon": "fas fa-pen-square"
+                },
+                "static_modifications": {
+                    "type": "string",
+                    "description": "Comet parameter: set the variable modifications to overwrite in the template.The actual string MUST be in single quotes inside a string, like \"'add_C_cysteine = 57.021464'\". The variables are defined like in the comet params file (with 'add_XX_... = ...'). Multiple modifications can be defined by separating them with a semicolon.",
+                    "fa_icon": "fas fa-pen-square"
+                }
+            },
+            "fa_icon": "fas fa-search"
+        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",
@@ -220,6 +301,9 @@
         },
         {
             "$ref": "#/$defs/fasta_parameters"
+        },
+        {
+            "$ref": "#/$defs/identification_parameters"
         },
         {
             "$ref": "#/$defs/institutional_config_options"
