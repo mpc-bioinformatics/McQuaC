@@ -55,6 +55,12 @@ The decoy database file is an intermediate used downstream for FDR estimation. I
 
 </details>
 
+### Comet search configuration
+
+Before the database search, the pipeline generates a Comet parameter file by taking a template (either the built-in default at `assets/default_configs/comet.params` or a user-supplied file via `--comet_config_template`) and overwriting the search settings (mass tolerances, fragment ion parameters, modifications, and output format flags) with the pipeline parameter values.
+
+The adjusted parameter file is an intermediate used by the Comet search step and is not written to the output directory.
+
 ### Comet PSMs _(migrating)_
 
 TODO
