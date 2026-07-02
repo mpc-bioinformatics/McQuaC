@@ -67,6 +67,61 @@ By default, the pipeline appends reversed decoy sequences to the target database
 > [!TIP]
 > If you run the pipeline repeatedly on the same dataset, generate the decoy database once with `--save_decoy_database`, then pass that file via `--fasta` and set `--skip_decoy_generation` in subsequent runs to avoid redundant processing.
 
+## Peptide identification
+
+The pipeline searches spectra against the (target-decoy) database using [Comet](https://uwpr.github.io/Comet/). Search parameters are configured through a combination of pipeline parameters and an optional Comet parameter template file.
+
+### Comet configuration template
+
+Comet is configured via a `.params` file. The pipeline ships a built-in default template (`assets/default_configs/comet.params`) that is used when no custom file is provided. You can supply your own template to control settings not exposed as pipeline parameters (e.g. enzyme, missed cleavages, ion series):
+
+```bash
+--comet_config_template '/path/to/your/comet.params'
+```
+
+The template is adjusted at runtime: output format flags, mass tolerances, fragment ion settings, and modifications are overwritten with the values of the pipeline parameters listed below. All other settings in the template are preserved as-is.
+
+### Search parameters
+
+The following parameters are overwritten in the Comet config at runtime:
+
+| Parameter                        | Default | Description                                                                                                  |
+| -------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
+| `--peptide_mass_tolerance_upper` | `5.0`   | Upper bound of precursor mass tolerance (`peptide_mass_tolerance_upper`)                                     |
+| `--peptide_mass_tolerance_lower` | `-5.0`  | Lower bound of precursor mass tolerance (`peptide_mass_tolerance_lower`). Usually negative.                  |
+| `--peptide_mass_units`           | `2`     | Units for precursor mass tolerance: `0` = amu, `1` = mmu, `2` = ppm                                          |
+| `--isotope_error`                | `2`     | Isotope offset range: `0` = off, `1` = 0/1 (C13), `2` = 0/1/2, `3` = 0/1/2/3, `4` = -1/0/1/2/3, `5` = -1/0/1 |
+| `--fragment_bin_tol`             | `0.02`  | Fragment ion bin width in amu (`fragment_bin_tol`)                                                           |
+| `--fragment_bin_offset`          | `0.0`   | Fragment ion bin offset, 0.0–1.0 (`fragment_bin_offset`)                                                     |
+| `--theoretical_fragment_ions`    | `0`     | `0` = use flanking peaks, `1` = monoisotopic peak only                                                       |
+| `--psms_per_spectrum`            | `5`     | Number of PSM candidates reported per spectrum (`num_output_lines`)                                          |
+
+The pipeline always enforces the following settings regardless of what is set in the template:
+
+- Output format is set to mzIdentML (all other Comet output formats are disabled).
+- Internal decoy search is disabled (`decoy_search = 0`); decoys are handled externally by the pipeline.
+- `max_duplicate_proteins = -1` to report all protein matches per PSM.
+- `equal_I_and_L = 0` (isoleucine and leucine are treated as distinct).
+
+### Peptide modifications
+
+Variable and static modifications can be set via pipeline parameters. The syntax matches the Comet params file format; multiple entries are separated by a semicolon. The modification string must be enclosed in single quotes when passed on the command line.
+
+| Parameter                  | Default | Description                                                                             |
+| -------------------------- | ------- | --------------------------------------------------------------------------------------- |
+| `--variable_modifications` | `""`    | Variable modifications to set in the Comet params file (`variable_modXX = ...` entries) |
+| `--static_modifications`   | `""`    | Static modifications to set in the Comet params file (`add_XX_... = ...` entries)       |
+
+> [!TIP]
+> When passing modification strings on the command line, wrap the entire value in double quotes and the Comet-format string in single quotes:
+>
+> ```bash
+> --variable_modifications "'variable_mod01 = 15.9949 M 0 3 -1 0 0 0.0;variable_mod02 = 79.966331 STY 0 3 -1 0 0 97.976896'"
+> --static_modifications "'add_C_cysteine = 57.021464'"
+> ```
+>
+> Only modifications already present in the template can be overwritten this way. To add new modification slots, provide a custom `--comet_config_template`.
+
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
