@@ -70,6 +70,8 @@ def parse_ext_args(args_string):
 
     parser.add_argument(
         "-variable_modifications",
+        nargs="?",
+        const="",
         default="",
         type=str,
         required=False,
@@ -77,6 +79,8 @@ def parse_ext_args(args_string):
     )
     parser.add_argument(
         "-static_modifications",
+        nargs="?",
+        const="",
         default="",
         type=str,
         required=False,
@@ -94,9 +98,11 @@ if __name__ == "__main__":
 
     # split the variable modifications into a dictionary
     variable_modifications = {}
-    if len(args.variable_modifications) > 0:
+    if args.variable_modifications and args.variable_modifications.strip() not in {"''", '""'}:
         for line in args.variable_modifications.split(";"):
             line = line.strip()
+            if not line:
+                continue
             vals = line.split("=")
             if len(vals) == 2:
                 key = vals[0].strip()
@@ -105,9 +111,11 @@ if __name__ == "__main__":
 
     # decode the static modifications
     static_modifications = {}
-    if len(args.static_modifications) > 0:
+    if args.static_modifications and args.static_modifications.strip() not in {"''", '""'}:
         for line in args.static_modifications.split(";"):
             line = line.strip()
+            if not line:
+                continue
             vals = line.split("=")
             if len(vals) == 2:
                 key = vals[0].strip()
