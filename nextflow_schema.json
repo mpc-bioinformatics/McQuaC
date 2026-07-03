@@ -95,13 +95,13 @@
                 },
                 "peptide_mass_tolerance_upper": {
                     "type": "number",
-                    "default": 5,
+                    "default": 5.0,
                     "fa_icon": "fas fa-arrows-alt-h",
                     "description": "Comet parameter: peptide_mass_tolerance_upper, upper bound of the precursor mass tolerance"
                 },
                 "peptide_mass_tolerance_lower": {
                     "type": "number",
-                    "default": -5,
+                    "default": -5.0,
                     "fa_icon": "fas fa-arrows-alt-h",
                     "description": "Comet parameter: peptide_mass_tolerance_lower, lower bound of the precursor mass tolerance; USUALLY NEGATIVE TO BE LOWER THAN 0"
                 },
@@ -129,7 +129,7 @@
                 },
                 "fragment_bin_offset": {
                     "type": "number",
-                    "default": 0,
+                    "default": 0.0,
                     "fa_icon": "fas fa-sort-amount-down",
                     "minimum": 0,
                     "maximum": 1,
