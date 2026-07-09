@@ -39,6 +39,8 @@ workflow NFCORE_MACPROQC {
     MACPROQC (
         samplesheet,
         params.outdir,
+        params.fasta,
+        params.skip_decoy_generation,
     )
 }
 /*
@@ -69,7 +71,8 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     NFCORE_MACPROQC (
-        PIPELINE_INITIALISATION.out.samplesheet
+        PIPELINE_INITIALISATION.out.samplesheet,
+
     )
     //
     // SUBWORKFLOW: Run completion tasks

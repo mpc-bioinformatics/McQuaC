@@ -8,6 +8,7 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_macproqc_pipeline'
 
 include { PREPARE_SPECTRA } from '../subworkflows/local/prepare_spectra'
+include { IDENT_DDA } from '../subworkflows/local/ident_dda'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -20,6 +21,8 @@ workflow MACPROQC {
     take:
     ch_samplesheet // channel: samplesheet read in from --input
     outdir
+    fasta
+    skip_decoy_generation
 
     main:
 
@@ -29,7 +32,15 @@ workflow MACPROQC {
     PREPARE_SPECTRA(
         ch_samplesheet.map { meta, spectrum_file -> [meta, spectrum_file] }
     )
-    ch_prepared_spectra = PREPARE_SPECTRA.out.mzmls.join(PREPARE_SPECTRA.out.uncompressed, by: 0)
+
+
+    // perform DDA identification
+    IDENT_DDA(
+        fasta,
+        skip_decoy_generation,
+        PREPARE_SPECTRA.out.mzmls,
+    )
+
 
 
     //

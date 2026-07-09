@@ -38,6 +38,50 @@
                 }
             }
         },
+        "fasta_parameters": {
+            "title": "FASTA parameters",
+            "type": "object",
+            "fa_icon": "fas fa-database",
+            "description": "Database settings, to specify the FASTA, create decoys, ...",
+            "properties": {
+                "fasta": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "fa_icon": "fas fa-file",
+                    "pattern": "^\\S+\\.(fasta|fa|fas|faa)(.gz)?$",
+                    "description": "Global input FASTA protein database",
+                    "help_text": "Path to a single protein database file applied to all MS runs. Whether the file already contains decoys is controlled by --skip_decoy_generation."
+                },
+                "skip_decoy_generation": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Add this parameter when you want to skip the generation of the decoy database.",
+                    "help_text": "If you want to use your own decoys, you can specify a dataset that includes decoy sequences."
+                },
+                "decoy_string": {
+                    "type": "string",
+                    "default": "DECOY_",
+                    "fa_icon": "fas fa-text-width",
+                    "description": "String that is combined with the accession of the protein identifier to indicate a decoy protein.",
+                    "help_text": "This is passed to the decoy generation as well as to tools using this. Usually, this is a prefix of the protein accession."
+                },
+                "decoy_method": {
+                    "type": "string",
+                    "default": "reverse",
+                    "fa_icon": "fas fa-random",
+                    "description": "Method used to generate decoy sequences.",
+                    "help_text": "Passed directly to OpenMS DecoyDatabase. Valid values are 'reverse' (default) and 'shuffle'. Has no effect when --skip_decoy_generation is set.",
+                    "enum": ["reverse", "shuffle"]
+                },
+                "save_decoy_database": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-save",
+                    "description": "Set this parameter to true to save the generated decoy database (for later usage)."
+                }
+            },
+            "required": ["fasta"]
+        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",
@@ -146,7 +190,7 @@
                     "type": "string",
                     "fa_icon": "far fa-check-circle",
                     "description": "Base URL or local path to location of specific macproqc test dataset files",
-                    "default": "https://raw.githubusercontent.com//mpc-bioinformatics/macproqc-test-data/main/testdata/",
+                    "default": "https://raw.githubusercontent.com/mpc-bioinformatics/macproqc-test-data/main/testdata/",
                     "hidden": true
                 },
                 "trace_report_suffix": {
@@ -173,6 +217,9 @@
     "allOf": [
         {
             "$ref": "#/$defs/input_output_options"
+        },
+        {
+            "$ref": "#/$defs/fasta_parameters"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

@@ -1,16 +1,50 @@
 {
     "-profile test": {
         "content": [
-            null,
+            {
+                "OPENMS_DECOYDATABASE": {
+                    "openms": "3.5.0"
+                },
+                "TDF2MZML": {
+                    "tdf2mzml": 0.4
+                },
+                "THERMORAWFILEPARSER": {
+                    "thermorawfileparser": "1.4.5"
+                },
+                "UNTAR": {
+                    "untar": 1.34
+                },
+                "Workflow": {
+                    "nf-core/macproqc": "v1.0.0dev"
+                }
+            },
             [
+                "decoy_database",
+                "decoy_database/yeast_UPS_decoy.fasta",
                 "mzmls",
                 "mzmls/sample_one_raw.mzML",
                 "mzmls/sample_two_d.mzML",
                 "pipeline_info",
                 "pipeline_info/nf_core_macproqc_software_versions.yml"
+            ],
+            [
+                "yeast_UPS_decoy.fasta:md5,96c0295f69e0cb92b705ca4c33e6f047"
             ]
         ],
-        "timestamp": "2026-06-23T07:24:17.05879469",
+        "timestamp": "2026-06-25T15:00:47.264256083",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.3"
+        }
+    },
+    "spectrum_counts": {
+        "content": [
+            [
+                1193,
+                6849
+            ]
+        ],
+        "timestamp": "2026-06-25T14:42:04.697302387",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.3"
