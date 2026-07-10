@@ -1,6 +1,5 @@
 include { OPENMS_DECOYDATABASE } from '../../../modules/nf-core/openms/decoydatabase/main'
 include { COMETCONFIG; COMETCONFIG as COMETCONFIG_LABELLED } from '../../../modules/local/cometconfig/main'
-include { COMET } from '../../../modules/nf-core/comet/main'
 
 workflow IDENT_DDA {
     take:
@@ -67,11 +66,6 @@ workflow IDENT_DDA {
         ch_comet_input = ch_comet_input.mix(ch_comet_input_labelled)
     }
 
-    // perform identification
-    COMET(
-        ch_comet_input
-    )
-
-    emit:
-    comet = COMET.out.mzid
+    // emit:
+    // emit outputs, as soon as created
 }
