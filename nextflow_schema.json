@@ -153,12 +153,17 @@
                 "variable_modifications": {
                     "type": "string",
                     "description": "Comet parameter: adjust or add the variable modifications to overwrite in the template. The actual string MUST be in single quotes inside a string, like \"'variable_mod01 = 15.9949 M 0 3 -1 0 0 0.0'\". Variables are defined like in the comet params file (with 'variable_modXX = ...'). Multiple modifications can be defined by separating them with a semicolon.",
-                    "fa_icon": "fas fa-pen-square"
+                    "fa_icon": "fas fa-tags"
                 },
                 "static_modifications": {
                     "type": "string",
                     "description": "Comet parameter: set the variable modifications to overwrite in the template.The actual string MUST be in single quotes inside a string, like \"'add_C_cysteine = 57.021464'\". The variables are defined like in the comet params file (with 'add_XX_... = ...'). Multiple modifications can be defined by separating them with a semicolon.",
-                    "fa_icon": "fas fa-pen-square"
+                    "fa_icon": "fas fa-tags"
+                },
+                "label_modifications": {
+                    "type": "string",
+                    "description": "Additional Comet static modifications appended only for the labelled COMETCONFIG search. Use the same syntax as static_modifications, for example \"'add_K_lysine = 8.014199;add_R_arginine = 10.008269'\".",
+                    "fa_icon": "fas fa-tags"
                 }
             },
             "fa_icon": "fas fa-search"
