@@ -20,6 +20,17 @@ process COMETCONFIG {
     task.ext.when == null || task.ext.when
 
     script:
+    // Supported ext.args (all optional; units and ranges match the Comet params file):
+    //   -peptide_mass_tolerance_upper <float>  (default: 5.0)
+    //   -peptide_mass_tolerance_lower <float>  (default: -5.0)  — usually negative
+    //   -peptide_mass_units           <int>    (default: 2)      0=amu, 1=mmu, 2=ppm
+    //   -isotope_error                <int>    (default: 2)      0=off, 1=0/1, 2=0/1/2, 3=0/1/2/3, 4=-1/0/1/2/3, 5=-1/0/1
+    //   -fragment_bin_tol             <float>  (default: 0.02)
+    //   -fragment_bin_offset          <float>  (default: 0.0)    0.0–1.0
+    //   -theoretical_fragment_ions    <int>    (default: 0)      0=flanking peaks, 1=M peak only
+    //   -psms_per_spectrum            <int>    (default: 5)      maps to num_output_lines
+    //   -variable_modifications       <string> (default: "")     semicolon-separated Comet variable_modXX entries
+    //   -static_modifications         <string> (default: "")     semicolon-separated Comet add_XX entries
     def prefix = task.ext.prefix ?: "${meta.id}"
     params_out_file = "${prefix}.comet.params"
     template 'adjust_comet_params.py'
