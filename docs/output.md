@@ -63,7 +63,21 @@ The adjusted parameter file is an intermediate used by the Comet search step and
 
 ### Comet PSMs _(migrating)_
 
-TODO
+Each mzML file is searched against the target-decoy database using Comet and the adjusted parameter file described above. Results are written as mzIdentML (`.mzid`) files.
+
+When `--label_modifications` is set, two searches are run per spectrum file — one unlabelled and one labelled — producing a pair of mzid files per input. The filename encodes the search type:
+
+- `<sample>-unlabelled.mzid` — standard search using `--static_modifications`
+- `<sample>-labelled.mzid` — search with `--label_modifications` merged into the static modifications
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `comet/`
+  - `*-unlabelled.mzid` — PSM results from the unlabelled search
+  - `*-labelled.mzid` — PSM results from the labelled search (only present when `--label_modifications` is set)
+
+</details>
 
 ---
 
