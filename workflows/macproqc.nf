@@ -19,11 +19,12 @@ include { IDENT_DDA } from '../subworkflows/local/ident_dda'
 workflow MACPROQC {
 
     take:
-    ch_samplesheet          // channel: samplesheet read in from --input
+    ch_samplesheet              // channel: samplesheet read in from --input
     outdir
     fasta
     skip_decoy_generation
-    comet_config_template   // string: path to comet config template, or null to use created default config
+    comet_config_template       // string: path to comet config template, or null to use created default config
+    label_modifications         //
 
     main:
 
@@ -34,12 +35,15 @@ workflow MACPROQC {
         ch_samplesheet.map { meta, spectrum_file -> [meta, spectrum_file] }
     )
 
+    // enable "label search" if the user has specified any label modifications (see also modules.config)
+    def search_label_modifications = label_modifications?.trim() ? true : false
 
     // perform DDA identification
     IDENT_DDA(
         fasta,
         skip_decoy_generation,
         comet_config_template,
+        search_label_modifications,
         PREPARE_SPECTRA.out.mzmls,
     )
 
