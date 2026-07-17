@@ -10,19 +10,26 @@ nextflow_workflow {
 
     tag "openms/decoydatabase"
     tag "cometconfig"
+    tag "comet"
 
 
-    test("small ident") {
+    test("small ident - unlabelled only") {
 
         config "./nextflow.config"
 
         when {
+            params {
+                // set the output params.outdir for the test run (for some moduels to work correctly)
+                outdir = "${outputDir}"
+            }
+
             workflow {
                 """
                 input[0] = file(params.modules_testdata_base_path + 'proteomics/database/yeast_UPS.fasta', checkIfExists: true)
                 input[1] = false
                 input[2] = file("${projectDir}/assets/default_configs/comet.params", checkIfExists: true)
-                input[3] = channel.of([
+                input[3] = false
+                input[4] = channel.of([
                     [ id:'test-mzmlraw' ],
                     file(params.modules_testdata_base_path + 'proteomics/msspectra/OVEMB150205_12.mzML', checkIfExists: true)
                 ])
@@ -32,9 +39,92 @@ nextflow_workflow {
 
         then {
             assertAll(
-                { assert workflow.success}
-                // TODO: add some useful tests, as soon as some files are emitted (like ID files)
-                // { assert snapshot(workflow.out).match() }
+                { assert workflow.success},
+                {
+                    // the comet params file should be stable across runs (checksum-test)
+                    def paramsFile = file("${outputDir}/comet/test-mzmlraw-unlabelled.comet.params")
+                    assert paramsFile.exists() : "Adjusted comet params file not found in output"
+                    assert snapshot(paramsFile).match("comet-params-file")
+                },
+                {
+                    // check the mzid file name and count some elements
+                    assert snapshot(
+                        file(workflow.out.mzid[0][1]).name,
+                        file(workflow.out.mzid[0][1]).readLines().count { it.stripLeading().startsWith("<PeptideEvidence ") },
+                        file(workflow.out.mzid[0][1]).readLines().count { it.stripLeading().startsWith("<SpectrumIdentificationItem ") }
+                    ).match("mzid-filename-and-elementcount")
+                },
+                {
+                    // the AnalysisProtocolCollection should stay the same (unless between comet versions)
+                    def lines = file(workflow.out.mzid[0][1]).readLines()
+                    def startIdx = lines.findIndexOf { it.contains('<AnalysisProtocolCollection') }
+                    def endIdx   = lines.findIndexOf { it.contains('</AnalysisProtocolCollection>') }
+                    assert startIdx >= 0 : "AnalysisProtocolCollection not found in mzid output"
+                    assert snapshot(lines[startIdx..endIdx].collect { it.trim() }).match("mzid-AnalysisProtocolCollection")
+                },
+            )
+        }
+    }
+
+    test("small ident - also labelled") {
+
+        config "./nextflow.config"
+
+        when {
+            params {
+                // set the output params.outdir for the test run (for some moduels to work correctly)
+                outdir = "${outputDir}"
+            }
+
+            workflow {
+                """
+                input[0] = file(params.modules_testdata_base_path + 'proteomics/database/yeast_UPS.fasta', checkIfExists: true)
+                input[1] = false
+                input[2] = file("${projectDir}/assets/default_configs/comet.params", checkIfExists: true)
+                input[3] = true
+                input[4] = channel.of([
+                    [ id:'test-mzmlraw' ],
+                    file(params.modules_testdata_base_path + 'proteomics/msspectra/OVEMB150205_12.mzML', checkIfExists: true)
+                ])
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success},
+                {
+                    // both comet params files (unlabelled and labelled) should be stable across runs
+                    assert snapshot(
+                        path("$outputDir/comet/").list()
+                            .findAll { it.getFileName().toString().endsWith(".comet.params") }
+                            .sort { it.getFileName().toString() }
+                            .collect { params_file -> params_file }
+                    ).match("labelled-and-unlabelled-comet-params-file")
+                },
+                {
+                    // testing the search result mzid files (counting some elements)
+                    assert snapshot(
+                        workflow.out.mzid.collect { meta, mzid ->
+                            [
+                                file(mzid).name,
+                                file(mzid).readLines().count { it.stripLeading().startsWith("<PeptideEvidence ") },
+                                file(mzid).readLines().count { it.stripLeading().startsWith("<SpectrumIdentificationItem ") },
+                            ]
+                    } ).match("labelled-and-unlabelled-mzid-filename-and-elementcount")
+                },
+                {
+                    // the AnalysisProtocolCollection should stay the same (unless between comet versions)
+                    assert snapshot(
+                        workflow.out.mzid.collect { meta, mzid ->
+                            def lines = file(mzid).readLines()
+                            def startIdx = lines.findIndexOf { it.contains('<AnalysisProtocolCollection') }
+                            def endIdx   = lines.findIndexOf { it.contains('</AnalysisProtocolCollection>') }
+                            assert startIdx >= 0 : "AnalysisProtocolCollection not found in ${file(mzid).name}"
+                            lines[startIdx..endIdx].collect { it.trim() }
+                        }
+                    ).match("labelled-and-unlabelled-mzid-AnalysisProtocolCollection")
+                },
             )
         }
     }
