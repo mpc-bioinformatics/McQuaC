@@ -1,11 +1,13 @@
 include { OPENMS_DECOYDATABASE } from '../../../modules/nf-core/openms/decoydatabase/main'
 include { COMETCONFIG; COMETCONFIG as COMETCONFIG_LABELLED } from '../../../modules/local/cometconfig/main'
+include { COMET } from '../../../modules/nf-core/comet/main'
 
 workflow IDENT_DDA {
     take:
     fasta                   // val: fasta path
     skip_decoy_generation   // val: true to skip the decoy generation
     comet_config_template   // val: path to comet config template (or null to use default)
+    search_labels           // val: true to search for label modifications, false to skip (which label is defined in modules.config)
     ch_mzml                 // channel: [ val(meta), mzmls ]
 
     main:
@@ -47,8 +49,7 @@ workflow IDENT_DDA {
             [meta, mzml, fastafile, comet_params]
         }
 
-    // TODO: change to if (search_label == true)....
-    if (true) {
+    if (search_labels == true) {
         // create the config file (for labelled search)
         COMETCONFIG_LABELLED(
             ch_comet_config_template
@@ -66,6 +67,11 @@ workflow IDENT_DDA {
         ch_comet_input = ch_comet_input.mix(ch_comet_input_labelled)
     }
 
-    // emit:
-    // emit outputs, as soon as created
+    // perform identification
+    COMET(
+        ch_comet_input
+    )
+
+    emit:
+    mzid = COMET.out.mzid
 }
