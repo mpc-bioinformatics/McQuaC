@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
 name: "cometconfig"
-description: Adjusts a Comet database search parameter file template based on provided options, configuring mass tolerances, fragment ion settings, output formats, and peptide modifications.
+description: Adjusts a Comet database search parameter file template based on provided options, configuring mass tolerances, fragment ion settings, output formats, and peptide modifications. Search parameters are passed via `task.ext.args`; see `main.nf` and teh template file for the full list of supported arguments.
 keywords:
   - proteomics
   - mass spectrometry
