@@ -19,10 +19,11 @@ include { IDENT_DDA } from '../subworkflows/local/ident_dda'
 workflow MACPROQC {
 
     take:
-    ch_samplesheet // channel: samplesheet read in from --input
+    ch_samplesheet          // channel: samplesheet read in from --input
     outdir
     fasta
     skip_decoy_generation
+    comet_config_template   // string: path to comet config template, or null to use created default config
 
     main:
 
@@ -38,6 +39,7 @@ workflow MACPROQC {
     IDENT_DDA(
         fasta,
         skip_decoy_generation,
+        comet_config_template,
         PREPARE_SPECTRA.out.mzmls,
     )
 
