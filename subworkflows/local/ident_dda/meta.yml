@@ -3,8 +3,10 @@ name: "ident_dda"
 description: |
   Performs peptide and protein identification for data-dependent acquisition (DDA)
   mass spectrometry data. Optionally generates a decoy database by appending reversed
-  or shuffled sequences to the target FASTA, then runs the Comet database search engine
-  against the resulting (decoy-)FASTA to produce peptide spectrum matches (PSMs).
+  or shuffled sequences to the target FASTA, then adjusts a Comet parameter file and
+  runs the Comet database search engine to produce peptide spectrum matches (PSMs) in
+  mzIdentML format. When label modifications are provided, a second parallel labelled
+  search is performed alongside the standard unlabelled search.
 keywords:
   - proteomics
   - mass spectrometry
@@ -16,6 +18,7 @@ keywords:
   - PSM
 components:
   - openms/decoydatabase
+  - cometconfig
   - comet
 input:
   - fasta:
@@ -27,6 +30,18 @@ input:
       description: |
         Boolean flag. When true the decoy database generation step is skipped and
         the input FASTA is used directly for the search.
+  - comet_config_template:
+      type: value
+      description: |
+        Path to a Comet parameter file template, or null to use the pipeline default
+        at assets/default_configs/comet.params. Search parameters (mass tolerances,
+        modifications, etc.) are overwritten at runtime via ext.args on COMETCONFIG.
+  - search_labels:
+      type: value
+      description: |
+        Boolean flag. When true a second labelled Comet search is run in parallel
+        with the unlabelled search. The label-specific static modifications are
+        defined via ext.args on COMETCONFIG_LABELLED in modules.config.
   - ch_mzml:
       type: channel
       description: |
@@ -34,7 +49,15 @@ input:
         Structure: [ val(meta), path(mzml) ]
       pattern: "*.mzML"
 output:
-
+  - mzid:
+      type: channel
+      description: |
+        Channel of mzIdentML result files, one per search (unlabelled, and optionally
+        labelled) per input spectrum file. The meta map carries label_search (boolean),
+        mzml_id, fasta_id, and params_id fields in addition to the sample id.
+        The id field encodes the search type: <sample>-unlabelled or <sample>-labelled.
+        Structure: [ val(meta), path(mzid) ]
+      pattern: "*.mzid"
 authors:
   - "@julianu"
 maintainers:

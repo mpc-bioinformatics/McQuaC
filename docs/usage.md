@@ -127,10 +127,6 @@ Variable and static modifications can be set via pipeline parameters. The syntax
 
 When `--label_modifications` is set to a non-empty string, the pipeline runs a **second, parallel Comet search** alongside the standard unlabelled search. The labelled search uses the same parameters as the unlabelled search, but the `--label_modifications` entries are appended to `--static_modifications` to account for stable isotope labels (e.g. SILAC).
 
-| Parameter               | Default | Description                                                                                                                          |
-| ----------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `--label_modifications` | `""`    | Static modifications specific to the labelled search. Merged with `--static_modifications`. Leave empty to skip the labelled search. |
-
 Example for a SILAC K+8 / R+10 experiment:
 
 ```bash
