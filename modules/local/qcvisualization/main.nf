@@ -23,7 +23,7 @@ process QCVISUALIZATION {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/YOUR-TOOL-HERE':
-        'ghcr.io/mpc-bioinformatics/mcquac:0.1.0'}"
+        'ghcr.io/mpc-bioinformatics/macproqc-helpers:latest'}"
 
     input:// TODO nf-core: Where applicable all sample-specific information e.g. "id", "single_end", "read_group"
     //               MUST be provided as an input via a Groovy Map called "meta".
@@ -32,14 +32,16 @@ process QCVISUALIZATION {
     // TODO nf-core: Where applicable please provide/convert compressed files as input/output
     //               e.g. "*.fastq.gz" and NOT "*.fastq", "*.bam" and NOT "*.sam" etc.
     tuple val(meta), path(hdf5_files)
+    val outputdir
 
     output:
     // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
-    tuple val(meta), path("graphics/*.json"), emit: jsons
-    // TODO nf-core: List additional required output channels/values here
-    // TODO nf-core: Update the command here to obtain the version number of the software used in this module
-    // TODO nf-core: If multiple software packages are used in this module, all MUST be added here
-    //               by copying the line below and replacing the current tool with the extra tool(s)
+    tuple val(meta), path("${outputdir}/*.json"), emit: jsons, optional: true
+    tuple val(meta), path("${outputdir}/*.html"), emit: htmls, optional: true
+    tuple val(meta), path("${outputdir}/*.{csv,tsv,xlsx}"), emit: output_tables, optional: true
+    tuple val(meta), path("${outputdir}/fig13_MS1_map"), emit: ms1_maps, optional: true
+    tuple val(meta), path("${outputdir}/fig16_additional_headers"), emit: additional_plots, optional: true
+    tuple val(meta), path("${outputdir}/fig17_BRUKER_calibrants"), emit: bruker_calibrants, optional: true
     path "versions.yml", emit: versions
 
     when:
@@ -47,9 +49,20 @@ process QCVISUALIZATION {
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
+    def args = task.ext.args ?: ''
     //def hdf5_files_list = hdf5_files.join(';')
     hdf5_files_list = hdf5_files.join(';')
-    template 'QC_visualization.py'
+    """
+    mkdir -p "${outputdir}"
+    python -m macproqc_helpers visualize -hdf5_files "${hdf5_files_list}" -output "${outputdir}" $args
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version 2>&1 | cut -d ' ' -f 2)
+    END_VERSIONS
+
+    """
+    // --meta "${meta}"
 
     // TODO nf-core: Where possible, a command MUST be provided to obtain the version number of the software e.g. 1.10
     //               If the software is unable to output a version number on the command-line then it can be manually specified

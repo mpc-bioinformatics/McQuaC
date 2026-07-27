@@ -168,6 +168,26 @@
             },
             "fa_icon": "fas fa-search"
         },
+        "visualization_parameters": {
+            "title": "Visualization parameters",
+            "type": "object",
+            "fa_icon": "fas fa-chart-bar",
+            "description": "Parameters for the visualization of the QC results.",
+            "properties": {
+                "figure_format": {
+                    "type": "string",
+                    "default": "plotly",
+                    "description": "Output format for figures (plotly, html, or both as 'html,plotly')",
+                    "enum": ["plotly", "html", "html,plotly"]
+                },
+                "output_table_type": {
+                    "type": "string",
+                    "default": "csv",
+                    "description": "Output format for the summary table",
+                    "enum": ["csv", "tsv", "xlsx"]
+                }
+            }
+        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",
