@@ -50,11 +50,12 @@ process QCVISUALIZATION {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     def args = task.ext.args ?: ''
+    def spikein_columns = task.ext.spikein_columns  // because it contains whitespace
     //def hdf5_files_list = hdf5_files.join(';')
     hdf5_files_list = hdf5_files.join(';')
     """
     mkdir -p "${outputdir}"
-    python -m macproqc_helpers visualize -hdf5_files "${hdf5_files_list}" -output "${outputdir}" $args
+    python -m macproqc_helpers visualize -hdf5_files "${hdf5_files_list}" -output "${outputdir}" -spikein_columns "${spikein_columns}" $args
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
