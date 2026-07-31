@@ -1,50 +1,108 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
 name: "visualization"
 ## TODO nf-core: Add a description of the subworkflow and list keywords
-description: Sort SAM/BAM/CRAM file
+description: Visualize QC results from McQuaC. This subworkflow takes the output hdf5s of the McQuaC QC workflow and generates visualizations for the QC metrics.
 keywords:
-  - sort
-  - bam
-  - sam
-  - cram
-## TODO nf-core: Add a list of the modules and/or subworkflows used in the subworkflow
+  - proteomics
+  - mass spectrometry
+  - quality control
+  - visualization
 components:
-  - samtools/sort
-  - samtools/index
-## TODO nf-core: List all of the channels used as input with a description and their structure
+  - qcvisualization/sort
+
 input:
-  - ch_bam:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1' ]`
+    - hdf5_files:
+        type: file
+        description: Hdf5 files containing the QC metrics collected by the McQuaC pipeline
+        pattern: "*.hdf5"
+        ontologies:
+          - edam: "http://edamontology.org/format_3590" # HDF5
+  - outputdir:
+      type: string
+      description: Directory where the output files will be written to
+  - spike_ins_table:
       type: file
-      description: |
-        The input channel containing the BAM/CRAM/SAM files
-        Structure: [ val(meta), path(bam) ]
-      pattern: "*.{bam/cram/sam}"
-## TODO nf-core: List all of the channels used as output with a descriptions and their structure
+      description: Table containing information on spike-ins that should be searched for
+      pattern: "*.csv"
+      ontologies:
+        - edam: "http://edamontology.org/format_3752" # CSV
 output:
-  - bam:
-      type: file
-      description: |
-        Channel containing BAM files
-        Structure: [ val(meta), path(bam) ]
-      pattern: "*.bam"
-  - bai:
-      type: file
-      description: |
-        Channel containing indexed BAM (BAI) files
-        Structure: [ val(meta), path(bai) ]
-      pattern: "*.bai"
-  - csi:
-      type: file
-      description: |
-        Channel containing CSI files
-        Structure: [ val(meta), path(csi) ]
-      pattern: "*.csi"
-  - versions:
-      type: file
-      description: |
-        File containing software versions
-        Structure: [ path(versions.yml) ]
-      pattern: "versions.yml"
+  jsons:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - "*.json":
+          type: file
+          description: Plotly graphics in JSON format
+          pattern: "*.json"
+          ontologies:
+            - edam: "http://edamontology.org/format_3464" # JSON
+  htmls:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - "*.html":
+          type: file
+          description: Plotly graphics in HTML format
+          pattern: "*.html"
+          ontologies:
+            - edam: "http://edamontology.org/format_2331" # HTML
+  output_tables:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - "*.{csv,tsv,xlsx}":
+          type: file
+          description: Output tables in CSV, TSV, or Excel format
+          pattern: "*.{csv,tsv,xlsx}"
+          ontologies:
+            - edam: "http://edamontology.org/format_3752" # CSV
+            - edam: "http://edamontology.org/format_3475" # TSV
+            - edam: "http://edamontology.org/format_3620" # Excel
+  ms1_maps:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - ms1_maps: 
+          type: directory
+          description: Directory containing MS1 maps in PNG format
+  additional_plots:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - additional_plots: 
+          type: directory
+          description: Directory containing additional plots in JSON or HTML format
+  bruker_calibrants:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - bruker_calibrants: 
+          type: directory
+          description: Directory containing bruker calibrants plot in JSON or HTML format
+  versions:
+    - - "versions.yml":
+          type: file
+          description: File containing software versions
+          pattern: "versions.yml"
+
 authors:
   - "@KarinSchork"
 maintainers:

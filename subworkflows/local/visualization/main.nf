@@ -1,23 +1,22 @@
-// TODO nf-core: If in doubt look at other nf-core/subworkflows to see how we are doing things! :)
-//               https://github.com/nf-core/modules/tree/master/subworkflows
-//               You can also ask for help via your pull request or on the #subworkflows channel on the nf-core Slack workspace:
-//               https://nf-co.re/join
-// TODO nf-core: A subworkflow SHOULD import at least two modules
-
 include { QCVISUALIZATION } from '../../../modules/local/qcvisualization/main'
 
 workflow VISUALIZATION {
 
     take:
-    // TODO nf-core: edit input (take) channels
-    hdf5_files // channel: [ val(meta), [ bam ] ]
+    hdf5_files       // channel: [ val(meta), hdf5s]
+    outputdir        // val: output directory
+    spike_ins_table  // path: spike-ins table
 
     main:
     // TODO nf-core: substitute modules here for the modules of your subworkflow
 
-    QCVISUALIZATION ( hdf5_files )
+    QCVISUALIZATION ( hdf5_files, outputdir, spike_ins_table )
 
     emit:
-    // TODO nf-core: edit emitted channels
-    jsons = QCVISUALIZATION.out.jsons           // channel: [ val(meta), [ bam ] ]
+    jsons = QCVISUALIZATION.out.jsons           // channel: [ val(meta), [ json ] ]
+    htmls = QCVISUALIZATION.out.htmls           // channel: [ val(meta), [ html ] ]
+    output_tables = QCVISUALIZATION.out.output_tables // channel: [ val(meta), [ csv, tsv, xlsx ] ]
+    ms1_maps = QCVISUALIZATION.out.ms1_maps     // channel: [ val(meta), ms1_maps ]
+    additional_plots = QCVISUALIZATION.out.additional_plots // channel: [ val(meta), additional_plots ]
+    bruker_calibrants = QCVISUALIZATION.out.bruker_calibrants // channel: [ val(meta), bruker_calibrants ]
 }
