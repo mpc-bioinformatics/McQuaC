@@ -65,6 +65,12 @@ The adjusted parameter file is an intermediate used by the Comet search step and
 
 TODO
 
+
+### Visualization
+
+The main output of the visualization subworkflow are interactive plots (as JSON and/or HTML, depending on the settings). Also, a summary output table is generated as csv, tsv or xlsx. 
+
+
 ---
 
 ## Pipeline information
