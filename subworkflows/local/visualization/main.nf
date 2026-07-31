@@ -8,8 +8,7 @@ workflow VISUALIZATION {
     spike_ins_table  // path: spike-ins table
 
     main:
-    // TODO nf-core: substitute modules here for the modules of your subworkflow
-
+   
     QCVISUALIZATION ( hdf5_files, outputdir, spike_ins_table )
 
     emit:

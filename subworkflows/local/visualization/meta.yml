@@ -1,6 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
 name: "visualization"
-## TODO nf-core: Add a description of the subworkflow and list keywords
 description: Visualize QC results from McQuaC. This subworkflow takes the output hdf5s of the McQuaC QC workflow and generates visualizations for the QC metrics.
 keywords:
   - proteomics
