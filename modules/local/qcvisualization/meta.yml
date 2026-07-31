@@ -1,76 +1,117 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
 # # TODO nf-core: Add a description of the module and list keywords
 name: "qcvisualization"
-description: write your description here
+description: Visualization of the collected QC metrics from the McQuaC pipeline (given as hdf5 files).
 keywords:
-  - sort
-  - example
-  - genomics
+  - proteomics
+  - mass spectrometry
+  - quality control
+  - visualization
 tools:
-  ## TODO nf-core: Add a description and other details for the software below
-  - "qcvisualization":
-      description: ""
-      homepage: ""
-      documentation: ""
-      tool_dev_url: ""
+  - "python":
+      description: "Python is a general-purpose programming language used here to parse and rewrite Comet parameter files."
+      homepage: "https://www.python.org/"
+      documentation: "https://docs.python.org/"
+      tool_dev_url: "https://github.com/python/cpython"
       doi: ""
-      licence: null
+      licence: ["PSF-2.0"]
       identifier: null
 
 input:
-  ### TODO nf-core: Add a description of all of the variables used as input
   - - meta:
         type: map
         description: |
           Groovy Map containing sample information
           e.g. `[ id:'sample1' ]`
-    - bam:
+    - hdf5_files:
         type: file
-        description: Sorted BAM/CRAM/SAM file
-        pattern: "*.{bam,cram,sam}"
+        description: Hdf5 files containing the QC metrics collected by the McQuaC pipeline
+        pattern: "*.hdf5"
         ontologies:
-          - edam: "http://edamontology.org/format_2572" # BAM
-          - edam: "http://edamontology.org/format_2573" # CRAM
-          - edam: "http://edamontology.org/format_3462" # SAM
+          - edam: "http://edamontology.org/format_3590" # HDF5
+  - outputdir:
+      type: string
+      description: Directory where the output files will be written to
+  - spike_ins_table:
+      type: file
+      description: Table containing information on spike-ins that should be searched for
+      pattern: "*.csv"
+      ontologies:
+        - edam: "http://edamontology.org/format_3752" # CSV
 
 output:
   ### TODO nf-core: Add a description of all of the variables used as output
-  bam:
+  jsons:
     - - meta:
           type: map
           description: |
             Groovy Map containing sample information
             e.g. `[ id:'sample1' ]`
-      - "*.bam":
+      - "*.json":
           type: file
-          description: Sorted BAM/CRAM/SAM file
-          pattern: "*.{bam,cram,sam}"
+          description: Plotly graphics in JSON format
+          pattern: "*.json"
           ontologies:
-            - edam: "http://edamontology.org/format_2572" # BAM
-            - edam: "http://edamontology.org/format_2573" # CRAM
-            - edam: "http://edamontology.org/format_3462" # SAM
-  versions_qcvisualization:
-    - - "${task.process}":
-          type: string
-          description: The name of the process
-      - "qcvisualization":
-          type: string
-          description: The name of the tool
-      - "qcvisualization --version":
-          type: eval
-          description: The expression to obtain the version of the tool
-
-topics:
+            - edam: "http://edamontology.org/format_3464" # JSON
+  htmls:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - "*.html":
+          type: file
+          description: Plotly graphics in HTML format
+          pattern: "*.html"
+          ontologies:
+            - edam: "http://edamontology.org/format_2331" # HTML
+  output_tables:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - "*.{csv,tsv,xlsx}":
+          type: file
+          description: Output tables in CSV, TSV, or Excel format
+          pattern: "*.{csv,tsv,xlsx}"
+          ontologies:
+            - edam: "http://edamontology.org/format_3752" # CSV
+            - edam: "http://edamontology.org/format_3475" # TSV
+            - edam: "http://edamontology.org/format_3620" # Excel
+  ms1_maps:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - ms1_maps: 
+          type: directory
+          description: Directory containing MS1 maps in PNG format
+  additional_plots:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - additional_plots: 
+          type: directory
+          description: Directory containing additional plots in JSON or HTML format
+  bruker_calibrants:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - bruker_calibrants: 
+          type: directory
+          description: Directory containing bruker calibrants plot in JSON or HTML format
   versions:
-    - - ${task.process}:
-          type: string
-          description: The name of the process
-      - qcvisualization:
-          type: string
-          description: The name of the tool
-      - qcvisualization --version:
-          type: eval
-          description: The expression to obtain the version of the tool
+    - - "versions.yml":
+          type: file
+          description: File containing software versions
+          pattern: "versions.yml"
+
 authors:
   - "@KarinSchork"
 maintainers:

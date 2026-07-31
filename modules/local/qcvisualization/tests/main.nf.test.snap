@@ -32,7 +32,7 @@
                         "id": "test"
                     },
                     [
-                        "00_table_summary.csv:md5,e5e7c29b45213980d531bcf1e760d195",
+                        "00_table_summary.csv:md5,6cb9c585f42e9f579996615c37c18c33",
                         "99_hdf5_feature_table.csv:md5,a11c05737c6afc1cc79b2498ed51f1d9",
                         "fig11c_table_loadings_raw.csv:md5,48dcfda8d22897971da986a1338668a9",
                         "fig12c_table_loadings_raw.csv:md5,9fad14f29a238a597fe54fc9e83b2710"
@@ -89,7 +89,7 @@
                 "versions.yml:md5,02a34265e562a8410ad48bc28da0de6c"
             ]
         ],
-        "timestamp": "2026-07-27T14:54:45.934069079",
+        "timestamp": "2026-07-31T09:08:45.880004488",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
