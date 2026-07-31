@@ -22,7 +22,8 @@ def argparse_setup():
         "Vacuum_CurrentFunnel",
         "Digitizer_CurrentTemp",
         "TOF_DeviceTempCurrentValue1",
-        "TOF_DeviceTempCurrentValue2"
+        "TOF_DeviceTempCurrentValue2",
+        "Source_CapillaryCurrentValue"
     ])
     parser.add_argument("-calibrants_to_retrieve", "-calibrants", help="Calibrants which should be retrieved. In the format MZ:Mobility. E.G.: 922.00978:1.1895", action="append", default=[
         "622.0290:0.9913",
