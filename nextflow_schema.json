@@ -185,6 +185,61 @@
                     "default": "csv",
                     "description": "Output format for the summary table",
                     "enum": ["csv", "tsv", "xlsx"]
+                },
+                "spikeins": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Whether to include spike-ins in the analysis."
+                },
+                "RT_unit": {
+                    "type": "string",
+                    "default": "sec",
+                    "description": "Unit for retention time in plots ('min', 'sec')."
+                },
+                "output_column_order": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Order of columns for the output table."
+                },
+                "spikein_columns": {
+                    "type": "string",
+                    "default": "MS1 feature maximum intensity,retention time,count of identified spectra,Delta_to_expected_RT",
+                    "description": "Spike-in columns to include in the output table, separated by commas."
+                },
+                "height_barplots": {
+                    "type": "integer",
+                    "default": 700,
+                    "description": "Height of the bar plots in pixels."
+                },
+                "width_barplots": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Width of the bar plots in pixels. Default = 0 means automatic width."
+                },
+                "height_pca": {
+                    "type": "integer",
+                    "default": 1000,
+                    "description": "Height of the PCA plots in pixels."
+                },
+                "width_pca": {
+                    "type": "integer",
+                    "default": 1000,
+                    "description": "Width of the PCA plots in pixels."
+                },
+                "height_ionmaps": {
+                    "type": "number",
+                    "default": 10.0,
+                    "description": "Height of the ion maps plots in inches."
+                },
+                "width_ionmaps": {
+                    "type": "number",
+                    "default": 10.0,
+                    "description": "Width of the ion maps plots in inches."
+                },
+                "spike_ins_table": {
+                    "type": "string",
+                    "default": null,
+                    "description": "Spike-ins table."
                 }
             }
         },
@@ -329,6 +384,9 @@
         },
         {
             "$ref": "#/$defs/identification_parameters"
+        },
+        {
+            "$ref": "#/$defs/visualization_parameters"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

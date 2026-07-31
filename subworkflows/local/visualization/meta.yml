@@ -10,17 +10,17 @@ components:
   - qcvisualization/sort
 
 input:
-  - - meta:
+  - meta:
         type: map
         description: |
           Groovy Map containing sample information
           e.g. `[ id:'sample1' ]`
-    - hdf5_files:
-        type: file
-        description: Hdf5 files containing the QC metrics collected by the McQuaC pipeline
-        pattern: "*.hdf5"
-        ontologies:
-          - edam: "http://edamontology.org/format_3590" # HDF5
+  - hdf5_files:
+      type: file
+      description: Hdf5 files containing the QC metrics collected by the McQuaC pipeline
+      pattern: "*.hdf5"
+      ontologies:
+        - edam: "http://edamontology.org/format_3590" # HDF5
   - outputdir:
       type: string
       description: Directory where the output files will be written to
@@ -31,76 +31,39 @@ input:
       ontologies:
         - edam: "http://edamontology.org/format_3752" # CSV
 output:
-  jsons:
-    - - meta:
-          type: map
-          description: |
-            Groovy Map containing sample information
-            e.g. `[ id:'sample1' ]`
-      - "*.json":
-          type: file
-          description: Plotly graphics in JSON format
-          pattern: "*.json"
-          ontologies:
-            - edam: "http://edamontology.org/format_3464" # JSON
-  htmls:
-    - - meta:
-          type: map
-          description: |
-            Groovy Map containing sample information
-            e.g. `[ id:'sample1' ]`
-      - "*.html":
-          type: file
-          description: Plotly graphics in HTML format
-          pattern: "*.html"
-          ontologies:
-            - edam: "http://edamontology.org/format_2331" # HTML
-  output_tables:
-    - - meta:
-          type: map
-          description: |
-            Groovy Map containing sample information
-            e.g. `[ id:'sample1' ]`
-      - "*.{csv,tsv,xlsx}":
-          type: file
-          description: Output tables in CSV, TSV, or Excel format
-          pattern: "*.{csv,tsv,xlsx}"
-          ontologies:
-            - edam: "http://edamontology.org/format_3752" # CSV
-            - edam: "http://edamontology.org/format_3475" # TSV
-            - edam: "http://edamontology.org/format_3620" # Excel
-  ms1_maps:
-    - - meta:
-          type: map
-          description: |
-            Groovy Map containing sample information
-            e.g. `[ id:'sample1' ]`
-      - ms1_maps: 
-          type: directory
-          description: Directory containing MS1 maps in PNG format
-  additional_plots:
-    - - meta:
-          type: map
-          description: |
-            Groovy Map containing sample information
-            e.g. `[ id:'sample1' ]`
-      - additional_plots: 
-          type: directory
-          description: Directory containing additional plots in JSON or HTML format
-  bruker_calibrants:
-    - - meta:
-          type: map
-          description: |
-            Groovy Map containing sample information
-            e.g. `[ id:'sample1' ]`
-      - bruker_calibrants: 
-          type: directory
-          description: Directory containing bruker calibrants plot in JSON or HTML format
-  versions:
-    - - "versions.yml":
-          type: file
-          description: File containing software versions
-          pattern: "versions.yml"
+  - jsons:
+      type: file
+      description: Plotly graphics in JSON format
+      pattern: "*.json"
+      ontologies:
+        - edam: "http://edamontology.org/format_3464" # JSON
+  - htmls:
+      type: file
+      description: Plotly graphics in HTML format
+      pattern: "*.html"
+      ontologies:
+        - edam: "http://edamontology.org/format_2331" # HTML
+  - output_tables:
+      type: file
+      description: Output tables in CSV, TSV, or Excel format
+      pattern: "*.{csv,tsv,xlsx}"
+      ontologies:
+        - edam: "http://edamontology.org/format_3752"
+        - edam: "http://edamontology.org/format_3475"
+        - edam: "http://edamontology.org/format_3620"
+  - ms1_maps:
+      type: directory
+      description: Directory containing MS1 maps in PNG format
+  - additional_plots:
+      type: directory
+      description: Directory containing additional plots in JSON or HTML format
+  - bruker_calibrants:
+      type: directory
+      description: Directory containing bruker calibrants plot in JSON or HTML format
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
 
 authors:
   - "@KarinSchork"
