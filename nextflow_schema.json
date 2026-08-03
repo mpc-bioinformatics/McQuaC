@@ -198,7 +198,7 @@
                 },
                 "output_column_order": {
                     "type": "string",
-                    "default": """",
+                    "default": null,
                     "description": "Order of columns for the output table."
                 },
                 "spikein_columns": {
