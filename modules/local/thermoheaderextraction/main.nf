@@ -1,44 +1,40 @@
+/*
+ * Extract specific headers from Thermofisher RAW files
+ **/
 process THERMOHEADEREXTRACTION {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_low'
 
-    conda "${moduleDir}/environment.yml"  // TODO DL it is not needed, can we remove this?
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'ghcr.io/mpc-bioinformatics/mcquac:0.1.0':
-        'ghcr.io/mpc-bioinformatics/mcquac:0.1.0' }"
+    stageInMode 'copy'  // needed due to mono
+
+    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-914105c"
 
     input:
-    tuple val(meta), path(raw_thermo_file)
-    val(thermo_extraction_headers)
+    tuple val(meta), file(raw_thermo_file)
 
-    // TODO DL how to do versioning?
     output:
     tuple val(meta), path("*.hdf5"), emit: hdf5
-    path("versions.yml"), emit: versions
+    tuple val("${task.process}"), val('macproqc-helpers'), val("sha-914105c"), emit: versions_thermoheaderextraction
+
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    outfile_basename = prefix
-    template 'thermo_header_extraction.py'
-
-    stub:
-    // TODO DL how to do versioning? Does it need to be in stub?
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    echo $args
-    echo ${raw_thermo_file}
-    echo ${thermo_extraction_headers}
+    python -m macproqc_helpers collect-metrics-from-thermo \\
+        ${args} \\
+        -raw ${raw_thermo_file} \\
+        -out_hdf5 ${prefix}.hdf5
+    """
+
+    stub:
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    echo ${args}
     
     touch ${prefix}.hdf5
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version 2>&1 | cut -d ' ' -f 2)
-        thermo_header_extraction: "0.0.1"
-    END_VERSIONS
     """
 }
-

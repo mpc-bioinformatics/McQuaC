@@ -1,76 +1,61 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
-# # TODO nf-core: Add a description of the module and list keywords
 name: "thermoheaderextraction"
-description: write your description here
+description: Extract specific headers from Thermofisher RAW files
 keywords:
-  - sort
-  - example
-  - genomics
+  - thermofisher
+  - proteomics
+  - mass_spectrometry
+  - raw
+  - header_extraction
 tools:
-  ## TODO nf-core: Add a description and other details for the software below
   - "thermoheaderextraction":
-      description: ""
-      homepage: ""
-      documentation: ""
-      tool_dev_url: ""
+      description: "Thermoheaderextraction from the helper tools for the McQuaC pipeline, including metric collection from Thermofisher RAW files."
+      homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers"
+      documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers"
+      tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       doi: ""
       licence: null
       identifier: null
 
 input:
-  ### TODO nf-core: Add a description of all of the variables used as input
   - - meta:
         type: map
         description: |
           Groovy Map containing sample information
           e.g. `[ id:'sample1' ]`
-    - bam:
+    - raw_thermo_file:
         type: file
-        description: Sorted BAM/CRAM/SAM file
-        pattern: "*.{bam,cram,sam}"
-        ontologies:
-          - edam: "http://edamontology.org/format_2572" # BAM
-          - edam: "http://edamontology.org/format_2573" # CRAM
-          - edam: "http://edamontology.org/format_3462" # SAM
+        description: Thermofisher RAW file
+        pattern: "*.{raw,RAW}"
 
 output:
-  ### TODO nf-core: Add a description of all of the variables used as output
-  bam:
+  hdf5:
     - - meta:
           type: map
           description: |
             Groovy Map containing sample information
             e.g. `[ id:'sample1' ]`
-      - "*.bam":
+      - "*.hdf5":
           type: file
-          description: Sorted BAM/CRAM/SAM file
-          pattern: "*.{bam,cram,sam}"
-          ontologies:
-            - edam: "http://edamontology.org/format_2572" # BAM
-            - edam: "http://edamontology.org/format_2573" # CRAM
-            - edam: "http://edamontology.org/format_3462" # SAM
+          description: HDF5 file containing extracted metrics from thermo file
+          pattern: "*.hdf5"
   versions_thermoheaderextraction:
     - - "${task.process}":
           type: string
           description: The name of the process
-      - "thermoheaderextraction":
+      - "macproqc-helpers":
           type: string
           description: The name of the tool
-      - "thermoheaderextraction --version":
+      - "sha-914105c":
           type: eval
-          description: The expression to obtain the version of the tool
+          description: The hardcoded value (fixed in docker)
 
 topics:
   versions:
     - - ${task.process}:
           type: string
-          description: The name of the process
-      - thermoheaderextraction:
-          type: string
-          description: The name of the tool
-      - thermoheaderextraction --version:
-          type: eval
-          description: The expression to obtain the version of the tool
+          description: The version/tag of the container image
+
 authors:
   - "@Luxxii"
 maintainers:

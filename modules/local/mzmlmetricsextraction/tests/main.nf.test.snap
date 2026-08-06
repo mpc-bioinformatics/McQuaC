@@ -1,0 +1,93 @@
+{
+    "mzmlmetricsextraction - small mzml - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        "MZMLMETRICSEXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ],
+                "hdf5": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions_mzmlmetricsextraction": [
+                    [
+                        "MZMLMETRICSEXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-08-06T16:59:24.146033489",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "mzmlmetricsextraction - small mzml": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.hdf5:md5,d26e9fb0a24373cd8f656f5e86af2edf"
+                    ]
+                ],
+                "1": [
+                    [
+                        "MZMLMETRICSEXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ],
+                "hdf5": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.hdf5:md5,d26e9fb0a24373cd8f656f5e86af2edf"
+                    ]
+                ],
+                "versions_mzmlmetricsextraction": [
+                    [
+                        "MZMLMETRICSEXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ]
+            },
+            {
+                "versions_mzmlmetricsextraction": [
+                    [
+                        "MZMLMETRICSEXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-08-06T16:59:12.605553431",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}
