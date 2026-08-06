@@ -1,0 +1,93 @@
+{
+    "brukerheaderextraction - simple dotd folder": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "50fmol_BSA_S1-A2_1_32.d"
+                        },
+                        "50fmol_BSA_S1-A2_1_32.d.hdf5:md5,4ec90e58243e9f573d5c872805acf58f"
+                    ]
+                ],
+                "1": [
+                    [
+                        "BRUKERHEADEREXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ],
+                "hdf5": [
+                    [
+                        {
+                            "id": "50fmol_BSA_S1-A2_1_32.d"
+                        },
+                        "50fmol_BSA_S1-A2_1_32.d.hdf5:md5,4ec90e58243e9f573d5c872805acf58f"
+                    ]
+                ],
+                "versions_brukerheaderextraction": [
+                    [
+                        "BRUKERHEADEREXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ]
+            },
+            {
+                "versions_brukerheaderextraction": [
+                    [
+                        "BRUKERHEADEREXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-08-06T16:58:18.869309103",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "brukerheaderextraction - simple dotd folder - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "50fmol_BSA_S1-A2_1_32.d"
+                        },
+                        "50fmol_BSA_S1-A2_1_32.d.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        "BRUKERHEADEREXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ],
+                "hdf5": [
+                    [
+                        {
+                            "id": "50fmol_BSA_S1-A2_1_32.d"
+                        },
+                        "50fmol_BSA_S1-A2_1_32.d.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions_brukerheaderextraction": [
+                    [
+                        "BRUKERHEADEREXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-08-06T16:58:34.685193996",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

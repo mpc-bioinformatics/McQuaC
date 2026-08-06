@@ -1,15 +1,15 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
-name: "thermoheaderextraction"
-description: Extract specific headers from Thermofisher RAW files
+name: "mzmlmetricsextraction"
+description: Extract QC metrics from mzML files using macproqc-helpers and store them in HDF5 format.
 keywords:
-  - thermofisher
-  - proteomics
-  - mass_spectrometry
-  - raw
-  - header_extraction
+  - mzML
+  - metrics
+  - mass spectrometry
+  - QC
+  - HDF5
 tools:
-  - "thermoheaderextraction":
-      description: "Thermoheaderextraction from the helper tools for the McQuaC pipeline, including metric collection from Thermofisher RAW files."
+  - "mzmlmetricsextraction":
+      description: "mzmlmetricsextraction from the helper tools for the MacProQC pipeline, including mzML metric extraction."
       homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers"
@@ -23,10 +23,12 @@ input:
         description: |
           Groovy Map containing sample information
           e.g. `[ id:'sample1' ]`
-    - raw_thermo_file:
+    - mzml_file:
         type: file
-        description: Thermofisher RAW file
-        pattern: "*.{raw,RAW}"
+        description: mzML file to extract metrics from
+        pattern: "*.{mzML,mzml}"
+        ontologies:
+          - edam: "http://edamontology.org/format_3244" # mzML
 
 output:
   hdf5:
@@ -37,9 +39,9 @@ output:
             e.g. `[ id:'sample1' ]`
       - "*.hdf5":
           type: file
-          description: HDF5 file containing extracted metrics from thermo file
+          description: HDF5 file containing extracted mzML metrics
           pattern: "*.hdf5"
-  versions_thermoheaderextraction:
+  versions_mzmlmetricsextraction:
     - - "${task.process}":
           type: string
           description: The name of the process
@@ -48,13 +50,13 @@ output:
           description: The name of the tool
       - "sha-914105c":
           type: eval
-          description: The hardcoded value (fixed in docker)
+          description: The expression to obtain the version of the tool
 
 topics:
   versions:
     - - ${task.process}:
           type: string
-          description: The version/tag of the container image
+          description: The version of the tool
 
 authors:
   - "@Luxxii"

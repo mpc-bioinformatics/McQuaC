@@ -1,0 +1,93 @@
+{
+    "thermoheaderextraction - simple raw file": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.hdf5:md5,422043069c2835aaa2aa6fef37d7b1e5"
+                    ]
+                ],
+                "1": [
+                    [
+                        "THERMOHEADEREXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ],
+                "hdf5": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.hdf5:md5,422043069c2835aaa2aa6fef37d7b1e5"
+                    ]
+                ],
+                "versions_thermoheaderextraction": [
+                    [
+                        "THERMOHEADEREXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ]
+            },
+            {
+                "versions_thermoheaderextraction": [
+                    [
+                        "THERMOHEADEREXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-08-06T17:00:24.429223151",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "thermoheaderextraction - thermo_raw - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        "THERMOHEADEREXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ],
+                "hdf5": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions_thermoheaderextraction": [
+                    [
+                        "THERMOHEADEREXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-08-06T17:00:28.720279285",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

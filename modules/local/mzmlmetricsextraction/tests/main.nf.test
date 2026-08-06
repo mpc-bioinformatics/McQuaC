@@ -1,22 +1,26 @@
-// nf-core modules test thermoheaderextraction
+// nf-core modules test mzmlmetricsextraction
 nextflow_process {
 
-    name "Test Process THERMOHEADEREXTRACTION"
+    name "Test Process MZMLMETRICSEXTRACTION"
     script "../main.nf"
-    process "THERMOHEADEREXTRACTION"
+    process "MZMLMETRICSEXTRACTION"
 
     tag "modules"
     tag "modules_"
-    tag "thermoheaderextraction"
+    tag "mzmlmetricsextraction"
 
-    test("thermoheaderextraction - simple raw file") {
+    // TODO nf-core: Change the test name preferably indicating the test-data and file-format used
+    test("mzmlmetricsextraction - small mzml") {
+
+        config "./nextflow.config"
 
         when {
+
             process {
                 """              
                 input[0] = [
                     [ id:'test' ],
-                    file(params.macproqc_testdata_base_path + 'msspectra/small.RAW', checkIfExists: true)
+                    file(params.macproqc_testdata_base_path + 'msspectra/medium_bruker.mzML', checkIfExists: true)
                 ]
                 """
             }
@@ -34,7 +38,7 @@ nextflow_process {
 
     }
 
-    test("thermoheaderextraction - thermo_raw - stub") {
+    test("mzmlmetricsextraction - small mzml - stub") {
 
         options "-stub"
 
@@ -43,7 +47,7 @@ nextflow_process {
                 """
                 input[0] = [
                     [ id:'test' ],
-                    file(params.macproqc_testdata_base_path + 'msspectra/small.RAW', checkIfExists: true)
+                    file(params.macproqc_testdata_base_path + 'msspectra/medium_bruker.mzML', checkIfExists: true)
                 ]
                 """
             }
