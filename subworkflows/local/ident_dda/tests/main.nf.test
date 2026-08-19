@@ -33,6 +33,8 @@ nextflow_workflow {
                     [ id:'test-mzmlraw' ],
                     file(params.modules_testdata_base_path + 'proteomics/msspectra/OVEMB150205_12.mzML', checkIfExists: true)
                 ])
+                input[5] = 0.01
+                input[6] = 0.05
                 """
             }
         }
@@ -86,6 +88,8 @@ nextflow_workflow {
                     [ id:'test-mzmlraw' ],
                     file(params.modules_testdata_base_path + 'proteomics/msspectra/OVEMB150205_12.mzML', checkIfExists: true)
                 ])
+                input[5] = 0.01
+                input[6] = 0.05
                 """
             }
         }

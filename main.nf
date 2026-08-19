@@ -43,6 +43,8 @@ workflow NFCORE_MACPROQC {
         params.skip_decoy_generation,
         params.comet_config_template,
         params.label_modifications,
+        params.pia_fdr_threshold,
+        params.pia_prefilter_threshold
     )
 }
 /*
