@@ -25,6 +25,8 @@ workflow MACPROQC {
     skip_decoy_generation
     comet_config_template       // string: path to comet config template, or null to use created default config
     label_modifications         //
+    pia_fdr_threshold           // number: pia fdr threshold (default 0.01)
+    pia_prefilter_threshold     // number: pia prefilter threshold (the FDR pre-filter or 0 / empty / null to skip prefiltering)
 
     main:
 
@@ -45,6 +47,8 @@ workflow MACPROQC {
         comet_config_template,
         search_label_modifications,
         PREPARE_SPECTRA.out.mzmls,
+        pia_fdr_threshold,
+        pia_prefilter_threshold
     )
 
 

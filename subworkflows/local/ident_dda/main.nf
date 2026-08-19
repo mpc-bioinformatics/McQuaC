@@ -1,6 +1,8 @@
 include { OPENMS_DECOYDATABASE } from '../../../modules/nf-core/openms/decoydatabase/main'
 include { COMETCONFIG; COMETCONFIG as COMETCONFIG_LABELLED } from '../../../modules/local/cometconfig/main'
 include { COMET } from '../../../modules/nf-core/comet/main'
+include { PIA_CONFIGURE } from '../../../modules/local/pia/configure/main'
+include { PIA_COMPILEXML } from '../../../modules/local/pia/compilexml/main'
 
 workflow IDENT_DDA {
     take:
@@ -9,6 +11,8 @@ workflow IDENT_DDA {
     comet_config_template   // val: path to comet config template (or null to use default)
     search_labels           // val: true to search for label modifications, false to skip (which label is defined in modules.config)
     ch_mzml                 // channel: [ val(meta), mzmls ]
+    pia_fdr_threshold       // val: threshold for PIA FDR filtering
+    pia_prefilter_threshold // val: threshold for PIA prefiltering, if 0 or null/empty, no prefiltering is done
 
     main:
 
@@ -71,6 +75,70 @@ workflow IDENT_DDA {
     COMET(
         ch_comet_input
     )
+
+    ///////////////////////////////////////////////////////
+    // PIA analysis
+
+    // first round of PIA compilation (pre-filtereing or branching off labelled is performed later)
+    PIA_COMPILEXML(
+        COMET.out.mzid
+    )
+
+    PIA_COMPILEXML.out.pia_xml.view()
+
+    // Create PIA configuration files
+    ch_pia_configuration_in = channel.of(
+        [
+            id: "main-analysis",
+            psm_export: true,
+            peptide_export: true,
+            protein_export: true,
+            fdr_filter: true,
+            remove_decoys: true,
+            fdr_threshold: pia_fdr_threshold
+        ]
+    )
+
+    if (pia_prefilter_threshold != null && pia_prefilter_threshold > 0) {
+        ch_pia_configuration_in = ch_pia_configuration_in.mix(
+            channel.of([
+                id: "prefilter",
+                psm_export: true,
+                peptide_export: false,
+                protein_export: false,
+                fdr_filter: true,
+                remove_decoys: false,
+                fdr_threshold: pia_prefilter_threshold
+            ])
+        )
+    }
+
+    PIA_CONFIGURE(ch_pia_configuration_in)
+
+    // split the comet output for labelled and unlabelled searches
+    ch_pia_in = COMET.out.mzid.branch { meta, _mzid ->
+        unlabelled: meta.label_search == false
+        labelled: meta.label_search == true
+    }
+
+    // TODO: perform PIA pre-filtering with pia_prefilter_threshold
+
+
+    // compile PIA xml files for final analysis
+
+
+    // TODO: run the PIA analysis
+
+
+    // for labelled: perform the PIA analysis only on PSM level
+    // labelled_pia_report_files = pia_analysis_psm_only(
+    //     comet_labelled_ids.mzids,
+    //     false,
+    //     params.identification__pia_threads,
+    //     params.identification__pia_gb_ram,
+    //     params.identification__pia_fdr_threshold
+    // )
+
 
     emit:
     mzid = COMET.out.mzid
