@@ -9,7 +9,25 @@ workflow VISUALIZATION {
 
     main:
 
-    QCVISUALIZATION ( hdf5_files, outputdir, spike_ins_table )
+    def spikein_columns = params.spikein_columns ?: 'MS1 feature maximum intensity,retention time,count of identified spectra,Delta_to_expected_RT'
+
+    QCVISUALIZATION (
+        hdf5_files,
+        outputdir,
+        spike_ins_table,
+        params.figure_format,
+        params.output_table_type,
+        params.spikeins,
+        params.RT_unit,
+        params.output_column_order ?: '',
+        spikein_columns,
+        params.height_barplots,
+        params.width_barplots,
+        params.height_pca,
+        params.width_pca,
+        params.height_ionmaps,
+        params.width_ionmaps,
+    )
 
     emit:
     jsons = QCVISUALIZATION.out.jsons           // channel: [ val(meta), [ json ] ]

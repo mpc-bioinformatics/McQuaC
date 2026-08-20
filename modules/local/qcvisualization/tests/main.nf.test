@@ -23,6 +23,18 @@ nextflow_process {
                 ]
                 input[1] = 'testfiles'   // output folder
                 input[2] = file('${projectDir}/assets/default_configs/spike_ins_whole_proforma.csv', checkIfExists: true)
+                input[3] = 'plotly'   // figure_format
+                input[4] = 'csv'      // output_table_type
+                input[5] = true       // spikeins
+                input[6] = 'sec'      // rt_unit
+                input[7] = ''         // output_column_order
+                input[8] = 'MS1 feature maximum intensity,retention time,count of identified spectra,Delta_to_expected_RT'  // spikein_columns
+                input[9] = 700        // height_barplots
+                input[10] = 0         // width_barplots
+                input[11] = 1000      // height_pca
+                input[12] = 1000      // width_pca
+                input[13] = 10        // height_ionmaps
+                input[14] = 10        // width_ionmaps
                 """
             }
         }
@@ -43,12 +55,6 @@ nextflow_process {
 
     test("qcvisualization - changed params") {
         when {
-            params {
-                figure_format     = "html"
-                output_table_type = "xlsx"
-                RT_unit           = "min"
-                spikein_columns = 'MS1 feature maximum intensity,retention time,count of identified spectra,Delta_to_expected_RT'
-            }
             process {
                 """
                 input[0] = [
@@ -60,6 +66,18 @@ nextflow_process {
                 ]
                 input[1] = 'testfiles'   // output folder
                 input[2] = file('${projectDir}/assets/default_configs/spike_ins_whole_proforma.csv', checkIfExists: true)
+                input[3] = 'html'     // figure_format
+                input[4] = 'xlsx'     // output_table_type
+                input[5] = true       // spikeins
+                input[6] = 'min'      // rt_unit
+                input[7] = ''         // output_column_order
+                input[8] = 'MS1 feature maximum intensity,retention time,count of identified spectra,Delta_to_expected_RT'  // spikein_columns
+                input[9] = 700        // height_barplots
+                input[10] = 0         // width_barplots
+                input[11] = 1000      // height_pca
+                input[12] = 1000      // width_pca
+                input[13] = 10        // height_ionmaps
+                input[14] = 10        // width_ionmaps
                 """
             }
         }

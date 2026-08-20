@@ -12,6 +12,18 @@ process QCVISUALIZATION {
     tuple val(meta), path(hdf5_files)
     val outputdir
     path spike_ins_table
+    val figure_format
+    val output_table_type
+    val spikeins
+    val rt_unit
+    val output_column_order
+    val spikein_columns
+    val height_barplots
+    val width_barplots
+    val height_pca
+    val width_pca
+    val height_ionmaps
+    val width_ionmaps
 
     output:
     tuple val(meta), path("${outputdir}/*.json"), emit: jsons, optional: true
@@ -27,13 +39,30 @@ process QCVISUALIZATION {
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def args = task.ext.args ?: ''
-    def spikein_columns = task.ext.spikein_columns  // because it contains whitespace
+    def args = task.ext.args ?: ''   // free-form, optional extra CLI arguments
     def spike_ins_tab = spike_ins_table ? "-spike_ins_table ${spike_ins_table}" : ''
+    def spikeins_arg = spikeins ? '-spikeins' : ''
+    def output_column_order_arg = output_column_order ? "-output_column_order ${output_column_order}" : ''
     hdf5_files_list = hdf5_files.join(' ')
     """
     mkdir -p "${outputdir}"
-    python -m macproqc_helpers visualize -hdf5_files ${hdf5_files_list} -output "${outputdir}" -spikein_columns "${spikein_columns}" ${spike_ins_tab} $args
+    python -m macproqc_helpers visualize \\
+        -hdf5_files ${hdf5_files_list} \\
+        -output "${outputdir}" \\
+        -figure_format ${figure_format} \\
+        -output_table_type ${output_table_type} \\
+        ${spikeins_arg} \\
+        -RT_unit ${rt_unit} \\
+        ${output_column_order_arg} \\
+        -spikein_columns "${spikein_columns}" \\
+        -height_barplots ${height_barplots} \\
+        -width_barplots ${width_barplots} \\
+        -height_pca ${height_pca} \\
+        -width_pca ${width_pca} \\
+        -height_ionmaps ${height_ionmaps} \\
+        -width_ionmaps ${width_ionmaps} \\
+        ${spike_ins_tab} \\
+        $args
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -37,6 +37,42 @@ input:
       pattern: "*.csv"
       ontologies:
         - edam: "http://edamontology.org/format_3752" # CSV
+  - figure_format:
+      type: string
+      description: Type of output figures (one or more of "html" and "plotly", comma-separated)
+  - output_table_type:
+      type: string
+      description: Type of the output table (one of "csv", "tsv" or "xlsx")
+  - spikeins:
+      type: boolean
+      description: Whether to analyse spike-ins
+  - rt_unit:
+      type: string
+      description: Unit of the retention time, either "sec" for seconds or "min" for minutes
+  - output_column_order:
+      type: string
+      description: Comma-separated order of columns in the output table. If not set, the default column order is used.
+  - spikein_columns:
+      type: string
+      description: Comma-separated columns of the spike-in dataframes that should end up in the result table
+  - height_barplots:
+      type: integer
+      description: Height of the barplots in pixels
+  - width_barplots:
+      type: integer
+      description: Width of the barplots in pixels (0 for flexible width)
+  - height_pca:
+      type: integer
+      description: Height of the PCA plots in pixels
+  - width_pca:
+      type: integer
+      description: Width of the PCA plots in pixels
+  - height_ionmaps:
+      type: integer
+      description: Height of the ion maps in inches
+  - width_ionmaps:
+      type: integer
+      description: Width of the ion maps in inches
 
 output:
   jsons:
