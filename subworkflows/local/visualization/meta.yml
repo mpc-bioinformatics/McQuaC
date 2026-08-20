@@ -11,10 +11,10 @@ components:
 
 input:
   - meta:
-        type: map
-        description: |
-          Groovy Map containing sample information
-          e.g. `[ id:'sample1' ]`
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'sample1' ]`
   - hdf5_files:
       type: file
       description: Hdf5 files containing the QC metrics collected by the McQuaC pipeline

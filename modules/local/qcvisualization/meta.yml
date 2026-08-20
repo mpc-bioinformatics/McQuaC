@@ -83,7 +83,7 @@ output:
           description: |
             Groovy Map containing sample information
             e.g. `[ id:'sample1' ]`
-      - ms1_maps: 
+      - ms1_maps:
           type: directory
           description: Directory containing MS1 maps in PNG format
   additional_plots:
@@ -92,7 +92,7 @@ output:
           description: |
             Groovy Map containing sample information
             e.g. `[ id:'sample1' ]`
-      - additional_plots: 
+      - additional_plots:
           type: directory
           description: Directory containing additional plots in JSON or HTML format
   bruker_calibrants:
@@ -101,7 +101,7 @@ output:
           description: |
             Groovy Map containing sample information
             e.g. `[ id:'sample1' ]`
-      - bruker_calibrants: 
+      - bruker_calibrants:
           type: directory
           description: Directory containing bruker calibrants plot in JSON or HTML format
   versions:
