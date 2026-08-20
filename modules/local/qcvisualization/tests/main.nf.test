@@ -64,7 +64,7 @@ nextflow_process {
             }
         }
 
-   
+
         then {
             assert process.success
             assertAll(
@@ -79,4 +79,3 @@ nextflow_process {
         }
     }
 }
-

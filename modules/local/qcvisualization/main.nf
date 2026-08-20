@@ -48,7 +48,7 @@ process QCVISUALIZATION {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     echo $args
-    
+
     touch Figure1.json
     touch Outputtable.csv
     touch fig13_MS1_map

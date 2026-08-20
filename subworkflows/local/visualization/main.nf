@@ -8,7 +8,7 @@ workflow VISUALIZATION {
     spike_ins_table  // path: spike-ins table
 
     main:
-   
+
     QCVISUALIZATION ( hdf5_files, outputdir, spike_ins_table )
 
     emit:
