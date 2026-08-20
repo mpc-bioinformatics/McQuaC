@@ -9,7 +9,7 @@ lint:
     - docs/images/nf-core-macproqc_logo_dark.png
     - docs/images/nf-core-macproqc_logo_light.png
   multiqc_config: false
-nf_core_version: 4.0.2
+nf_core_version: 4.1.0
 repository_type: pipeline
 template:
   author: Julian Uszkoreit, Dirk Winkelhardt, Karin Schork, Maike Weber, Dominik Lux
