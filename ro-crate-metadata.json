@@ -93,7 +93,7 @@
             },
             "mentions": [
                 {
-                    "@id": "#a1d991fb-3ad8-49bb-bd31-b83c72ae1b37"
+                    "@id": "#de1c4c28-3619-4d8c-8c27-454a5c469351"
                 }
             ],
             "name": "nf-core/macproqc"
@@ -120,25 +120,8 @@
                 "SoftwareSourceCode",
                 "ComputationalWorkflow"
             ],
-            "contributor": [
-                {
-                    "@id": "https://orcid.org/0000-0001-7522-4007"
-                },
-                {
-                    "@id": "https://orcid.org/0000-0001-8770-2221"
-                },
-                {
-                    "@id": "https://orcid.org/0000-0003-3756-4347"
-                },
-                {
-                    "@id": "https://orcid.org/0000-0002-7730-7436"
-                },
-                {
-                    "@id": "https://orcid.org/0000-0002-7490-8260"
-                }
-            ],
             "dateCreated": "",
-            "dateModified": "2026-06-18T09:16:04Z",
+            "dateModified": "2026-08-19T15:29:50Z",
             "dct:conformsTo": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE/",
             "keywords": [
                 "nf-core",
@@ -158,9 +141,10 @@
             },
             "url": [
                 "https://github.com/nf-core/macproqc",
-                "https://nf-co.re/macproqc/dev/"
+                "https://nf-co.re/macproqc//"
             ],
             "version": [
+                "",
                 "1.0.0dev"
             ]
         },
@@ -177,11 +161,11 @@
             "version": "!>=25.10.4"
         },
         {
-            "@id": "#a1d991fb-3ad8-49bb-bd31-b83c72ae1b37",
+            "@id": "#de1c4c28-3619-4d8c-8c27-454a5c469351",
             "@type": "TestSuite",
             "instance": [
                 {
-                    "@id": "#cd8e9484-bbdb-41f7-b314-c35236ff1fba"
+                    "@id": "#a71b9c8e-bfc1-461e-b764-67bd421b9b0b"
                 }
             ],
             "mainEntity": {
@@ -190,7 +174,7 @@
             "name": "Test suite for nf-core/macproqc"
         },
         {
-            "@id": "#cd8e9484-bbdb-41f7-b314-c35236ff1fba",
+            "@id": "#a71b9c8e-bfc1-461e-b764-67bd421b9b0b",
             "@type": "TestInstance",
             "name": "GitHub Actions workflow for testing nf-core/macproqc",
             "resource": "repos/nf-core/macproqc/actions/workflows/nf-test.yml",
@@ -307,32 +291,6 @@
             "@type": "Organization",
             "name": "nf-core",
             "url": "https://nf-co.re/"
-        },
-        {
-            "@id": "https://orcid.org/0000-0001-7522-4007",
-            "@type": "Person",
-            "email": "julian.uszkoreit@rub.de",
-            "name": "Julian Uszkoreit"
-        },
-        {
-            "@id": "https://orcid.org/0000-0001-8770-2221",
-            "@type": "Person",
-            "name": "Dirk Winkelhardt"
-        },
-        {
-            "@id": "https://orcid.org/0000-0003-3756-4347",
-            "@type": "Person",
-            "name": "Karin Schork"
-        },
-        {
-            "@id": "https://orcid.org/0000-0002-7730-7436",
-            "@type": "Person",
-            "name": "Maike Weber"
-        },
-        {
-            "@id": "https://orcid.org/0000-0002-7490-8260",
-            "@type": "Person",
-            "name": "Dominik Lux"
         }
     ]
 }
