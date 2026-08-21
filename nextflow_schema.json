@@ -189,22 +189,23 @@
                 "spikeins": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Whether to include spike-ins in the analysis."
+                    "description": "Whether spike-ins were included in the analysis. If information on identified spike-in peptides is available (spikeins = true), they can be included in the summary table and the calculation of the principle component analysis (PCA)."
                 },
                 "rt_unit": {
                     "type": "string",
                     "default": "sec",
-                    "description": "Unit for retention time in plots ('min', 'sec')."
+                    "description": "Unit for retention time in plots ('min', 'sec').",
+                    "enum": ["sec", "min"]
                 },
                 "output_column_order": {
                     "type": "string",
                     "default": null,
-                    "description": "Order of columns for the output table."
+                    "description": "Order of columns for the output table, separated by commas, e.g. 'filename,startTime,nr_MS1,nr_MS2'."
                 },
                 "spikein_columns": {
                     "type": "string",
                     "default": "MS1 feature maximum intensity,retention time,count of identified spectra,Delta_to_expected_RT",
-                    "description": "Spike-in columns to include in the output table, separated by commas."
+                    "description": "Spike-in columns to include in the output table, separated by commas. Available columns: 'MS1 feature maximum intensity' (maximum XIC intensity observed for the spike-in peptide), 'retention time' (observed retention time at that maximum intensity), 'count of identified spectra' (number of identified spectra/PSMs matching the spike-in peptide), 'predicted retention time' (expected retention time from the spike-ins reference table), and 'Delta_to_expected_RT' (difference between observed and predicted retention time)."
                 },
                 "height_barplots": {
                     "type": "integer",
@@ -239,7 +240,7 @@
                 "spike_ins_table": {
                     "type": "string",
                     "default": null,
-                    "description": "Spike-ins table."
+                    "description": "Spike-ins reference table as a csv file. Please refer to the [usage docs](https://mpc-bioinformatics.github.io/McQuaC/usage) for details on the required format and columns."
                 }
             }
         },
