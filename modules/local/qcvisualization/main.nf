@@ -79,9 +79,9 @@ process QCVISUALIZATION {
 
     touch Figure1.json
     touch Outputtable.csv
-    touch fig13_MS1_map
-    touch fig16_additional_headers
-    touch fig17_BRUKER_calibrants
+    mkdir fig13_MS1_map
+    mkdir fig16_additional_headers
+    mkdir fig17_BRUKER_calibrants
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
