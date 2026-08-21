@@ -51,7 +51,7 @@ process QCVISUALIZATION {
         -figure_format ${figure_format} \\
         -output_table_type ${output_table_type} \\
         ${spikeins_arg} \\
-        -RT_unit ${rt_unit} \\
+        -rt_unit ${rt_unit} \\
         ${output_column_order_arg} \\
         -spikein_columns "${spikein_columns}" \\
         -height_barplots ${height_barplots} \\

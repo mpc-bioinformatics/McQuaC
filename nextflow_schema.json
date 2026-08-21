@@ -191,7 +191,7 @@
                     "default": true,
                     "description": "Whether to include spike-ins in the analysis."
                 },
-                "RT_unit": {
+                "rt_unit": {
                     "type": "string",
                     "default": "sec",
                     "description": "Unit for retention time in plots ('min', 'sec')."

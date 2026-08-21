@@ -18,7 +18,7 @@ workflow VISUALIZATION {
         params.figure_format,
         params.output_table_type,
         params.spikeins,
-        params.RT_unit,
+        params.rt_unit,
         params.output_column_order ?: '',
         spikein_columns,
         params.height_barplots,
