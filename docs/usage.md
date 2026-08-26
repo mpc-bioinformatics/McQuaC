@@ -131,14 +131,14 @@ name,sequence,mz,RT,mz-tol,rt-tol
 SPIKE1,GEPAAAAAPEAGASPVEK[+8.014199]/2,815.9118,5,10 ppm,36000
 ```
 
-| Column     | Description                                                                                                                                         |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`     | Unique identifier for the spike-in peptide.                                                                                                         |
-| `sequence` | Proforma peptidoform sequence of the spike-in, including any modifications.                                                                         |
-| `mz`       | Expected mass-to-charge ratio (m/z) of the spike-in.                                                                                                |
-| `RT`       | Expected retention time of the spike-in.                                                                                                            |
-| `mz-tol`   | Mass tolerance around `mz` used to search for the spike-in (e.g. `10 ppm`).                                                                         |
-| `rt-tol`   | Retention time tolerance around `RT` used to search for the spike-in. The high value of 36000 in this example means that the whole run is searched. |
+| Column     | Description                                                                                                                                                    |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`     | Unique identifier for the spike-in peptide.                                                                                                                    |
+| `sequence` | Proforma peptidoform sequence of the spike-in, including any modifications.                                                                                    |
+| `mz`       | Expected mass-to-charge ratio (m/z) of the spike-in.                                                                                                           |
+| `RT`       | Expected retention time of the spike-in in seconds.                                                                                                            |
+| `mz-tol`   | Mass tolerance around `mz` used to search for the spike-in (e.g. `10 ppm`).                                                                                    |
+| `rt-tol`   | Retention time tolerance in seconds around `RT` used to search for the spike-in. The high value of 36000 in this example means that the whole run is searched. |
 
 ## Running the pipeline
 
