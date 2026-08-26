@@ -21,9 +21,6 @@ input:
       pattern: "*.hdf5"
       ontologies:
         - edam: "http://edamontology.org/format_3590" # HDF5
-  - outputdir:
-      type: string
-      description: Directory where the output files will be written to
   - spike_ins_table:
       type: file
       description: Table containing information on spike-ins that should be searched for

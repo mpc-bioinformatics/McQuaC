@@ -4,7 +4,6 @@ workflow VISUALIZATION {
 
     take:
     hdf5_files       // channel: [ val(meta), hdf5s]
-    outputdir        // val: output directory
     spike_ins_table  // path: spike-ins table
 
     main:
@@ -13,7 +12,6 @@ workflow VISUALIZATION {
 
     QCVISUALIZATION (
         hdf5_files,
-        outputdir,
         spike_ins_table,
         params.figure_format,
         params.output_table_type,

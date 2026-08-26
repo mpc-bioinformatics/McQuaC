@@ -3,13 +3,10 @@ process QCVISUALIZATION {
     tag "$meta.id"
     label 'process_medium'
 
-    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/YOUR-TOOL-HERE':
-        'ghcr.io/mpc-bioinformatics/macproqc-helpers:latest'}"
+    container 'ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-60c25b7'
 
     input:
     tuple val(meta), path(hdf5_files)
-    val outputdir
     path spike_ins_table
     val figure_format
     val output_table_type
@@ -25,12 +22,12 @@ process QCVISUALIZATION {
     val width_ionmaps
 
     output:
-    tuple val(meta), path("${outputdir}/*.json"), emit: jsons, optional: true
-    tuple val(meta), path("${outputdir}/*.html"), emit: htmls, optional: true
-    tuple val(meta), path("${outputdir}/*.{csv,tsv,xlsx}"), emit: output_tables, optional: false
-    tuple val(meta), path("${outputdir}/fig13_MS1_map"), emit: ms1_maps, optional: false
-    tuple val(meta), path("${outputdir}/fig16_additional_headers"), emit: additional_plots, optional: true
-    tuple val(meta), path("${outputdir}/fig17_BRUKER_calibrants"), emit: bruker_calibrants, optional: true
+    tuple val(meta), path("*.json"), emit: jsons, optional: true
+    tuple val(meta), path("*.html"), emit: htmls, optional: true
+    tuple val(meta), path("*.{csv,tsv,xlsx}"), emit: output_tables, optional: false
+    tuple val(meta), path("fig13_MS1_map"), emit: ms1_maps, optional: false
+    tuple val(meta), path("fig16_additional_headers"), emit: additional_plots, optional: true
+    tuple val(meta), path("fig17_BRUKER_calibrants"), emit: bruker_calibrants, optional: true
     path "versions.yml", emit: versions
 
     when:
@@ -44,10 +41,9 @@ process QCVISUALIZATION {
     def output_column_order_arg = output_column_order ? "-output_column_order ${output_column_order}" : ''
     hdf5_files_list = hdf5_files.join(' ')
     """
-    mkdir -p "${outputdir}"
     python -m macproqc_helpers visualize \\
         -hdf5_files ${hdf5_files_list} \\
-        -output "${outputdir}" \\
+        -output "." \\
         -figure_format ${figure_format} \\
         -output_table_type ${output_table_type} \\
         ${spikeins_arg} \\
