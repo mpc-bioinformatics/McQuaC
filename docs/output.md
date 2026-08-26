@@ -12,7 +12,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes m
 - [FDR filtering and protein inference](#fdr-filtering-and-protein-inference) — 1 % FDR filter and PIA protein groups _(migrating)_
 - [Feature finding](#feature-finding) — isotope feature detection with IDMapper _(migrating)_
 - [mzQC output](#mzqc-output) — standardised QC metric export _(migrating)_
-- [Visualisation](#visualisation) — interactive Plotly report _(migrating)_
+- [Visualization](#visualization) — graphical visualizations of QC metrics using interactive plotly plots
 - [Pipeline information](#pipeline-information) — reports from Nextflow itself
 
 ---
