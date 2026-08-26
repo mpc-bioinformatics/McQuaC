@@ -16,12 +16,12 @@
                         "fig07_barplot_MS2_TIC_quartiles.plotly.json:md5,8d0f3fc592cf7f5b71e75a43b4f578d5",
                         "fig08_barplot_precursor_charge.plotly.json:md5,5506461cc277cd06350799f8cd6b990e",
                         "fig09_barplot_PSM_charge.plotly.json:md5,28c26b9b2d1449c8a495c50053f7c0eb",
-                        "fig10_barplot_PSM_missedcleavages.plotly.json:md5,6fef43cd47a4330c11619117670f6140",
+                        "fig10_barplot_PSM_missedcleavages.plotly.json:md5,867b19317f46f158314240ea86c7b5f7",
                         "fig11a_PCA_raw.plotly.json:md5,1979036f8ed9ff395810e7135088c401",
                         "fig11b_Loadings_raw.plotly.json:md5,8437dddf051436448ff2e945d1e39e22",
-                        "fig12a_PCA_all.plotly.json:md5,14db11aa182a7d835362884a16e45508",
-                        "fig12b_Loadings_all.plotly.json:md5,8437dddf051436448ff2e945d1e39e22",
-                        "fig14_Pump_pressure.plotly.json:md5,31a4f9d13b2f4a3ca928de2b1d61dcbe",
+                        "fig12a_PCA_all.plotly.json:md5,721d45dfd3499fe9249a444545af9d97",
+                        "fig12b_Loadings_all.plotly.json:md5,ed85a7a99568b1eff650f110404de492",
+                        "fig14_Pump_pressure.plotly.json:md5,68041de0bb08bf8a48a0036fa2411781",
                         "fig15_PSM_error_boxplots.plotly.json:md5,14ddbc919321273b2cbba8aefd627bdf"
                     ]
                 ]
@@ -32,10 +32,10 @@
                         "id": "test"
                     },
                     [
-                        "00_table_summary.csv:md5,6cb9c585f42e9f579996615c37c18c33",
+                        "00_table_summary.csv:md5,a269c806dc8b24d61c9044f54b467b4c",
                         "99_hdf5_feature_table.csv:md5,a11c05737c6afc1cc79b2498ed51f1d9",
                         "fig11c_table_loadings_raw.csv:md5,48dcfda8d22897971da986a1338668a9",
-                        "fig12c_table_loadings_raw.csv:md5,9fad14f29a238a597fe54fc9e83b2710"
+                        "fig12c_table_loadings_raw.csv:md5,07a7e43b40404cc676f81edf783b5c6b"
                     ]
                 ]
             ],
@@ -56,38 +56,38 @@
                         "id": "test"
                     },
                     [
-                        "EXTRA_IonInjectionTimemsMS1filtered.plotly.json:md5,266b872a9e4702b3728528a787ef1ab6",
-                        "EXTRA_LMSearchWindowmmu.plotly.json:md5,bb2fcb0986460ce4b94be186afca17b0",
-                        "EXTRA_LMSearchWindowppm.plotly.json:md5,db7c7944c49f0e72b6cb436fbcf71153",
-                        "EXTRA_LMmzCorrectionppmLMCorrectionMS1filtered.plotly.json:md5,f002969dd38d0a9a653d429e93e73897",
-                        "EXTRA_LastLockingsec.plotly.json:md5,5958722e6d807db843897a4fb8914a4f",
-                        "EXTRA_LockMass1mz.plotly.json:md5,db61242887f2203f6fead23dd84926ae",
-                        "EXTRA_LockMass2mz.plotly.json:md5,a74b8b95138d2e9e9c9943fceda4bd1c",
-                        "EXTRA_LockMass3mz.plotly.json:md5,df2e97f6a962e9ec268814bc30743df9",
-                        "EXTRA_NumberofLockMasses.plotly.json:md5,8b286b5c4dde46bda6526c929cc7ab6b",
-                        "LOG_AmbienttempC.plotly.json:md5,dc26371f3e9181de2993702ea74e4f50",
-                        "LOG_CPUcoretempC.plotly.json:md5,80bccaa00d9b0adf7ec605d903dd2085",
-                        "LOG_DetectortempC.plotly.json:md5,af80060e669a24d46b84baedbb16b042",
-                        "LOG_InnerElectrodeTempC.plotly.json:md5,a668979fcaf4cbc2c905aebee24c0a38",
-                        "LOG_IonTransferTubeTemperatureC.plotly.json:md5,4c54035a7acacdbdca98011522394f2c",
-                        "LOG_IontrtubetempC.plotly.json:md5,a62bd5d361a7b55d067733054e13e2cc",
-                        "LOG_MCBAmbientTempC.plotly.json:md5,16c8eda6591488d23e3438b4a65f3f9a",
-                        "LOG_MCBPCBTempC.plotly.json:md5,a03763339d21d1336b1020822e32c8d3",
-                        "LOG_OrbitrapblocktempC.plotly.json:md5,4808d564c2a0dbafeda69fbe2b5fed6f",
-                        "LOG_OuterElectrode1TempC.plotly.json:md5,5382af168aa2ccfd31cd92eb955c8c6c",
-                        "LOG_OuterElectrode2TempC.plotly.json:md5,3477acdc3bac57d43a9009a1b70705f5",
-                        "LOG_PCBtempbottomC.plotly.json:md5,26c9d3aac5339c7474c0eae7fcb643a4",
-                        "LOG_PCBtempcenterC.plotly.json:md5,613fd566bd79bc0e231f910b4fc72872",
-                        "LOG_PCBtemptopC.plotly.json:md5,1d39cca20726049a068fb6d76d7ec6c3",
-                        "LOG_TXPCBtemperatureC.plotly.json:md5,721c15e8b824f10243a4275e121c689e",
-                        "LOG_VaporizerTemperatureC.plotly.json:md5,0b4ebeefa2c76381ee19b4e352b92608",
-                        "LOG_VaporizertempC.plotly.json:md5,7dbc47415008dee821c55b0c7c01fcf7"
+                        "EXTRA_IonInjectionTimemsMS1filtered.plotly.json:md5,ecd78eddb46c187b55e603c4a585fb0b",
+                        "EXTRA_LMSearchWindowmmu.plotly.json:md5,225340807d2b87b4f8ce00320afa335f",
+                        "EXTRA_LMSearchWindowppm.plotly.json:md5,4c4d93188fa1b5440c8e517eedd9241d",
+                        "EXTRA_LMmzCorrectionppmLMCorrectionMS1filtered.plotly.json:md5,a61728971dca0c3266a97601df89ef9a",
+                        "EXTRA_LastLockingsec.plotly.json:md5,c8ebde69ca6e184ff3ae9f3c12ad19a5",
+                        "EXTRA_LockMass1mz.plotly.json:md5,f0f9c6a832da050e1cb711a2dad4e920",
+                        "EXTRA_LockMass2mz.plotly.json:md5,0ed3699848ef03f236cb83198b47d815",
+                        "EXTRA_LockMass3mz.plotly.json:md5,06c5ec4b44e46c423e81d374a028f865",
+                        "EXTRA_NumberofLockMasses.plotly.json:md5,10d52a8a7a87a1dc241243d918d798ec",
+                        "LOG_AmbienttempC.plotly.json:md5,00174b9a321ee04aac67d6f4da98c3f9",
+                        "LOG_CPUcoretempC.plotly.json:md5,26d23f5c92063d516658259ef38971dd",
+                        "LOG_DetectortempC.plotly.json:md5,ae7d0b338e0207016d13379ae887a9dd",
+                        "LOG_InnerElectrodeTempC.plotly.json:md5,9472b2e8561044369a8699698759e0be",
+                        "LOG_IonTransferTubeTemperatureC.plotly.json:md5,0b873d3eb175fb614b544b5132aafd75",
+                        "LOG_IontrtubetempC.plotly.json:md5,2666655b3b0ce15eedb6ba37dbba089c",
+                        "LOG_MCBAmbientTempC.plotly.json:md5,a6b9c69773a0abb2c7fe36da3235086c",
+                        "LOG_MCBPCBTempC.plotly.json:md5,4a2567c7d99ebac402a14cf52d551629",
+                        "LOG_OrbitrapblocktempC.plotly.json:md5,9ce62b3d324792e30f0d8174cc65277d",
+                        "LOG_OuterElectrode1TempC.plotly.json:md5,0c3ddd1aa8f6af98d583ba4768a7f94a",
+                        "LOG_OuterElectrode2TempC.plotly.json:md5,2516990221a4461fbba0da9acd1b3400",
+                        "LOG_PCBtempbottomC.plotly.json:md5,3a45ff71cc05ecf9cfd782b1aa555d11",
+                        "LOG_PCBtempcenterC.plotly.json:md5,679b85a0babba0a62b7f43f2597f1222",
+                        "LOG_PCBtemptopC.plotly.json:md5,d188ffcdbac6e9016c6290950fcb12e1",
+                        "LOG_TXPCBtemperatureC.plotly.json:md5,6df8c65787e5f2e8449b3073623baee7",
+                        "LOG_VaporizerTemperatureC.plotly.json:md5,7bd5c6604870cb031a47b75f8bce58a9",
+                        "LOG_VaporizertempC.plotly.json:md5,4a1c3e14c7258823dc086a7a927a350c"
                     ]
                 ]
             ],
             null
         ],
-        "timestamp": "2026-07-31T11:12:20.601763826",
+        "timestamp": "2026-08-26T13:28:47.415004037",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

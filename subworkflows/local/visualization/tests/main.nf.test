@@ -22,8 +22,7 @@ nextflow_workflow {
                     file(params.macproqc_testdata_base_path + 'visualization/EXII01990std.hdf5', checkIfExists: true),
                     ]
                 ]
-                input[1] = 'testfiles'   // output folder
-                input[2] = file('${projectDir}/assets/default_configs/spike_ins_whole_proforma.csv', checkIfExists: true)
+                input[1] = file('${projectDir}/assets/default_configs/spike_ins_whole_proforma.csv', checkIfExists: true)
                 """
             }
         }
