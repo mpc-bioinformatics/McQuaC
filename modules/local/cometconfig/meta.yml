@@ -35,10 +35,10 @@ output:
           description: |
             Groovy Map containing sample information
             e.g. `[ id:'sample1' ]`
-      - "*.adjusted.comet.params":
+      - "*.comet.params":
           type: file
           description: Adjusted Comet search engine parameter file with updated mass tolerances, fragment ion settings, output format flags, and modifications
-          pattern: "*.adjusted.comet.params"
+          pattern: "*.comet.params"
   versions:
     - - "versions.yml":
           type: file
