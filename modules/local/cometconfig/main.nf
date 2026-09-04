@@ -4,7 +4,6 @@ process COMETCONFIG {
 
     publishDir path: { "${params.outdir}/comet" }, mode: params.publish_dir_mode
 
-    conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
         ? 'https://depot.galaxyproject.org/singularity/python:3.14'
         : 'biocontainers/python:3.14'}"

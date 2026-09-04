@@ -4,4 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - conda-forge::sed=4.9
+  - "bioconda::comet-ms=2026011"

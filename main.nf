@@ -42,6 +42,7 @@ workflow NFCORE_MACPROQC {
         params.fasta,
         params.skip_decoy_generation,
         params.comet_config_template,
+        params.label_modifications,
     )
 }
 /*
