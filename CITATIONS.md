@@ -10,6 +10,10 @@
 
 ## Pipeline tools
 
+- [Comet](https://pubmed.ncbi.nlm.nih.gov/23148064/)
+
+  > Eng JK, Jahan TA, Hoopmann MR. Comet: an open-source MS/MS sequence database search tool. Proteomics. 2013 Jan;13(1):22-4. doi: 10.1002/pmic.201200439. Epub 2012 Dec 4. PMID: 23148064.
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)

@@ -107,10 +107,11 @@ The pipeline always enforces the following settings regardless of what is set in
 
 Variable and static modifications can be set via pipeline parameters. The syntax matches the Comet params file format; multiple entries are separated by a semicolon. The modification string must be enclosed in single quotes when passed on the command line.
 
-| Parameter                  | Default | Description                                                                             |
-| -------------------------- | ------- | --------------------------------------------------------------------------------------- |
-| `--variable_modifications` | `""`    | Variable modifications to set in the Comet params file (`variable_modXX = ...` entries) |
-| `--static_modifications`   | `""`    | Static modifications to set in the Comet params file (`add_XX_... = ...` entries)       |
+| Parameter                  | Default | Description                                                                                                                      |
+| -------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `--variable_modifications` | `""`    | Variable modifications to set in the Comet params file (`variable_modXX = ...` entries)                                          |
+| `--static_modifications`   | `""`    | Static modifications to set in the Comet params file (`add_XX_... = ...` entries)                                                |
+| `--label_modifications`    | `""`    | Label-specific static modifications for a second, parallel labelled search (see below). Same syntax as `--static_modifications`. |
 
 > [!TIP]
 > When passing modification strings on the command line, wrap the entire value in double quotes and the Comet-format string in single quotes:
@@ -121,6 +122,19 @@ Variable and static modifications can be set via pipeline parameters. The syntax
 > ```
 >
 > Only modifications already present in the template can be overwritten this way. To add new modification slots, provide a custom `--comet_config_template`.
+
+### Labelled quantification search
+
+When `--label_modifications` is set to a non-empty string, the pipeline runs a **second, parallel Comet search** alongside the standard unlabelled search. The labelled search uses the same parameters as the unlabelled search, but the `--label_modifications` entries are appended to `--static_modifications` to account for stable isotope labels (e.g. SILAC). In this workflow, this can be used to explicitly identify labelled spike-in peptides.
+
+Example for a SILAC K+8 / R+10 experiment:
+
+```bash
+--static_modifications "'add_C_cysteine = 57.021464'"
+--label_modifications  "'add_K_lysine = 8.014199;add_R_arginine = 10.008269'"
+```
+
+Each spectrum file produces two result files: one from the unlabelled search and one from the labelled search. Both are written to the `comet/` output directory.
 
 ## Running the pipeline
 

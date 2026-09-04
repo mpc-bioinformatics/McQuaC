@@ -39,7 +39,7 @@ TODO
 
 ## Peptide identification
 
-Peptide spectrum matches (PSMs) are produced by searching the converted mzML files against a protein sequence database using the [Comet](https://uwpr.github.io/Comet/) search engine _(STILL TODO)_.
+Peptide spectrum matches (PSMs) are produced by searching the converted mzML files against a protein sequence database using the [Comet](https://uwpr.github.io/Comet/) search engine.
 
 ### Decoy database
 
@@ -61,9 +61,23 @@ Before the database search, the pipeline generates a Comet parameter file by tak
 
 The adjusted parameter file is an intermediate used by the Comet search step and is not written to the output directory.
 
-### Comet PSMs _(migrating)_
+### Comet PSMs
 
-TODO
+Each mzML file is searched against the target-decoy database using Comet and the adjusted parameter file described above. Results are written as mzIdentML (`.mzid`) files.
+
+When `--label_modifications` is set, two searches are run per spectrum file — one unlabelled and one labelled — producing a pair of mzid files per input. The filename encodes the search type:
+
+- `<sample>-unlabelled.mzid` — standard search using `--static_modifications`
+- `<sample>-labelled.mzid` — search with `--label_modifications` merged into the static modifications
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `comet/`
+  - `*-unlabelled.mzid` — PSM results from the unlabelled search
+  - `*-labelled.mzid` — PSM results from the labelled search (only present when `--label_modifications` is set)
+
+</details>
 
 ---
 
