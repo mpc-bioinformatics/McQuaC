@@ -125,7 +125,7 @@ Variable and static modifications can be set via pipeline parameters. The syntax
 
 ### Labelled quantification search
 
-When `--label_modifications` is set to a non-empty string, the pipeline runs a **second, parallel Comet search** alongside the standard unlabelled search. The labelled search uses the same parameters as the unlabelled search, but the `--label_modifications` entries are appended to `--static_modifications` to account for stable isotope labels (e.g. SILAC).
+When `--label_modifications` is set to a non-empty string, the pipeline runs a **second, parallel Comet search** alongside the standard unlabelled search. The labelled search uses the same parameters as the unlabelled search, but the `--label_modifications` entries are appended to `--static_modifications` to account for stable isotope labels (e.g. SILAC). In this workflow, this can be used to explicitly identify labelled spike-in peptides.
 
 Example for a SILAC K+8 / R+10 experiment:
 
