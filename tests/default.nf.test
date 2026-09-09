@@ -56,6 +56,44 @@ nextflow_pipeline {
                         }
                     ).match("mzid-filename-and-elementcount")
                 },
+                // perform some count checks in the PIA results
+                {
+                    assert snapshot(
+                        path("$outputDir/pia/").list()
+                        .findAll { it.getFileName().toString().endsWith(".piaExport-PSMs.mzTab") }
+                        .sort { it.getFileName().toString() }
+                        .collect { mztab ->
+                            [
+                                mztab.getFileName().toString(),
+                                mztab.readLines().count { it.stripLeading().startsWith("PSM") },
+                            ]
+                        }
+                    ).match("pia-psms-results")
+                    assert snapshot(
+                        path("$outputDir/pia/").list()
+                        .findAll { it.getFileName().toString().endsWith(".piaExport-peptides.csv") }
+                        .sort { it.getFileName().toString() }
+                        .collect { csv ->
+                            [
+                                csv.getFileName().toString(),
+                                csv.readLines().count { it.stripLeading().startsWith("PEPTIDE") },
+                                csv.readLines().count { it.stripLeading().startsWith("PSM") },
+                            ]
+                        }
+                    ).match("pia-peptides-results")
+                    assert snapshot(
+                        path("$outputDir/pia/").list()
+                        .findAll { it.getFileName().toString().endsWith(".piaExport-proteins.mzTab") }
+                        .sort { it.getFileName().toString() }
+                        .collect { mztab ->
+                            [
+                                mztab.getFileName().toString(),
+                                mztab.readLines().count { it.stripLeading().startsWith("PRT") },
+                                mztab.readLines().count { it.stripLeading().startsWith("PSM") },
+                            ]
+                        }
+                    ).match("pia-proteins-results")
+                },
             )
         }
     }
