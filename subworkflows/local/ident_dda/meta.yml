@@ -20,6 +20,9 @@ components:
   - openms/decoydatabase
   - cometconfig
   - comet
+  - pia/configure
+  - pia/compilexml
+  - pia/analysis
 input:
   - fasta:
       type: value

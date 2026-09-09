@@ -11,7 +11,9 @@ nextflow_workflow {
     tag "openms/decoydatabase"
     tag "cometconfig"
     tag "comet"
-
+    tag "pia/configure"
+    tag "pia/compilexml"
+    tag "pia/analysis"
 
     test("small ident - unlabelled only") {
 
