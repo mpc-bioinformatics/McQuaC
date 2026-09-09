@@ -19,12 +19,13 @@ process PIA_CONFIGURE {
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def psm_export = meta.psm_export ?: true
-    def peptide_export = meta.peptide_export ?: true
-    def protein_export = meta.protein_export ?: true
-    def fdr_filter = meta.fdr_filter ?: 0.01
-    def remove_decoys = meta.remove_decoys ?: true
+    def psm_export = meta.psm_export != null ? meta.psm_export : true
+    def peptide_export = meta.peptide_export != null ? meta.peptide_export : true
+    def protein_export = meta.protein_export != null ? meta.protein_export : true
+    def fdr_filter = meta.fdr_filter != null ? meta.fdr_filter : true
+    def remove_decoys = meta.remove_decoys != null ? meta.remove_decoys : true
     def fdr_threshold = meta.fdr_threshold ?: 0.05
+    def psm_export_format = meta.psm_export_format ?: 'mzTab'
 
     """
     pia --example > pia_analysis.json
@@ -38,7 +39,7 @@ process PIA_CONFIGURE {
     sed -i 's;"calculateCombinedFDRScore": .*,;"calculateCombinedFDRScore": false,;g' pia_analysis.json
     if [ ${psm_export} = true ];
     then
-      sed -i 's;"psmExportFile":.*,;"psmExportFile": "piaExport-PSMs.mzTab",;g' pia_analysis.json
+      sed -i 's;"psmExportFile":.*,;"psmExportFile": "piaExport-PSMs.${psm_export_format}",;g' pia_analysis.json
     else
       sed -i 's;"psmExportFile":.*;;g' pia_analysis.json
     fi
