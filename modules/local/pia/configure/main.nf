@@ -24,7 +24,7 @@ process PIA_CONFIGURE {
     def protein_export = meta.protein_export != null ? meta.protein_export : true
     def fdr_filter = meta.fdr_filter != null ? meta.fdr_filter : true
     def remove_decoys = meta.remove_decoys != null ? meta.remove_decoys : true
-    def fdr_threshold = meta.fdr_threshold ?: 0.05
+    def fdr_threshold = meta.fdr_threshold ?: 0.01
     def psm_export_format = meta.psm_export_format ?: 'mzTab'
 
     """
@@ -58,7 +58,7 @@ process PIA_CONFIGURE {
     then
       sed -i 's;"infereProteins":.*,;"infereProteins": true,;g' pia_analysis.json
       sed -i 's;"inferenceMethod":.*,;"inferenceMethod": "inference_spectrum_extractor",;g' pia_analysis.json
-      sed -i '/inferenceFilters/{n;s/.*/    "psm_score_filter_psm_fdr_score <= 0.01"/g;}' pia_analysis.json
+      sed -i '/inferenceFilters/{n;s/.*/    "psm_score_filter_psm_fdr_score <= ${fdr_threshold}"/g;}' pia_analysis.json
       sed -i 's;"scoringBaseScore":.*,;"scoringBaseScore": "psm_fdr_score",;g' pia_analysis.json
       sed -i 's;"scoringPSMs":.*,;"scoringPSMs": "best",;g' pia_analysis.json
       sed -i 's;"proteinExportFile":.*,;"proteinExportFile": "piaExport-proteins.mzTab",;g' pia_analysis.json
