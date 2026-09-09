@@ -12,7 +12,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes m
 - [FDR filtering and protein inference](#fdr-filtering-and-protein-inference) — 1 % FDR filter and PIA protein groups _(migrating)_
 - [Feature finding](#feature-finding) — isotope feature detection with IDMapper _(migrating)_
 - [mzQC output](#mzqc-output) — standardised QC metric export _(migrating)_
-- [Visualisation](#visualisation) — interactive Plotly report _(migrating)_
+- [Visualization](#visualization) — graphical visualizations of QC metrics using interactive plotly plots
 - [Pipeline information](#pipeline-information) — reports from Nextflow itself
 
 ---
@@ -78,6 +78,32 @@ When `--label_modifications` is set, two searches are run per spectrum file — 
   - `*-labelled.mzid` — PSM results from the labelled search (only present when `--label_modifications` is set)
 
 </details>
+
+### Visualization
+
+The main output of the visualization subworkflow are interactive plots (as JSON and/or HTML, depending on the settings). Also, a summary output table is generated as csv, tsv or xlsx.
+
+- 00_table_summary.[csv,tsv,xlsx]: summary table containing QC metrics per raw file. The column selection and order is defined by the 'output_column_order' parameter.
+- 99_hdf5_feature_table.csv: overview of QC metrics keys and names stored in the hdf5 output files.
+- fig01_barplot_MS1_MS2.[plotly.json, html]: Barplot of number of MS1 and MS2 spectra per raw file.
+- fig02_barplot_PSMs_peptides_proteins.[plotly.json, html]: Barplot of the number of PSMs, peptides, protein groups and accessions per raw file.
+- fig03_barplot_features.[plotly.json, html]: Barplot of the number of features and identified features per raw file.
+- fig04_MS1_TIC_overlay.[plotly.json, html]: Lineplot of MS1 Total Ion Chromatogram (TIC) vs retention time for each sample.
+- fig05_barplot_TIC_quartiles.[plotly.json, html]: TIC quartiles are the percentage of retention time that is needed to obtain the first, second, third or fourth 25% of the TIC. These quartiles are visualized as stacked barplots.
+- fig06_barplot_MS1_TIC_quartiles.[plotly.json, html]: Same as fig05, but only using MS1-level data.
+- fig07_barplot_MS2_TIC_quartiles.[plotly.json, html]: Same as fig05, but only using MS2-level data.
+- fig08_barplot_precursor_charge.[plotly.json, html]: Stacked barplot of precursor charge fractions (also includes unidentified precursors).
+- fig09_barplot_precursor_charge.[plotly.json, html]: Stacked barplot of PSM charge fractions (only identified precursors).
+- fig10_barplot_PSM_missedcleavages.[plotly.json, html]: Stacked barplot of missed cleavage fractions (only identified).
+- fig11a_PCA_raw.[plotly.json, html]: Principal component analysis plot (PCA-plot). The PCA is calculated on a set of QC metrics that are all directly obtainable from the raw data without a peptide identification step. The metrics are RT_range, nr_MS1, nr_MS2, accumulated_MS1_TIC, accumulated_MS2_TIC, base_peak_intensity_max, total_ion_current_max, MS2_prec_charge_fraction, RT_MS1_quantiles, RT_MS2_quantiles, RT_TIC_quantiles, MS1_freq_max, MS2_freq_max, MS1_density_quantiles, MS2_density_quantiles, MS1_TIC_change_quantiles, MS1_TIC_quantiles.
+- fig11b_Loadings_raw.[plotly.json, html]: Loadings plot belonging to the PCA in fig11a. The loadings show which Qc metrics have the highest weight in each direction and can help to interpret groups and outliers in the PCA.
+- fig12a_PCA_all.[plotly.json, html]: Principal component analysis plot (PCA-plot). The PCA is calculated on the set of QC metrics used for fig11a plus metrics obtained during peptide identification. The additional metrics are nr_PSMs, nr_peptides, nr_protein_groups, nr_accessions, PSM_charge_fractions, PSM_missed_cleavage_counts, nr_features, nr_ident_features, features_charges, ident_features_charge
+- fig12b_Loadings_all.[plotly.json, html]: Loadings plot belonging to the PCA in fig11a.
+- fig13_MS1_map: folder containing MS1 maps for each raw file
+- fig14_Pump_pressure.[plotly.json, html]: Lineplot of pump pressure vs. retention time for all samples.
+- fig15_PSM_error_boxplots.[plotly.json, html]: Boxplots of PSM error (in ppm) for all samples.
+- fig16_additional_headers: folder with lineplots over retention time for different metrics recorded by the machine (e.g. temperatures, lock mass correction)
+- fig17_BRUKER_calibrant: folder with lineplots over retention time for calibrants used by BRUKER machines
 
 ---
 

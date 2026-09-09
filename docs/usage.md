@@ -136,6 +136,24 @@ Example for a SILAC K+8 / R+10 experiment:
 
 Each spectrum file produces two result files: one from the unlabelled search and one from the labelled search. Both are written to the `comet/` output directory.
 
+### Spike-ins
+
+Specific quality control samples may contain spike-in peptides. These spike-ins can be provided via a comma-separated spike-in table with the following format:
+
+```csv title="spike_ins.csv"
+name,sequence,mz,RT,mz-tol,rt-tol
+SPIKE1,GEPAAAAAPEAGASPVEK[+8.014199]/2,815.9118,5,10 ppm,36000
+```
+
+| Column     | Description                                                                                                                                                    |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`     | Unique identifier for the spike-in peptide.                                                                                                                    |
+| `sequence` | Proforma peptidoform sequence of the spike-in, including any modifications.                                                                                    |
+| `mz`       | Expected mass-to-charge ratio (m/z) of the spike-in.                                                                                                           |
+| `RT`       | Expected retention time of the spike-in in seconds.                                                                                                            |
+| `mz-tol`   | Mass tolerance around `mz` used to search for the spike-in (e.g. `10 ppm`).                                                                                    |
+| `rt-tol`   | Retention time tolerance in seconds around `RT` used to search for the spike-in. The high value of 36000 in this example means that the whole run is searched. |
+
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
