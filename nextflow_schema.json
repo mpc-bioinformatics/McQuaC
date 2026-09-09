@@ -164,6 +164,22 @@
                     "type": "string",
                     "description": "Additional Comet static modifications appended only for the labelled COMETCONFIG search. Use the same syntax as static_modifications, for example \"'add_K_lysine = 8.014199;add_R_arginine = 10.008269'\".",
                     "fa_icon": "fas fa-tags"
+                },
+                "pia_fdr_threshold": {
+                    "type": "number",
+                    "default": 0.01,
+                    "fa_icon": "fas fa-percentage",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "FDR threshold used by PIA for the final PSM-, peptide- and protein-level filtering."
+                },
+                "pia_prefilter_threshold": {
+                    "type": "number",
+                    "default": 0.05,
+                    "fa_icon": "fas fa-filter",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "FDR threshold used by PIA's optional PSM-level pre-filtering pass, run before the final --pia_fdr_threshold analysis on the unlabelled search to speed up the total time and reduce the memory consumption for the whole analysis. Set to 0 to disable pre-filtering."
                 }
             },
             "fa_icon": "fas fa-search"

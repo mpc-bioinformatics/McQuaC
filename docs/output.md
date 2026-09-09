@@ -6,14 +6,14 @@ This document describes the output produced by the pipeline. All paths are relat
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes mass spectrometry data through the following steps:
 
-- [Spectra preparation](#spectra-preparation) — decompression and conversion to mzML
-- [Raw-data metrics](#raw-data-metrics) — spectrum-level QC metrics from mzML _(migrating)_
-- [Peptide identification](#peptide-identification) — decoy database generation and database search with Comet
-- [FDR filtering and protein inference](#fdr-filtering-and-protein-inference) — 1 % FDR filter and PIA protein groups _(migrating)_
-- [Feature finding](#feature-finding) — isotope feature detection with IDMapper _(migrating)_
-- [mzQC output](#mzqc-output) — standardised QC metric export _(migrating)_
+- [Spectra preparation](#spectra-preparation) - decompression and conversion to mzML
+- [Raw-data metrics](#raw-data-metrics) - spectrum-level QC metrics from mzML _(migrating)_
+- [Peptide identification](#peptide-identification) - decoy database generation and database search with Comet
+- [FDR filtering and protein inference](#fdr-filtering-and-protein-inference) - 1 % FDR filter and PIA protein groups
+- [Feature finding](#feature-finding) - isotope feature detection with IDMapper _(migrating)_
+- [mzQC output](#mzqc-output) - standardised QC metric export _(migrating)_
 - [Visualization](#visualization) — graphical visualizations of QC metrics using interactive plotly plots
-- [Pipeline information](#pipeline-information) — reports from Nextflow itself
+- [Pipeline information](#pipeline-information) - reports from Nextflow itself
 
 ---
 
@@ -25,7 +25,7 @@ Raw vendor files are decompressed (if necessary) and converted to the open mzML 
 <summary>Output files</summary>
 
 - `mzmls/`
-  - `*.mzML` — converted mzML files. These are intermediate files used by downstream steps and are not published by default
+  - `*.mzML` - converted mzML files. These are intermediate files used by downstream steps and are not published by default
 
 </details>
 
@@ -51,7 +51,7 @@ The decoy database file is an intermediate used downstream for FDR estimation. I
 <summary>Output files</summary>
 
 - `decoy_database/`
-  - `*_decoy.fasta` — combined target-decoy protein sequence database. Only present when `--save_decoy_database true` is set.
+  - `*_decoy.fasta` - combined target-decoy protein sequence database. Only present when `--save_decoy_database true` is set.
 
 </details>
 
@@ -65,17 +65,34 @@ The adjusted parameter file is an intermediate used by the Comet search step and
 
 Each mzML file is searched against the target-decoy database using Comet and the adjusted parameter file described above. Results are written as mzIdentML (`.mzid`) files.
 
-When `--label_modifications` is set, two searches are run per spectrum file — one unlabelled and one labelled — producing a pair of mzid files per input. The filename encodes the search type:
+When `--label_modifications` is set, two searches are run per spectrum file - one unlabelled and one labelled - producing a pair of mzid files per input. The filename encodes the search type:
 
-- `<sample>-unlabelled.mzid` — standard search using `--static_modifications`
-- `<sample>-labelled.mzid` — search with `--label_modifications` merged into the static modifications
+- `<sample>-unlabelled.mzid` - standard search using `--static_modifications`
+- `<sample>-labelled.mzid` - search with `--label_modifications` merged into the static modifications
 
 <details markdown="1">
 <summary>Output files</summary>
 
 - `comet/`
-  - `*-unlabelled.mzid` — PSM results from the unlabelled search
-  - `*-labelled.mzid` — PSM results from the labelled search (only present when `--label_modifications` is set)
+  - `*-unlabelled.mzid` - PSM results from the unlabelled search
+  - `*-labelled.mzid` - PSM results from the labelled search (only present when `--label_modifications` is set)
+
+</details>
+
+---
+
+## FDR filtering and protein inference
+
+The PSM results are compiled into a [PIA](https://github.com/medbioinf/pia) (PIA - Protein Inference Algorithms) intermediate file, filtered at `--pia_fdr_threshold` FDR, and used for peptide and protein inference. When `--pia_prefilter_threshold` is greater than `0` (the default is `0.05`), an additional pre-filtering pass first reduces the unlabelled PSM set on this looser FDR threshold before the final analysis is run, which speeds up inference on large searches. Labelled search results (produced when `--label_modifications` is set, mainly used for labelled spike-ins) only ever receive a PSM-level export - protein and peptide inference is not meaningful for the labelled search channel, so both are skipped, and no pre-filtering is applied to labelled results either.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `pia/`
+  - `*-unlabelled.piaExport-PSMs.mzTab` - PSM-level results of the unlabelled search, filtered at `--pia_fdr_threshold`
+  - `*-unlabelled.piaExport-peptides.csv` - inferred peptides for the unlabelled search
+  - `*-unlabelled.piaExport-proteins.mzTab` - inferred protein groups for the unlabelled search
+  - `*-labelled.piaExport-PSMs.mzTab` - PSM-level results of the labelled search (only present when `--label_modifications` is set); no peptide- or protein-level export is produced for the labelled search
 
 </details>
 
@@ -113,11 +130,11 @@ The main output of the visualization subworkflow are interactive plots (as JSON 
 <summary>Output files</summary>
 
 - `pipeline_info/`
-  - `execution_report_<timestamp>.html` — Nextflow execution report with run statistics and per-process resource usage.
-  - `execution_timeline_<timestamp>.html` — timeline of all process executions.
-  - `execution_trace_<timestamp>.txt` — tab-separated trace file with per-task resource metrics.
-  - `pipeline_dag_<timestamp>.html` — directed acyclic graph (DAG) of the pipeline workflow.
-  - `nf_core_macproqc_software_versions.yml` — versions of all software used in the pipeline run.
+  - `execution_report_<timestamp>.html` - Nextflow execution report with run statistics and per-process resource usage.
+  - `execution_timeline_<timestamp>.html` - timeline of all process executions.
+  - `execution_trace_<timestamp>.txt` - tab-separated trace file with per-task resource metrics.
+  - `pipeline_dag_<timestamp>.html` - directed acyclic graph (DAG) of the pipeline workflow.
+  - `nf_core_macproqc_software_versions.yml` - versions of all software used in the pipeline run.
 
 </details>
 
