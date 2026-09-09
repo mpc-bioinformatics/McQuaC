@@ -14,6 +14,10 @@
 
   > Eng JK, Jahan TA, Hoopmann MR. Comet: an open-source MS/MS sequence database search tool. Proteomics. 2013 Jan;13(1):22-4. doi: 10.1002/pmic.201200439. Epub 2012 Dec 4. PMID: 23148064.
 
+- [PIA](https://pubmed.ncbi.nlm.nih.gov/25938255/)
+
+  > Uszkoreit J, Maerkens A, Perez-Riverol Y, Meyer HE, Marcus K, Stephan C, Kohlbacher O, Eisenacher M. PIA: An Intuitive Protein Inference Engine with a Web-Based User Interface. J Proteome Res. 2015 Jul 2;14(7):2988-97. doi: 10.1021/acs.jproteome.5b00121. Epub 2015 Jun 10. PMID: 25938255.
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)
