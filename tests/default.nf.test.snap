@@ -108,18 +108,10 @@
                 "sample_one_raw-unlabelled.comet.params:md5,88be13163b840fb754296dc46d157e38",
                 "sample_two_d-labelled.comet.params:md5,4e513d5872c1d4ccf375995b85cb30b4",
                 "sample_two_d-unlabelled.comet.params:md5,88be13163b840fb754296dc46d157e38",
-                "yeast_UPS_decoy.fasta:md5,96c0295f69e0cb92b705ca4c33e6f047",
-                "sample_one_raw-labelled.piaExport-PSMs.mzTab:md5,346f20da53a96735a56aad55754b7586",
-                "sample_one_raw-unlabelled.piaExport-PSMs.mzTab:md5,e822863901e016237a6369a6c846809a",
-                "sample_one_raw-unlabelled.piaExport-peptides.csv:md5,3701d10fc0b6be0ea6292d24c88dcfa0",
-                "sample_one_raw-unlabelled.piaExport-proteins.mzTab:md5,210569438b9a473118d3583b283c8892",
-                "sample_two_d-labelled.piaExport-PSMs.mzTab:md5,5eb3bee339d0d05de137e3c04ee00f9a",
-                "sample_two_d-unlabelled.piaExport-PSMs.mzTab:md5,f71f42e063e23dd44529befb7a8de616",
-                "sample_two_d-unlabelled.piaExport-peptides.csv:md5,0d20ac9ca1edfcecdc2aaf556a130937",
-                "sample_two_d-unlabelled.piaExport-proteins.mzTab:md5,329328492df5c9ed4a9f40588e0e4fc8"
+                "yeast_UPS_decoy.fasta:md5,96c0295f69e0cb92b705ca4c33e6f047"
             ]
         ],
-        "timestamp": "2026-09-09T13:39:37.436849021",
+        "timestamp": "2026-09-10T07:26:08.157794889",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
