@@ -45,6 +45,24 @@
                 "OPENMS_DECOYDATABASE": {
                     "openms": "3.5.0"
                 },
+                "PIA_ANALYSIS": {
+                    "pia": "1.5.9"
+                },
+                "PIA_ANALYSIS_LABELLED": {
+                    "pia": "1.5.9"
+                },
+                "PIA_ANALYSIS_PREFILTER": {
+                    "pia": "1.5.9"
+                },
+                "PIA_COMPILEXML": {
+                    "pia": "1.5.9"
+                },
+                "PIA_COMPILEXML_PREFILTERED": {
+                    "pia": "1.5.9"
+                },
+                "PIA_CONFIGURE": {
+                    "pia": "1.5.9"
+                },
                 "TDF2MZML": {
                     "tdf2mzml": 0.4
                 },
@@ -73,6 +91,15 @@
                 "mzmls",
                 "mzmls/sample_one_raw.mzML",
                 "mzmls/sample_two_d.mzML",
+                "pia",
+                "pia/sample_one_raw-labelled.piaExport-PSMs.mzTab",
+                "pia/sample_one_raw-unlabelled.piaExport-PSMs.mzTab",
+                "pia/sample_one_raw-unlabelled.piaExport-peptides.csv",
+                "pia/sample_one_raw-unlabelled.piaExport-proteins.mzTab",
+                "pia/sample_two_d-labelled.piaExport-PSMs.mzTab",
+                "pia/sample_two_d-unlabelled.piaExport-PSMs.mzTab",
+                "pia/sample_two_d-unlabelled.piaExport-peptides.csv",
+                "pia/sample_two_d-unlabelled.piaExport-proteins.mzTab",
                 "pipeline_info",
                 "pipeline_info/nf_core_macproqc_software_versions.yml"
             ],
@@ -84,7 +111,7 @@
                 "yeast_UPS_decoy.fasta:md5,96c0295f69e0cb92b705ca4c33e6f047"
             ]
         ],
-        "timestamp": "2026-07-17T09:32:50.230969608",
+        "timestamp": "2026-09-10T07:26:08.157794889",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -104,6 +131,75 @@
             ]
         ],
         "timestamp": "2026-07-17T09:32:50.629102663",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "pia-peptides-results": {
+        "content": [
+            [
+                [
+                    "sample_one_raw-unlabelled.piaExport-peptides.csv",
+                    117,
+                    126
+                ],
+                [
+                    "sample_two_d-unlabelled.piaExport-peptides.csv",
+                    7,
+                    58
+                ]
+            ]
+        ],
+        "timestamp": "2026-09-09T13:34:54.060274869",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "pia-proteins-results": {
+        "content": [
+            [
+                [
+                    "sample_one_raw-unlabelled.piaExport-proteins.mzTab",
+                    41,
+                    127
+                ],
+                [
+                    "sample_two_d-unlabelled.piaExport-proteins.mzTab",
+                    2,
+                    56
+                ]
+            ]
+        ],
+        "timestamp": "2026-09-09T13:34:54.071684956",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "pia-psms-results": {
+        "content": [
+            [
+                [
+                    "sample_one_raw-labelled.piaExport-PSMs.mzTab",
+                    579
+                ],
+                [
+                    "sample_one_raw-unlabelled.piaExport-PSMs.mzTab",
+                    127
+                ],
+                [
+                    "sample_two_d-labelled.piaExport-PSMs.mzTab",
+                    4119
+                ],
+                [
+                    "sample_two_d-unlabelled.piaExport-PSMs.mzTab",
+                    58
+                ]
+            ]
+        ],
+        "timestamp": "2026-09-09T13:39:38.040915578",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
