@@ -1,0 +1,93 @@
+{
+    "spikeinmetricsextraction - json - identifications - csv": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.hdf5:md5,fe02e95fabe77cbee7db281b8794a9b2"
+                    ]
+                ],
+                "1": [
+                    [
+                        "SPIKEINMETRICSEXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ],
+                "hdf5": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.hdf5:md5,fe02e95fabe77cbee7db281b8794a9b2"
+                    ]
+                ],
+                "versions_spikeinmetricsextraction": [
+                    [
+                        "SPIKEINMETRICSEXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ]
+            },
+            {
+                "versions_spikeinmetricsextraction": [
+                    [
+                        "SPIKEINMETRICSEXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-09-16T16:24:37.869207841",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "spikeinmetricsextraction - json - identifications - csv - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        "SPIKEINMETRICSEXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ],
+                "hdf5": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions_spikeinmetricsextraction": [
+                    [
+                        "SPIKEINMETRICSEXTRACTION",
+                        "macproqc-helpers",
+                        "sha-914105c"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-09-16T16:24:43.864550768",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}
