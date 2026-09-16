@@ -1,7 +1,7 @@
 /*
  * Extract specific headers from Thermofisher RAW files
  **/
-process THERMOHEADEREXTRACTION {
+process THERMOMETRICSEXTRACTION {
     tag "${meta.id}"
     label 'process_low'
 
@@ -14,7 +14,7 @@ process THERMOHEADEREXTRACTION {
 
     output:
     tuple val(meta), path("*.hdf5"), emit: hdf5
-    tuple val("${task.process}"), val('macproqc-helpers'), val("sha-914105c"), emit: versions_thermoheaderextraction
+    tuple val("${task.process}"), val('macproqc-helpers'), val("sha-914105c"), emit: versions_thermometricsextraction
 
     when:
     task.ext.when == null || task.ext.when

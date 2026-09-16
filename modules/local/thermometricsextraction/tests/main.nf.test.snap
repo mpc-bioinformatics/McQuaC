@@ -1,5 +1,5 @@
 {
-    "thermoheaderextraction - simple raw file": {
+    "thermometricsextraction - simple raw file": {
         "content": [
             {
                 "0": [
@@ -12,7 +12,7 @@
                 ],
                 "1": [
                     [
-                        "THERMOHEADEREXTRACTION",
+                        "THERMOMETRICSEXTRACTION",
                         "macproqc-helpers",
                         "sha-914105c"
                     ]
@@ -25,18 +25,18 @@
                         "test.hdf5:md5,422043069c2835aaa2aa6fef37d7b1e5"
                     ]
                 ],
-                "versions_thermoheaderextraction": [
+                "versions_thermometricsextraction": [
                     [
-                        "THERMOHEADEREXTRACTION",
+                        "THERMOMETRICSEXTRACTION",
                         "macproqc-helpers",
                         "sha-914105c"
                     ]
                 ]
             },
             {
-                "versions_thermoheaderextraction": [
+                "versions_thermometricsextraction": [
                     [
-                        "THERMOHEADEREXTRACTION",
+                        "THERMOMETRICSEXTRACTION",
                         "macproqc-helpers",
                         "sha-914105c"
                     ]
@@ -49,7 +49,7 @@
             "nextflow": "26.04.6"
         }
     },
-    "thermoheaderextraction - thermo_raw - stub": {
+    "thermometricsextraction - thermo_raw - stub": {
         "content": [
             {
                 "0": [
@@ -62,7 +62,7 @@
                 ],
                 "1": [
                     [
-                        "THERMOHEADEREXTRACTION",
+                        "THERMOMETRICSEXTRACTION",
                         "macproqc-helpers",
                         "sha-914105c"
                     ]
@@ -75,9 +75,9 @@
                         "test.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ],
-                "versions_thermoheaderextraction": [
+                "versions_thermometricsextraction": [
                     [
-                        "THERMOHEADEREXTRACTION",
+                        "THERMOMETRICSEXTRACTION",
                         "macproqc-helpers",
                         "sha-914105c"
                     ]

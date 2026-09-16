@@ -1,7 +1,7 @@
 /*
  * Extract specific headers from Bruker dot d folders
  **/
-process BRUKERHEADEREXTRACTION {
+process BRUKERMETRICSEXTRACTION {
     tag "${meta.id}"
     label 'process_low'
 
@@ -14,7 +14,7 @@ process BRUKERHEADEREXTRACTION {
 
     output:
     tuple val(meta), path("*.hdf5"), emit: hdf5
-    tuple val("${task.process}"), val('macproqc-helpers'), val("sha-914105c"), emit: versions_brukerheaderextraction
+    tuple val("${task.process}"), val('macproqc-helpers'), val("sha-914105c"), emit: versions_brukermetricsextraction
 
     when:
     task.ext.when == null || task.ext.when
