@@ -1,13 +1,13 @@
-// nf-core modules test brukerheaderextraction
+// nf-core modules test brukermetricsextraction
 nextflow_process {
 
-    name "Test Process BRUKERHEADEREXTRACTION"
+    name "Test Process BRUKERMETRICSEXTRACTION"
     script "../main.nf"
-    process "BRUKERHEADEREXTRACTION"
+    process "BRUKERMETRICSEXTRACTION"
 
     tag "modules"
     tag "modules_"
-    tag "brukerheaderextraction"
+    tag "brukermetricsextraction"
     tag "untar"
 
     setup {
@@ -25,7 +25,7 @@ nextflow_process {
         }
     }
 
-    test("brukerheaderextraction - simple dotd folder") {
+    test("brukermetricsextraction - simple dotd folder") {
 
         when {
             process {
@@ -47,7 +47,7 @@ nextflow_process {
 
     }
 
-    test("brukerheaderextraction - simple dotd folder - stub") {
+    test("brukermetricsextraction - simple dotd folder - stub") {
 
         options "-stub"
 

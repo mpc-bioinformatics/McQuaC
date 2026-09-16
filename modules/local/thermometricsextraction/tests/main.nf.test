@@ -1,15 +1,15 @@
-// nf-core modules test thermoheaderextraction
+// nf-core modules test thermometricsextraction
 nextflow_process {
 
-    name "Test Process THERMOHEADEREXTRACTION"
+    name "Test Process THERMOMETRICSEXTRACTION"
     script "../main.nf"
-    process "THERMOHEADEREXTRACTION"
+    process "THERMOMETRICSEXTRACTION"
 
     tag "modules"
     tag "modules_"
-    tag "thermoheaderextraction"
+    tag "thermometricsextraction"
 
-    test("thermoheaderextraction - simple raw file") {
+    test("thermometricsextraction - simple raw file") {
 
         when {
             process {
@@ -34,7 +34,7 @@ nextflow_process {
 
     }
 
-    test("thermoheaderextraction - thermo_raw - stub") {
+    test("thermometricsextraction - thermo_raw - stub") {
 
         options "-stub"
 

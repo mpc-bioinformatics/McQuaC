@@ -1,15 +1,15 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
-name: "brukerheaderextraction"
-description: Extract specific headers from Bruker dot d folders
+name: "thermometricsextraction"
+description: Extract specific headers from Thermofisher RAW files
 keywords:
-  - bruker
+  - thermofisher
   - proteomics
   - mass_spectrometry
-  - dotd
+  - raw
   - header_extraction
 tools:
-  - "brukerheaderextraction":
-      description: "Brukerheaderextraction from the helper tools for the McQuaC pipeline, including metric collection from Bruker dot d folders."
+  - "thermometricsextraction":
+      description: "Thermometricsextraction from the helper tools for the McQuaC pipeline, including metric collection from Thermofisher RAW files."
       homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers"
@@ -23,10 +23,10 @@ input:
         description: |
           Groovy Map containing sample information
           e.g. `[ id:'sample1' ]`
-    - dotd_bruker_folder:
-        type: directory
-        description: Bruker dot d folder
-        pattern: "*.d"
+    - raw_thermo_file:
+        type: file
+        description: Thermofisher RAW file
+        pattern: "*.{raw,RAW}"
 
 output:
   hdf5:
@@ -37,9 +37,9 @@ output:
             e.g. `[ id:'sample1' ]`
       - "*.hdf5":
           type: file
-          description: HDF5 file containing extracted metrics from Bruker dot d folder
+          description: HDF5 file containing extracted metrics from thermo file
           pattern: "*.hdf5"
-  versions_brukerheaderextraction:
+  versions_thermometricsextraction:
     - - "${task.process}":
           type: string
           description: The name of the process
