@@ -14,8 +14,8 @@
                 "1": [
                     [
                         "XICEXTRACTIONCONFIG",
-                        "msproqc_helpers",
-                        "__main__.py 1.0.0"
+                        "macproqc-helpers",
+                        "sha-914105c"
                     ]
                 ],
                 "config": [
@@ -30,8 +30,8 @@
                 "versions_xicextractionconfig": [
                     [
                         "XICEXTRACTIONCONFIG",
-                        "msproqc_helpers",
-                        "__main__.py 1.0.0"
+                        "macproqc-helpers",
+                        "sha-914105c"
                     ]
                 ]
             }
@@ -57,8 +57,8 @@
                 "1": [
                     [
                         "XICEXTRACTIONCONFIG",
-                        "msproqc_helpers",
-                        "__main__.py 1.0.0"
+                        "macproqc-helpers",
+                        "sha-914105c"
                     ]
                 ],
                 "config": [
@@ -73,8 +73,8 @@
                 "versions_xicextractionconfig": [
                     [
                         "XICEXTRACTIONCONFIG",
-                        "msproqc_helpers",
-                        "__main__.py 1.0.0"
+                        "macproqc-helpers",
+                        "sha-914105c"
                     ]
                 ]
             },
@@ -82,8 +82,8 @@
                 "versions_xicextractionconfig": [
                     [
                         "XICEXTRACTIONCONFIG",
-                        "msproqc_helpers",
-                        "__main__.py 1.0.0"
+                        "macproqc-helpers",
+                        "sha-914105c"
                     ]
                 ]
             }
