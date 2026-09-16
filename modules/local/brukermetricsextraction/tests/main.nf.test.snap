@@ -1,5 +1,5 @@
 {
-    "brukerheaderextraction - simple dotd folder": {
+    "brukermetricsextraction - simple dotd folder": {
         "content": [
             {
                 "0": [
@@ -12,7 +12,7 @@
                 ],
                 "1": [
                     [
-                        "BRUKERHEADEREXTRACTION",
+                        "BRUKERMETRICSEXTRACTION",
                         "macproqc-helpers",
                         "sha-914105c"
                     ]
@@ -25,18 +25,18 @@
                         "50fmol_BSA_S1-A2_1_32.d.hdf5:md5,4ec90e58243e9f573d5c872805acf58f"
                     ]
                 ],
-                "versions_brukerheaderextraction": [
+                "versions_brukermetricsextraction": [
                     [
-                        "BRUKERHEADEREXTRACTION",
+                        "BRUKERMETRICSEXTRACTION",
                         "macproqc-helpers",
                         "sha-914105c"
                     ]
                 ]
             },
             {
-                "versions_brukerheaderextraction": [
+                "versions_brukermetricsextraction": [
                     [
-                        "BRUKERHEADEREXTRACTION",
+                        "BRUKERMETRICSEXTRACTION",
                         "macproqc-helpers",
                         "sha-914105c"
                     ]
@@ -49,7 +49,7 @@
             "nextflow": "26.04.6"
         }
     },
-    "brukerheaderextraction - simple dotd folder - stub": {
+    "brukermetricsextraction - simple dotd folder - stub": {
         "content": [
             {
                 "0": [
@@ -62,7 +62,7 @@
                 ],
                 "1": [
                     [
-                        "BRUKERHEADEREXTRACTION",
+                        "BRUKERMETRICSEXTRACTION",
                         "macproqc-helpers",
                         "sha-914105c"
                     ]
@@ -75,9 +75,9 @@
                         "50fmol_BSA_S1-A2_1_32.d.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ],
-                "versions_brukerheaderextraction": [
+                "versions_brukermetricsextraction": [
                     [
-                        "BRUKERHEADEREXTRACTION",
+                        "BRUKERMETRICSEXTRACTION",
                         "macproqc-helpers",
                         "sha-914105c"
                     ]
