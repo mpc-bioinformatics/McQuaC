@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "combinehdf5"
+description: Merge all per-metric HDF5 files produced for a single run (e.g. mzML metrics, Thermo/Bruker headers, spike-in metrics) into one combined HDF5 file.
+keywords:
+  - HDF5
+  - quality control
+  - mass spectrometry
+tools:
+  - "combinehdf5":
+      description: "Combinehdf5 from the helper tools for the MacProQC pipeline, merging multiple HDF5 files into one."
+      homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers"
+      documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers"
+      tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers"
+      doi: ""
+      licence: null
+      identifier: null
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1' ]`
+    - hdf5_files:
+        type: file
+        description: All per-metric HDF5 files belonging to a single run, to be merged into one
+        pattern: "*.hdf5"
+
+output:
+  hdf5:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - "*.hdf5":
+          type: file
+          description: The combined HDF5 file, containing every dataset/group from all input HDF5 files
+          pattern: "*.hdf5"
+  versions_combinehdf5:
+    - - "${task.process}":
+          type: string
+          description: The name of the process
+      - "macproqc-helpers":
+          type: string
+          description: The name of the tool
+      - "sha-914105c":
+          type: eval
+          description: The hardcoded value (fixed in docker)
+
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The version/tag of the container image
+
+authors:
+  - "@di-hardt"
+maintainers:
+  - "@di-hardt"
