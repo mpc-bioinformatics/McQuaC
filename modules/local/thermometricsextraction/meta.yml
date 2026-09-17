@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
 name: "thermometricsextraction"
-description: Extract specific headers from Thermofisher RAW files
+description: Extract specific metrics from Thermofisher RAW files
 keywords:
   - thermofisher
   - proteomics
   - mass_spectrometry
   - raw
-  - header_extraction
+  - metrics_extraction
 tools:
   - "thermometricsextraction":
       description: "Thermometricsextraction from the helper tools for the McQuaC pipeline, including metric collection from Thermofisher RAW files."
@@ -37,7 +37,7 @@ output:
             e.g. `[ id:'sample1' ]`
       - "*.hdf5":
           type: file
-          description: HDF5 file containing extracted metrics from thermo file
+          description: HDF5 file containing extracted metrics from Thermofisher RAW file
           pattern: "*.hdf5"
   versions_thermometricsextraction:
     - - "${task.process}":
