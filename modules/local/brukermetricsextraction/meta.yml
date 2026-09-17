@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "brukermetricsextraction"
+description: Extract specific metrics from Bruker dot d folders
+keywords:
+  - bruker
+  - proteomics
+  - mass_spectrometry
+  - dotd
+  - metrics_extraction
+tools:
+  - "brukermetricsextraction":
+      description: "Brukermetricsextraction from the helper tools for the McQuaC pipeline, including metric collection from Bruker dot d folders."
+      homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers"
+      documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers"
+      tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers"
+      doi: ""
+      licence: null
+      identifier: null
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1' ]`
+    - dotd_bruker_folder:
+        type: directory
+        description: Bruker dot d folder
+        pattern: "*.d"
+
+output:
+  hdf5:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - "*.hdf5":
+          type: file
+          description: HDF5 file containing extracted metrics from Bruker dot d folder
+          pattern: "*.hdf5"
+  versions_brukermetricsextraction:
+    - - "${task.process}":
+          type: string
+          description: The name of the process
+      - "macproqc-helpers":
+          type: string
+          description: The name of the tool
+      - "sha-914105c":
+          type: eval
+          description: The hardcoded value (fixed in docker)
+
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The version/tag of the container image
+
+authors:
+  - "@Luxxii"
+maintainers:
+  - "@Luxxii"

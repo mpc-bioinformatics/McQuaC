@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "mzmlmetricsextraction"
+description: Extract QC metrics from mzML files using macproqc-helpers and store them in HDF5 format.
+keywords:
+  - mzML
+  - metrics
+  - mass spectrometry
+  - QC
+  - HDF5
+tools:
+  - "mzmlmetricsextraction":
+      description: "mzmlmetricsextraction from the helper tools for the MacProQC pipeline, including mzML metric extraction."
+      homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers"
+      documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers"
+      tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers"
+      doi: ""
+      licence: null
+      identifier: null
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1' ]`
+    - mzml_file:
+        type: file
+        description: mzML file to extract metrics from
+        pattern: "*.{mzML,mzml}"
+        ontologies:
+          - edam: "http://edamontology.org/format_3244" # mzML
+
+output:
+  hdf5:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - "*.hdf5":
+          type: file
+          description: HDF5 file containing extracted mzML metrics
+          pattern: "*.hdf5"
+  versions_mzmlmetricsextraction:
+    - - "${task.process}":
+          type: string
+          description: The name of the process
+      - "macproqc-helpers":
+          type: string
+          description: The name of the tool
+      - "sha-914105c":
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The version of the tool
+
+authors:
+  - "@Luxxii"
+maintainers:
+  - "@Luxxii"

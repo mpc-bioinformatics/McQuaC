@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "thermometricsextraction"
+description: Extract specific metrics from Thermofisher RAW files
+keywords:
+  - thermofisher
+  - proteomics
+  - mass_spectrometry
+  - raw
+  - metrics_extraction
+tools:
+  - "thermometricsextraction":
+      description: "Thermometricsextraction from the helper tools for the McQuaC pipeline, including metric collection from Thermofisher RAW files."
+      homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers"
+      documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers"
+      tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers"
+      doi: ""
+      licence: null
+      identifier: null
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. `[ id:'sample1' ]`
+    - raw_thermo_file:
+        type: file
+        description: Thermofisher RAW file
+        pattern: "*.{raw,RAW}"
+
+output:
+  hdf5:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'sample1' ]`
+      - "*.hdf5":
+          type: file
+          description: HDF5 file containing extracted metrics from Thermofisher RAW file
+          pattern: "*.hdf5"
+  versions_thermometricsextraction:
+    - - "${task.process}":
+          type: string
+          description: The name of the process
+      - "macproqc-helpers":
+          type: string
+          description: The name of the tool
+      - "sha-914105c":
+          type: eval
+          description: The hardcoded value (fixed in docker)
+
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The version/tag of the container image
+
+authors:
+  - "@Luxxii"
+maintainers:
+  - "@Luxxii"
