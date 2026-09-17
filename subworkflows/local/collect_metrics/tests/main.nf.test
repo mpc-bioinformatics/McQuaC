@@ -1,4 +1,3 @@
-// TODO nf-core: Once you have added the required tests, please run the following command to build this file:
 // nf-core subworkflows test collect_metrics
 nextflow_workflow {
 
@@ -9,38 +8,117 @@ nextflow_workflow {
     tag "subworkflows"
     tag "subworkflows_"
     tag "subworkflows/collect_metrics"
-    // TODO nf-core: Add tags for all modules used within this subworkflow. Example:
-    tag "samtools"
-    tag "samtools/sort"
-    tag "samtools/index"
 
+    tag "untar"
+    tag "mzmlmetricsextraction"
+    tag "thermometricsextraction"
+    tag "brukermetricsextraction"
+    tag "xicextractionconfig"
+    tag "thermoxicextraction"
+    tag "brukerxicextraction"
+    tag "spikeinmetricsextraction"
+    tag "combinehdf5"
 
-    // TODO nf-core: Change the test name preferably indicating the test-data and file-format used
-    test("sarscov2 - bam - single_end") {
+    setup {
+        // need to untar the Bruker .d-folder first (this is another module)
+        run("UNTAR") {
+            script "../../../../modules/nf-core/untar/main.nf"
+            process {
+                """
+                input[0] = channel.of([
+                    [ id:'test-bruker', vendor: 'bruker' ],
+                    file(params.macproqc_testdata_base_path + 'msspectra/50fmol_BSA_S1-A2_1_32.d.tar.bz2', checkIfExists: true)
+                ])
+                """
+            }
+        }
+    }
+
+    test("collect_metrics - thermo and bruker - with spike-ins") {
 
         when {
             workflow {
                 """
-                // TODO nf-core: define inputs of the workflow here. Example:
-                input[0] = [
-                    [ id:'test', single_end:false ], // meta map
-                    file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
-                ]
-                input[1] = [
-                    [ id:'genome' ],
-                    file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
-                ]
+                input[0] = channel.of(
+                    [
+                        [ id:'test-thermo' ],
+                        file(params.macproqc_testdata_base_path + 'msspectra/medium_bruker.mzML', checkIfExists: true)
+                    ],
+                    [
+                        [ id:'test-bruker' ],
+                        file(params.macproqc_testdata_base_path + 'msspectra/medium_bruker.mzML', checkIfExists: true)
+                    ],
+                )
+                input[1] = channel.of(
+                    [
+                        [ id:'test-thermo', vendor: 'thermo' ],
+                        file(params.macproqc_testdata_base_path + 'msspectra/small.RAW', checkIfExists: true)
+                    ]
+                ).mix(UNTAR.out.untar)
+                input[2] = channel.of(
+                    [
+                        [ id:'test-thermo' ],
+                        file(params.macproqc_testdata_base_path + 'identifications/EXII07043std.mzTab', checkIfExists: true)
+                    ],
+                    [
+                        [ id:'test-bruker' ],
+                        file(params.macproqc_testdata_base_path + 'identifications/EXII07043std.mzTab', checkIfExists: true)
+                    ],
+                )
+                input[3] = params.macproqc_testdata_base_path + 'spike_ins.csv'
+                input[4] = true
                 """
             }
         }
+
         then {
-            assert workflow.success
             assertAll(
+                { assert workflow.success },
                 { assert snapshot(
-                    workflow.out
-                    //TODO nf-core: Add all required assertions to verify the test output.
+                    workflow.out.hdf5.collect { meta, hdf5 -> [ meta, file(hdf5).name ] }
                 ).match() }
             )
         }
+
     }
+
+    test("collect_metrics - thermo and bruker - without spike-ins") {
+
+        when {
+            workflow {
+                """
+                input[0] = channel.of(
+                    [
+                        [ id:'test-thermo' ],
+                        file(params.macproqc_testdata_base_path + 'msspectra/medium_bruker.mzML', checkIfExists: true)
+                    ],
+                    [
+                        [ id:'test-bruker' ],
+                        file(params.macproqc_testdata_base_path + 'msspectra/medium_bruker.mzML', checkIfExists: true)
+                    ],
+                )
+                input[1] = channel.of(
+                    [
+                        [ id:'test-thermo', vendor: 'thermo' ],
+                        file(params.macproqc_testdata_base_path + 'msspectra/small.RAW', checkIfExists: true)
+                    ]
+                ).mix(UNTAR.out.untar)
+                input[2] = channel.empty()
+                input[3] = ''
+                input[4] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert snapshot(
+                    workflow.out.hdf5.collect { meta, hdf5 -> [ meta, file(hdf5).name ] }
+                ).match() }
+            )
+        }
+
+    }
+
 }
