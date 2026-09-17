@@ -1,12 +1,12 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
 name: "brukermetricsextraction"
-description: Extract specific headers from Bruker dot d folders
+description: Extract specific metrics from Bruker dot d folders
 keywords:
   - bruker
   - proteomics
   - mass_spectrometry
   - dotd
-  - header_extraction
+  - metrics_extraction
 tools:
   - "brukermetricsextraction":
       description: "Brukermetricsextraction from the helper tools for the McQuaC pipeline, including metric collection from Bruker dot d folders."
