@@ -50,7 +50,7 @@ output:
       - "thermorawfileparser":
           type: string
           description: The name of the tool
-      - "eval(\"ThermoRawFileParser.sh --version\")":
+      - 'eval("ThermoRawFileParser.sh --version")':
           type: eval
           description: The version of the tool
 

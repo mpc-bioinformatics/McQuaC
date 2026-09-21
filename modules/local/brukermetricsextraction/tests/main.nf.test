@@ -29,7 +29,7 @@ nextflow_process {
 
         when {
             process {
-                """              
+                """
                 input[0] = UNTAR.out.untar
                 """
             }
@@ -53,7 +53,7 @@ nextflow_process {
 
         when {
             process {
-                """              
+                """
                 input[0] = UNTAR.out.untar
                 """
             }
