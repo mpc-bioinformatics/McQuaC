@@ -13,7 +13,7 @@ nextflow_process {
 
         when {
             process {
-                """              
+                """
                 input[0] = [
                     [ id:'test' ],
                     file(params.macproqc_testdata_base_path + 'msspectra/small.RAW', checkIfExists: true)
