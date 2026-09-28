@@ -184,6 +184,44 @@
             },
             "fa_icon": "fas fa-search"
         },
+        "metrics_parameters": {
+            "title": "mzML metrics extraction parameters",
+            "type": "object",
+            "description": "Parameters for extracting QC metrics from mzML files.",
+            "properties": {
+                "base_peak_tic_up_to": {
+                    "type": "integer",
+                    "default": 105,
+                    "fa_icon": "fas fa-arrows-alt-h",
+                    "description": "Retrieve the Basepeak Intensity Max and the Total Ion Current from minute 0 up to the given number in minutes. Defaults to 105 (minutes)."
+                },
+                "filter_threshold": {
+                    "type": "number",
+                    "default": 1e-5,
+                    "fa_icon": "fas fa-filter",
+                    "description": "Threshold for the MS1 peaks, to be included in the output file. Defaults to 0.00001 (0.001%) of the highest overall MS1 peak. Values lower will be disregarded."
+                },
+                "report_up_to_charge": {
+                    "type": "integer",
+                    "default": 5,
+                    "fa_icon": "fas fa-list-ol",
+                    "description": "Upper limit of range to be reported in a csv table for the charge, defaults to 5."
+                },
+                "ms1_map_rt_bins": {
+                    "type": "integer",
+                    "default": 1000,
+                    "fa_icon": "fas fa-th",
+                    "description": "Number of retention time grid cells for the bilinearly-interpolated MS1 ion map (LOCAL:rtMzIntensityMS1)."
+                },
+                "ms1_map_mz_bins": {
+                    "type": "integer",
+                    "default": 1000,
+                    "fa_icon": "fas fa-th",
+                    "description": "Number of m/z grid cells for the bilinearly-interpolated MS1 ion map (LOCAL:rtMzIntensityMS1)."
+                }
+            },
+            "fa_icon": "fas fa-chart-line"
+        },
         "visualization_parameters": {
             "title": "Visualization parameters",
             "type": "object",
