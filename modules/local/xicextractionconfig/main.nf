@@ -6,7 +6,7 @@ process XICEXTRACTIONCONFIG {
     tag "${meta.id}"
     label 'process_single'
 
-    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-914105c"
+    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-7a956ec"
 
     input:
     tuple val(meta), path(psm_mztab_file)
@@ -14,7 +14,7 @@ process XICEXTRACTIONCONFIG {
 
     output:
     tuple val(meta), path("*.json"), path("*.ident.csv"), emit: config
-    tuple val("${task.process}"), val('macproqc-helpers'), val("sha-914105c"), topic: versions, emit: versions_xicextractionconfig
+    path "versions.yml", emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -29,6 +29,12 @@ process XICEXTRACTIONCONFIG {
         -iidents ${psm_mztab_file} \\
         -ojson ${psm_mztab_file}.json \\
         -oidentifications ${psm_mztab_file}.ident.csv
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version 2>&1 | cut -d ' ' -f 2)
+        macproqc-helpers: \$(python -m macproqc_helpers --version | sed 's;__main__.py ;;')
+    END_VERSIONS
     """
 
     stub:
@@ -39,5 +45,11 @@ process XICEXTRACTIONCONFIG {
 
     echo '{}' > ${prefix}.json
     touch ${prefix}.ident.csv
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version 2>&1 | cut -d ' ' -f 2)
+        macproqc-helpers: \$(python -m macproqc_helpers --version | sed 's;__main__.py ;;')
+    END_VERSIONS
     """
 }
