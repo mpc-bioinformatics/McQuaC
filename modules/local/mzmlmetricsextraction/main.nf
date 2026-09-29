@@ -26,7 +26,7 @@ process MZMLMETRICSEXTRACTION {
         ${args} \\
         -mzml ${mzml_file} \\
         -out_hdf5 ${prefix}.hdf5
-    
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version 2>&1 | cut -d ' ' -f 2)
