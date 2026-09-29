@@ -22,10 +22,17 @@ process BRUKERMETRICSEXTRACTION {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
+    // alphatims.bruker.TimsTOF (used in macproqc_helpers) dispatches on the folder name's
+    // suffix, requiring it to end in ".d". the staged input folder may not (e.g.
+    // when staged under a pipeline sample ID), so alias it to a ".d"-suffixed name.
+    def orig_name = dotd_bruker_folder.name.toString()
+    def dotd_name = orig_name.endsWith('.d') ? orig_name : "${orig_name}.d"
+    def link_cmd = dotd_name == orig_name ? '' : "ln -s ${dotd_bruker_folder} ${dotd_name}"
     """
+    ${link_cmd}
     python -m macproqc_helpers collect-metrics-from-bruker \\
         ${args} \\
-        -d_folder ${dotd_bruker_folder} \\
+        -d_folder ${dotd_name} \\
         -out_hdf5 ${prefix}.hdf5
     """
 
