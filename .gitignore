@@ -1,21 +1,10 @@
-# Nextflow ecosystem
 .nextflow*
-.nf-test/
-.nf-test.log
-## temporary nf-test file on repo root (containing hash)
-/.nf-test-*.nf 
 work/
-
-# OSs
-.DS_Store
-
-# Python (still needed?)
-*.pyc
-
-# Remains
 data/
 results/
+.DS_Store
 testing/
 testing*
+*.pyc
 null/
 .lineage/
