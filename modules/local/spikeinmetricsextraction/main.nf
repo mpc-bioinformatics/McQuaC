@@ -7,7 +7,7 @@ process SPIKEINMETRICSEXTRACTION {
     tag "${meta.id}"
     label 'process_single'
 
-    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-914105c"
+    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-7a956ec"
 
     input:
     tuple val(meta), path(xic_json), path(identifications)
@@ -15,7 +15,7 @@ process SPIKEINMETRICSEXTRACTION {
 
     output:
     tuple val(meta), path("*.hdf5"), emit: hdf5
-    tuple val("${task.process}"), val('macproqc-helpers'), val("sha-914105c"), topic: versions, emit: versions_spikeinmetricsextraction
+    path "versions.yml", emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -30,6 +30,12 @@ process SPIKEINMETRICSEXTRACTION {
         -iidentifications ${identifications} \\
         -ispikeins ${spike_ins_table} \\
         -ohdf5 ${prefix}.hdf5
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version 2>&1 | cut -d ' ' -f 2)
+        macproqc-helpers: \$(python -m macproqc_helpers --version | sed 's;__main__.py ;;')
+    END_VERSIONS
     """
 
     stub:
@@ -39,5 +45,11 @@ process SPIKEINMETRICSEXTRACTION {
     echo ${args}
 
     touch ${prefix}.hdf5
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version 2>&1 | cut -d ' ' -f 2)
+        macproqc-helpers: \$(python -m macproqc_helpers --version | sed 's;__main__.py ;;')
+    END_VERSIONS
     """
 }
