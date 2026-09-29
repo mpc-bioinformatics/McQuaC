@@ -441,6 +441,9 @@
             "$ref": "#/$defs/identification_parameters"
         },
         {
+            "$ref": "#/$defs/metrics_parameters"
+        },
+        {
             "$ref": "#/$defs/visualization_parameters"
         },
         {
