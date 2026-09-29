@@ -1,5 +1,5 @@
 {
-    "mzmlmetricsextraction - small mzml - stub": {
+    "combinehdf5 - mzml and thermo metrics - stub": {
         "content": [
             {
                 "0": [
@@ -7,32 +7,32 @@
                         {
                             "id": "test"
                         },
-                        "test.mzml_metrics.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
+                        "test.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,582b94cd2d965130fa984bf61ef27673"
+                    "versions.yml:md5,f9c3ea98b27ee0916fd3cca058921993"
                 ],
                 "hdf5": [
                     [
                         {
                             "id": "test"
                         },
-                        "test.mzml_metrics.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
+                        "test.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ],
                 "versions": [
-                    "versions.yml:md5,582b94cd2d965130fa984bf61ef27673"
+                    "versions.yml:md5,f9c3ea98b27ee0916fd3cca058921993"
                 ]
             }
         ],
-        "timestamp": "2026-09-29T12:02:46.206131732",
+        "timestamp": "2026-09-29T12:02:15.733256148",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
         }
     },
-    "mzmlmetricsextraction - small mzml": {
+    "combinehdf5 - mzml and thermo metrics": {
         "content": [
             {
                 "0": [
@@ -40,31 +40,31 @@
                         {
                             "id": "test"
                         },
-                        "test.mzml_metrics.hdf5:md5,967b2f7d6a52b99c0c5199023e8b8ff5"
+                        "test.hdf5:md5,f196d5ee06fbb91a69d71538fd68c578"
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,582b94cd2d965130fa984bf61ef27673"
+                    "versions.yml:md5,f9c3ea98b27ee0916fd3cca058921993"
                 ],
                 "hdf5": [
                     [
                         {
                             "id": "test"
                         },
-                        "test.mzml_metrics.hdf5:md5,967b2f7d6a52b99c0c5199023e8b8ff5"
+                        "test.hdf5:md5,f196d5ee06fbb91a69d71538fd68c578"
                     ]
                 ],
                 "versions": [
-                    "versions.yml:md5,582b94cd2d965130fa984bf61ef27673"
+                    "versions.yml:md5,f9c3ea98b27ee0916fd3cca058921993"
                 ]
             },
             {
                 "versions": [
-                    "versions.yml:md5,582b94cd2d965130fa984bf61ef27673"
+                    "versions.yml:md5,f9c3ea98b27ee0916fd3cca058921993"
                 ]
             }
         ],
-        "timestamp": "2026-09-29T12:02:36.252190327",
+        "timestamp": "2026-09-29T12:01:59.64873554",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

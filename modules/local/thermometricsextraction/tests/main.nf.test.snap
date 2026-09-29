@@ -1,54 +1,4 @@
 {
-    "thermometricsextraction - simple raw file": {
-        "content": [
-            {
-                "0": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "test.hdf5:md5,422043069c2835aaa2aa6fef37d7b1e5"
-                    ]
-                ],
-                "1": [
-                    [
-                        "THERMOMETRICSEXTRACTION",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
-                ],
-                "hdf5": [
-                    [
-                        {
-                            "id": "test"
-                        },
-                        "test.hdf5:md5,422043069c2835aaa2aa6fef37d7b1e5"
-                    ]
-                ],
-                "versions_thermometricsextraction": [
-                    [
-                        "THERMOMETRICSEXTRACTION",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
-                ]
-            },
-            {
-                "versions_thermometricsextraction": [
-                    [
-                        "THERMOMETRICSEXTRACTION",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
-                ]
-            }
-        ],
-        "timestamp": "2026-08-06T17:00:24.429223151",
-        "meta": {
-            "nf-test": "0.9.5",
-            "nextflow": "26.04.6"
-        }
-    },
     "thermometricsextraction - thermo_raw - stub": {
         "content": [
             {
@@ -57,34 +7,64 @@
                         {
                             "id": "test"
                         },
-                        "test.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
+                        "test.thermo_metrics.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ],
                 "1": [
-                    [
-                        "THERMOMETRICSEXTRACTION",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                    "versions.yml:md5,b79858e5f0165b194da60e13a610a5e7"
                 ],
                 "hdf5": [
                     [
                         {
                             "id": "test"
                         },
-                        "test.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
+                        "test.thermo_metrics.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ],
-                "versions_thermometricsextraction": [
-                    [
-                        "THERMOMETRICSEXTRACTION",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                "versions": [
+                    "versions.yml:md5,b79858e5f0165b194da60e13a610a5e7"
                 ]
             }
         ],
-        "timestamp": "2026-08-06T17:00:28.720279285",
+        "timestamp": "2026-09-29T12:07:33.06116276",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "thermometricsextraction - simple raw file": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.thermo_metrics.hdf5:md5,422043069c2835aaa2aa6fef37d7b1e5"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,b79858e5f0165b194da60e13a610a5e7"
+                ],
+                "hdf5": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.thermo_metrics.hdf5:md5,422043069c2835aaa2aa6fef37d7b1e5"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,b79858e5f0165b194da60e13a610a5e7"
+                ]
+            },
+            {
+                "versions": [
+                    "versions.yml:md5,b79858e5f0165b194da60e13a610a5e7"
+                ]
+            }
+        ],
+        "timestamp": "2026-09-29T12:07:23.665757772",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

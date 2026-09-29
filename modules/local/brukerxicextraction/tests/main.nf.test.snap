@@ -11,18 +11,10 @@
                     ]
                 ],
                 "1": [
-                    [
-                        "BRUKERXICEXTRACTION",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                    "versions.yml:md5,6cd3e78f17610f8ae24dd80979de7a97"
                 ],
-                "versions_brukerxicextraction": [
-                    [
-                        "BRUKERXICEXTRACTION",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                "versions": [
+                    "versions.yml:md5,6cd3e78f17610f8ae24dd80979de7a97"
                 ],
                 "xic": [
                     [
@@ -34,16 +26,12 @@
                 ]
             },
             {
-                "versions_brukerxicextraction": [
-                    [
-                        "BRUKERXICEXTRACTION",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                "versions": [
+                    "versions.yml:md5,6cd3e78f17610f8ae24dd80979de7a97"
                 ]
             }
         ],
-        "timestamp": "2026-09-16T16:24:04.772131457",
+        "timestamp": "2026-09-29T11:47:08.53224421",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -61,18 +49,10 @@
                     ]
                 ],
                 "1": [
-                    [
-                        "BRUKERXICEXTRACTION",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                    "versions.yml:md5,6cd3e78f17610f8ae24dd80979de7a97"
                 ],
-                "versions_brukerxicextraction": [
-                    [
-                        "BRUKERXICEXTRACTION",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                "versions": [
+                    "versions.yml:md5,6cd3e78f17610f8ae24dd80979de7a97"
                 ],
                 "xic": [
                     [
@@ -84,7 +64,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-09-16T16:24:16.894791835",
+        "timestamp": "2026-09-29T11:47:25.851133304",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
