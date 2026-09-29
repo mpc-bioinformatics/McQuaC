@@ -1,0 +1,50 @@
+{
+    "collect_metrics - thermo and bruker - with spike-ins": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test-bruker"
+                    },
+                    "test-bruker.hdf5"
+                ],
+                [
+                    {
+                        "id": "test-thermo",
+                        "vendor": "thermo"
+                    },
+                    "test-thermo.hdf5"
+                ]
+            ]
+        ],
+        "timestamp": "2026-09-29T10:11:55.439138762",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    },
+    "collect_metrics - thermo and bruker - without spike-ins": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test-bruker"
+                    },
+                    "test-bruker.hdf5"
+                ],
+                [
+                    {
+                        "id": "test-thermo",
+                        "vendor": "thermo"
+                    },
+                    "test-thermo.hdf5"
+                ]
+            ]
+        ],
+        "timestamp": "2026-09-29T10:12:38.056553235",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

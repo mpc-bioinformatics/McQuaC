@@ -7,34 +7,26 @@
                         {
                             "id": "test"
                         },
-                        "test.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
+                        "test.mzml_metrics.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ],
                 "1": [
-                    [
-                        "MZMLMETRICSEXTRACTION",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                    "versions.yml:md5,582b94cd2d965130fa984bf61ef27673"
                 ],
                 "hdf5": [
                     [
                         {
                             "id": "test"
                         },
-                        "test.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
+                        "test.mzml_metrics.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ],
-                "versions_mzmlmetricsextraction": [
-                    [
-                        "MZMLMETRICSEXTRACTION",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                "versions": [
+                    "versions.yml:md5,582b94cd2d965130fa984bf61ef27673"
                 ]
             }
         ],
-        "timestamp": "2026-08-06T16:59:24.146033489",
+        "timestamp": "2026-09-29T12:02:46.206131732",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -48,43 +40,31 @@
                         {
                             "id": "test"
                         },
-                        "test.hdf5:md5,d26e9fb0a24373cd8f656f5e86af2edf"
+                        "test.mzml_metrics.hdf5:md5,967b2f7d6a52b99c0c5199023e8b8ff5"
                     ]
                 ],
                 "1": [
-                    [
-                        "MZMLMETRICSEXTRACTION",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                    "versions.yml:md5,582b94cd2d965130fa984bf61ef27673"
                 ],
                 "hdf5": [
                     [
                         {
                             "id": "test"
                         },
-                        "test.hdf5:md5,d26e9fb0a24373cd8f656f5e86af2edf"
+                        "test.mzml_metrics.hdf5:md5,967b2f7d6a52b99c0c5199023e8b8ff5"
                     ]
                 ],
-                "versions_mzmlmetricsextraction": [
-                    [
-                        "MZMLMETRICSEXTRACTION",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                "versions": [
+                    "versions.yml:md5,582b94cd2d965130fa984bf61ef27673"
                 ]
             },
             {
-                "versions_mzmlmetricsextraction": [
-                    [
-                        "MZMLMETRICSEXTRACTION",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                "versions": [
+                    "versions.yml:md5,582b94cd2d965130fa984bf61ef27673"
                 ]
             }
         ],
-        "timestamp": "2026-08-06T16:59:12.605553431",
+        "timestamp": "2026-09-29T12:02:36.252190327",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

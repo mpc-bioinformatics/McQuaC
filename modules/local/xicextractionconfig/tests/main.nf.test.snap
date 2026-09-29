@@ -12,11 +12,7 @@
                     ]
                 ],
                 "1": [
-                    [
-                        "XICEXTRACTIONCONFIG",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                    "versions.yml:md5,338ef01e47a4e4c72b6bd38e299b0bf5"
                 ],
                 "config": [
                     [
@@ -27,19 +23,15 @@
                         "test.ident.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ],
-                "versions_xicextractionconfig": [
-                    [
-                        "XICEXTRACTIONCONFIG",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                "versions": [
+                    "versions.yml:md5,338ef01e47a4e4c72b6bd38e299b0bf5"
                 ]
             }
         ],
-        "timestamp": "2026-06-25T17:55:20.857997455",
+        "timestamp": "2026-09-29T12:07:57.870426922",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.1"
+            "nextflow": "26.04.6"
         }
     },
     "xicextractionconfig - mzTab - csv": {
@@ -55,11 +47,7 @@
                     ]
                 ],
                 "1": [
-                    [
-                        "XICEXTRACTIONCONFIG",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                    "versions.yml:md5,338ef01e47a4e4c72b6bd38e299b0bf5"
                 ],
                 "config": [
                     [
@@ -70,28 +58,20 @@
                         "EXII07043std.mzTab.ident.csv:md5,514b9c745f5ca08c1626e8fe97001ac4"
                     ]
                 ],
-                "versions_xicextractionconfig": [
-                    [
-                        "XICEXTRACTIONCONFIG",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                "versions": [
+                    "versions.yml:md5,338ef01e47a4e4c72b6bd38e299b0bf5"
                 ]
             },
             {
-                "versions_xicextractionconfig": [
-                    [
-                        "XICEXTRACTIONCONFIG",
-                        "macproqc-helpers",
-                        "sha-914105c"
-                    ]
+                "versions": [
+                    "versions.yml:md5,338ef01e47a4e4c72b6bd38e299b0bf5"
                 ]
             }
         ],
-        "timestamp": "2026-06-25T15:58:05.852464448",
+        "timestamp": "2026-09-29T12:07:47.798524522",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.1"
+            "nextflow": "26.04.6"
         }
     }
 }
