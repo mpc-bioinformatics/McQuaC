@@ -22,7 +22,8 @@
                         "fig12a_PCA_all.plotly.json:md5,721d45dfd3499fe9249a444545af9d97",
                         "fig12b_Loadings_all.plotly.json:md5,ed85a7a99568b1eff650f110404de492",
                         "fig14_Pump_pressure.plotly.json:md5,68041de0bb08bf8a48a0036fa2411781",
-                        "fig15_PSM_error_boxplots.plotly.json:md5,14ddbc919321273b2cbba8aefd627bdf"
+                        "fig15_PSM_error_boxplots.plotly.json:md5,14ddbc919321273b2cbba8aefd627bdf",
+                        "metric_registry.json:md5,f2ad417c6107db952c7cca344fdb67b7"
                     ]
                 ]
             ],
@@ -45,8 +46,8 @@
                         "id": "test"
                     },
                     [
-                        "fig13_MS1_map_EXII01980std.png:md5,157ff82747ee6d77cda4e60bab97493f",
-                        "fig13_MS1_map_EXII01990std.png:md5,d103f7b151cd63d0e38ededbf310a5df"
+                        "fig13_MS1_map_EXII01980std.png:md5,aeeb23adfdc0b77263caea8a2879a097",
+                        "fig13_MS1_map_EXII01990std.png:md5,51fb95f1e586faae3009efda913233b6"
                     ]
                 ]
             ],
@@ -84,10 +85,9 @@
                         "LOG_VaporizertempC.plotly.json:md5,4a1c3e14c7258823dc086a7a927a350c"
                     ]
                 ]
-            ],
-            null
+            ]
         ],
-        "timestamp": "2026-08-26T13:28:47.415004037",
+        "timestamp": "2026-09-30T14:51:37.522964985",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

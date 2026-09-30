@@ -33,8 +33,7 @@ nextflow_workflow {
                     workflow.out.jsons,
                     workflow.out.output_tables,
                     workflow.out.ms1_maps,
-                    workflow.out.additional_plots,
-                    workflow.out.versions
+                    workflow.out.additional_plots
                 ).match() },
             )
         }

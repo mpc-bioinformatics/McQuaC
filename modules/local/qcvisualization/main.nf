@@ -3,7 +3,7 @@ process QCVISUALIZATION {
     tag "$meta.id"
     label 'process_medium'
 
-    container 'ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-60c25b7'
+    container 'ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-604eac1'
 
     input:
     tuple val(meta), path(hdf5_files)
@@ -28,7 +28,7 @@ process QCVISUALIZATION {
     tuple val(meta), path("fig13_MS1_map"), emit: ms1_maps, optional: false
     tuple val(meta), path("fig16_additional_headers"), emit: additional_plots, optional: true
     tuple val(meta), path("fig17_BRUKER_calibrants"), emit: bruker_calibrants, optional: true
-    path "versions.yml", emit: versions
+    tuple val("${task.process}"), val('macproqc_helpers'), eval('macproqc-helpers --version | sed "s;^macproqc-helpers ;;"'), topic: versions, emit: versions_macproqc_helpers
 
     when:
     task.ext.when == null || task.ext.when
@@ -59,11 +59,6 @@ process QCVISUALIZATION {
         ${spike_ins_tab} \\
         $args
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version 2>&1 | cut -d ' ' -f 2)
-    END_VERSIONS
-
     """
 
 
@@ -78,10 +73,5 @@ process QCVISUALIZATION {
     mkdir fig13_MS1_map
     mkdir fig16_additional_headers
     mkdir fig17_BRUKER_calibrants
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version 2>&1 | cut -d ' ' -f 2)
-    END_VERSIONS
     """
 }

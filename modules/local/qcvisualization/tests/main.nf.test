@@ -29,7 +29,7 @@ nextflow_process {
                 input[6] = ''         // output_column_order
                 input[7] = 'MS1 feature maximum intensity,retention time,count of identified spectra,Delta_to_expected_RT'  // spikein_columns
                 input[8] = 700        // height_barplots
-                input[9] = 0         // width_barplots
+                input[9] = 0          // width_barplots
                 input[10] = 1000      // height_pca
                 input[11] = 1000      // width_pca
                 input[12] = 10        // height_ionmaps
@@ -45,8 +45,7 @@ nextflow_process {
                     process.out.jsons,
                     process.out.output_tables,
                     process.out.ms1_maps,
-                    process.out.additional_plots,
-                    process.out.versions
+                    process.out.additional_plots
                 ).match() },
             )
         }
@@ -71,7 +70,7 @@ nextflow_process {
                 input[6] = ''         // output_column_order
                 input[7] = 'MS1 feature maximum intensity,retention time,count of identified spectra,Delta_to_expected_RT'  // spikein_columns
                 input[8] = 700        // height_barplots
-                input[9] = 0         // width_barplots
+                input[9] = 0          // width_barplots
                 input[10] = 1000      // height_pca
                 input[11] = 1000      // width_pca
                 input[12] = 10        // height_ionmaps
@@ -85,12 +84,11 @@ nextflow_process {
             assert process.success
             assertAll(
                 { assert snapshot(
-                    process.out.ms1_maps,
-                    process.out.versions
+                    process.out.ms1_maps
                 ).match() },
-                { assert process.out.htmls },  // html: md5 changes
-                { assert process.out.output_tables },  // xlsx: md5 changes
-                { assert process.out.additional_plots },   // html: md5 changes
+                { assert process.out.htmls },               // html: md5 changes
+                { assert process.out.output_tables },       // xlsx: md5 changes
+                { assert process.out.additional_plots },    // html: md5 changes
             )
         }
     }
@@ -118,7 +116,7 @@ nextflow_process {
                 input[6] = ''         // output_column_order
                 input[7] = 'MS1 feature maximum intensity,retention time,count of identified spectra,Delta_to_expected_RT'  // spikein_columns
                 input[8] = 700        // height_barplots
-                input[9] = 0         // width_barplots
+                input[9] = 0          // width_barplots
                 input[10] = 1000      // height_pca
                 input[11] = 1000      // width_pca
                 input[12] = 10        // height_ionmaps
