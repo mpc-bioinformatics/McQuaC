@@ -34,7 +34,6 @@ process QCVISUALIZATION {
     task.ext.when == null || task.ext.when
 
     script:
-    def prefix = task.ext.prefix ?: "${meta.id}"
     def args = task.ext.args ?: ''   // free-form, optional extra CLI arguments
     def spike_ins_tab = spike_ins_table ? "-spike_ins_table ${spike_ins_table}" : ''
     def spikeins_arg = spikeins ? '-spikeins' : ''
@@ -64,7 +63,6 @@ process QCVISUALIZATION {
 
     stub:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     echo $args
 
