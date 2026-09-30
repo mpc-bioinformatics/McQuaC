@@ -4,16 +4,17 @@ description: Runs a PIA analysis (FDR filtering and PSM/peptide/protein inferenc
 keywords:
   - proteomics
   - protein inference
+  - identification
   - fdr
   - pia
 tools:
   - "pia":
       description: "PIA is a toolbox for MS based protein inference and identification
         analysis."
-      homepage: "None"
-      documentation: "None"
-      tool_dev_url: "None"
-      doi: ""
+      homepage: "https://github.com/medbioinf/pia"
+      documentation: "https://github.com/medbioinf/pia/wiki"
+      tool_dev_url: "https://github.com/medbioinf/pia"
+      doi: "10.1021/acs.jproteome.5b00121"
       licence: ["BSD-3-clause"]
       identifier: biotools:pia_d
 
@@ -21,16 +22,20 @@ input:
   - - meta:
         type: map
         description: |
-          Groovy Map containing sample information
+          Groovy Map containing sample information, passed through to the outputs
           e.g. `[ id:'sample1' ]`
     - pia_xml:
         type: file
         description: Compiled PIA intermediate file, as produced by PIA_COMPILEXML
         pattern: "*.pia.xml"
+        ontologies:
+          - edam: "http://edamontology.org/format_2332" # XML
     - pia_json:
         type: file
         description: PIA analysis configuration file, as produced by PIA_CONFIGURE
         pattern: "*.pia.json"
+        ontologies:
+          - edam: "http://edamontology.org/format_3464" # JSON
 
 output:
   psms:
@@ -39,10 +44,13 @@ output:
           description: |
             Groovy Map containing sample information
             e.g. `[ id:'sample1' ]`
-      - "*.piaExport-PSMs.mzTab":
+      - "*.piaExport-PSMs.{mzTab,mzid}":
           type: file
-          description: PSM-level export (optional - not produced if PSM export was disabled in the analysis configuration)
-          pattern: "*.piaExport-PSMs.mzTab"
+          description: PSM-level export in mzTab or mzIdentML format, depending on the analysis configuration (optional - not produced if PSM export was disabled in the analysis configuration)
+          pattern: "*.piaExport-PSMs.{mzTab,mzid}"
+          ontologies:
+            - edam: "http://edamontology.org/format_3681" # mzTab
+            - edam: "http://edamontology.org/format_3247" # mzIdentML
   peptides:
     - - meta:
           type: map
@@ -53,6 +61,8 @@ output:
           type: file
           description: Peptide-level export (optional - not produced if peptide export was disabled in the analysis configuration)
           pattern: "*.piaExport-peptides.csv"
+          ontologies:
+            - edam: "http://edamontology.org/format_3752" # CSV
   proteins:
     - - meta:
           type: map
@@ -61,8 +71,10 @@ output:
             e.g. `[ id:'sample1' ]`
       - "*.piaExport-proteins.mzTab":
           type: file
-          description: Protein-level export (optional - not produced if protein export was disabled in the analysis configuration)
+          description: Protein-level export, including the reported proteins and corresponding PSMs (optional - not produced if protein export was disabled in the analysis configuration)
           pattern: "*.piaExport-proteins.mzTab"
+          ontologies:
+            - edam: "http://edamontology.org/format_3681" # mzTab
   versions_pia:
     - - "${task.process}":
           type: string

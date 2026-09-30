@@ -2,7 +2,6 @@ process PIA_CONFIGURE {
     tag "$meta.id"
     label 'process_single'
 
-    // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/pia:1.5.9--hdfd78af_0':
         'quay.io/biocontainers/pia:1.5.9--hdfd78af_0' }"
