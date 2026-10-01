@@ -11,7 +11,11 @@
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,05ef5026518082bf6fae58722d409d88"
+                    [
+                        "SPIKEINMETRICSEXTRACTION",
+                        "macproqc_helpers",
+                        "0.0.1 (commit 604eac1491d98bfaf916bad3758a97968200058b)"
+                    ]
                 ],
                 "hdf5": [
                     [
@@ -21,17 +25,25 @@
                         "test.spikein_metrics.hdf5:md5,fe02e95fabe77cbee7db281b8794a9b2"
                     ]
                 ],
-                "versions": [
-                    "versions.yml:md5,05ef5026518082bf6fae58722d409d88"
+                "versions_macproqc_helpers": [
+                    [
+                        "SPIKEINMETRICSEXTRACTION",
+                        "macproqc_helpers",
+                        "0.0.1 (commit 604eac1491d98bfaf916bad3758a97968200058b)"
+                    ]
                 ]
             },
             {
-                "versions": [
-                    "versions.yml:md5,05ef5026518082bf6fae58722d409d88"
+                "versions_macproqc_helpers": [
+                    [
+                        "SPIKEINMETRICSEXTRACTION",
+                        "macproqc_helpers",
+                        "0.0.1 (commit 604eac1491d98bfaf916bad3758a97968200058b)"
+                    ]
                 ]
             }
         ],
-        "timestamp": "2026-09-29T12:06:52.011600312",
+        "timestamp": "2026-10-01T13:38:39.682796991",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -49,7 +61,11 @@
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,05ef5026518082bf6fae58722d409d88"
+                    [
+                        "SPIKEINMETRICSEXTRACTION",
+                        "macproqc_helpers",
+                        "0.0.1 (commit 604eac1491d98bfaf916bad3758a97968200058b)"
+                    ]
                 ],
                 "hdf5": [
                     [
@@ -59,12 +75,16 @@
                         "test.spikein_metrics.hdf5:md5,d41d8cd98f00b204e9800998ecf8427e"
                     ]
                 ],
-                "versions": [
-                    "versions.yml:md5,05ef5026518082bf6fae58722d409d88"
+                "versions_macproqc_helpers": [
+                    [
+                        "SPIKEINMETRICSEXTRACTION",
+                        "macproqc_helpers",
+                        "0.0.1 (commit 604eac1491d98bfaf916bad3758a97968200058b)"
+                    ]
                 ]
             }
         ],
-        "timestamp": "2026-09-29T12:07:09.170888731",
+        "timestamp": "2026-10-01T13:38:55.781443039",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

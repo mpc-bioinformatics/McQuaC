@@ -8,14 +8,14 @@ process BRUKERXICEXTRACTION {
 
     stageInMode 'copy'  // needed due to alphatims
 
-    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-7a956ec"
+    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-604eac1"
 
     input:
     tuple val(meta), path(d_folder), path(xic_config)
 
     output:
     tuple val(meta), path("*.json"), emit: xic
-    path "versions.yml", emit: versions, topic: versions
+    tuple val("${task.process}"), val('macproqc_helpers'), eval('macproqc-helpers --version | sed "s;^macproqc-helpers ;;"'), topic: versions, emit: versions_macproqc_helpers
 
     when:
     task.ext.when == null || task.ext.when
@@ -29,12 +29,6 @@ process BRUKERXICEXTRACTION {
         -d_folder ${d_folder} \\
         -in_json ${xic_config} \\
         -out_json ${prefix}.json
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version 2>&1 | cut -d ' ' -f 2)
-        macproqc-helpers: \$(python -m macproqc_helpers --version | sed 's;__main__.py ;;')
-    END_VERSIONS
     """
 
     stub:
@@ -44,11 +38,5 @@ process BRUKERXICEXTRACTION {
     echo ${args}
 
     echo '{}' > ${prefix}.json
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version 2>&1 | cut -d ' ' -f 2)
-        macproqc-helpers: \$(python -m macproqc_helpers --version | sed 's;__main__.py ;;')
-    END_VERSIONS
     """
 }

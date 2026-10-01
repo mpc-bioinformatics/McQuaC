@@ -11,10 +11,18 @@
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,6cd3e78f17610f8ae24dd80979de7a97"
+                    [
+                        "BRUKERXICEXTRACTION",
+                        "macproqc_helpers",
+                        "0.0.1 (commit 604eac1491d98bfaf916bad3758a97968200058b)"
+                    ]
                 ],
-                "versions": [
-                    "versions.yml:md5,6cd3e78f17610f8ae24dd80979de7a97"
+                "versions_macproqc_helpers": [
+                    [
+                        "BRUKERXICEXTRACTION",
+                        "macproqc_helpers",
+                        "0.0.1 (commit 604eac1491d98bfaf916bad3758a97968200058b)"
+                    ]
                 ],
                 "xic": [
                     [
@@ -26,12 +34,16 @@
                 ]
             },
             {
-                "versions": [
-                    "versions.yml:md5,6cd3e78f17610f8ae24dd80979de7a97"
+                "versions_macproqc_helpers": [
+                    [
+                        "BRUKERXICEXTRACTION",
+                        "macproqc_helpers",
+                        "0.0.1 (commit 604eac1491d98bfaf916bad3758a97968200058b)"
+                    ]
                 ]
             }
         ],
-        "timestamp": "2026-09-29T11:47:08.53224421",
+        "timestamp": "2026-10-01T13:36:40.039138287",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -49,10 +61,18 @@
                     ]
                 ],
                 "1": [
-                    "versions.yml:md5,6cd3e78f17610f8ae24dd80979de7a97"
+                    [
+                        "BRUKERXICEXTRACTION",
+                        "macproqc_helpers",
+                        "0.0.1 (commit 604eac1491d98bfaf916bad3758a97968200058b)"
+                    ]
                 ],
-                "versions": [
-                    "versions.yml:md5,6cd3e78f17610f8ae24dd80979de7a97"
+                "versions_macproqc_helpers": [
+                    [
+                        "BRUKERXICEXTRACTION",
+                        "macproqc_helpers",
+                        "0.0.1 (commit 604eac1491d98bfaf916bad3758a97968200058b)"
+                    ]
                 ],
                 "xic": [
                     [
@@ -64,7 +84,7 @@
                 ]
             }
         ],
-        "timestamp": "2026-09-29T11:47:25.851133304",
+        "timestamp": "2026-10-01T13:36:57.225174211",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

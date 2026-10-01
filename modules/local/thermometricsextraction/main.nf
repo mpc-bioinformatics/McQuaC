@@ -7,14 +7,14 @@ process THERMOMETRICSEXTRACTION {
 
     stageInMode 'copy'  // needed due to mono
 
-    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-7a956ec"
+    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-604eac1"
 
     input:
     tuple val(meta), file(raw_thermo_file)
 
     output:
     tuple val(meta), path("*.hdf5"), emit: hdf5
-    path "versions.yml", emit: versions, topic: versions
+    tuple val("${task.process}"), val('macproqc_helpers'), eval('macproqc-helpers --version | sed "s;^macproqc-helpers ;;"'), topic: versions, emit: versions_macproqc_helpers
 
     when:
     task.ext.when == null || task.ext.when
@@ -27,12 +27,6 @@ process THERMOMETRICSEXTRACTION {
         ${args} \\
         -raw ${raw_thermo_file} \\
         -out_hdf5 ${prefix}.hdf5
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version 2>&1 | cut -d ' ' -f 2)
-        macproqc-helpers: \$(python -m macproqc_helpers --version | sed 's;__main__.py ;;')
-    END_VERSIONS
     """
 
     stub:
@@ -42,11 +36,5 @@ process THERMOMETRICSEXTRACTION {
     echo ${args}
 
     touch ${prefix}.hdf5
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version 2>&1 | cut -d ' ' -f 2)
-        macproqc-helpers: \$(python -m macproqc_helpers --version | sed 's;__main__.py ;;')
-    END_VERSIONS
     """
 }
