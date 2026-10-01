@@ -8,10 +8,11 @@ keywords:
   - decompress
   - conversion
 components:
-  - modules/gunzip
-  - modules/thermorawfileparser
-  - modules/unzip
-  - modules/untar
+  - gunzip
+  - unzip
+  - untar
+  - thermorawfileparser
+  - tdf2mzml
 input:
   - ch_spectra:
       type: path
