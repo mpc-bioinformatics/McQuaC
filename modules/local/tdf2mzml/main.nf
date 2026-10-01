@@ -5,16 +5,14 @@ process TDF2MZML {
     tag "${meta.id}"
     label 'process_low'
 
-    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'https://depot.galaxyproject.org/singularity/YOUR-TOOL-HERE'
-        : 'quay.io/medbioinf/tdf2mzml:0.4'}"
+    container "docker.io/mfreitas/tdf2mzml:0.6.1_noentry"
 
     input:
     tuple val(meta), path(d_folder)
 
     output:
     tuple val(meta), path("*.mzML"), emit: spectra
-    tuple val("${task.process}"), val('tdf2mzml'), val("0.4"), topic: versions, emit: versions_tdf2mzml
+    tuple val("${task.process}"), val('tdf2mzml'), eval('tdf2mzml --version | sed "s/.*tdf2mzml //"'), topic: versions, emit: versions_tdf2mzml
 
     when:
     task.ext.when == null || task.ext.when
@@ -29,7 +27,10 @@ process TDF2MZML {
     export NUMEXPR_NUM_THREADS=${task.cpus}
     export OMP_NUM_THREADS=${task.cpus}
 
-    tdf2mzml ${args} -i ${d_folder} --compression "zlib" -o ${prefix}.mzML
+    tdf2mzml ${args} \
+            -i ${d_folder} \
+            --compression "zlib" \
+            -o ${prefix}.mzML
     """
 
     stub:
