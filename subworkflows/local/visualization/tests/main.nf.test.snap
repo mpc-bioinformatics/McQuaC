@@ -34,7 +34,7 @@
                     },
                     [
                         "00_table_summary.csv:md5,a269c806dc8b24d61c9044f54b467b4c",
-                        "99_hdf5_feature_table.csv:md5,a11c05737c6afc1cc79b2498ed51f1d9",
+                        "99_hdf5_feature_table.csv:md5,d89052fdbfd8d12b6c9ee1a49b49e467",
                         "fig11c_table_loadings_raw.csv:md5,48dcfda8d22897971da986a1338668a9",
                         "fig12c_table_loadings_raw.csv:md5,07a7e43b40404cc676f81edf783b5c6b"
                     ]
@@ -46,8 +46,8 @@
                         "id": "test"
                     },
                     [
-                        "fig13_MS1_map_EXII01980std.png:md5,aeeb23adfdc0b77263caea8a2879a097",
-                        "fig13_MS1_map_EXII01990std.png:md5,51fb95f1e586faae3009efda913233b6"
+                        "fig13_MS1_map_EXII01980std.png:md5,943ea0e21b56c81d8ecb683f3acba513",
+                        "fig13_MS1_map_EXII01990std.png:md5,cb8e51687eb06855d364e5e9a0e194f1"
                     ]
                 ]
             ],
