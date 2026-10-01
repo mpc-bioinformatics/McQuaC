@@ -154,6 +154,19 @@ SPIKE1,GEPAAAAAPEAGASPVEK[+8.014199]/2,815.9118,5,10 ppm,36000
 | `mz-tol`   | Mass tolerance around `mz` used to search for the spike-in (e.g. `10 ppm`).                                                                                    |
 | `rt-tol`   | Retention time tolerance in seconds around `RT` used to search for the spike-in. The high value of 36000 in this example means that the whole run is searched. |
 
+## FDR filtering and protein inference
+
+The PSM results are processed with [PIA](https://github.com/medbioinf/pia) (PIA - Protein Inference Algorithms) for FDR filtering and peptide/protein inference.
+
+| Parameter                   | Default | Description                                                                                                                                                                    |
+| --------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--pia_fdr_threshold`       | `0.01`  | FDR threshold used by PIA for the final PSM-, peptide- and protein-level filtering.                                                                                            |
+| `--pia_prefilter_threshold` | `0.05`  | FDR threshold for an optional PSM-level pre-filtering pass, run before the final `--pia_fdr_threshold` analysis on the unlabelled search. Set to `0` to disable pre-filtering. |
+
+When `--pia_prefilter_threshold` is greater than `0`, the unlabelled search's PSMs are first filtered on this looser threshold and recompiled, before the final analysis (at `--pia_fdr_threshold`) runs on the reduced PSM set - this speeds up inference on large searches.
+
+Labelled search results (produced when `--label_modifications` is set, mainly used for spike-in peptides) only ever receive a PSM-level export - protein and peptide inference is not meaningful for the labelled search channel, so both are skipped, and no pre-filtering is applied to labelled results either.
+
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:

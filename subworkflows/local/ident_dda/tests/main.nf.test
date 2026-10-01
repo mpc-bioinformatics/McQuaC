@@ -11,7 +11,9 @@ nextflow_workflow {
     tag "openms/decoydatabase"
     tag "cometconfig"
     tag "comet"
-
+    tag "pia/configure"
+    tag "pia/compilexml"
+    tag "pia/analysis"
 
     test("small ident - unlabelled only") {
 
@@ -19,7 +21,7 @@ nextflow_workflow {
 
         when {
             params {
-                // set the output params.outdir for the test run (for some moduels to work correctly)
+                // set the output params.outdir for the test run (for some modules to work correctly)
                 outdir = "${outputDir}"
             }
 
@@ -33,6 +35,8 @@ nextflow_workflow {
                     [ id:'test-mzmlraw' ],
                     file(params.modules_testdata_base_path + 'proteomics/msspectra/OVEMB150205_12.mzML', checkIfExists: true)
                 ])
+                input[5] = 0.01
+                input[6] = 0.05
                 """
             }
         }
@@ -62,6 +66,75 @@ nextflow_workflow {
                     assert startIdx >= 0 : "AnalysisProtocolCollection not found in mzid output"
                     assert snapshot(lines[startIdx..endIdx].collect { it.trim() }).match("mzid-AnalysisProtocolCollection")
                 },
+                {
+                    // briefly check the PIA exports
+                    assert snapshot(
+                        file(workflow.out.pia_psms[0][1]).name,
+                        file(workflow.out.pia_psms[0][1]).readLines().count { it.stripLeading().startsWith("PSM") },
+                        file(workflow.out.pia_peptides[0][1]).name,
+                        file(workflow.out.pia_peptides[0][1]).readLines().count { it.stripLeading().startsWith("PSM") },
+                        file(workflow.out.pia_peptides[0][1]).readLines().count { it.stripLeading().startsWith("PEPTIDE") },
+                        file(workflow.out.pia_proteins[0][1]).name,
+                        file(workflow.out.pia_proteins[0][1]).readLines().count { it.stripLeading().startsWith("PRT") },
+                        file(workflow.out.pia_proteins[0][1]).readLines().count { it.stripLeading().startsWith("PSM") }
+                    ).match("pia-check-exports")
+                },
+            )
+        }
+    }
+
+    test("small ident - no PIA prefiltering") {
+
+        config "./nextflow.config"
+
+        when {
+            params {
+                // set the output params.outdir for the test run (for some modules to work correctly)
+                outdir = "${outputDir}"
+            }
+
+            workflow {
+                """
+                input[0] = file(params.modules_testdata_base_path + 'proteomics/database/yeast_UPS.fasta', checkIfExists: true)
+                input[1] = false
+                input[2] = file("${projectDir}/assets/default_configs/comet.params", checkIfExists: true)
+                input[3] = false
+                input[4] = channel.of([
+                    [ id:'test-mzmlraw' ],
+                    file(params.modules_testdata_base_path + 'proteomics/msspectra/OVEMB150205_12.mzML', checkIfExists: true)
+                ])
+                input[5] = 0.01
+                input[6] = 0
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success},
+                {
+                    // complete content check of the PSM-level rows in the exported mzTab: sort by
+                    // (retention_time, sequence) and drop the PSM_ID column before comparing, since
+                    // PSM row order and PSM_ID are not guaranteed to be stable across runs
+                    def lines = file(workflow.out.pia_psms[0][1]).readLines().findAll { it.startsWith("PS") }
+                    def header = lines.find { it.startsWith("PSH") }.split("\t") as List
+                    def psmIdIdx = header.indexOf("PSM_ID")
+                    def rtIdx = header.indexOf("retention_time")
+                    def seqIdx = header.indexOf("sequence")
+                    def dropPsmId = { List<String> cols -> (0..<cols.size()).findAll { it != psmIdIdx }.collect { cols[it] } }
+
+                    def psmRows = lines.findAll { it.startsWith("PSM") }
+                        .collect { it.split("\t") as List }
+                        .sort { a, b ->
+                            def cmp = (a[rtIdx] as Double) <=> (b[rtIdx] as Double)
+                            cmp != 0 ? cmp : (a[seqIdx] <=> b[seqIdx])
+                        }
+                        .collect { dropPsmId(it).join("\t") }
+
+                    def headerLine = dropPsmId(header).join("\t")
+
+                    assert snapshot([headerLine] + psmRows).match("no-prefiltering-psm-rows")
+                },
             )
         }
     }
@@ -72,7 +145,7 @@ nextflow_workflow {
 
         when {
             params {
-                // set the output params.outdir for the test run (for some moduels to work correctly)
+                // set the output params.outdir for the test run (for some modules to work correctly)
                 outdir = "${outputDir}"
             }
 
@@ -86,6 +159,8 @@ nextflow_workflow {
                     [ id:'test-mzmlraw' ],
                     file(params.modules_testdata_base_path + 'proteomics/msspectra/OVEMB150205_12.mzML', checkIfExists: true)
                 ])
+                input[5] = 0.01
+                input[6] = 0.05
                 """
             }
         }
