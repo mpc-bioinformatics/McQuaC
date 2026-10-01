@@ -7,14 +7,14 @@ process BRUKERMETRICSEXTRACTION {
 
     stageInMode 'copy'  // needed due to pyopenms
 
-    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-7a956ec"
+    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-604eac1"
 
     input:
     tuple val(meta), path(dotd_bruker_folder)
 
     output:
     tuple val(meta), path("*.hdf5"), emit: hdf5
-    path "versions.yml", emit: versions, topic: versions
+    tuple val("${task.process}"), val('macproqc_helpers'), eval('macproqc-helpers --version | sed "s;^macproqc-helpers ;;"'), topic: versions, emit: versions_macproqc_helpers
 
     when:
     task.ext.when == null || task.ext.when
@@ -34,12 +34,6 @@ process BRUKERMETRICSEXTRACTION {
         ${args} \\
         -d_folder ${dotd_name} \\
         -out_hdf5 ${prefix}.hdf5
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version 2>&1 | cut -d ' ' -f 2)
-        macproqc-helpers: \$(python -m macproqc_helpers --version | sed 's;__main__.py ;;')
-    END_VERSIONS
     """
 
     stub:
@@ -49,11 +43,5 @@ process BRUKERMETRICSEXTRACTION {
     echo ${args}
 
     touch ${prefix}.hdf5
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python --version 2>&1 | cut -d ' ' -f 2)
-        macproqc-helpers: \$(python -m macproqc_helpers --version | sed 's;__main__.py ;;')
-    END_VERSIONS
     """
 }

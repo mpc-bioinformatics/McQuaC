@@ -43,14 +43,14 @@ output:
           pattern: "*.hdf5"
           ontologies:
             - edam: "http://edamontology.org/format_3590" # HDF5
-  versions_mzmlmetricsextraction:
+  versions_macproqc_helpers:
     - - "${task.process}":
           type: string
           description: The name of the process
-      - "macproqc-helpers":
+      - "macproqc_helpers":
           type: string
           description: The name of the tool
-      - "sha-914105c":
+      - eval('macproqc-helpers --version | sed "s;^macproqc-helpers ;;"'):
           type: eval
           description: The expression to obtain the version of the tool
 
@@ -58,7 +58,13 @@ topics:
   versions:
     - - ${task.process}:
           type: string
-          description: The version of the tool
+          description: The name of the process
+      - macproqc_helpers:
+          type: string
+          description: The name of the tool
+      - eval('macproqc-helpers --version | sed "s;^macproqc-helpers ;;"'):
+          type: eval
+          description: The expression to obtain the version of the tool
 
 authors:
   - "@Luxxii"
