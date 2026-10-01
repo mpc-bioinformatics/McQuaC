@@ -7,7 +7,7 @@ keywords:
   - quality control
   - visualization
 components:
-  - qcvisualization/sort
+  - qcvisualization
 
 input:
   - meta:
