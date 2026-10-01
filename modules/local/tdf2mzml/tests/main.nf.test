@@ -35,11 +35,12 @@ nextflow_process {
         }
 
         then {
-            assert process.success
             assertAll(
+                { assert process.success },
                 {
-                    snapshot(path(process.out.spectra[0][1]).readLines().count { it.stripLeading().startsWith("<spectrum ") }).match()
-                }
+                    // count the spectra in the converted mzML file
+                    assert snapshot(path(process.out.spectra[0][1]).readLines().count { it.stripLeading().startsWith("<spectrum ") }).match()
+                },
             )
         }
     }

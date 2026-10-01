@@ -14,13 +14,13 @@
                 ],
                 [
                     "sample_two_d-labelled.mzid",
-                    3052,
-                    3938
+                    3096,
+                    4008
                 ],
                 [
                     "sample_two_d-unlabelled.mzid",
-                    3021,
-                    3975
+                    3050,
+                    4049
                 ]
             ]
         ],
@@ -46,7 +46,7 @@
                     "openms": "3.5.0"
                 },
                 "TDF2MZML": {
-                    "tdf2mzml": 0.4
+                    "tdf2mzml": "0.6.1"
                 },
                 "THERMORAWFILEPARSER": {
                     "thermorawfileparser": "1.4.5"
