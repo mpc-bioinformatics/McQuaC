@@ -28,6 +28,8 @@ input:
         type: directory
         description: Bruker .d-folder to extract XICs from
         pattern: "*.d"
+        # EDAM term for Bruker dot d folder could be added
+        # https://github.com/edamontology/edamontology/issues/959
     - xic_config:
         type: file
         description: XIC extraction configuration file (as produced by XICEXTRACTIONCONFIG)

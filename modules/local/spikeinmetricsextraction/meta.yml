@@ -27,10 +27,14 @@ input:
         type: file
         description: Extracted XICs in JSON format (as produced by THERMOXICEXTRACTION/BRUKERXICEXTRACTION)
         pattern: "*.json"
+        ontologies:
+          - edam: "http://edamontology.org/format_3464" # JSON
     - identifications:
         type: file
         description: CSV file listing the identifications matched to spike-ins (as produced by XICEXTRACTIONCONFIG)
         pattern: "*.csv"
+        ontologies:
+          - edam: "http://edamontology.org/format_3752" # CSV
   - - spike_ins_table:
         type: file
         description: CSV file containing spike-in information
@@ -49,6 +53,8 @@ output:
           type: file
           description: HDF5 file containing the spike-in metrics
           pattern: "*.hdf5"
+          ontologies:
+            - edam: "http://edamontology.org/format_3590" # HDF5
   versions_spikeinmetricsextraction:
     - - "${task.process}":
           type: string

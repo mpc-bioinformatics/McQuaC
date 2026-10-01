@@ -27,6 +27,8 @@ input:
         type: directory
         description: Bruker dot d folder
         pattern: "*.d"
+        # EDAM term for Bruker dot d folder could be added
+        # https://github.com/edamontology/edamontology/issues/959
 
 output:
   hdf5:
@@ -39,6 +41,8 @@ output:
           type: file
           description: HDF5 file containing extracted metrics from Bruker dot d folder
           pattern: "*.hdf5"
+          ontologies:
+            - edam: "http://edamontology.org/format_3590" # HDF5
   versions_brukermetricsextraction:
     - - "${task.process}":
           type: string
