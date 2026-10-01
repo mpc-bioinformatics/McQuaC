@@ -147,11 +147,11 @@
                 [
                     "sample_two_d-unlabelled.piaExport-peptides.csv",
                     7,
-                    58
+                    60
                 ]
             ]
         ],
-        "timestamp": "2026-09-09T13:34:54.060274869",
+        "timestamp": "2026-10-01T14:54:56.860121984",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -168,11 +168,11 @@
                 [
                     "sample_two_d-unlabelled.piaExport-proteins.mzTab",
                     2,
-                    56
+                    57
                 ]
             ]
         ],
-        "timestamp": "2026-09-09T13:34:54.071684956",
+        "timestamp": "2026-10-01T14:54:56.880682083",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
@@ -191,15 +191,15 @@
                 ],
                 [
                     "sample_two_d-labelled.piaExport-PSMs.mzTab",
-                    4119
+                    4192
                 ],
                 [
                     "sample_two_d-unlabelled.piaExport-PSMs.mzTab",
-                    58
+                    60
                 ]
             ]
         ],
-        "timestamp": "2026-09-09T13:39:38.040915578",
+        "timestamp": "2026-10-01T14:54:56.830366824",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
