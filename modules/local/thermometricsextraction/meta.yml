@@ -27,6 +27,8 @@ input:
         type: file
         description: Thermofisher RAW file
         pattern: "*.{raw,RAW}"
+        ontologies:
+          - edam: "http://edamontology.org/format_3712" # Thermo RAW
 
 output:
   hdf5:
@@ -39,6 +41,8 @@ output:
           type: file
           description: HDF5 file containing extracted metrics from Thermofisher RAW file
           pattern: "*.hdf5"
+          ontologies:
+            - edam: "http://edamontology.org/format_3590" # HDF5
   versions_thermometricsextraction:
     - - "${task.process}":
           type: string

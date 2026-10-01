@@ -41,6 +41,8 @@ output:
           type: file
           description: HDF5 file containing extracted mzML metrics
           pattern: "*.hdf5"
+          ontologies:
+            - edam: "http://edamontology.org/format_3590" # HDF5
   versions_mzmlmetricsextraction:
     - - "${task.process}":
           type: string
