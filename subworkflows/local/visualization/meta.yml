@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
 name: "visualization"
-description: Visualize QC results from McQuaC. This subworkflow takes the output hdf5s of the McQuaC QC workflow and generates visualizations for the QC metrics.
+description: Visualize QC results from macproqc. This subworkflow takes the output hdf5s of the macproqc workflow and generates visualizations for the QC metrics.
 keywords:
   - proteomics
   - mass spectrometry
@@ -17,7 +17,7 @@ input:
         e.g. `[ id:'sample1' ]`
   - hdf5_files:
       type: file
-      description: Hdf5 files containing the QC metrics collected by the McQuaC pipeline
+      description: Hdf5 files containing the QC metrics collected by the macproqc pipeline
       pattern: "*.hdf5"
       ontologies:
         - edam: "http://edamontology.org/format_3590" # HDF5

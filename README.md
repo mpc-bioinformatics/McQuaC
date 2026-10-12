@@ -6,8 +6,8 @@
 </h1>
 
 [![Open in GitHub Codespaces](https://img.shields.io/badge/Open_In_GitHub_Codespaces-black?labelColor=grey&logo=github)](https://github.com/codespaces/new/nf-core/macproqc)
-[![GitHub Actions CI Status](https://github.com/mpc-bioinformatics/McQuaC/actions/workflows/nf-test.yml/badge.svg)](https://github.com/mpc-bioinformatics/McQuaC/actions/workflows/nf-test.yml)
-[![GitHub Actions Linting Status](https://github.com/mpc-bioinformatics/McQuaC/actions/workflows/linting.yml/badge.svg)](https://github.com/mpc-bioinformatics/McQuaC/actions/workflows/linting.yml)
+[![GitHub Actions CI Status](https://github.com/mpc-bioinformatics/macproqc/actions/workflows/nf-test.yml/badge.svg)](https://github.com/mpc-bioinformatics/macproqc/actions/workflows/nf-test.yml)
+[![GitHub Actions Linting Status](https://github.com/mpc-bioinformatics/macproqc/actions/workflows/linting.yml/badge.svg)](https://github.com/mpc-bioinformatics/macproqc/actions/workflows/linting.yml)
 
 [![Nextflow](https://img.shields.io/badge/version-%E2%89%A525.10.4-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
 [![nf-core template version](https://img.shields.io/badge/nf--core_template-4.1.0-green?style=flat&logo=nfcore&logoColor=white&color=%2324B064&link=https%3A%2F%2Fnf-co.re)](https://github.com/nf-core/tools/releases/tag/4.1.0)
@@ -61,11 +61,11 @@ nextflow run nf-core/macproqc \
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/running/run-pipelines#using-parameter-files).
 
-For more details and further functionality, please refer to the [usage documentation](https://mpc-bioinformatics.github.io/McQuaC/usage/) and the [parameter documentation](https://mpc-bioinformatics.github.io/McQuaC/parameters).
+For more details and further functionality, please refer to the [usage documentation](https://mpc-bioinformatics.github.io/macproqc/usage/) and the [parameter documentation](https://mpc-bioinformatics.github.io/macproqc/parameters).
 
 ## Pipeline output
 
-For more details about the output files and reports, please refer to the [output documentation](https://mpc-bioinformatics.github.io/McQuaC/output/).
+For more details about the output files and reports, please refer to the [output documentation](https://mpc-bioinformatics.github.io/macproqc/output/).
 Update these paths information!
 
 ## Credits

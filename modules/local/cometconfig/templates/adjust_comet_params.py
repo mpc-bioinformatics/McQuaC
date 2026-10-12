@@ -126,7 +126,7 @@ if __name__ == "__main__":
         # adjust and write the parameter file line-wise
         for line in params_in:
             line = line.strip()
-            # the first few parameters are static / always used like this in McQuaC
+            # the first few parameters are static / always used like this in macproqc
             if line.startswith("decoy_search"):                 # disable decoy search
                 line = "decoy_search = 0"
             elif line.startswith("output_sqtfile"):             # disable SQT output

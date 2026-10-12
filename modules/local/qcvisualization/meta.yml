@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
 name: "qcvisualization"
-description: Visualization of the collected QC metrics from the McQuaC pipeline (given as hdf5 files).
+description: Visualization of the collected QC metrics from the macproqc pipeline (given as hdf5 files).
 keywords:
   - proteomics
   - mass spectrometry
@@ -24,7 +24,7 @@ input:
           e.g. `[ id:'sample1' ]`
     - hdf5_files:
         type: file
-        description: Hdf5 files containing the QC metrics collected by the McQuaC pipeline
+        description: Hdf5 files containing the QC metrics collected by the macproqc pipeline
         pattern: "*.hdf5"
         ontologies:
           - edam: "http://edamontology.org/format_3590" # HDF5

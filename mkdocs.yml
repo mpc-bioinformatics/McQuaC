@@ -1,8 +1,8 @@
 site_name: nf-core/macproqc
 site_description: macproqc
-site_url: https://mpc-bioinformatics.github.io/McQuaC/
-repo_url: https://github.com/mpc-bioinformatics/McQuaC
-repo_name: mpc-bioinformatics/McQuaC
+site_url: https://mpc-bioinformatics.github.io/macproqc/
+repo_url: https://github.com/mpc-bioinformatics/macproqc
+repo_name: mpc-bioinformatics/macproqc
 edit_uri: edit/main/docs/
 
 docs_dir: docs
@@ -66,6 +66,6 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/mpc-bioinformatics/McQuaC
+      link: https://github.com/mpc-bioinformatics/macproqc
     - icon: fontawesome/brands/slack
       link: https://nfcore.slack.com/channels/macproqc

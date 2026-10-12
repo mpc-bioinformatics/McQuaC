@@ -8,7 +8,7 @@ keywords:
   - mzqc
 tools:
   - "macproqc_helpers":
-      description: "Helper scripts for the McQuaC pipeline, used here to convert the collected QC metrics from hdf5 into mzQC."
+      description: "Helper scripts for the macproqc pipeline, used here to convert the collected QC metrics from hdf5 into mzQC."
       homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers"
@@ -24,7 +24,7 @@ input:
           e.g. `[ id:'sample1' ]`
     - hdf5:
         type: file
-        description: Hdf5 file containing the combined QC metrics of one run collected by the McQuaC pipeline
+        description: Hdf5 file containing the combined QC metrics of one run collected by the macproqc pipeline
         pattern: "*.hdf5"
         ontologies:
           - edam: "http://edamontology.org/format_3590" # HDF5
