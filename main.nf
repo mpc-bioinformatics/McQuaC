@@ -3,8 +3,8 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     nf-core/macproqc
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/mpc-bioinformatics/McQuaC
-    Website: https://mpc-bioinformatics.github.io/McQuaC/
+    Github : https://github.com/mpc-bioinformatics/macproqc
+    Website: https://mpc-bioinformatics.github.io/macproqc/
 ----------------------------------------------------------------------------------------
 */
 
