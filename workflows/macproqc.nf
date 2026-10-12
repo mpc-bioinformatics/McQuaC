@@ -9,6 +9,7 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_macp
 
 include { PREPARE_SPECTRA } from '../subworkflows/local/prepare_spectra'
 include { IDENT_DDA } from '../subworkflows/local/ident_dda'
+include { SPECTRAFILES_METRIC_EXTRACTION } from '../subworkflows/local/spectrafiles_metric_extraction'
 
 include { COMBINEHDF5 } from '../modules/local/combinehdf5/main'
 
@@ -42,7 +43,7 @@ workflow MACPROQC {
     // enable "label search" if the user has specified any label modifications (see also modules.config)
     def search_label_modifications = label_modifications?.trim() ? true : false
 
-    // perform DDA identification nad extract the respective metrics
+    // perform DDA identification and extract the respective metrics
     IDENT_DDA(
         fasta,
         skip_decoy_generation,
@@ -53,9 +54,25 @@ workflow MACPROQC {
         pia_prefilter_threshold
     )
 
-    // combine the  metrics from all analyses runs into one HDF5 file
+    // extract metrics from the spectra files (mzML, Thermo .raw, Bruker .d)
+    SPECTRAFILES_METRIC_EXTRACTION(
+        PREPARE_SPECTRA.out.mzmls,
+        PREPARE_SPECTRA.out.uncompressed
+    )
+
+    // collect all metric HDF5 files per run: the identification metrics carry "<run>-unlabelled"
+    // as meta.id (and the run ID in meta.mzml_id), so join them on the run ID and keep the run's meta
+    ch_run_metrics = SPECTRAFILES_METRIC_EXTRACTION.out.mzml_metrics
+        .map { meta, hdf5 -> [ meta.id, meta, hdf5 ] }
+        .join(
+            IDENT_DDA.out.idmetrics.map { meta, hdf5 -> [ meta.mzml_id, hdf5 ] },
+            remainder: true     // keep runs without identification metrics
+        )
+        .map { _run_id, meta, mzml_hdf5, id_hdf5 -> [ meta, [ mzml_hdf5, id_hdf5 ].findAll { hdf5 -> hdf5 != null } ] }
+
+    // combine the metrics of each run into one HDF5 file
     COMBINEHDF5(
-        IDENT_DDA.out.idmetrics
+        ch_run_metrics
     )
 
     //
