@@ -11,6 +11,7 @@ include { PREPARE_SPECTRA } from '../subworkflows/local/prepare_spectra'
 include { IDENT_DDA } from '../subworkflows/local/ident_dda'
 include { COLLECT_METRICS } from '../subworkflows/local/collect_metrics'
 
+include { HDF5TOMZQC } from '../modules/local/hdf5tomzqc'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,6 +64,11 @@ workflow MACPROQC {
             .join(IDENT_DDA.out.pia_proteins),
         IDENT_DDA.out.pia_labelled_psms,
         spike_ins_table
+    )
+
+    // export the metrics to mzQC format
+    HDF5TOMZQC(
+        COLLECT_METRICS.out.hdf5
     )
 
     //
