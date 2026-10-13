@@ -39,6 +39,7 @@ workflow NFCORE_MACPROQC {
     MACPROQC (
         samplesheet,
         params.outdir,
+        params.spike_ins_table,
         params.fasta,
         params.skip_decoy_generation,
         params.comet_config_template,

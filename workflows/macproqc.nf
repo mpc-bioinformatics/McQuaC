@@ -9,9 +9,8 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_macp
 
 include { PREPARE_SPECTRA } from '../subworkflows/local/prepare_spectra'
 include { IDENT_DDA } from '../subworkflows/local/ident_dda'
-include { SPECTRAFILES_METRIC_EXTRACTION } from '../subworkflows/local/spectrafiles_metric_extraction'
+include { COLLECT_METRICS } from '../subworkflows/local/collect_metrics'
 
-include { COMBINEHDF5 } from '../modules/local/combinehdf5/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -24,9 +23,10 @@ workflow MACPROQC {
     take:
     ch_samplesheet              // channel: samplesheet read in from --input
     outdir
+    spike_ins_table             // val: path to the spike-ins reference table (csv), or null to skip any spike in metric extraction
     fasta
     skip_decoy_generation
-    comet_config_template       // string: path to comet config template, or null to use created default config
+    comet_config_template       // val: path to comet config template, or null to use created default config
     label_modifications         //
     pia_fdr_threshold           // number: pia fdr threshold (default 0.01)
     pia_prefilter_threshold     // number: pia prefilter threshold (the FDR pre-filter or 0 / empty / null to skip prefiltering)
@@ -54,25 +54,15 @@ workflow MACPROQC {
         pia_prefilter_threshold
     )
 
-    // extract metrics from the spectra files (mzML, Thermo .raw, Bruker .d)
-    SPECTRAFILES_METRIC_EXTRACTION(
+    // collect all metrics (from mzML, raw, and PIA results) and optionally also the spike-in XIC metrics
+    COLLECT_METRICS(
         PREPARE_SPECTRA.out.mzmls,
-        PREPARE_SPECTRA.out.uncompressed
-    )
-
-    // collect all metric HDF5 files per run: the identification metrics carry "<run>-unlabelled"
-    // as meta.id (and the run ID in meta.mzml_id), so join them on the run ID and keep the run's meta
-    ch_run_metrics = SPECTRAFILES_METRIC_EXTRACTION.out.mzml_metrics
-        .map { meta, hdf5 -> [ meta.id, meta, hdf5 ] }
-        .join(
-            IDENT_DDA.out.idmetrics.map { meta, hdf5 -> [ meta.mzml_id, hdf5 ] },
-            remainder: true     // keep runs without identification metrics
-        )
-        .map { _run_id, meta, mzml_hdf5, id_hdf5 -> [ meta, [ mzml_hdf5, id_hdf5 ].findAll { hdf5 -> hdf5 != null } ] }
-
-    // combine the metrics of each run into one HDF5 file
-    COMBINEHDF5(
-        ch_run_metrics
+        PREPARE_SPECTRA.out.uncompressed,
+        IDENT_DDA.out.pia_psms
+            .join(IDENT_DDA.out.pia_peptides)
+            .join(IDENT_DDA.out.pia_proteins),
+        IDENT_DDA.out.pia_labelled_psms,
+        spike_ins_table
     )
 
     //
