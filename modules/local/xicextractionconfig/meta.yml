@@ -7,14 +7,13 @@ keywords:
   - spike-ins
   - thermorawfileparser
 tools:
-  - "xicextractionconfig":
-      description: "Xicextractionconfig from the helper tools for the McQuaC pipeline, including creation of XIC extraction configuration files."
+  - "macproqc_helpers":
+      description: "Helper tools for the macproqc pipeline. This module uses the `create_thermorawfileparser_xic_config` helper to create the ThermoRawFileParser/alphatims XIC extraction configuration file."
       homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers"
-      doi: ""
-      licence: null
-      identifier: null
+      licence:
+        - BSD-3-Clause
 
 input:
   - - meta:

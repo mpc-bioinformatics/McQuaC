@@ -9,14 +9,13 @@ keywords:
   - alphatims
   - mass spectrometry
 tools:
-  - "brukerxicextraction":
-      description: "Brukerxicextraction from the helper tools for the MacProQC pipeline, including alphatims-based XIC extraction from Bruker .d-folders."
+  - "macproqc_helpers":
+      description: "Helper tools for the macproqc pipeline. This module uses the `extract-xic-bruker` helper to extract alphatims-based XICs from Bruker .d folders."
       homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers"
-      doi: ""
-      licence: null
-      identifier: null
+      licence:
+        - BSD-3-Clause
 
 input:
   - - meta:

@@ -8,14 +8,13 @@ keywords:
   - raw
   - metrics_extraction
 tools:
-  - "thermometricsextraction":
-      description: "Thermometricsextraction from the helper tools for the McQuaC pipeline, including metric collection from Thermofisher RAW files."
+  - "macproqc_helpers":
+      description: "Helper tools for the macproqc pipeline. This module uses the `collect-metrics-from-thermo` helper to collect metrics from Thermofisher RAW files."
       homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers"
-      doi: ""
-      licence: null
-      identifier: null
+      licence:
+        - BSD-3-Clause
 
 input:
   - - meta:

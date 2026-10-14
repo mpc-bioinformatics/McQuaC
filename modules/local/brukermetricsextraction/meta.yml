@@ -8,13 +8,13 @@ keywords:
   - dotd
   - metrics_extraction
 tools:
-  - "brukermetricsextraction":
-      description: "Brukermetricsextraction from the helper tools for the McQuaC pipeline, including metric collection from Bruker dot d folders."
+  - "macproqc_helpers":
+      description: "Helper tools for the macproqc pipeline. This module uses the `collect-metrics-from-bruker` helper to collect metrics from Bruker .d folders."
       homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       licence:
-        - BSD-3
+        - BSD-3-Clause
 
 input:
   - - meta:

@@ -8,14 +8,13 @@ keywords:
   - HDF5
   - mass spectrometry
 tools:
-  - "spikeinmetricsextraction":
-      description: "Spikeinmetricsextraction from the helper tools for the MacProQC pipeline, including collection of spike-in/reference peptide metrics."
+  - "macproqc_helpers":
+      description: "Helper tools for the macproqc pipeline. This module uses the `collect-spikein-metrics` helper to collect spike-in/reference peptide metrics."
       homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers"
-      doi: ""
-      licence: null
-      identifier: null
+      licence:
+        - BSD-3-Clause
 
 input:
   - - meta:

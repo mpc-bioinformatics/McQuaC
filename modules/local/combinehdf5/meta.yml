@@ -6,13 +6,13 @@ keywords:
   - quality control
   - mass spectrometry
 tools:
-  - "combinehdf5":
-      description: "Combinehdf5 from the helper tools for the MacProQC pipeline, merging multiple HDF5 files into one."
+  - "macproqc_helpers":
+      description: "Helper tools for the macproqc pipeline. This module uses the `combine-hdf5` helper to merge multiple per-metric HDF5 files into one combined HDF5 file."
       homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       licence:
-        - BSD-3
+        - BSD-3-Clause
 
 input:
   - - meta:
