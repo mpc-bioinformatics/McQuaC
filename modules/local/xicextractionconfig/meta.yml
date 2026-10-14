@@ -12,6 +12,7 @@ tools:
       homepage: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       documentation: "https://github.com/mpc-bioinformatics/macproqc-helpers"
       tool_dev_url: "https://github.com/mpc-bioinformatics/macproqc-helpers"
+      doi: "no DOI available"
       licence:
         - BSD-3-Clause
 
