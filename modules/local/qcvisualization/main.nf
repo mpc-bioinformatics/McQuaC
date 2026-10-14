@@ -3,7 +3,7 @@ process QCVISUALIZATION {
     tag "$meta.id"
     label 'process_medium'
 
-    container 'ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-a9c31aa'
+    container 'ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-604eac1'
 
     input:
     tuple val(meta), path(hdf5_files)
