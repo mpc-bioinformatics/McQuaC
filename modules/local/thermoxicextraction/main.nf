@@ -6,7 +6,6 @@ process THERMOXICEXTRACTION {
     tag "${meta.id}"
     label 'process_medium'
 
-    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/thermorawfileparser:1.4.5--h05cac1d_1' :
         'quay.io/biocontainers/thermorawfileparser:1.4.5--h05cac1d_1' }"
