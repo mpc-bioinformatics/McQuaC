@@ -12,6 +12,7 @@ include { IDENT_DDA } from '../subworkflows/local/ident_dda'
 include { COLLECT_METRICS } from '../subworkflows/local/collect_metrics'
 
 include { HDF5TOMZQC } from '../modules/local/hdf5tomzqc'
+include { QCVISUALIZATION } from '../modules/local/qcvisualization'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -28,9 +29,11 @@ workflow MACPROQC {
     fasta
     skip_decoy_generation
     comet_config_template       // val: path to comet config template, or null to use created default config
-    label_modifications         //
+    label_modifications
     pia_fdr_threshold           // number: pia fdr threshold (default 0.01)
     pia_prefilter_threshold     // number: pia prefilter threshold (the FDR pre-filter or 0 / empty / null to skip prefiltering)
+    output_table_type           // val: output table type for the QC visualization (default: csv)
+    figure_format               // val: figure format for the QC visualization (default: plotly)
 
     main:
 
@@ -69,6 +72,14 @@ workflow MACPROQC {
     // export the metrics to mzQC format
     HDF5TOMZQC(
         COLLECT_METRICS.out.hdf5
+    )
+
+    // perform the visualization
+    QCVISUALIZATION (
+        COLLECT_METRICS.out.hdf5,
+        output_table_type,
+        figure_format,
+        spike_ins_table
     )
 
     //

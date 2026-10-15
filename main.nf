@@ -45,7 +45,9 @@ workflow NFCORE_MACPROQC {
         params.comet_config_template,
         params.label_modifications,
         params.pia_fdr_threshold,
-        params.pia_prefilter_threshold
+        params.pia_prefilter_threshold,
+        params.output_table_type,
+        params.figure_format
     )
 }
 /*
