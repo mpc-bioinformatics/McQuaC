@@ -107,6 +107,9 @@ nextflow_process {
     test("idmetricsextraction - metrics in mzQC") {
 
         when {
+            params {
+                outdir = "$outputDir"
+            }
             process {
                 """
                 input[0] = IDMETRICSEXTRACTION.out.hdf5
