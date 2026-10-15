@@ -28,6 +28,7 @@ workflow COLLECT_METRICS {
     }
 
     // mzML-based metrics (MS1/MS2 counts, TIC, RT, precursor charge, ...)
+    // TODO: check the meta.params for the MZMLMETRICSEXTRACTION, nothing is forwarded right now! Add these as params!
     MZMLMETRICSEXTRACTION(ch_mzml)
     ch_all_hdf5 = ch_all_hdf5.mix(MZMLMETRICSEXTRACTION.out.hdf5)
 
@@ -39,7 +40,9 @@ workflow COLLECT_METRICS {
         }
         .set { ch_branched_raw }
 
+    // TODO: check the meta.params for the THERMOMETRICSEXTRACTION, nothing is forwarded right now! Add these as params!
     THERMOMETRICSEXTRACTION(ch_branched_raw.thermo)
+    // TODO: check the meta.params for the BRUKERMETRICSEXTRACTION, nothing is forwarded right now! Add these as params!
     BRUKERMETRICSEXTRACTION(ch_branched_raw.bruker)
     ch_all_hdf5 = ch_all_hdf5
         .mix(THERMOMETRICSEXTRACTION.out.hdf5)
