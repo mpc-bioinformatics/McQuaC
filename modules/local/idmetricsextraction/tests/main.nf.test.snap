@@ -14,7 +14,7 @@
                     [
                         "IDMETRICSEXTRACTION",
                         "macproqc_helpers",
-                        "0.0.1 (commit 0d17313250d8ba843b1441b0a3f2021e5bab6ba1)"
+                        "0.0.1 (commit 4206fa8ac80a1b0d0370c783b5d8318cc356654d)"
                     ]
                 ],
                 "hdf5": [
@@ -29,15 +29,15 @@
                     [
                         "IDMETRICSEXTRACTION",
                         "macproqc_helpers",
-                        "0.0.1 (commit 0d17313250d8ba843b1441b0a3f2021e5bab6ba1)"
+                        "0.0.1 (commit 4206fa8ac80a1b0d0370c783b5d8318cc356654d)"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-10-15T09:53:00.689480171",
+        "timestamp": "2026-10-15T14:48:32.317147642",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.6"
+            "nextflow": "26.10.0"
         }
     },
     "idmetricsextraction - pia exports": {
@@ -47,15 +47,15 @@
                     [
                         "IDMETRICSEXTRACTION",
                         "macproqc_helpers",
-                        "0.0.1 (commit 0d17313250d8ba843b1441b0a3f2021e5bab6ba1)"
+                        "0.0.1 (commit 4206fa8ac80a1b0d0370c783b5d8318cc356654d)"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-10-15T09:52:44.474945827",
+        "timestamp": "2026-10-15T14:48:15.999324214",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.6"
+            "nextflow": "26.10.0"
         }
     }
 }

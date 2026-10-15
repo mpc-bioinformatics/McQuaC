@@ -7,7 +7,7 @@ process THERMOMETRICSEXTRACTION {
 
     stageInMode 'copy'  // needed due to mono
 
-    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-0d17313"
+    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-4206fa8"
 
     input:
     tuple val(meta), file(raw_thermo_file)

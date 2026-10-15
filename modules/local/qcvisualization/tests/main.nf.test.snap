@@ -33,7 +33,7 @@
                         "id": "test"
                     },
                     [
-                        "00_table_summary.csv:md5,a269c806dc8b24d61c9044f54b467b4c",
+                        "00_table_summary.csv:md5,748f1cb02b3688fb4521b982522f3d04",
                         "99_hdf5_feature_table.csv:md5,d89052fdbfd8d12b6c9ee1a49b49e467",
                         "fig11c_table_loadings_raw.csv:md5,48dcfda8d22897971da986a1338668a9",
                         "fig12c_table_loadings_raw.csv:md5,e50525e3e87817c616d67982f21b683b"
@@ -87,10 +87,10 @@
                 ]
             ]
         ],
-        "timestamp": "2026-10-15T11:19:00.360949388",
+        "timestamp": "2026-10-15T14:50:33.166838567",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.6"
+            "nextflow": "26.10.0"
         }
     },
     "qcvisualization - changed params": {
@@ -169,7 +169,7 @@
                     [
                         "QCVISUALIZATION",
                         "macproqc_helpers",
-                        "0.0.1 (commit 0d17313250d8ba843b1441b0a3f2021e5bab6ba1)"
+                        "0.0.1 (commit 4206fa8ac80a1b0d0370c783b5d8318cc356654d)"
                     ]
                 ],
                 "additional_plots": [
@@ -225,15 +225,15 @@
                     [
                         "QCVISUALIZATION",
                         "macproqc_helpers",
-                        "0.0.1 (commit 0d17313250d8ba843b1441b0a3f2021e5bab6ba1)"
+                        "0.0.1 (commit 4206fa8ac80a1b0d0370c783b5d8318cc356654d)"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-10-15T11:19:54.993978802",
+        "timestamp": "2026-10-15T14:51:27.333755389",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.6"
+            "nextflow": "26.10.0"
         }
     }
 }

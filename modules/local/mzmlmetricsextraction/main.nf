@@ -5,7 +5,7 @@ process MZMLMETRICSEXTRACTION {
     tag "${meta.id}"
     label 'process_low'
 
-    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-0d17313"
+    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-4206fa8"
 
     input:
     tuple val(meta), path(mzml_file)
