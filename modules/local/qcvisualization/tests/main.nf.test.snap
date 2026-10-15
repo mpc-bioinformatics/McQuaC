@@ -101,16 +101,16 @@
                         "id": "test"
                     },
                     [
-                        "fig13_MS1_map_EXII01980std.png:md5,81eab679d543f5b5cb19d0e6a306913c",
-                        "fig13_MS1_map_EXII01990std.png:md5,981b76dad640133a73ac362bd5320bb5"
+                        "fig13_MS1_map_EXII01980std.png:md5,6810547a0c0e1d24d81723a95e284baf",
+                        "fig13_MS1_map_EXII01990std.png:md5,d964f66f890b321e9329375f50aa9d76"
                     ]
                 ]
             ]
         ],
-        "timestamp": "2026-10-15T11:19:40.402570901",
+        "timestamp": "2026-10-15T14:01:34.806284333",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.6"
+            "nextflow": "26.10.0"
         }
     },
     "qcvisualization - stub": {
