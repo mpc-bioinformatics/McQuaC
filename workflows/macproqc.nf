@@ -74,12 +74,15 @@ workflow MACPROQC {
         COLLECT_METRICS.out.hdf5
     )
 
-    // perform the visualization
+    // perform the visualization once over all runs (collect every per-run HDF5 into a single list, sorted by file name for a stable order)
     QCVISUALIZATION (
-        COLLECT_METRICS.out.hdf5,
+        COLLECT_METRICS.out.hdf5
+            .map { _meta, hdf5 -> hdf5 }
+            .collect(sort: { a, b -> a.name <=> b.name })
+            .map { hdf5_files -> [ [ id: 'qc_visualization' ], hdf5_files ] },
         output_table_type,
         figure_format,
-        spike_ins_table
+        spike_ins_table ? file(spike_ins_table, checkIfExists: true) : []   // [] = no spike-ins table
     )
 
     //
