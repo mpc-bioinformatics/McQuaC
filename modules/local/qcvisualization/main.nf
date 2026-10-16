@@ -9,7 +9,7 @@ process QCVISUALIZATION {
     tuple val(meta), path(hdf5_files)   // tuple: meta information and list of hdf5 files containing the metrics to visualize
     val output_table_type               // val: output table type for the QC visualization (tsv, csv, xlsx; default: tsv)
     val figure_format                   // val: figure format for the QC visualization (plotly, html, or both as 'html,plotly'; default: plotly)
-    path spike_ins_table                // path: spike-ins reference table as a csv file
+    path spike_ins_table                // path: spike-ins reference table as a csv file, or [] if no spike-ins are used
 
     output:
     tuple val(meta), path("*.json"), emit: jsons, optional: true

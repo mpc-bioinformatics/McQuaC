@@ -30,7 +30,7 @@ input:
           - edam: "http://edamontology.org/format_3590" # HDF5
   - spike_ins_table:
       type: file
-      description: Table containing information on spike-ins that should be searched for
+      description: Table containing information on spike-ins that should be searched for (optional, pass [] if no spike-ins are used)
       pattern: "*.csv"
       ontologies:
         - edam: "http://edamontology.org/format_3752" # CSV
