@@ -5,7 +5,7 @@ process COMBINEHDF5 {
     tag "${meta.id}"
     label 'process_single'
 
-    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-4206fa8"
+    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-74e33ed"
 
     input:
     tuple val(meta), path(hdf5_files)
