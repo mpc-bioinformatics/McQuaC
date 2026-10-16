@@ -108,15 +108,11 @@ nextflow_process {
         }
 
         then {
-            // the ppm error mean and sigma vary in the last bits between runs (probably a changing PSM order of PIA affecting the floating point summation),
-            // so no md5 of the hdf5; its content is checked via the mzQC export in mzqc.nf.test
+            // the hdf5 is checked by its md5 here; its metric values are additionally checked via the mzQC export in mzqc.nf.test
             assertAll(
                 { assert process.success },
-                { assert process.out.hdf5.size() == 1 },
-                { assert file(process.out.hdf5[0][1]).name == 'test.idmetrics.hdf5' },
-                { assert file(process.out.hdf5[0][1]).size() > 0 },
-
                 { assert snapshot(
+                    process.out.hdf5,
                     process.out.findAll { key, val -> key.startsWith("versions") }
                 ).match() }
             )
