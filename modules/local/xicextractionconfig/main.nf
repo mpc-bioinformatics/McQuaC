@@ -13,7 +13,7 @@ process XICEXTRACTIONCONFIG {
     path spike_ins
 
     output:
-    tuple val(meta), path("*.json"), path("*.ident.csv"), emit: config
+    tuple val(meta), path("*.xic_config.json"), path("*.ident.csv"), emit: config   // distinct suffix, so the XIC extraction outputs ("<id>.json") do not clash with this input
     tuple val("${task.process}"), val('macproqc_helpers'), eval('macproqc-helpers --version | sed "s;^macproqc-helpers ;;"'), topic: versions, emit: versions_macproqc_helpers
 
     when:
@@ -29,7 +29,7 @@ process XICEXTRACTIONCONFIG {
         ${args} \\
         -icsv ${spike_ins} \\
         ${idents_arg} \\
-        -ojson ${prefix}.json \\
+        -ojson ${prefix}.xic_config.json \\
         -oidentifications ${prefix}.ident.csv
     """
 
@@ -39,7 +39,7 @@ process XICEXTRACTIONCONFIG {
     """
     echo ${args}
 
-    echo '{}' > ${prefix}.json
+    echo '{}' > ${prefix}.xic_config.json
     touch ${prefix}.ident.csv
     """
 }

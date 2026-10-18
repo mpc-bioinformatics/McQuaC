@@ -45,10 +45,10 @@ output:
           description: |
             Groovy Map containing sample information
             e.g. `[ id:'sample1' ]`
-      - "*.json":
+      - "*.xic_config.json":
           type: file
           description: XIC extraction configuration file for ThermoRawFileParser/alphatims (named after meta.id)
-          pattern: "*.json"
+          pattern: "*.xic_config.json"
       - "*.ident.csv":
           type: file
           description: CSV file listing the identifications matched to spike-ins (header only, if no PSM file is given)
