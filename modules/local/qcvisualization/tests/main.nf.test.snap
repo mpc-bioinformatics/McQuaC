@@ -18,11 +18,11 @@
                         "fig09_barplot_PSM_charge.plotly.json:md5,44ab5e619fe78f8119d71e100ae8f6cb",
                         "fig10_barplot_PSM_missedcleavages.plotly.json:md5,3364b11512fa402f102303956919079b",
                         "fig11a_PCA_raw.plotly.json:md5,f6872ce61a57cb7655003d1b98d7392c",
-                        "fig11b_Loadings_raw.plotly.json:md5,a1b4e060afad76d594d4edbccc8d922b",
+                        "fig11b_Loadings_raw.plotly.json:md5,ff2e6c2d19ba2c33f8022c7e879a1870",
                         "fig12a_PCA_all.plotly.json:md5,f54df00e61ee85c29ddc56e4b5eab497",
-                        "fig12b_Loadings_all.plotly.json:md5,80d4d0c94cdd739c716f79dda70433b7",
+                        "fig12b_Loadings_all.plotly.json:md5,88c92f41aac4c30d092f1ee6f35603a4",
                         "fig14_Pump_pressure.plotly.json:md5,b0ea206d7c22fb4a281e088ea2ae432e",
-                        "fig15_PSM_error_boxplots.plotly.json:md5,d6eb92f7645bdde6080feafc86cb86e3",
+                        "fig15_PSM_error_boxplots.plotly.json:md5,6db338fa1cde008ac5f5522bc3270c8f",
                         "metric_registry.json:md5,f2ad417c6107db952c7cca344fdb67b7"
                     ]
                 ]
@@ -33,10 +33,10 @@
                         "id": "test"
                     },
                     [
-                        "00_table_summary.csv:md5,748f1cb02b3688fb4521b982522f3d04",
+                        "00_table_summary.csv:md5,57df648f6334562df52f36f93cd25bbd",
                         "99_hdf5_feature_table.csv:md5,d89052fdbfd8d12b6c9ee1a49b49e467",
-                        "fig11c_table_loadings_raw.csv:md5,48dcfda8d22897971da986a1338668a9",
-                        "fig12c_table_loadings_raw.csv:md5,e50525e3e87817c616d67982f21b683b"
+                        "fig11c_table_loadings_raw.csv:md5,6ff3be4cc53602b55f42e72807a6f0dc",
+                        "fig12c_table_loadings_all.csv:md5,4be10fad5e962114b35c781b32c1c1e2"
                     ]
                 ]
             ],
@@ -87,7 +87,7 @@
                 ]
             ]
         ],
-        "timestamp": "2026-10-15T14:50:33.166838567",
+        "timestamp": "2026-10-18T16:59:26.113637594",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.10.0"
@@ -169,7 +169,7 @@
                     [
                         "QCVISUALIZATION",
                         "macproqc_helpers",
-                        "0.0.1 (commit 4206fa8ac80a1b0d0370c783b5d8318cc356654d)"
+                        "0.0.1 (commit 74e33ed5c64f665b3434673f92f8bfdc26dfb535)"
                     ]
                 ],
                 "additional_plots": [
@@ -225,12 +225,12 @@
                     [
                         "QCVISUALIZATION",
                         "macproqc_helpers",
-                        "0.0.1 (commit 4206fa8ac80a1b0d0370c783b5d8318cc356654d)"
+                        "0.0.1 (commit 74e33ed5c64f665b3434673f92f8bfdc26dfb535)"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-10-15T14:51:27.333755389",
+        "timestamp": "2026-10-18T17:00:19.809134219",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.10.0"
