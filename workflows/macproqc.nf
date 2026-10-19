@@ -23,7 +23,12 @@ include { QCVISUALIZATION } from '../modules/local/qcvisualization'
 workflow MACPROQC {
 
     take:
-    ch_samplesheet              // channel: samplesheet read in from --input
+    ch_samplesheet              // channel: samplesheet read in from --input (empty, if the metrics extraction is skipped)
+    ch_input_hdf5               // channel: [ val(meta), path(hdf5) ] from --input_hdf5_dir (empty, if the metrics extraction is performed)
+    skip_metrics_extraction     // boolean: skip the metrics extraction (spectra preparation, identification, metric collection) and use ch_input_hdf5
+    skip_identification         // boolean: skip the identification (Comet + PIA) during the metrics extraction
+    skip_mzqc_export            // boolean: skip the mzQC export
+    skip_visualization          // boolean: skip the visualization
     outdir
     spike_ins_table             // val: path to the spike-ins reference table (csv), or null to skip any spike in metric extraction
     fasta
@@ -39,51 +44,71 @@ workflow MACPROQC {
 
     def ch_versions = channel.empty()   // this channel needs to be filled, if the module/subworkflow return any versions NOT in the topic channel, but in the versions.yml file
 
-    // prepare the spectra files (strip the fasta_file before passing to PREPARE_SPECTRA)
-    PREPARE_SPECTRA(
-        ch_samplesheet.map { meta, spectrum_file -> [meta, spectrum_file] }
-    )
+    // the per-run metric HDF5 files: given via --input_hdf5_dir, or created by the metrics extraction
+    def ch_hdf5 = ch_input_hdf5
 
-    // enable "label search" if the user has specified any label modifications (see also modules.config)
-    def search_label_modifications = label_modifications?.trim() ? true : false
+    if (!skip_metrics_extraction) {
+        // prepare the spectra files (strip the fasta_file before passing to PREPARE_SPECTRA)
+        PREPARE_SPECTRA(
+            ch_samplesheet.map { meta, spectrum_file -> [meta, spectrum_file] }
+        )
 
-    // perform DDA identification and extract the respective metrics
-    IDENT_DDA(
-        fasta,
-        skip_decoy_generation,
-        comet_config_template,
-        search_label_modifications,
-        PREPARE_SPECTRA.out.mzmls,
-        pia_fdr_threshold,
-        pia_prefilter_threshold
-    )
+        // without identification, no ID metrics are collected and the spike-in metrics use only the RT windows of the table
+        def ch_pia_results = channel.empty()
+        def ch_labelled_psm_mztab = channel.empty()
 
-    // collect all metrics (from mzML, raw, and PIA results) and optionally also the spike-in XIC metrics
-    COLLECT_METRICS(
-        PREPARE_SPECTRA.out.mzmls,
-        PREPARE_SPECTRA.out.uncompressed,
-        IDENT_DDA.out.pia_psms
-            .join(IDENT_DDA.out.pia_peptides)
-            .join(IDENT_DDA.out.pia_proteins),
-        IDENT_DDA.out.pia_labelled_psms,
-        spike_ins_table
-    )
+        if (!skip_identification) {
+            // enable "label search" if the user has specified any label modifications (see also modules.config)
+            def search_label_modifications = label_modifications?.trim() ? true : false
 
-    // export the metrics to mzQC format
-    HDF5TOMZQC(
-        COLLECT_METRICS.out.hdf5
-    )
+            // perform DDA identification and extract the respective metrics
+            IDENT_DDA(
+                fasta,
+                skip_decoy_generation,
+                comet_config_template,
+                search_label_modifications,
+                PREPARE_SPECTRA.out.mzmls,
+                pia_fdr_threshold,
+                pia_prefilter_threshold
+            )
 
-    // perform the visualization once over all runs (collect every per-run HDF5 into a single list, sorted by file name for a stable order)
-    QCVISUALIZATION (
-        COLLECT_METRICS.out.hdf5
-            .map { _meta, hdf5 -> hdf5 }
-            .collect(sort: { a, b -> a.name <=> b.name })
-            .map { hdf5_files -> [ [ id: 'qc_visualization' ], hdf5_files ] },
-        output_table_type,
-        figure_format,
-        spike_ins_table ? file(spike_ins_table, checkIfExists: true) : []   // [] = no spike-ins table
-    )
+            ch_pia_results = IDENT_DDA.out.pia_psms
+                .join(IDENT_DDA.out.pia_peptides)
+                .join(IDENT_DDA.out.pia_proteins)
+            ch_labelled_psm_mztab = IDENT_DDA.out.pia_labelled_psms
+        }
+
+        // collect all metrics (from mzML, raw, and PIA results) and optionally also the spike-in XIC metrics
+        COLLECT_METRICS(
+            PREPARE_SPECTRA.out.mzmls,
+            PREPARE_SPECTRA.out.uncompressed,
+            ch_pia_results,
+            ch_labelled_psm_mztab,
+            spike_ins_table
+        )
+
+        ch_hdf5 = COLLECT_METRICS.out.hdf5
+    }
+
+    if (!skip_mzqc_export) {
+        // export the metrics to mzQC format
+        HDF5TOMZQC(
+            ch_hdf5
+        )
+    }
+
+    if (!skip_visualization) {
+        // perform the visualization once over all runs (collect every per-run HDF5 into a single list, sorted by file name for a stable order)
+        QCVISUALIZATION (
+            ch_hdf5
+                .map { _meta, hdf5 -> hdf5 }
+                .collect(sort: { a, b -> a.name <=> b.name })
+                .map { hdf5_files -> [ [ id: 'qc_visualization' ], hdf5_files ] },
+            output_table_type,
+            figure_format,
+            spike_ins_table ? file(spike_ins_table, checkIfExists: true) : []   // [] = no spike-ins table
+        )
+    }
 
     //
     // Collate and save software versions

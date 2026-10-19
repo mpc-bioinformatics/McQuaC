@@ -40,19 +40,27 @@ input:
   - ch_raw:
       type: channel
       description: |
-        Channel of vendor raw files/folders to extract instrument header metrics (and,
-        when `spike_ins_table` is given, spike-in XICs) from. `meta.vendor` must be set
-        to either 'thermo' or 'bruker' (e.g. as produced by PREPARE_SPECTRA); runs without
-        a matching vendor (e.g. 'mzml'-only input) are dropped. `meta.id` must match the
-        corresponding entry in ch_mzml (and, when enabled, ch_psm_mztab).
-        Structure: [ val(meta), path(raw) ]
-      pattern: "*.{raw,RAW,d}"
-  - ch_psm_mztab:
+        Channel of the (uncompressed) spectra files, e.g. as produced by PREPARE_SPECTRA, to
+        extract instrument header metrics (and, when `spike_ins_table` is given, spike-in XICs)
+        from. `meta.vendor` is used to select the extraction: only 'thermo' and 'bruker' runs
+        get header metrics and XICs, other runs (e.g. 'mzml') are dropped there. `meta.id` must
+        match the corresponding entry in ch_mzml (and, if given, ch_labelled_psm_mztab).
+        Structure: [ val(meta), path(spectra_file) ]
+      pattern: "*.{raw,RAW,d,mzML}"
+  - ch_unlabelled_pia_results:
       type: channel
       description: |
-        Channel of PSM mzTab files (e.g. from PIA), used to refine the spike-in retention
+        Channel of the (unlabelled) PIA identification results to extract the ID metrics from.
+        May be empty (e.g. when the identification is skipped), then no ID metrics are collected.
+        Structure: [ val(meta), path(pia_psms), path(pia_peptides), path(pia_proteins) ]
+      pattern: "*.{mzTab,csv}"
+  - ch_labelled_psm_mztab:
+      type: channel
+      description: |
+        Channel of (labelled) PSM mzTab files (e.g. from PIA), used to refine the spike-in retention
         time windows and to record which spike-ins were identified. Only consumed when
-        `spike_ins_table` is given.
+        `spike_ins_table` is given. May be empty or miss runs: those runs then use only the
+        retention time windows of the spike-ins table.
         Structure: [ val(meta), path(psm_mztab_file) ]
       pattern: "*.mzTab"
   - spike_ins_table:

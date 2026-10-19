@@ -29,7 +29,8 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_macp
 workflow NFCORE_MACPROQC {
 
     take:
-    samplesheet // channel: samplesheet read in from --input
+    samplesheet // channel: samplesheet read in from --input (empty, if the metrics extraction is skipped)
+    input_hdf5  // channel: [ val(meta), path(hdf5) ] read in from --input_hdf5_dir (empty, if the metrics extraction is performed)
 
     main:
 
@@ -38,6 +39,11 @@ workflow NFCORE_MACPROQC {
     //
     MACPROQC (
         samplesheet,
+        input_hdf5,
+        params.skip_metrics_extraction,
+        params.skip_identification,
+        params.skip_mzqc_export,
+        params.skip_visualization,
         params.outdir,
         params.spike_ins_table,
         params.fasta,
@@ -69,6 +75,12 @@ workflow {
         args,
         params.outdir,
         params.input,
+        params.input_hdf5_dir,
+        params.fasta,
+        params.skip_metrics_extraction,
+        params.skip_identification,
+        params.skip_mzqc_export,
+        params.skip_visualization,
         params.help,
         params.help_full,
         params.show_hidden
@@ -79,7 +91,7 @@ workflow {
     //
     NFCORE_MACPROQC (
         PIPELINE_INITIALISATION.out.samplesheet,
-
+        PIPELINE_INITIALISATION.out.hdf5
     )
     //
     // SUBWORKFLOW: Run completion tasks
