@@ -45,7 +45,7 @@ An [example samplesheet](../assets/samplesheet.csv) has been provided with the p
 
 ## Protein sequence database
 
-The pipeline requires a protein sequence database in FASTA format for peptide identification. A single database is applied globally to all MS runs listed in the samplesheet.
+The pipeline requires a protein sequence database in FASTA format for peptide identification. A single database is applied globally to all MS runs listed in the samplesheet. If the identification is skipped (see [Running only parts of the pipeline](#running-only-parts-of-the-pipeline)), no database is needed.
 
 ```bash
 --fasta '[path to FASTA file]'
@@ -138,7 +138,13 @@ Each spectrum file produces two result files: one from the unlabelled search and
 
 ### Spike-ins
 
-Specific quality control samples may contain spike-in peptides. These spike-ins can be provided via a comma-separated spike-in table with the following format:
+Specific quality control samples may contain spike-in or reference peptides. If a spike-in table is given, the extracted ion chromatograms (XICs) of these peptides are extracted from the Thermo `.raw` and Bruker `.d` files, and their maximum intensity, retention time and number of identifications are added to the QC metrics and the visualization.
+
+```bash
+--spike_ins_table '[path to spike-ins CSV file]'
+```
+
+The spike-ins are given in a comma-separated table with the following format (an example is provided with the pipeline in `assets/default_configs/spike_ins_whole_proforma.csv`):
 
 ```csv title="spike_ins.csv"
 name,sequence,mz,RT,mz-tol,rt-tol
@@ -154,6 +160,8 @@ SPIKE1,GEPAAAAAPEAGASPVEK[+8.014199]/2,815.9118,5,10 ppm,36000
 | `mz-tol`   | Mass tolerance around `mz` used to search for the spike-in (e.g. `10 ppm`).                                                                                    |
 | `rt-tol`   | Retention time tolerance in seconds around `RT` used to search for the spike-in. The high value of 36000 in this example means that the whole run is searched. |
 
+If (labelled) identifications are available for a run, they are used to refine the retention time windows and to record which spike-ins were identified. Without identifications (e.g. with `--skip_identification` or without `--label_modifications`), only the retention time windows given in the table are used.
+
 ## FDR filtering and protein inference
 
 The PSM results are processed with [PIA](https://github.com/medbioinf/pia) (PIA - Protein Inference Algorithms) for FDR filtering and peptide/protein inference.
@@ -167,6 +175,41 @@ When `--pia_prefilter_threshold` is greater than `0`, the unlabelled search's PS
 
 Labelled search results (produced when `--label_modifications` is set, mainly used for spike-in peptides) only ever receive a PSM-level export - protein and peptide inference is not meaningful for the labelled search channel, so both are skipped, and no pre-filtering is applied to labelled results either.
 
+## Visualization
+
+The visualization creates plots and a summary table over all MS runs (see the [output documentation](output.md#visualization)). Their formats can be set with:
+
+| Parameter             | Default  | Description                                                                                                      |
+| --------------------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `--figure_format`     | `plotly` | Format of the figures: `plotly` (plotly JSON files), `html` (standalone interactive HTML files) or `html,plotly` |
+| `--output_table_type` | `tsv`    | Format of the summary and loadings tables: `tsv`, `csv` or `xlsx`                                                |
+
+## Running only parts of the pipeline
+
+The pipeline consists of three main steps, which are all executed by default and can each be disabled:
+
+| Parameter                   | Step                                                                                                                                     |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `--skip_metrics_extraction` | Metrics extraction: preparation of the spectra, identification and collection of all metrics into one HDF5 file per run (`metrics/hdf5`) |
+| `--skip_mzqc_export`        | Export of the metrics into mzQC files (`metrics/mzqc`)                                                                                   |
+| `--skip_visualization`      | Visualization of the metrics (`qcvisualization`)                                                                                         |
+
+Additionally, the identification can be skipped within the metrics extraction with `--skip_identification`. Then no identification based metrics are collected, no `--fasta` is needed, and spike-in metrics (if `--spike_ins_table` is given) only use the retention time windows of the table.
+
+If the metrics extraction is skipped, the HDF5 files of an earlier run have to be given with `--input_hdf5_dir` instead of a samplesheet with `--input` (both cannot be combined). This allows e.g. to re-create the visualization with other settings, without repeating the identification:
+
+```bash
+nextflow run nf-core/macproqc \
+   --skip_metrics_extraction \
+   --skip_mzqc_export \
+   --input_hdf5_dir ./results/metrics/hdf5 \
+   --figure_format html \
+   --outdir ./results_html \
+   -profile docker
+```
+
+All files ending with `.hdf5` in this directory are used, the run names are taken from the file names.
+
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
@@ -174,6 +217,7 @@ The typical command for running the pipeline is as follows:
 ```bash
 nextflow run nf-core/macproqc \
    --input ./samplesheet.csv \
+   --fasta ./database.fasta \
    --outdir ./results \
    -profile docker
 ```
@@ -204,6 +248,7 @@ with `params.yaml`:
 
 ```yaml title="params.yaml"
 input: "./samplesheet.csv"
+fasta: "./database.fasta"
 outdir: "./results/"
 ```
 
