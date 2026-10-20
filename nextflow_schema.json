@@ -250,8 +250,8 @@
                 },
                 "figure_format": {
                     "type": "string",
-                    "default": "plotly",
-                    "description": "Output format for figures (plotly, html, or both as 'html,plotly')",
+                    "default": "html,plotly",
+                    "description": "Output format for figures (plotly, html, or both as 'html,plotly', which is also the default)",
                     "enum": ["plotly", "html", "html,plotly"],
                     "fa_icon": "fas fa-chart-bar"
                 }

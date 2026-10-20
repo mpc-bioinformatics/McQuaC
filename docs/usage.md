@@ -179,10 +179,10 @@ Labelled search results (produced when `--label_modifications` is set, mainly us
 
 The visualization creates plots and a summary table over all MS runs (see the [output documentation](output.md#visualization)). Their formats can be set with:
 
-| Parameter             | Default  | Description                                                                                                      |
-| --------------------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-| `--figure_format`     | `plotly` | Format of the figures: `plotly` (plotly JSON files), `html` (standalone interactive HTML files) or `html,plotly` |
-| `--output_table_type` | `tsv`    | Format of the summary and loadings tables: `tsv`, `csv` or `xlsx`                                                |
+| Parameter             | Default       | Description                                                                                                      |
+| --------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `--figure_format`     | `html,plotly` | Format of the figures: `plotly` (plotly JSON files), `html` (standalone interactive HTML files) or `html,plotly` |
+| `--output_table_type` | `tsv`         | Format of the summary and loadings tables: `tsv`, `csv` or `xlsx`                                                |
 
 ## Running only parts of the pipeline
 
