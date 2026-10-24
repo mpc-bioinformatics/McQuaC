@@ -21,11 +21,9 @@ workflow COLLECT_METRICS {
     // this channel will be filled with all per-metric HDF5 produced for a given run, to be merged into one HDF5 at the end
     ch_all_hdf5 = channel.empty()
 
-    // Perform ID based metric extraction (if identification data is provided)
-    if (ch_unlabelled_pia_results) {
-        IDMETRICSEXTRACTION(ch_unlabelled_pia_results)
-        ch_all_hdf5 = ch_all_hdf5.mix(IDMETRICSEXTRACTION.out.hdf5)
-    }
+    // Perform ID based metric extraction (if identification data is provided, if channel is empty, it will be skipped)
+    IDMETRICSEXTRACTION(ch_unlabelled_pia_results)
+    ch_all_hdf5 = ch_all_hdf5.mix(IDMETRICSEXTRACTION.out.hdf5)
 
     // mzML-based metrics (MS1/MS2 counts, TIC, RT, precursor charge, ...)
     // TODO: check the meta.params for the MZMLMETRICSEXTRACTION, nothing is forwarded right now! Add these as params!
@@ -51,21 +49,21 @@ workflow COLLECT_METRICS {
     if (spike_ins_table) {
         ch_spike_ins_table = channel.value(file(spike_ins_table, checkIfExists: true))
 
-        // one XIC extraction config per spectra file, with its (labelled) PSMs if available (joined on meta.id),
-        // otherwise [] to use only the RT windows of the spike-ins table (e.g. without identification)
-        ch_xic_config_input = ch_raw
+        // all PSM mzTabs per run (labelled and unlabelled), sorted for a stable order
+        ch_psm_mztabs_per_run = ch_labelled_psm_mztab
+            .mix(ch_unlabelled_pia_results.map { meta, psms, _peptides, _proteins -> [ meta, psms ] })
+            .map { meta, psm_mztab -> [ meta.id, psm_mztab ] }
+            .groupTuple(by: 0, sort: { a, b -> a.name <=> b.name })
+
+        // now join with the meta.id from raw, and make sure to have an input for all files (even if it is empty)
+        ch_xic_input_mztab = ch_raw
             .map { meta, _raw -> [ meta.id, meta ] }
-            .join(
-                ch_labelled_psm_mztab.map { meta, psm_mztab -> [ meta.id, psm_mztab ] },
-                by: 0,
-                remainder: true
-            )
-            .filter { _id, meta, _psm_mztab -> meta != null }   // drop PSMs without a matching spectra file
-            .map { _id, meta, psm_mztab -> [ meta, psm_mztab ?: [] ] }
+            .join(ch_psm_mztabs_per_run, by: 0, remainder: true)
+            .map { _id, meta, psm_mztabs -> [ meta, psm_mztabs ?: [] ] }
 
         // create the XIC extraction config and the identifications matched to the spike-ins
         XICEXTRACTIONCONFIG(
-            ch_xic_config_input,
+            ch_xic_input_mztab,
             ch_spike_ins_table
         )
 

@@ -72,10 +72,10 @@
                     "macproqc_helpers": "0.0.1 (commit 74e33ed5c64f665b3434673f92f8bfdc26dfb535)"
                 },
                 "BRUKERXICEXTRACTION": {
-                    "macproqc_helpers": "0.0.1 (commit 74e33ed5c64f665b3434673f92f8bfdc26dfb535)"
+                    "macproqc_helpers": "0.0.1 (commit 55b549b0868bb7b84137df34b67a4bcb86397366)"
                 },
                 "COMBINEHDF5": {
-                    "macproqc_helpers": "0.0.1 (commit 74e33ed5c64f665b3434673f92f8bfdc26dfb535)"
+                    "macproqc_helpers": "0.0.1 (commit 55b549b0868bb7b84137df34b67a4bcb86397366)"
                 },
                 "COMET": {
                     "comet": "2026.01 rev. 1 (e4f767c)"
@@ -87,13 +87,13 @@
                     "python": "3.14.3"
                 },
                 "HDF5TOMZQC": {
-                    "macproqc_helpers": "0.0.1 (commit 74e33ed5c64f665b3434673f92f8bfdc26dfb535)"
+                    "macproqc_helpers": "0.0.1 (commit 55b549b0868bb7b84137df34b67a4bcb86397366)"
                 },
                 "IDMETRICSEXTRACTION": {
-                    "macproqc_helpers": "0.0.1 (commit 74e33ed5c64f665b3434673f92f8bfdc26dfb535)"
+                    "macproqc_helpers": "0.0.1 (commit 55b549b0868bb7b84137df34b67a4bcb86397366)"
                 },
                 "MZMLMETRICSEXTRACTION": {
-                    "macproqc_helpers": "0.0.1 (commit 74e33ed5c64f665b3434673f92f8bfdc26dfb535)"
+                    "macproqc_helpers": "0.0.1 (commit 55b549b0868bb7b84137df34b67a4bcb86397366)"
                 },
                 "OPENMS_DECOYDATABASE": {
                     "openms": "3.5.0"
@@ -117,16 +117,16 @@
                     "pia": "1.5.9"
                 },
                 "QCVISUALIZATION": {
-                    "macproqc_helpers": "0.0.1 (commit 74e33ed5c64f665b3434673f92f8bfdc26dfb535)"
+                    "macproqc_helpers": "0.0.1 (commit 55b549b0868bb7b84137df34b67a4bcb86397366)"
                 },
                 "SPIKEINMETRICSEXTRACTION": {
-                    "macproqc_helpers": "0.0.1 (commit 74e33ed5c64f665b3434673f92f8bfdc26dfb535)"
+                    "macproqc_helpers": "0.0.1 (commit 55b549b0868bb7b84137df34b67a4bcb86397366)"
                 },
                 "TDF2MZML": {
                     "tdf2mzml": "0.6.1"
                 },
                 "THERMOMETRICSEXTRACTION": {
-                    "macproqc_helpers": "0.0.1 (commit 74e33ed5c64f665b3434673f92f8bfdc26dfb535)"
+                    "macproqc_helpers": "0.0.1 (commit 55b549b0868bb7b84137df34b67a4bcb86397366)"
                 },
                 "THERMORAWFILEPARSER": {
                     "thermorawfileparser": "1.4.5"
@@ -141,7 +141,7 @@
                     "nf-core/macproqc": "v1.0.0dev"
                 },
                 "XICEXTRACTIONCONFIG": {
-                    "macproqc_helpers": "0.0.1 (commit 74e33ed5c64f665b3434673f92f8bfdc26dfb535)"
+                    "macproqc_helpers": "0.0.1 (commit 55b549b0868bb7b84137df34b67a4bcb86397366)"
                 }
             },
             [
@@ -224,9 +224,9 @@
                 "sample_two_d-labelled.comet.params:md5,4e513d5872c1d4ccf375995b85cb30b4",
                 "sample_two_d-unlabelled.comet.params:md5,88be13163b840fb754296dc46d157e38",
                 "yeast_UPS_decoy.fasta:md5,96c0295f69e0cb92b705ca4c33e6f047",
-                "sample_one_raw.hdf5:md5,c7e313ef124934e18b32fee5be25e794",
-                "sample_two_d.hdf5:md5,c2bd2aeecf61b6f2d3220d97a231d0b0",
-                "00_table_summary.tsv:md5,e8073e530d03aeee5363769edab4db94",
+                "sample_one_raw.hdf5:md5,9a7da54d32181392f960b19cc11f0239",
+                "sample_two_d.hdf5:md5,6dfb231524dbf765bed4b29ea4aca365",
+                "00_table_summary.tsv:md5,e7f2442233e142a2b005488799105ab5",
                 "99_hdf5_feature_table.tsv:md5,122833501446599e295f75f0588c421b",
                 "fig01_barplot_MS1_MS2.plotly.json:md5,d0289dba682d207a24e956c8c77b7210",
                 "fig02_barplot_PSMs_peptides_proteins.plotly.json:md5,290e8dea69eeb753170079d037fb0f72",
@@ -264,7 +264,7 @@
                 "metric_registry.json:md5,e7269e1eed00123904132b29a2ddf1bf"
             ]
         ],
-        "timestamp": "2026-10-18T16:36:26.647184149",
+        "timestamp": "2026-10-24T19:23:58.205668686",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.10.0"

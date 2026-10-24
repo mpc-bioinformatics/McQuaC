@@ -6,10 +6,10 @@ process XICEXTRACTIONCONFIG {
     tag "${meta.id}"
     label 'process_single'
 
-    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-74e33ed"
+    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-55b549b"
 
     input:
-    tuple val(meta), path(psm_mztab_file)   // psm_mztab_file: PSM mzTab, or [] to use only the RT windows of the spike-ins table
+    tuple val(meta), path(psm_mztab_files)   // psm_mztab_files: one or more PSM mzTab files, or [] to use only the RT windows of the spike-ins table
     path spike_ins
 
     output:
@@ -22,15 +22,15 @@ process XICEXTRACTIONCONFIG {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def idents_arg = psm_mztab_file ? "-iidents ${psm_mztab_file}" : ''
+    def idents_arg = psm_mztab_files.collect { mztab -> "-mztab ${mztab}" }.join(' ')   // empty for []
 
     """
     python -m macproqc_helpers create_thermorawfileparser_xic_config \\
         ${args} \\
-        -icsv ${spike_ins} \\
-        ${idents_arg} \\
-        -ojson ${prefix}.xic_config.json \\
-        -oidentifications ${prefix}.ident.csv
+        -spikeins ${spike_ins} \\
+        -xic_definition_json_out ${prefix}.xic_config.json \\
+        -id_counts_out ${prefix}.ident.csv \\
+        ${idents_arg}
     """
 
     stub:

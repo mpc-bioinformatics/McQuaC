@@ -7,7 +7,7 @@ process SPIKEINMETRICSEXTRACTION {
     tag "${meta.id}"
     label 'process_single'
 
-    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-74e33ed"
+    container "ghcr.io/mpc-bioinformatics/macproqc-helpers:sha-55b549b"
 
     input:
     tuple val(meta), path(xic_json), path(identifications)

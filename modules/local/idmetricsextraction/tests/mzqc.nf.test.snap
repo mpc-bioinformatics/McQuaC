@@ -53,12 +53,12 @@
                     [
                         "HDF5TOMZQC",
                         "macproqc_helpers",
-                        "0.0.1 (commit 74e33ed5c64f665b3434673f92f8bfdc26dfb535)"
+                        "0.0.1 (commit 55b549b0868bb7b84137df34b67a4bcb86397366)"
                     ]
                 ]
             }
         ],
-        "timestamp": "2026-10-16T15:22:54.225382397",
+        "timestamp": "2026-10-24T19:16:21.228398112",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.10.0"
