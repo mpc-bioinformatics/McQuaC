@@ -69,7 +69,7 @@
         "content": [
             {
                 "BRUKERMETRICSEXTRACTION": {
-                    "macproqc_helpers": "0.0.1 (commit 74e33ed5c64f665b3434673f92f8bfdc26dfb535)"
+                    "macproqc_helpers": "0.0.1 (commit 55b549b0868bb7b84137df34b67a4bcb86397366)"
                 },
                 "BRUKERXICEXTRACTION": {
                     "macproqc_helpers": "0.0.1 (commit 55b549b0868bb7b84137df34b67a4bcb86397366)"
@@ -264,7 +264,7 @@
                 "metric_registry.json:md5,e7269e1eed00123904132b29a2ddf1bf"
             ]
         ],
-        "timestamp": "2026-10-24T19:23:58.205668686",
+        "timestamp": "2026-10-24T20:51:28.941616311",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.10.0"
