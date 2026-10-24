@@ -123,11 +123,13 @@ Variable and static modifications can be set via pipeline parameters. The syntax
 >
 > Only modifications already present in the template can be overwritten this way. To add new modification slots, provide a custom `--comet_config_template`.
 
-### Labelled quantification search
+### Labelled search (for spike-ins)
 
-When `--label_modifications` is set to a non-empty string, the pipeline runs a **second, parallel Comet search** alongside the standard unlabelled search. The labelled search uses the same parameters as the unlabelled search, but the `--label_modifications` entries are appended to `--static_modifications` to account for stable isotope labels (e.g. SILAC). In this workflow, this can be used to explicitly identify labelled spike-in peptides.
+When `--label_modifications` is set to a non-empty string, the pipeline runs a **second, parallel Comet search** alongside the standard unlabelled search. The labelled search uses the same parameters as the unlabelled search, but the `--label_modifications` entries are appended to `--static_modifications` to account for stable isotope labels (e.g. heavy lysine and arginine).
 
-Example for a SILAC K+8 / R+10 experiment:
+This labelled search is only used for the [spike-ins](#spike-ins): its identifications help to find the labelled spike-in peptides for the XIC extraction. It is not used for any other QC metric, and it is not mandatory for the spike-in metrics. The point of a separate search is that the labels can be searched as static modifications only here, instead of adding them as variable modifications to the general identification, which would enlarge the search space and affect the identification based QC metrics.
+
+Example for spike-ins labelled with heavy lysine (K+8) and arginine (R+10):
 
 ```bash
 --static_modifications "'add_C_cysteine = 57.021464'"
@@ -147,20 +149,30 @@ Specific quality control samples may contain spike-in or reference peptides. If 
 The spike-ins are given in a comma-separated table with the following format (an example is provided with the pipeline in `assets/default_configs/spike_ins_whole_proforma.csv`):
 
 ```csv title="spike_ins.csv"
-name,sequence,mz,RT,mz-tol,rt-tol
-SPIKE1,GEPAAAAAPEAGASPVEK[+8.014199]/2,815.9118,5,10 ppm,36000
+name,sequence,mz,RT,mz-tol,mz-tol-unit,rt-tol
+SPIKE1,GEPAAAAAPEAGASPVEK[+8.014199]/2,815.9118,-1,10,ppm,300
+SPIKE2,NLVVGDETTSSLR[+10.008269]/2,700.8664,1830,10,ppm,300
 ```
 
-| Column     | Description                                                                                                                                                    |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`     | Unique identifier for the spike-in peptide.                                                                                                                    |
-| `sequence` | Proforma peptidoform sequence of the spike-in, including any modifications.                                                                                    |
-| `mz`       | Expected mass-to-charge ratio (m/z) of the spike-in.                                                                                                           |
-| `RT`       | Expected retention time of the spike-in in seconds.                                                                                                            |
-| `mz-tol`   | Mass tolerance around `mz` used to search for the spike-in (e.g. `10 ppm`).                                                                                    |
-| `rt-tol`   | Retention time tolerance in seconds around `RT` used to search for the spike-in. The high value of 36000 in this example means that the whole run is searched. |
+| Column        | Description                                                                                                                                                     |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`        | Unique identifier for the spike-in peptide.                                                                                                                     |
+| `sequence`    | Proforma peptidoform sequence of the spike-in, including any modifications and the charge (e.g. `/2`).                                                          |
+| `mz`          | Expected mass-to-charge ratio (m/z) of the spike-in.                                                                                                            |
+| `RT`          | Expected retention time of the spike-in in seconds, or `-1` if it is not known.                                                                                 |
+| `mz-tol`      | Mass tolerance around `mz` used to extract the XIC (a number, e.g. `10`).                                                                                       |
+| `mz-tol-unit` | Unit of `mz-tol`: `ppm` (recommended). Thermo `.raw` files also support `amu` and `mmu`, while the XIC extraction from Bruker `.d` folders only supports `ppm`. |
+| `rt-tol`      | Retention time tolerance in seconds around the (expected or identified) retention time, used to extract the XIC.                                                |
 
-If (labelled) identifications are available for a run, they are used to refine the retention time windows and to record which spike-ins were identified. Without identifications (e.g. with `--skip_identification` or without `--label_modifications`), only the retention time windows given in the table are used.
+The retention time window used to extract the XIC of each spike-in is determined as follows:
+
+1. If the spike-in was identified in the run, the window is centred on the mean retention time of its identifications. The half window size is `rt-tol`, or half of the retention time range of the identifications, if that is larger.
+2. Otherwise, if an `RT` is given, the window is `RT` ± `rt-tol`.
+3. Otherwise (`RT` is `-1` and no identification), the XIC is extracted over the whole run.
+
+For this tuning of the retention time windows, the PSMs of the unlabelled **and** (if `--label_modifications` is set) the labelled search are used. The spike-ins are matched to the PSMs by their plain amino acid sequence, so each search contributes the spike-ins it can identify: e.g. unlabelled spike-ins are found in the unlabelled search, while labelled spike-ins are found in the labelled search. The filtering of these PSMs is intentionally more relaxed than the general FDR filtering: all PSMs with a Comet expectation value below 0.01 are used. These identifications are also used to report the number of identifications of each spike-in.
+
+Without identifications (e.g. with `--skip_identification`), only the retention times given in the table are used, and no spike-in is counted as identified.
 
 ## FDR filtering and protein inference
 

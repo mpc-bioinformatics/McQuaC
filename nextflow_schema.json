@@ -170,6 +170,7 @@
                 "label_modifications": {
                     "type": "string",
                     "description": "Additional Comet static modifications appended only for the labelled COMETCONFIG search. Use the same syntax as static_modifications, for example \"'add_K_lysine = 8.014199;add_R_arginine = 10.008269'\".",
+                    "help_text": "If set, a second (labelled) search is performed, which is only used to find labelled spike-ins for the XIC extraction (see --spike_ins_table). It is optional for the spike-in metrics and does not affect any other QC metric. This allows searching for the labels as static modifications, instead of adding them as variable modifications to the general identification.",
                     "fa_icon": "fas fa-tags"
                 },
                 "pia_fdr_threshold": {

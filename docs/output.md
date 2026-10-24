@@ -103,7 +103,7 @@ For each MS run, the QC metrics are extracted by several steps and then combined
 - **mzML metrics** (from the mzML file, using pyOpenMS): numbers of MS1 and MS2 spectra, retention time range, MS1/MS2 total ion current (TIC) over time, TIC quartiles, spectra density quantiles, base peak and TIC maxima, precursor charge fractions, acquisition frequencies and the data for the MS1 maps.
 - **Instrument metrics** (from the vendor file): headers and logs recorded by the instrument, e.g. pump pressure, ion injection times, temperatures and lock mass corrections for Thermo `.raw` files, or frame headers and calibrants for Bruker `.d` folders. These are not available for runs given as mzML.
 - **Identification metrics** (from the unlabelled PIA results): numbers of PSMs, peptides, protein groups and accessions, PSM charge fractions, missed cleavage fractions and the precursor mass error (in ppm) of the PSMs. Not available with `--skip_identification`.
-- **Spike-in metrics** (only with `--spike_ins_table`, for Thermo and Bruker runs): for each spike-in/reference peptide of the table, the maximum intensity and retention time of its extracted ion chromatogram (XIC) and its number of identifications (from the labelled search, if available).
+- **Spike-in metrics** (only with `--spike_ins_table`, for Thermo and Bruker runs): for each spike-in/reference peptide of the table, the maximum intensity and retention time of its extracted ion chromatogram (XIC) and its number of identifications (from the labelled and unlabelled search, if available).
 
 The per-step HDF5 files are intermediates, only the combined file is written to the output directory.
 
